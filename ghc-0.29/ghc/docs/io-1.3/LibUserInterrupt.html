@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Haskell 1.3 Interrupt Handling: LibUserInterrupt</title>
+</head>
+<body>
+
+[<a href="LibCPUTime.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Posix.html">Next</a>]
+<p>
+<hr><p>
+
+
+<h2>User Interrupt Handling "LibUserInterrupt"</h2>
+
+<hr>
+<p>
+
+<pre>
+> interface LibUserInterrupt where
+
+> setUserInterrupt :: Maybe (IO ()) -> IO (Maybe (IO ()))
+</pre>
+<p>
+
+Whenever a user interrupt occurs, the program is stopped.  If an
+interrupt handler is installed, this is then executed in place of the
+program.  If no interrupt handler is installed, the program is simply
+terminated.<p>
+
+Computation <code>setUserInterrupt (Just</code><var>p</var><code>)</code> installs <var>p</var> as the
+interrupt handler; Computation
+<code>setUserInterrupt Nothing</code> removes the current interrupt
+handler.  In either case, if an interrupt handler <var>q</var> was
+previously installed <code>(Just </code><var>q</var><code>)</code> is
+returned; otherwise <code>Nothing</code> is returned.
+ <a href="Rationale.html#LibUserInterrupt">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+The operation may fail with:
+<ul>
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.  
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support interrupt handling.
+</ul>
+<hr><p>
+
+[<a href="LibCPUTime.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Posix.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>

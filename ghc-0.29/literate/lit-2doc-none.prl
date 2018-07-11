@@ -1,0 +1,17 @@
+# "none" is a really nice language
+
+sub rm_embedded_stuff { # return clean code + entries (\002 separated)
+    local($codetxt) = @_;
+    
+    ($codetxt, '');
+}
+
+sub add_code_interests {
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $in_code) = @_;
+    
+    ('', ''); # DO NOTHING
+}
+
+# this keeps 'do'ing happy
+1;

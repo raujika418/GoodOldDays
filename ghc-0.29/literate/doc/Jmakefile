@@ -1,0 +1,8 @@
+LitStuffNeededHere(docs depend)
+InfoStuffNeededHere(docs)
+
+LitSuffixRule(.lit,)
+
+LitDocRootTarget(literate,lit)
+
+InstallInfoFileTarget(literate,literate,$(INSTINFODIR))

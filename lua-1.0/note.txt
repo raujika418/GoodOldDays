@@ -1,0 +1,1 @@
+#define lua_register(n,f)       (lua_pushcfunction(f), lua_storeglobal(n))

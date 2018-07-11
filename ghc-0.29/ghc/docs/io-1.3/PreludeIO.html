@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Haskell 1.3 Top-Level I/O: PreludeIO</title>
+</head>
+<body>
+
+[<a href="Programs.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeMonadicIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Top Level I/O  "PreludeIO"</h2>
+
+This module collects and exports the more primitive Prelude modules.
+<p>
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeIO (
+>       PreludeMonadicIO.., PreludeIOError..,
+>       PreludeStdIO.., PreludeReadTextIO.., PreludeWriteTextIO..,
+>       interact
+>     ) where
+
+> import PreludeMonadicIO
+> import PreludeStdIO
+> import PreludeIOError
+> import PreludeReadTextIO
+> import PreludeWriteTextIO
+</pre>
+<p>
+
+<a name="interact"><pre>
+> interact      :: (String -> String)       -> IO ()
+> interact f     = hGetContents stdin >>= (putStr . f)
+</pre></a>
+<p>
+
+The <code>interact</code> computation supports classical Landin-stream
+character I/O, as in Haskell 1.2 <a href="Rationale.html#interact">
+<img src="Rationale.gif" alt="(Rationale)"></a>.  <p>
+
+<hr><p>
+
+
+[<a href="Programs.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeMonadicIO.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>

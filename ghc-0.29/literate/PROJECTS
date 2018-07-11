@@ -1,0 +1,64 @@
+SIMPLE \defines with parameters
+\begin\end grammar
+better tabulars (changes)
+\owner -- how/where does one such decl apply?
+don't xref uses that are def'd nearby
+tgrind/tags
+do postmakeinfo
+
+de-Birdizing for >#(if|elsif|else|endif)
+
+codethings def'd more than once
+Haskell same-named codethings from diff namespaces
+
+\title as \section0 ?
+
+for large docs, could use
+\reset{indexing,xref}tables to be heaved in periodically.
+
+chg onlyinfo, onlylatex semantics to go straight-through.
+
+onlystandalone, etc.: carry both through, decide on linking
+
+how does CPP interact w/ haskell?
+
+independent code writing / code printing styles.
+
+xtex option?
+
+\begin...\end{invisiblecode}
+
+(info) be able to jump to all places where a function is used
+
+postmakeinfo -- colons in nodenames
+
+index the right things
+
+pagebreaks for code in LaTeX
+
+verbatim in verbatim (cf verbatim.sty)
+
+math mode
+
+and what's this with @'s in codeformat (if the latter exists?!)
+
+multiple indexes -- we need these! (e.g., code for subsystems of a
+larger system don't want to share an index):
+    \index[string]{index-entry-as-usual} % default is "main" index
+    \printindex[string] % default is "main" index
+also
+    \setcurrentindex{string} % to change default
+    \setcurrentcodeindex{string} % where code-ish index-entries go
+Implementation: I'd pre-pend the string to the entry-as-usual
+("string<uniquifier>!"), let LaTeX/makeinfo do the work, then
+post-process to make the separate indexes.
+
+Got a bug with:
+
+    Used only once (ToDo: check ?):
+       <- spaces here
+    >newTyVar :: NFSap TyVar
+
+ditto for \tr{\Haskell}... (defined things)
+
+if lit2pgm fails, nuke the output file (so make will re-try).

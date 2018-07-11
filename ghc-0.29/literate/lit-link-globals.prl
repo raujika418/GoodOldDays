@@ -1,0 +1,5 @@
+$Base_sec_depth = 0; # changed by \{up,down}section commands
+$Sec_depth_offset=1; # changed by \documentstyle, \rootsectiontype commands
+
+# a trailing 1 seems to be the habit for inc'd perl files
+1;

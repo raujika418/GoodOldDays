@@ -1,0 +1,82 @@
+#!/usr/local/bin/perl
+#
+die "must have exactly one argument\n"    if $#ARGV != 0;
+die "input file $ARGV[0] doesn't exist\n" if ! -f $ARGV[0];
+$Inputfile = $ARGV[0];
+$Bakfile   = $ARGV[0].'.bak';
+
+rename($Inputfile, $Bakfile) ||
+    die "Can't rename $Inputfile to  $Bakfile\n";
+
+sub put_file_back {
+    print STDERR "doing mv $Bakfile $Inputfile...\n";
+    rename($Bakfile, $Inputfile) ||
+	die "Can't rename $Bakfile to  $Inputfile\n";
+    exit(1);
+}
+$SIG{'INT'}  = 'put_file_back';
+$SIG{'QUIT'} = 'put_file_back';
+
+open(OUTF,">$Inputfile") || die "Can't re-open $Inputfile for output\n";
+select(OUTF);
+
+$ARGV[0] = $Bakfile; # fiddle with, before first <> read
+
+# NB: eof() == 1 in perl means NEXT read will return end-of-file (urgh)
+
+$_ = <>;
+
+while ( $_ ) { # I don't dig this test ...
+
+    # loop-'n-echo 'til we find a menu
+    while ( $_ && ! /^\* Menu:/) {
+	print $_;
+        $_ = <>;
+    }
+    next if ! /^\* Menu:/;
+
+    # we found a menu, so munge it...
+    print $_; # the *Menu:...
+
+    # snarf the entries (everything 'til node ends), rm'ing exact duplicates
+    # and uniquifying diff ones with the same
+    # entry part
+    # (they are sorted, right ?)
+
+    $prev_entry    = '';
+    $prev_nodename = '';
+    $uniquer = 2;
+    $_ = <>;
+
+    while ( $_ && ! /^\037/) {
+
+	if (/^\*(\s*)([^:]*)(:\s*)(.*)$/) {
+	    $indent   = $1;
+	    $divider  = $3;
+	    $nodename = $4;
+	    # fix the @_sep_@ stuff...
+	    ($entry    = $2) =~ s/(.+)\@_sep_\@//;
+
+	    next if $entry eq $prev_entry && $nodename eq $prev_nodename;
+
+	    if ($entry eq $prev_entry) {
+		print "\*${indent}${entry}_${uniquer}${divider}${nodename}\n";
+		$uniquer++;
+	    } else {
+		print "\*${indent}${entry}${divider}${nodename}\n";
+		$uniquer = 2; # reset
+	    }
+
+	} else { # comment line
+	    print $_;
+	}
+    } continue {
+	$_ = <>; # next...
+	$prev_entry    = $entry;
+	$prev_nodename = $nodename;
+    }
+}
+close(OUTF);
+
+# once we're brave:
+#unlink $Bakfile;

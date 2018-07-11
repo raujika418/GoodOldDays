@@ -1,0 +1,31 @@
+Need a return code (Int)  IO Int rather than IO ().   ?? signal kill
+   OK and error exit codes
+
+runProcess should have stderr at least.  Problem connecting existing channels.
+pipe primitive  (pipe creates input and output channels connected together)??
+runProcess :: Handle -> Handle -> Handle -> IO ProcessID
+(non-blocking)
+getProcessStatus ::   ProcessID -> IO (Maybe TerminationCode)
+awaitProcessStatus :: ProcessID -> IO TerminationCode
+(subsequent calls fail if a termination code has already been returned).
+
+echoing is not necessary
+
+No change for Buffering
+
+Polymorphic handles (CHandle == Handle Char)
+
+select :: [Handle] -> Maybe Integer -> IO [Bool]
+
+If we have interrupts, any RTS code must be prepared to tidy itself.
+
+Date needs to be non-Unix specific (getClock)?  Standard time library.
+
+  instance Ord Time
+  instance Eq  Time
+
+    getTime :: Time -> (Hours,Mins,Secs,MicroSecs)
+    getDate :: Time -> (Year,Month,Date)
+    getDay  :: Time -> Day
+    addTime :: Time -> (Hours,Mins,Secs,MicroSecs) -> Time
+    addDate :: Time -> (Year,Month,Date) -> Time

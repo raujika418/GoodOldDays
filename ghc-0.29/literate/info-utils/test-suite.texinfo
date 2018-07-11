@@ -1,0 +1,167 @@
+Info file: TEST-elisp-file,    -*-Text-*-
+produced by texinfo-format-buffer
+from file: test.texinfo
+
+Examples of @def's
+******************
+
+* Command: revert-buffer &optional NO-AUTOSAVE-OFFER-P NOCONFIRM
+
+       This command replaces the buffer text with the text of the
+     visited file on disk.  This action undoes all changes since the
+     file was visited or saved.  If the latest auto-save file is more
+     recent than the visited file, Emacs asks the user whether to use
+     that instead.
+
+       When the value of the `no-autosave-offer-p' argument is
+     non-`nil', Emacs does not offer to use the auto-save file.  This
+     argument is the prefix argument when the function is called
+     interactively.
+
+       When the value of the `noconfirm' argument is non-`nil', emacs
+     does not ask for confirmation for the reversion action.  This means
+     that the buffer is deleted and replaced by the text from the file
+     on the disk without asking the user if he or she really want that.
+
+       If the value of the `revert-buffer-function' variable is
+     non-`nil', it is called as a function to do the work.
+
+* Function: cons OBJECT1 OBJECT2
+
+       This function is the primary function used to build new lists.
+     It creates a new cons cell, making OBJECT1 the `car', and OBJECT2
+     the `cdr'.  It then returns a pointer to the new cons cell.  There
+     is no requirement for OBJECT2 to be of any particular type,
+     although it is normally a list.
+
+          (cons 1 '(2))
+               => (1 2)
+          (cons 1 '())
+               => (1)
+          (cons 1 2)
+               => (1 . 2)
+
+* Function: list &rest OBJECTS
+
+       This function creates a list with OBJECTS as its elements.  The
+     resulting list is always `nil'-terminated.  If no OBJECTS are
+     given, the empty list is returned.
+
+          (list 1 2 3 4 5)
+               => (1 2 3 4 5)
+          (list)
+               => nil
+
+
+* Special form: progn FORMS...
+
+     This special form evaluates all of the FORMS, in textual order,
+     returning the result of the final form.
+
+          (progn (print "The first form")
+                 (print "The second form")
+                 (print "The third form"))
+               -| "The first form"
+               -| "The second form"
+               -| "The third form"
+               => "The third form"
+
+* Variable: obarray
+
+       This global variable is the standard obarray for use by `intern'
+     and `read'.  It is a vector whose length ought to be prime for best
+     results (presently 511).  Each element is an interned symbol whose
+     name hashes to that bucket.  That symbol (if any) has an internal
+     link (invisible to the user) to the next symbol that hashes to that
+     bucket.  The order of these is unimportant.
+
+
+================================================================
+
+
+\input texinfo  @c -*-texinfo-*-
+@c %**start of header
+@setfilename TEST-elisp-file
+@settitle GNU Emacs Lisp TEST File
+@c %**end of header
+
+@unnumbered Examples of @@def's
+
+@deffn Command revert-buffer &optional no-autosave-offer-p noconfirm
+  This command replaces the buffer text with the text of the visited
+file on disk.  This action undoes all changes since the file was
+visited or saved.  If the latest auto-save file is more recent than the
+visited file, Emacs asks the  user whether to use that instead.  
+
+  When the value of the @code{no-autosave-offer-p} argument is
+non-@code{nil}, Emacs does not offer to use the auto-save file.  This
+argument is the prefix argument when the function is called
+interactively.
+
+  When the value of the @code{noconfirm} argument is non-@code{nil},
+emacs does not ask for confirmation for the reversion action.  This
+means that the buffer is deleted and replaced by the text from the
+file on the disk without asking the user if he or she really want that.
+
+  If the value of the @code{revert-buffer-function} variable is
+non-@code{nil}, it is called as a function to do the work.
+@end deffn
+
+@defun cons object1 object2
+  This function is the primary function used to build new lists.  It creates
+a new cons cell, making @var{object1} the @code{car}, and @var{object2} the
+@code{cdr}.  It then returns a pointer to the new cons cell.  There is no
+requirement for @var{object2} to be of any particular type, although it is
+normally a list.
+
+@example
+(cons 1 '(2))
+     @result{} (1 2)
+(cons 1 '())
+     @result{} (1)
+(cons 1 2)
+     @result{} (1 . 2)
+@end example
+@end defun
+
+@defun list &rest objects
+  This function creates a list with @var{objects} as its elements.  The
+resulting list is always @code{nil}-terminated.  If no @var{objects}
+are given, the empty list is returned.
+
+@example
+(list 1 2 3 4 5)
+     @result{} (1 2 3 4 5)
+(list)
+     @result{} nil
+@end example
+@end defun
+
+
+@defspec progn forms@dots{}
+This special form evaluates all of the @var{forms}, in textual
+order, returning the result of the final form.
+
+@example
+(progn (print "The first form")
+       (print "The second form")
+       (print "The third form"))
+     @print{} "The first form"
+     @print{} "The second form"
+     @print{} "The third form"
+     @result{} "The third form"
+@end example
+@end defspec
+
+@defvar obarray
+  This global variable is the standard obarray for use by @code{intern} and
+@code{read}.  It is a vector whose length ought to be prime for best
+results (presently 511).  Each element is an interned symbol whose name
+hashes to that bucket.  That symbol (if any) has an internal link (invisible
+to the user) to the next symbol that hashes to that bucket.  The order of
+these is unimportant.
+@end defvar
+
+
+@bye
+

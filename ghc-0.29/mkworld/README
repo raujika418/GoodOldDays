@@ -1,0 +1,26 @@
+This is the Glasgow "make world" configuration system.  We always
+distribute as a component of another system (e.g., the Glasgow Haskell
+compiler), but it can be used separately.
+
+It is based on "imake" in the MIT distribution of the X Window System,
+as hacked on by Paul DuBois to support "multiple projects".  None of
+those people would probably recognise it now.
+
+The instructions for using this system come with the main system (ghc,
+nofib, etc.)  They may, however, aim you at the documentation here:
+
+    docs/mkworld_guide/mkw_guide.{dvi,info}
+			general user's guide
+
+    docs/mkworld_ref/mkw_ref.{dvi,info}
+			reference guide -- actually the ``make world''
+			source in literate form.
+
+    docs/<other>	documents related to X11 `imake' or Paul
+			DuBois's variant, the ancestors of this
+			system.
+
+Bug reports and comments would be most welcome.
+
+Will Partain
+partain@dcs.glasgow.ac.uk

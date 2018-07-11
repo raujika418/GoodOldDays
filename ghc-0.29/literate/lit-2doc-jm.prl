@@ -1,0 +1,60 @@
+sub rm_embedded_stuff { # return clean code + index entries (\002 separated)
+    local($codetxt) = @_;
+    
+    ($codetxt, '');
+}
+
+sub add_code_interests { # DO NOTHING
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $_) = @_;
+    local($defs_to_return) = '';
+    local($uses_to_return) = '';
+    
+#   & setup_MkWorld_keywords();
+
+    $* = 1; # multi-line searches
+    s/^>//g;		# de-Bird-ize
+    s/\/\*[^\/]*\*\///g;# de-commentize (necessarily fraught with peril)
+    s/\"[^\"\n]*\"//g;	# de-string-ize and de-char-ize
+    s/\'[^\'\n]*\'//g;
+
+    # OK, the "interesting" DEFS are #define'd things & defns of "make" vars
+    # The latter must begin in col 1!
+
+    while (/^(\s*#define\s+)([A-Za-z_][A-Za-z0-9_]{2,})(\s*)/ ||
+           /^(\s*)([A-Za-z_][A-Za-z0-9_]{2,})(\s*=)/) {
+    	local($before) = $1;
+	local($interesting_thing) = $2; # see hacks below
+	local($after) = $3;
+
+#print STDERR "defs=>$before::$interesting_thing::$after::\n";
+
+	if ($interesting_thing) {
+	    if ($s != -1) {
+		$Blk_codethings_defd[$b] .= "$interesting_thing\001";
+		$Sec_codethings_defd[$s] .= "$interesting_thing\001";
+	    } else {
+		$defs_to_return .= "$interesting_thing\001";
+	    }
+	}
+	# escaping all magic chars in before/interesting/after
+	# is v important for avoiding infinite loops! (also below)
+	$before =~ s/\s+/\\s\+/g;
+	$after =~ s/\s+/\\s\+/g;
+
+	s/$before$interesting_thing$after//g;
+    }
+
+    # I AM NOT INTERESTED IN USES AT THE MOMENT
+
+    $* = 0;
+#    ('', &std_codething_uses_check($s, $b, $incode));
+    ($defs_to_return, $uses_to_return);
+}
+
+#sub setup_MkWorld_keywords {
+#   $IGNORE_WD{''} = 1;
+#}
+
+# this keeps 'do'ing happy
+1;

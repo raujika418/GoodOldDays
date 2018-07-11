@@ -1,0 +1,70 @@
+eval "exec perl -S $0 $*"
+     if $running_under_some_random_shell;
+#
+$Verbose = 0;
+if ($ARGV[0] eq '-v') {
+    $Verbose++;
+    shift(@ARGV);
+}
+# assuming we've just saved a Makefile as Makefile.bak
+# and run "jmake" to make a new Makefile, we now want
+# to grab all the old "make depend" stuff from Makefile.bak and
+# re-glue it onto the new Makefile.
+
+open(MKF, "< Makefile")	    || die "Can't open Makefile\n";
+open(NEW, "> Makefile.new") || die "Can't open Makefile.new\n";
+while (<MKF>) {
+    # don't let lines through with NULs
+    print STDERR "NUL seen in Makefile!\n", next if /\000/;
+
+    # don't go past a "# DO NOT DELETE" line
+    last if /^# DO NOT DELETE/;
+
+    # major HACK (to sidestep whitespace kludgery in jmake)
+    # IF a Makefile line starts with a tab
+    # AND IF it uses a make-variable followed by a backslashed semi-colon,
+    # THEN un-backslash the semi-colon.  MEGA-SIGH
+    if (/^\t/ && /\$\([A-Z][A-Z_]*\\:/) {
+	s/(\$\([A-Z][A-Z_]*)\\:/\1:/g;
+    }
+
+    # while here, we may as well tidy up some mess that
+    # an ANSI cpp can cause:
+    s/\$\(\s*([_A-Z]+)\s\)/\$\(\1\)/g;
+
+    # while we're here, we might as well tidy up any directory names...
+    # s|/[^/.][^/]*/\.\.||g;	# nuke: /<dir>/..
+    #    s|/\.[^.][^/]*/\.\.||g;	# nuke: /./.. (and others)
+    # s| \./| |;
+
+    print NEW $_;
+}
+close(MKF);
+
+open(BAK, "< Makefile.bak") || exit(0); # die "Can't open Makefile.bak\n";
+
+# skip to "# DO NOT DELETE"
+$_ = <BAK>;
+while ($_ && ! /^# DO NOT DELETE/ ) {
+    $_ = <BAK>;
+}
+if (! $_) {
+    print STDERR "No old dependencies to restore were found in Makefile.bak\n"
+	if $Verbose;
+} else {
+    # copy through "DO NOT DELETE" line
+    print NEW $_;
+
+    # copy through the rest
+    while (<BAK>) {
+	# don't let lines through with NULs
+	print STDERR "NUL seen in Makefile!\n", next if /\000/;
+
+	print NEW $_;
+    }
+    close(NEW);
+    close(BAK);
+}
+
+# now rename Makefile.new to Makefile.
+rename('Makefile.new', 'Makefile');

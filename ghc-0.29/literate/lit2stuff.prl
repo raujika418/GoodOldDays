@@ -1,0 +1,841 @@
+#% % *** MSUB does some substitutions here ***
+#% % *** grep for $( ***
+#% %
+#% \begin{onlystandalone}
+#% \documentstyle[11pt,literate]{article}
+#% \begin{document}
+#% \title{Source for the Glasgow literate programming system}
+#% \author{Will Partain; HTML support by Chris Toshok}
+#% \date{Last fiddled: 20 November 1993}
+#% \maketitle
+#% \begin{rawlatex}
+#% \tableofcontents
+#% \end{rawlatex}
+#% \end{onlystandalone}
+#% 
+#% \section[Source_Introduction]{Source: introduction and overall structure}
+#% 
+#% This \tr{perl} script is a driver that converts literate scripts into other
+#% useful forms.  Because the various tasks
+#% \tr{lit2pgm},\index{lit2pgm} \tr{lit2latex},\index{lit2latex}
+#% etc., are so similar, there's just one script (which I call
+#% \tr{lit2stuff}),\index{lit2stuff} with some parts conditionally
+#% included/executed, depending on how
+#% the script was invoked (exactly one of the variables @$Lit2pgm@,
+#% @$Lit2latex@, and @$Lit2texi@ will be @1@, the others @0@).
+#% 
+#% \tr{lit2stuff} is written in \tr{perl}, so some tasks are not as
+#% conveniently expressed as one might wish.  For example, \tr{perl} is
+#% line-oriented so, for example, chasing down the contents of a multi-line
+#% \tr{\title{...}} is, in the general case, unpleasant.
+#% \tr{lit2stuff} uses helper programs to cope with such things.  You'll
+#% see 'em along the way.
+#% 
+#% \section[Naming_and_background]{Naming conventions, perl hackery, etc.}
+#% 
+#% [How I use names, and so on. ]
+#% 
+#% \section[Global_data_structures]{Global data structures}
+#% \downsection
+#% \input{lit-globals.lprl}
+#% \input{lit-link-globals.lprl}
+#% \upsection
+#% 
+#% \section[Lit_initialization]{Initialization and command-line argument checking}
+#% 
+#% First, the program must have been invoked with an approved name:
+#% \begin{code}
+($Pgm = $0) =~ s/.*\/([^\/]+)$/$1/;
+$LIT_VERSION = '0.29';
+
+# an initial -A<name> option overrides the name
+if ($#ARGV >= 0 && $ARGV[0] =~ /^-A(lit2)(pgm|texi|latex)$/) {
+    $Pgm = $1.$2;
+    shift(@ARGV);
+}
+$Lit2pgm	= ($Pgm eq 'lit2pgm')	    ? 1 : 0;
+$Lit2latex	= ($Pgm eq 'lit2latex')	    ? 1 : 0;
+$Lit2texi	= ($Pgm eq 'lit2texi')	    ? 1 : 0;
+$Lit2depend	= ($Pgm eq 'mkdependlit')   ? 1 : 0;
+$Lit2changelog	= ($Pgm eq 'lit2changelog') ? 1 : 0;
+$Lit2text	= ($Pgm eq 'lit2text')	    ? 1 : 0;
+$Lit2html	= ($Pgm eq 'lit2html')      ? 1 : 0;
+&my_die("$Pgm: must be invoked as lit2pgm, lit2texi, lit2latex, mkdependlit, lit2changelog, lit2text, or lit2html (or use -A<name>)\n")
+    if (!($Lit2pgm || $Lit2latex || $Lit2texi || $Lit2depend || $Lit2changelog || $Lit2text || $Lit2html));
+
+# $Lit2what will be set after we know $Quick_lit2pgm
+
+$Status    = 0; # just used for exit() status
+#% \end{code}
+#% 
+#% Unravel the command-line options with one of the perl-library @getopt@
+#% routines, then transfer that information to more pleasantly-named
+#% global variables (see the User Guide
+#% \standaloneornot{}{[Section~\ref{Literate_guide}]}
+#% for what passes as good command-line arguments):
+#% 
+#% \begin{code}
+# really only needed if perl is misinstalled. (and can't find getopts.pl)
+if ( $(INSTALLING) ) {
+    unshift(@INC, '$(INSTDATADIR_LITERATE)');
+} else {
+    unshift(@INC, '$(TOP_PWD)/$(CURRENT_DIR)');	# absolutize the paths
+}
+
+do 'getopts.pl' || &my_die("Giant error 'do'ing getopts.pl: $@");
+
+$Usage  = "usage: $Pgm ".
+	  '[-i input-file] '.
+	  '[-I LITINPUTS-path-additions] '.
+	  '[-o output-file] ';
+$Usage .= '[-cdnqv] '.
+	  '[-r ribbons] '.
+	  "[input-file]\n" if $Lit2pgm;
+$Usage .= '[-cdLnOSv] '.
+	  '[-f nodename-suffix] '.
+	  '[-N infofilename] '.
+	  '[-[lx] language] '.
+	  '[-s stop-list-file] '.
+	  "[input-file]\n" if $Lit2texi;
+$Usage .= '[-cdDnOSv] '.
+	  '[-g node-name] '.
+	  '[-[lptx] language] '.
+	  '[-s stop-list-file] '.
+	  "[input-file]\n" if $Lit2latex;
+$Usage .= '[-dv] '.
+	  "[input-file]\n" if $Lit2depend;
+$Usage .= '[-dnv] '.
+	  "[input-file]\n" if $Lit2changelog;
+$Usage .= '[-dnv] '.
+	  "[input-file]\n" if $Lit2text;
+$Usage .= '[-cdDnOSv] '.
+          '[-[lx] language] '.
+          "[input-file]\n" if $Lit2html;
+
+if ( ($Lit2pgm       && ! &Getopts('cdH:I:i:Ll:no:qr:v'))
+  || ($Lit2texi      && ! &Getopts('cdf:H:I:i:Ll:nN:Oo:Ss:vx:'))
+  || ($Lit2latex     && ! &Getopts('cdDg:H:I:i:l:no:Op:Ss:t:vx:'))
+  || ($Lit2depend    && ! &Getopts('dH:I:i:o:v'))
+  || ($Lit2text	     && ! &Getopts('dH:I:i:no:v'))
+  || ($Lit2html      && ! &Getopts('cdDg:H:I:i:l:no:Op:Ss:t:vx:'))
+  || ($Lit2changelog && ! &Getopts('dH:I:i:no:v'))) {
+    print STDERR $Usage;
+    exit 1;
+} elsif ($#ARGV > 0) {
+    print STDERR "$Pgm: cannot have more than one input file: @ARGV \n";
+    print STDERR $Usage;
+    exit 1;
+}
+
+if ( $ENV{'TMPDIR'} ) { # where to make tmp file names
+    $Tmp_prefix = $ENV{'TMPDIR'} ;
+} else {
+    $Tmp_prefix ='$(TMPDIR)';
+    $ENV{'TMPDIR'} = '$(TMPDIR)'; # set the env var as well
+}
+
+# SHARED OPTIONS
+$Debugging      = ($opt_d) ? 1 : 0;
+$Verbose        = ($Debugging | $opt_v) ? 1 : 0;
+print STDERR "Glasgow literate programming system, version $LIT_VERSION\n" if $Verbose;
+$Input_file	= ($opt_i) ? $opt_i : '';
+# -o <output file> handled after deciding if linking
+
+$Litinputs      = '.';
+$Litinputs_adds = ($opt_I) ? $opt_I : '';
+$Litinputs      = "$Litinputs_adds:$Litinputs" if $Litinputs && $Litinputs_adds;
+
+# where all the assisting code is found (HARDWIRED)
+if ($opt_H) {
+    # no error checking; you get what you deserve
+    ($LIB_ARCH_DIR,$LIB_DIR) = split(/:/,$opt_H);
+} elsif ( $(INSTALLING) ) {
+    $LIB_ARCH_DIR   = '$(INSTLIBDIR_LITERATE)';
+    $LIB_DIR	    = '$(INSTDATADIR_LITERATE)';
+} else {
+    $LIB_ARCH_DIR   = '$(TOP_PWD)/$(CURRENT_DIR)';	# absolutize the paths
+    $LIB_DIR	    = '$(TOP_PWD)/$(CURRENT_DIR)';
+}
+unshift(@INC, $LIB_DIR); # adding to; for .prl libraries sucked in at runtime
+#
+# now the (derived) names of all the helpers
+$Lit_inputter   = "$LIB_ARCH_DIR/lit-inputter";
+$Lit_deatify	= "$LIB_ARCH_DIR/lit-deatify";
+$Lit_verb2latex = "$LIB_ARCH_DIR/lit-verb2latex";
+
+# this should be done a better way...
+$Tgrind_pgm	=  '$(TGRIND_HELPER)';
+
+# finish knowing myself; must agree with lit-deatify.llex
+$Quick_lit2pgm  = ($opt_q) ? 1 : 0;
+$Lit2what = 1 if $Quick_lit2pgm;
+$Lit2what = 2 if $Lit2pgm && ! $Quick_lit2pgm;
+$Lit2what = 3 if $Lit2texi;
+$Lit2what = 4 if $Lit2latex;
+$Lit2what = 5 if $Lit2depend;
+$Lit2what = 6 if $Lit2changelog;
+$Lit2what = 7 if $Lit2text;
+$Lit2what = 8 if $Lit2html;
+
+# LESS SHARED OPTIONS
+$Codedef_blurbs	= ($opt_D) ? 1	    : 0;
+$Grab_node	= ($opt_g) ? $opt_g : 'Top';
+$Infofilename   = ($opt_N) ? $opt_N : ''; # see do_setfilename
+$Follow_inputs  = ($opt_n) ? 1	    : 0;
+$Show_node_owner= ($opt_O) ? 1      : 0;
+$Nodename_suffix= ($opt_f) ? $opt_f : '';
+$Opt_node_links = ($opt_L) ? 1      : 0;
+$Standalone_doc = ($opt_S) ? 1	    : 0;
+
+$Stoplist_file  = ($opt_s) ? $opt_s : '';
+# for now, stop lists are simply words to be ignored
+if ($Stoplist_file) {
+    if ( ! -f $Stoplist_file) {
+	&not_OK('','',"stop-list file does not exist: $Stoplist_file\n");
+    } else {
+	open(STOPF,"<$Stoplist_file") || &my_die("Can't open file: $Stoplist_file\n");
+	while (<STOPF>) {
+	    chop;
+	    $IGNORE_WD{$_} = 1; # no questions asked...
+	}
+	close(STOPF);
+    }
+}
+
+$Ribbons_to_get = ($opt_r) ? $opt_r : 'main';
+$Ribbons_to_get =~ s/\s*,\s*/,/g; # remove spaces around commas
+
+# figure out what we're doing and the input and output files...
+if ( ! $Input_file ) {
+    if ($#ARGV == 0) {
+	$Input_file = $ARGV[0];
+    } else {
+	$Input_file = '-'; # stdin; hmm...
+    }
+}
+
+($Inputfile_root,$Inputfile_suff) = &root_and_suffix($Input_file);
+@Files_to_tidy = ();
+
+# are we "processing" and/or "linking" ?
+if ( ! ($Lit2texi || $Lit2latex || $Lit2html)) { # that's easy...
+    $Processing = 1;
+    $Linking    = 0;
+} else {
+    $Processing = 1 if $Inputfile_suff !~ /^(itxi|itex|ihtml|texi|tex|html)$/;
+    $Linking    = ($opt_c) ? 0 : 1;
+}
+
+# table of input-suffixes -> output-suffixes (for "processing");
+# cf. tables in &check_language_stuff
+$ISUFF2OSUFF{'lit'}	= '';
+$ISUFF2OSUFF{'lhs'}	= 'hs';
+$ISUFF2OSUFF{'lit.hs'}	= 'hs';
+$ISUFF2OSUFF{'lprl'}	= 'prl';
+$ISUFF2OSUFF{'llex'}	= 'lex';
+$ISUFF2OSUFF{'lhc'}	= 'hc';
+$ISUFF2OSUFF{'lc'}	= 'c';
+$ISUFF2OSUFF{'lh'}	= 'h';
+$ISUFF2OSUFF{'ltex'}	= 'tex';
+$ISUFF2OSUFF{'lit.tex'}	= 'tex';
+$ISUFF2OSUFF{'ljm'}	= 'jm'; # mkworld-ery
+$ISUFF2OSUFF{'lf'}	= 'f';  # Literate Fortran (adriaan@dcs.qmw.ac.uk)
+$ISUFF2OSUFF{'lsml'}	= 'sml';  # Literate SML (toshok@cs.uidaho.edu)
+
+# guess the output filenames (for "processing" and "linking")
+if ( $opt_o ) {
+    @Files_to_tidy = ( $opt_o );
+    if ( $Linking ) {
+	$Link_outfile = $opt_o;
+    } else {
+	$Proc_outfile = $opt_o;
+    }
+}
+if ( !defined($Proc_outfile) ) {
+    if ($Linking) { # got to put it _somewhere_
+	$Proc_outfile = "$Tmp_prefix/lit2stuff-po.$$";
+
+    } elsif ($Lit2pgm) { # try to be clever
+	if (defined($ISUFF2OSUFF{$Inputfile_suff})) {
+	    $Proc_outfile  = $Inputfile_root;
+	    $Proc_outfile .= '.'.$ISUFF2OSUFF{$Inputfile_suff}
+		if $ISUFF2OSUFF{$Inputfile_suff};
+	} else {
+	    print STDERR "$Pgm: don't know the file suffix: $Inputfile_suff\n";
+	    $Proc_outfile = '-'; # stdout will do
+	}
+
+    } elsif ($Lit2texi) {
+	$Proc_outfile  = $Inputfile_root . '.itxi';
+    } elsif ($Lit2latex) {
+	$Proc_outfile  = $Inputfile_root . '.itex';
+    } elsif ($Lit2html) {
+	$Proc_outfile  = $Inputfile_root . '.ihtml';
+    } else {
+	$Proc_outfile = '-'; # stdout
+    }
+    @Files_to_tidy = ( $Proc_outfile ) if $Proc_outfile ne '-';
+}
+# messing with Link_outfile deferred to later...
+
+&check_language_stuff();
+exit $Status if $Status; # don't proceed if errors
+
+# here we go: set up signal handler
+sub quit_upon_signal {
+    # delete any files to tidy
+    print STDERR "deleting... @Files_to_tidy\n" if $Verbose && $#Files_to_tidy >= 0;
+    unlink @Files_to_tidy if $#Files_to_tidy >= 0;
+    exit 1;
+}
+$SIG{'INT'}  = 'quit_upon_signal';
+$SIG{'QUIT'} = 'quit_upon_signal';
+
+print STDERR "Language info: code=$Code_lang, xref=$Lang_xref, ",
+		"typeset=$Lang_typeset, pagebreak=$Lang_pagebreak\n"
+    if $Verbose;
+
+# now we know the program, the options, and the language info, we load
+# the other (non-language-related) pieces of perl code (roll-your-own
+# dynamic linking...)
+if ( ! $Quick_lit2pgm) {
+    do 'lit-globals.prl' || &my_die("Giant error 'do'ing lit-globals.prl: $@");
+    do 'lit-reader.prl'  || &my_die("Giant error 'do'ing lit-reader.prl: $@");
+}
+if ($Lit2pgm) {
+    if (! $Quick_lit2pgm) { # i.e., the slow one
+	do 'lit-2pgm.prl' || &my_die("Giant error 'do'ing lit-2pgm.prl: $@");
+    }
+    # we _always_ need something for line directives
+    do "lit-2pgm-$Code_lang.prl"
+	|| &my_die("Giant error 'do'ing lit-2pgm-$Code_lang.prl: $@");
+
+} elsif ($Lit2depend) {
+    do 'lit-2depend.prl' || &my_die("Giant error 'do'ing lit-2depend.prl: $@");
+
+} elsif ($Lit2changelog) {
+    do 'lit-2changes.prl' || &my_die("Giant error 'do'ing lit-2changes.prl: $@");
+
+} elsif ($Lit2text) {
+    do 'lit-2text.prl' || &my_die("Giant error 'do'ing lit-2text.prl: $@");
+
+} else {
+    # creating a document...
+    do 'lit-2doc.prl' || &my_die("Giant error 'do'ing lit-2doc.prl: $@");
+    # language-specific stuff (most of it)
+    do "lit-2doc-$Code_lang.prl"
+	|| &my_die("Giant error 'do'ing lit-2doc-$Code_lang.prl: $@");
+    if ( $Lit2texi ) {
+	do 'lit-2texi.prl' || &my_die("Giant error 'do'ing lit-2texi.prl: $@");
+	if ($Processing) {
+	    do "lit-2texi-$Code_lang.prl"
+		|| &my_die("Giant error 'do'ing lit-2texi-$Code_lang.prl: $@");
+	    # non-Code_lang xref/typeset/pagebreak code would be slurped here
+	    # [not implemented]
+	}
+    }
+    if ( $Lit2latex ) {
+	do 'lit-2latex.prl' || &my_die("Giant error 'do'ing lit-2latex.prl: $@");
+	if ($Processing) {
+	    do "lit-2latex-$Code_lang.prl"
+		|| &my_die("Giant error 'do'ing lit-2latex-$Code_lang.prl: $@");
+	    # non-Code_lang xref/typeset/pagebreak code would be slurped here
+	    # [not implemented]
+	}
+    }
+    if ( $Lit2html ) {
+	do 'lit-2html.prl' || &my_die("Giant error 'do'ing lit-2html.prl: $@");
+	if ($Processing) {
+	    do "lit-2html-$Code_lang.prl"
+		|| &my_die("Giant error 'do'ing lit-2html-$Code_lang.prl: $@");
+	    # non-Code_lang xref/typeset/pagebreak code would be slurped here
+	    # [not implemented]
+	}
+    }
+    if ( $Linking ) {
+	do 'lit-link-globals.prl' || &my_die("Giant error 'do'ing lit-link-globals.prl: $@");
+	do 'lit-linker.prl' || &my_die("Giant error 'do'ing lit-linker.prl: $@");
+    }
+}
+
+# NOW WE START DRIVING...
+
+# first: we handle "quick" lit2pgm
+if ($Quick_lit2pgm) {
+
+    # check that no incompatible lit2pgm options were used
+    &my_die("Can only get ribbon 'main' with lit2pgm -q option\n")
+	if ($Ribbons_to_get ne 'main');
+    &my_die("Can't follow \\input{}s with lit2pgm -q option\n")
+	if ($Follow_inputs);
+
+    $Input_file = '' if $Input_file eq '-';
+    $pipe_string = "(echo \"srcfile!_!$Input_file!_!1!_!\" ; cat $Input_file) | " .
+		   "$Lit_deatify $Verbose 0 $Lit2what -";
+	# Note: use "cat", not "expand" because
+	# some kind of inputs are very TAB sensitive
+	# (e.g., Makefiles).
+    print STDERR "QUICK LIT2PGM:in=$pipe_string\n" if $Verbose;
+    print STDERR "             out=$Proc_outfile\n" if $Verbose;
+    &do_std_opens($pipe_string,$Proc_outfile);
+
+    # this "quick" loop does as little as possible
+    while (<INPIPE>) {
+	if ( /^srcfile!_!(.*)!_!(.*)!_!/) {
+	    print &mk_line_directive($1,$2);
+	} else {
+	    print $_ ;
+	}
+    }
+    &do_std_closes();
+    exit $Status;
+}
+
+# second: we handle lit2depend
+if ($Lit2depend) {
+    $Follow_inputs = 1; # that's the whole point
+    # just using lit-inputter to follow \input's
+
+    $pipe_string = "$Lit_inputter $Verbose $Follow_inputs $Litinputs $Input_file";
+    print STDERR "MKDEPENDLIT:in=$pipe_string\n" if $Verbose;
+    print STDERR "           out=$Proc_outfile\n" if $Verbose;
+    &do_std_opens($pipe_string,$Proc_outfile);
+
+    # lineno 1 means we just started the file
+    # look for these and deduce dependency info (a hack)
+    @Depend_lines = ();
+    while (<INPIPE>) {
+	if ( /^srcfile!_!(.*)!_!1!_!/) {
+	    &collect_dependencies($1);
+    	}
+    }
+    &do_std_closes();
+    &mangle_Makefile();
+    exit $Status;
+}
+
+# all other invocations of "processing" (slow lit2pgm, lit2latex,
+# lit2texi, lit2changelog) need the input "parsed" and stuffed into
+# the global data structures, so we do that now.
+
+if ($Processing) {
+    # (would really like to get \input'ing over to deatify...)
+
+    $pipe_string = "$Lit_inputter $Verbose $Follow_inputs $Litinputs $Input_file | " .
+		   (($Lit2pgm) ? "cat | " : "expand | ") .
+		   "$Lit_deatify $Verbose 0 $Lit2what -";
+    # lit-deatify last so we get its error report
+    # see note about expand/cat, above
+    print STDERR "PARSING:in=$pipe_string\n" if $Verbose;
+    print STDERR "       out=$Proc_outfile\n" if $Verbose;
+
+    &do_std_opens($pipe_string,$Proc_outfile);
+
+    &read_and_categorize_input(); # reads <INPIPE>
+    &fiddle_line_numbers() if ! $Lit2pgm;
+
+    if ($Lit2texi || $Lit2latex || $Lit2html) { # want this before dumping...
+	&find_interesting_codethings();
+    }
+
+    if ($Debugging) {
+	print STDERR "AFTER \"PARSING\" :-\n";
+	&dump_sections_and_blocks();
+    }
+}
+
+# continue with various kinds of "processing" ...
+
+if ($Lit2pgm) {
+    print STDERR "LIT2PGM:out=$Proc_outfile\n" if $Verbose;
+    &spit_out_ribbons_code(split(/,/, $Ribbons_to_get));
+    &do_std_closes();
+    exit $Status;
+}
+
+if ($Lit2changelog) {
+    print STDERR "LIT2CHANGELOG:out=$Proc_outfile\n" if $Verbose;
+    &spit_out_change_info();
+    &do_std_closes();
+    exit $Status;
+}
+
+if ($Lit2text) {
+    print STDERR "LIT2TEXT:out=$Proc_outfile\n" if $Verbose;
+    &spit_out_raw_text();
+    &do_std_closes();
+    exit $Status;
+}
+
+if ($Processing) {
+    # now either lit2html, lit2latex or lit2texi...
+    print STDERR "LIT2DOC:out=$Proc_outfile\n" if $Verbose;
+
+    &do_text_substitutions(); # \defines
+
+    &print_intermed_document();
+
+    &do_std_closes();
+}
+
+## (I'd rather keep going... )
+## close up and unlink temp outfile file if we are about to die
+#unlink("$Tmp_prefix/lit2stuff-po.$$") if $Status;
+#exit $Status if $Status || ! $Linking;
+exit $Status if ! $Linking;
+
+# NOW WE'RE TO "linking" ... (lit2texi, lit2html and lit2latex only)
+
+# make sure we know where to put the output (_before_ redefining Input_file)
+if ( !defined($Link_outfile) ) {
+    $Link_outfile = $Inputfile_root . '.texi' if $Lit2texi;
+    $Link_outfile = $Inputfile_root . '.tex'  if $Lit2latex;
+    $Link_outfile = $Inputfile_root . '.html' if $Lit2html;
+    @Files_to_tidy = ( $Link_outfile );
+}
+# readjust notions of "input" file if just processed
+if ( $Processing ) {
+    $Input_file = $Proc_outfile;
+}
+
+# $Input_file is the root of a bunch of i{tex,texi,html} files to be glued
+# together; the sectioning needs to be fixed and unresolved node refs
+# need to be fixed.
+# each file has a table of relevant info at the beginning
+# 1st pass: go \inputting down through them, reading those tables
+# 2nd pass: go \inputting down through them, fixing things and writing
+
+&first_link_pass(); # GO!!!
+
+if ($Debugging) {
+    print STDERR "AFTER LINKER FIRST PASS :-\n";
+    &dump_sections_and_blocks();
+}
+
+# # (I'd rather keep going)
+# # unlink temp outfile file if we are about to die
+# unlink("$Tmp_prefix/lit2stuff-po.$$") if $Status;
+# exit $Status if $Status;
+
+&second_link_pass();
+
+# unlink temp outfile no matter what
+unlink("$Tmp_prefix/lit2stuff-po.$$");
+exit $Status;
+#% \end{code}
+#% 
+#% \begin{code}
+sub check_language_stuff {
+
+    # fixed tables of "language"-related info
+
+    $ISUFF2LANG{'lit'}	= 'none';
+    $ISUFF2LANG{'lhc'}	= 'c';
+    $ISUFF2LANG{'lc'}	= 'c';
+    $ISUFF2LANG{'lh'}	= 'c';
+    $ISUFF2LANG{'lhs'}	= 'hs';
+    $ISUFF2LANG{'lit.hs'}='hs';
+    $ISUFF2LANG{'lprl'}	= 'prl';
+    $ISUFF2LANG{'llex'}	= 'lex';
+    $ISUFF2LANG{'ljm'}	= 'jm';	# mkworld-ery
+    $ISUFF2LANG{'lf'}   = 'f';  # Literate Fortran (adriaan@dcs.qmw.ac.uk)
+    $ISUFF2LANG{'lsml'}   = 'sml';  # Literate SML (toshok@cs.uidaho.edu)
+
+    $STD_LANGS		= 'none,c,hs,prl,lex,jm,f,sml'; # fully supported (?)
+
+    $XREF_HINTS		= 'noindex'; # could have more...
+    $PAGEBREAK_HINTS	= '';
+    $TYPESET_HINTS	= 'tgrind,ruled,unruled,bird,nobird';
+
+    $Code_lang =
+    	($opt_l) ? $opt_l 
+	         : (defined($ISUFF2LANG{$Inputfile_suff})) ? $ISUFF2LANG{$Inputfile_suff}
+							   : 'none';
+    $Lang_pagebreak = ($opt_p) ? $opt_p : '';
+    $Lang_typeset   = ($opt_t) ? $opt_t : '';
+    $Lang_xref      = ($opt_x) ? $opt_x : '';
+
+    &not_OK("","","xref hint(s) unknown: $Lang_xref\n")
+	if  $Lang_xref && &hints_not_OK( $XREF_HINTS, $Lang_xref );
+    &not_OK("","","pagebreak hint(s) unknown: $Lang_pagebreak\n")
+	if  $Lang_pagebreak && &hints_not_OK( $PAGEBREAK_HINTS, $Lang_pagebreak );
+    &not_OK("","","typeset hint(s) unknown: $Lang_typeset\n")
+	if  $Lang_typeset && &hints_not_OK( $TYPESET_HINTS, $Lang_typeset );
+}
+#% \end{code}
+#% 
+#% \section[Misc_routines]{Miscellaneous subroutines}
+#% 
+#% \begin{code}
+sub do_std_opens { # opens INPIPE, and OUTF; selects the latter
+
+    local($pipe_string,$output_file) = @_;
+
+    # check it output is to a pipe
+    $output_file = ">$output_file" if $output_file !~ /^\|/;
+
+    open(INPIPE, "$pipe_string |")
+	|| &my_die("$Pgm: can't start prefilter pipe: $pipe_string\n");
+    open(OUTF, "$output_file")
+	|| &my_die("$Pgm: can't open output file: $output_file\n");
+    select(OUTF);
+}
+
+sub do_std_closes { # closes INPIPE and OUTF; re-selects STDOUT
+
+    close(INPIPE);
+    # most regrettably, this only tells if the _last_ thing
+    # in the pipeline croaked...
+    if ($? >> 8) {
+	print STDERR "$Pgm: error(s) from prefilter pipe\n";
+	unlink("$Tmp_prefix/lit2stuff-po.$$"); # this might exist...
+	if ($#Files_to_tidy >= 0) {
+	    print STDERR "rm -f @Files_to_tidy\n" if $Verbose;
+	    unlink ( @Files_to_tidy );
+	}
+	exit 1;
+    }
+    close(OUTF);
+    if ($? >> 8) {
+	print STDERR "$Pgm: error in closing output file: $?\n";
+	unlink("$Tmp_prefix/lit2stuff-po.$$"); # this might exist...
+	exit 1;
+    }
+    select(STDOUT);
+}
+
+sub not_OK { # report error, increment $Status, but keep going
+    local($srcfilename, $srclineno, $msg) = @_;
+    if ($srcfilename) { # not always there
+	print STDERR "$srcfilename:$srclineno: $msg";
+    } else {
+	print STDERR "$Pgm: $msg";
+    }
+    $Status++;
+}
+
+sub my_die { # like "die" built-in but delete @Files_to_tidy first
+    local($msg) = @_;
+
+    print STDERR "rm -f @Files_to_tidy\n" if $Verbose;
+    unlink ( @Files_to_tidy );
+
+    die $msg;
+}
+
+sub hints_not_OK { # return 1 or '' depending on if all hints are in valid list or not
+    local($valid_hints,$given_hints) = @_;
+    local($h);
+
+    foreach $h (split(/,/,$given_hints)) {
+	return(1) if index($valid_hints,$h) < 0;
+    }
+    '';
+}
+
+sub filter_string {
+    local($filter, $string) = @_;
+
+    open(FILT, "| $filter > /tmp/lit$$") || &my_die("Can't open in filter_string\n");
+    print FILT $string;
+    close(FILT);
+    if ($? >> 8) { # something went wrong in the pipe  ???
+	print STDERR "$Pgm: error(s) in/from filter: $filter\n";
+    }
+#   local($filtered_string) = `cat /tmp/lit$$`; # perl bug
+    $filtered_string = `cat /tmp/lit$$`;
+    unlink("/tmp/lit$$");
+    $filtered_string;
+}
+
+sub deatified2verb_nl { # lit-deatify put 'em in; now we take 'em out
+    local($_) = @_;
+
+    s/\001newline\003/\n/g; # _WITH_ newlines
+    s/\001lbrace\003/\{/g;
+    s/\001rbrace\003/\}/g;
+    s/\001rbracket\003/\]/g;
+#
+#
+# Quick `fix' to \url{name}{the-url} occurrences when running
+# non-lit2html converters. Just remove everything but the name.
+# --SOF
+#
+    s/\\url\{([^\}]*)\}.*\}/$1/g if !$Lit2html;
+
+    $_;
+}
+
+sub deatified2verb { # without newlines
+    local($_) = @_;
+
+    $_ = &deatified2verb_nl($_);
+
+    s/\n/ /g;   # the difference; to SPACES
+    $_;
+}
+
+sub de_newlined {
+    local($_) = @_;
+
+    s/\n/\001newline\003/g;
+    $_;
+}
+
+sub root_and_suffix {
+    local($filename) = @_;
+    local($root,$suffix);
+
+    # find the file's "suffix" (NB: *.lit.hs has a 6-letter suffix)
+    if ($filename =~ /\.(lit\.[^\.\/]+)$/) { # cf \input handling in reader
+	$suffix = $1;
+	($root = $filename) =~ s/\.(lit\.[^\.\/]+)$//;
+
+    } elsif ($filename =~ /\.([^\.\/]+)$/) {
+	$suffix = $1;
+	($root = $filename) =~ s/\.([^\.\/]+)$//;
+
+    } else {
+	# should there be a warning or something here?
+	$root = '???';
+	$suffix = '???';
+    }
+    ($root, $suffix);
+}
+#% \end{code}
+#% 
+#% \section[Reader_feeding]{Pre-processing programs that feed the reader}
+#% \downsection
+#% % the inputter that we hope will go away
+#% \input{lit-inputter.lprl}
+#% 
+#% % the pre-processing filter, a lex script
+#% \input{lit-deatify.llex}
+#% \upsection
+#% 
+#% \section[Reader]{The input reader and categorizer}
+#% \downsection
+#% \input{lit-reader.lprl}
+#% \upsection
+#% 
+#% \section[Language_independent_processing]{Language-independent processing code}
+#% 
+#% ``Language''-specific code is described after the linker.
+#% 
+#% \downsection
+#% \input{lit-2pgm.lprl}
+#% % for both lit2texi and lit2latex
+#% \input{lit-2doc.lprl}
+#% \input{lit-2texi.lprl}
+#% \input{lit-2latex.lprl}
+#% \input{lit-2depend.lprl}
+#% \input{lit-2changes.lprl}
+#% \input{lit-2html.lprl}
+#% \upsection
+#% 
+#% \section[Linking_code]{Language-independent code for linking}
+#% \downsection
+#% \input{lit-linker.lprl}
+#% \upsection
+#% 
+#% \section[Language_specific_processing]{Code-language-specific processing}
+#% 
+#% This code only applies for \tr{lit2texi} and \tr{lit2latex}.
+#% 
+#% \downsection
+#% \section[Language_none]{Special stuff for language \tr{none}}
+#% \downsection
+#% \input{lit-2pgm-none.lprl}
+#% \input{lit-2doc-none.lprl}
+#% \input{lit-2texi-none.lprl}
+#% \input{lit-2latex-none.lprl}
+#% \input{lit-2html-none.lprl}
+#% \upsection
+#% \upsection
+#% 
+#% \downsection
+#% \section[Language_hs]{Special stuff for language \tr{hs} (Haskell)}
+#% \downsection
+#% \input{lit-2pgm-hs.lprl}
+#% \input{lit-2doc-hs.lprl}
+#% \input{lit-2texi-hs.lprl}
+#% \input{lit-2latex-hs.lprl}
+#% \input{lit-2html-hs.lprl}
+#% \upsection
+#% \upsection
+#% 
+#% \downsection
+#% \section[Language_prl]{Special stuff for language \tr{prl} (Perl)}
+#% \downsection
+#% \input{lit-2pgm-prl.lprl}
+#% \input{lit-2doc-prl.lprl}
+#% \input{lit-2texi-prl.lprl}
+#% \input{lit-2latex-prl.lprl}
+#% \input{lit-2html-prl.lprl}
+#% \upsection
+#% \upsection
+#% 
+#% \downsection
+#% \section[Language_C]{Special stuff for language \tr{c} (C)}
+#% \downsection
+#% \input{lit-2pgm-c.lprl}
+#% \input{lit-2doc-c.lprl}
+#% \input{lit-2texi-c.lprl}
+#% \input{lit-2latex-c.lprl}
+#% \input{lit-2html-c.lprl}
+#% \upsection
+#% \upsection
+#% 
+#% \downsection
+#% \section[Language_lex]{Special stuff for language \tr{lex}}
+#% \downsection
+#% \input{lit-2pgm-lex.lprl}
+#% \input{lit-2doc-lex.lprl}
+#% \input{lit-2texi-lex.lprl}
+#% \input{lit-2latex-lex.lprl}
+#% \input{lit-2html-lex.lprl}
+#% \upsection
+#% \upsection
+#% 
+#% \downsection
+#% \section[Language_Fortran]{Special stuff for language \tr{f}}
+#% \downsection
+#% \input{lit-2pgm-f.lprl}
+#% \input{lit-2doc-f.lprl}
+#% \input{lit-2texi-f.lprl}
+#% \input{lit-2latex-f.lprl}
+#% \input{lit-2html-f.lprl}
+#% \upsection
+#% \upsection
+#% 
+#% \downsection
+#% \section[Language_Sml]{Special stuff for language \tr{sml}}
+#% \downsection
+#% \input{lit-2pgm-sml.lprl}
+#% \input{lit-2doc-sml.lprl}
+#% \input{lit-2texi-sml.lprl}
+#% \input{lit-2latex-sml.lprl}
+#% \input{lit-2html-sml.lprl}
+#% \upsection
+#% \upsection
+#% 
+#% \downsection
+#% \section[Language_jm]{Special stuff for language \tr{jm} (``make world'' stuff)}
+#% 
+#% This type of input file is a mixture of C-pre-processor stuff and
+#% \tr{make} stuff.
+#% 
+#% \downsection
+#% \input{lit-2pgm-jm.lprl}
+#% \input{lit-2doc-jm.lprl}
+#% \input{lit-2texi-jm.lprl}
+#% \input{lit-2latex-jm.lprl}
+#% \input{lit-2html-jm.lprl}
+#% \upsection
+#% \upsection
+#% 
+#% \begin{onlystandalone}
+#% \printindex
+#% \end{document}
+#% \end{onlystandalone}
+

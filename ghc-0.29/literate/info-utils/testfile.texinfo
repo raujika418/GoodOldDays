@@ -1,0 +1,130 @@
+\input texinfo  @c -*-texinfo-*-
+@c %**start of header
+@setfilename format-test-file
+@settitle Formatting Test File
+@c %**end of header
+
+
+@unnumberedsec  Formatting Command Test File
+
+This file tests the following commands:
+
+@example
+result
+expansion
+prints
+equiv
+
+deffn
+defun
+defspec
+defvar
+@end example
+
+@c     result
+@c
+The following example tests @code{@@result@{@}}
+
+@example
+(car '(bow midships stern))	; @r{This is a comment using @@r@{}
+@result{} bow			; @r{This is an aligned comment using @@r@{}
+@end example
+
+@c     expansion
+@c    
+The following example tests @code{@@expansion@{@}} and @code{@@result@{@}}
+
+@example
+(third '(a b c))			; @r{This is a comment using @@r@{}
+@expansion{} (car (cdr (cdr '(a b c)))) ; @r{This is an aligned comment.}
+@result{} c				; @r{This is an aligned comment.}
+@end example
+
+@c     print
+@c
+The following example tests @code{@@prints@{@}}
+
+@example
+(message "Hello.")		; @r{This is a comment using @@r@{}
+@print{} Hello.			; @r{This is an aligned comment using @@r@{}
+@end example
+
+@c    equiv
+@c
+The following example tests @code{@@equiv@{@}}
+
+@example
+(make-sparse-keymap) @equiv{} (list 'keymap)
+@end example
+
+@c    error
+@c
+The following example tests @code{@@error@{@}}
+
+@example
+(car)
+@error{} Wrong number of arguments: #<subr car>, 0
+@end example
+
+@c    indentedresult
+@c
+The following example tests @code{@@result@{@}}
+
+This command is an experiment designed to make it easy to change
+indentation until we get it right.
+
+@example
+(car '(bow midships stern))
+     @result{} bow
+@end example
+
+@c    indentedexpansion, indendedresult
+@c
+The following example tests 
+@code{@@expansion@{@}} and @code{@@result@{@}}
+
+@example
+(third '(a b c))
+     @expansion{} (car (cdr (cdr '(a b c))))
+     @result{} c
+@end example
+
+
+@subheading @@def commands
+
+@deffn Command make-variable-buffer-local symbol
+This function marks @var{symbol} automatically buffer local, so that
+any attempt to set it will make it local to the current buffer at the
+time.
+
+     I put this here twice on purpose: this function marks @var{symbol}
+automatically buffer local, so that any attempt to set it will make it
+local to the current buffer at the time.
+
+The value returned is @var{symbol}.
+@end deffn
+
+@defun default-value symbol
+Return @var{symbol}'s default value.  This is the value that is seen
+in buffers that do not have their own values for this variable.  If
+@var{symbol} is not buffer-local, than this is the same as
+@code{symbol-value} (@pxref{Accessing Variables}).
+@end defun
+
+@defspec setq-default symbol value
+This function sets the default (global) value of @var{symbol} to
+@var{value}.  @var{symbol} is not evaluated, but @var{value} is.  The
+value of the @code{setq-default} form is @var{value}.
+
+@dots{}
+@end defspec
+
+@defvar minibuffer-completion-table
+  The value of this variable is the alist or obarray used for
+completion in the minibuffer.  This is the global variable that
+contains what @code{completing-read} passes to @code{read-minibuffer}.
+It is used by all the minibuffer completion functions, such as
+@code{minibuffer-complete-word}.
+@end defvar
+
+@bye

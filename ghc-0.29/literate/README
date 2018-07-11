@@ -1,0 +1,44 @@
+This directory (and its subdirectories) contains version 0.26 of the
+Glasgow literate programming system.  This stuff is usually -- but not
+always -- distributed as part of a larger system (e.g., the Glasgow
+Haskell compiler).
+
+The version numbers for this system tend to track those for Glasgow
+Haskell, even if virtually nothing has changed herein.
+
+Version 0.26 has a few bug fixes since 0.16 (and earlier versions),
+plus some "lit2html" code contributed by Chris Toshok
+<toshok@cs.uidaho.edu>.  Way cool stuff!  (HTML is the Hypertext
+Markup Language, used on the World-Wide Web.)
+
+Version 0.26 is virtually the same as version 0.19.  It has one
+or two "lit2html" fixes.
+
+The subdirectory "doc" contains the user's guide (notably, the files
+literate.dvi [TeX-produced DVI format] and literate.info [equivalent
+in GNU Info format].
+
+If you are building/installing this stuff as a separate system, please
+consult the relevant section of the user's guide, near the end
+(source: literate/doc/install.lit).  If this stuff "came with" another
+system (e.g., GHC or NoFib), simply follow the directions for
+building/installing *that* system.
+
+Once this system is built, if you would like to see its source in
+"literate" form (not overly recommended :-), try:
+
+    % cd <here>
+    % make depend	    # may be omitted if you've already done it
+    % make lit2stuff.dvi
+		# or...
+    % make lit2stuff.info
+
+The subdirectory "info-utils" contains hacked versions of the GNU
+Info-related utilities, "info" and "makeinfo".  See the README file
+there.
+
+Comments about and suggestions for this system would be most welcome.
+You may send them directly to me.
+
+Will Partain
+partain@dcs.glasgow.ac.uk

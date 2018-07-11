@@ -1,0 +1,549 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:597: checking host system type
+configure:675: checking for gcc
+configure:752: checking whether the C compiler (gcc  ) works
+configure:766: gcc -o conftest    conftest.c  1>&5
+configure:763:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main(){return(0);}
+ ^~~~
+configure:786: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:791: checking whether we are using GNU C
+configure:800: gcc -E conftest.c
+configure:815: checking whether gcc accepts -g
+configure:843: checking how to run the C preprocessor
+configure:864: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:905: checking whether gcc needs -traditional
+configure:955: checking for bison
+configure:987: checking for ranlib
+configure:1019: checking for ar
+configure:1059: checking for a BSD compatible install
+configure:1109: checking whether make sets ${MAKE}
+configure:1139: checking for minix/config.h
+configure:1149: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1145:10: fatal error: minix/config.h: No such file or directory
+ #include <minix/config.h>
+          ^~~~~~~~~~~~~~~~
+compilation terminated.
+configure: failed program was:
+#line 1144 "configure"
+#include "confdefs.h"
+#include <minix/config.h>
+configure:1193: checking for crypt in -lcrypt
+configure:1212: gcc -o conftest -g -O2   conftest.c -lcrypt  -lm  1>&5
+configure:1240: checking for dlopen in -ldl
+configure:1259: gcc -o conftest -g -O2   conftest.c -ldl  -lcrypt -lm  1>&5
+configure:1287: checking for shl_load in -ldld
+configure:1306: gcc -o conftest -g -O2   conftest.c -ldld  -ldl -lcrypt -lm  1>&5
+/usr/bin/ld: cannot find -ldld
+collect2: error: ld returned 1 exit status
+configure: failed program was:
+#line 1295 "configure"
+#include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char shl_load();
+
+int main() {
+shl_load()
+; return 0; }
+configure:1339: checking for dirent.h that defines DIR
+configure:1352: gcc -c -g -O2  conftest.c 1>&5
+configure:1377: checking for opendir in -ldir
+configure:1396: gcc -o conftest -g -O2   conftest.c -ldir  -ldl -lcrypt -lm  1>&5
+/usr/bin/ld: cannot find -ldir
+collect2: error: ld returned 1 exit status
+configure: failed program was:
+#line 1385 "configure"
+#include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char opendir();
+
+int main() {
+opendir()
+; return 0; }
+configure:1460: checking for ANSI C header files
+configure:1473: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1540: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure: In function 'main':
+configure:1535:67: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+ if (XOR (islower (i), ISLOWER (i)) || toupper (i) != TOUPPER (i)) exit(2);
+                                                                   ^~~~
+configure:1535:67: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1535:67: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1536:1: warning: incompatible implicit declaration of built-in function 'exit'
+ exit (0); }
+ ^~~~
+configure:1536:1: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1569: checking for stdlib.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for unistd.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for limits.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for sys/file.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for sys/ioctl.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for pwd.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for sys/select.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for sys/time.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for sys/times.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for sys/param.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for sys/wait.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for syscall.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for a.out.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for string.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for utime.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1569: checking for memory.h
+configure:1579: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1607: checking for uid_t in sys/types.h
+configure:1641: checking for size_t
+configure:1674: checking for st_blksize in struct stat
+configure:1687: gcc -c -g -O2  conftest.c 1>&5
+configure:1709: checking for st_blocks in struct stat
+configure:1722: gcc -c -g -O2  conftest.c 1>&5
+configure:1746: checking for st_rdev in struct stat
+configure:1759: gcc -c -g -O2  conftest.c 1>&5
+configure:1781: checking size of short
+configure:1800: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:1791:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+configure: In function 'main':
+configure:1794:11: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+   if (!f) exit(1);
+           ^~~~
+configure:1794:11: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1794:11: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1796:3: warning: incompatible implicit declaration of built-in function 'exit'
+   exit(0);
+   ^~~~
+configure:1796:3: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1820: checking size of int
+configure:1839: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:1830:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+configure: In function 'main':
+configure:1833:11: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+   if (!f) exit(1);
+           ^~~~
+configure:1833:11: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1833:11: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1835:3: warning: incompatible implicit declaration of built-in function 'exit'
+   exit(0);
+   ^~~~
+configure:1835:3: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1859: checking size of long
+configure:1878: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:1869:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+configure: In function 'main':
+configure:1872:11: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+   if (!f) exit(1);
+           ^~~~
+configure:1872:11: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1872:11: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1874:3: warning: incompatible implicit declaration of built-in function 'exit'
+   exit(0);
+   ^~~~
+configure:1874:3: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1898: checking size of void*
+configure:1917: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:1908:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+configure: In function 'main':
+configure:1911:11: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+   if (!f) exit(1);
+           ^~~~
+configure:1911:11: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1911:11: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1913:3: warning: incompatible implicit declaration of built-in function 'exit'
+   exit(0);
+   ^~~~
+configure:1913:3: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:1938: checking type of array argument to getgroups
+configure:1971: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:1953:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main()
+ ^~~~
+configure: In function 'main':
+configure:1962:7: warning: implicit declaration of function 'getgroups' [-Wimplicit-function-declaration]
+   n = getgroups (sizeof (gidset) / MAX (sizeof (int), sizeof (gid_t)) - 1,
+       ^~~~~~~~~
+configure:1966:3: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+   exit ((n > 0 && gidset[n] != val.gval) ? 1 : 0);
+   ^~~~
+configure:1966:3: warning: incompatible implicit declaration of built-in function 'exit'
+configure:1966:3: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:2009: checking return type of signal handlers
+configure:2031: gcc -c -g -O2  conftest.c 1>&5
+configure:2052: checking for working alloca.h
+configure:2064: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2085: checking for alloca
+configure:2113: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2279: checking for pid_t
+configure:2313: checking for vfork.h
+configure:2323: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:2319:10: fatal error: vfork.h: No such file or directory
+ #include <vfork.h>
+          ^~~~~~~~~
+compilation terminated.
+configure: failed program was:
+#line 2318 "configure"
+#include "confdefs.h"
+#include <vfork.h>
+configure:2348: checking for working vfork
+configure:2498: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2424:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ sparc_address_test (arg) int arg;
+ ^~~~~~~~~~~~~~~~~~
+configure:2441:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main() {
+ ^~~~
+configure: In function 'main':
+configure:2479:12: warning: implicit declaration of function 'wait'; did you mean 'main'? [-Wimplicit-function-declaration]
+     while (wait(&status) != child)
+            ^~~~
+            main
+configure:2481:5: warning: implicit declaration of function 'exit' [-Wimplicit-function-declaration]
+     exit(
+     ^~~~
+configure:2481:5: warning: incompatible implicit declaration of built-in function 'exit'
+configure:2481:5: note: include '<stdlib.h>' or provide a declaration of 'exit'
+configure:2524: checking for dup2
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2524: checking for setenv
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2524: checking for memmove
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2536:6: warning: conflicting types for built-in function 'memmove' [-Wbuiltin-declaration-mismatch]
+ char $ac_func();
+      ^~~~~~~
+configure:2524: checking for mkdir
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2524: checking for strcasecmp
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2536:6: warning: conflicting types for built-in function 'strcasecmp' [-Wbuiltin-declaration-mismatch]
+ char $ac_func();
+      ^~~~~~~~~~
+configure:2524: checking for strerror
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2524: checking for strftime
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2536:6: warning: conflicting types for built-in function 'strftime' [-Wbuiltin-declaration-mismatch]
+ char $ac_func();
+      ^~~~~~~~
+configure:2524: checking for strstr
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2536:6: warning: conflicting types for built-in function 'strstr' [-Wbuiltin-declaration-mismatch]
+ char $ac_func();
+      ^~~~~~
+configure:2524: checking for strtoul
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2524: checking for strdup
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2536:6: warning: conflicting types for built-in function 'strdup' [-Wbuiltin-declaration-mismatch]
+ char $ac_func();
+      ^~~~~~
+configure:2524: checking for crypt
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2524: checking for flock
+configure:2552: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for fmod
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2597:6: warning: conflicting types for built-in function 'fmod' [-Wbuiltin-declaration-mismatch]
+ char $ac_func();
+      ^~~~
+configure:2585: checking for killpg
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for random
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for wait4
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for waitpid
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for syscall
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for getcwd
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for truncate
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for chsize
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+/tmp/ccSVHcaf.o: In function `main':
+/home/raujikachu/code/source/ruby-1.0-971225/configure:2607: undefined reference to `chsize'
+collect2: error: ld returned 1 exit status
+configure: failed program was:
+#line 2590 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char chsize(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char chsize();
+
+int main() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_chsize) || defined (__stub___chsize)
+choke me
+#else
+chsize();
+#endif
+
+; return 0; }
+configure:2585: checking for times
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for utimes
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for fcntl
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for lockf
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for setitimer
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for setruid
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+/tmp/ccCZPZO2.o: In function `main':
+/home/raujikachu/code/source/ruby-1.0-971225/configure:2607: undefined reference to `setruid'
+collect2: error: ld returned 1 exit status
+configure: failed program was:
+#line 2590 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char setruid(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char setruid();
+
+int main() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_setruid) || defined (__stub___setruid)
+choke me
+#else
+setruid();
+#endif
+
+; return 0; }
+configure:2585: checking for seteuid
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for setreuid
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for setrgid
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+/tmp/cckImR1q.o: In function `main':
+/home/raujikachu/code/source/ruby-1.0-971225/configure:2607: undefined reference to `setrgid'
+collect2: error: ld returned 1 exit status
+configure: failed program was:
+#line 2590 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char setrgid(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char setrgid();
+
+int main() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_setrgid) || defined (__stub___setrgid)
+choke me
+#else
+setrgid();
+#endif
+
+; return 0; }
+configure:2585: checking for setegid
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for setregid
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for setpgrp2
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+/tmp/cc6GVPcM.o: In function `main':
+/home/raujikachu/code/source/ruby-1.0-971225/configure:2607: undefined reference to `setpgrp2'
+collect2: error: ld returned 1 exit status
+configure: failed program was:
+#line 2590 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char setpgrp2(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char setpgrp2();
+
+int main() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_setpgrp2) || defined (__stub___setpgrp2)
+choke me
+#else
+setpgrp2();
+#endif
+
+; return 0; }
+configure:2585: checking for getpgid
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for getgroups
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for getpriority
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for dlopen
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for sigprocmask
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for sigaction
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2585: checking for _setjmp
+configure:2613: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:2834: checking whether getpgrp() has arg
+configure:2846: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:2842:1: error: too many arguments to function 'getpgrp'
+ getpgrp(0);
+ ^~~~~~~
+In file included from configure:2840:0:
+/usr/include/unistd.h:637:16: note: declared here
+ extern __pid_t getpgrp (void) __THROW;
+                ^~~~~~~
+configure: failed program was:
+#line 2839 "configure"
+#include "confdefs.h"
+#include <unistd.h>
+int main() {
+getpgrp(0);
+; return 0; }
+configure:2867: checking whether setpgrp() has args
+configure:2879: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:2875:1: error: too many arguments to function 'setpgrp'
+ setpgrp(1, 1);
+ ^~~~~~~
+In file included from configure:2873:0:
+/usr/include/unistd.h:663:12: note: declared here
+ extern int setpgrp (void) __THROW;
+            ^~~~~~~
+configure: failed program was:
+#line 2872 "configure"
+#include "confdefs.h"
+#include <unistd.h>
+int main() {
+setpgrp(1, 1);
+; return 0; }
+configure:2901: checking whether byte ordering is bigendian
+configure:2919: gcc -c -g -O2  conftest.c 1>&5
+configure:2934: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:2929:2: error: unknown type name 'not'; did you mean 'ino_t'?
+  not big endian
+  ^~~
+  ino_t
+configure:2929:10: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'endian'
+  not big endian
+          ^~~~~~
+configure: failed program was:
+#line 2923 "configure"
+#include "confdefs.h"
+#include <sys/types.h>
+#include <sys/param.h>
+int main() {
+
+#if BYTE_ORDER != BIG_ENDIAN
+ not big endian
+#endif
+; return 0; }
+configure:2991: checking whether char is unsigned
+configure:3055: checking count field in FILE structures
+configure:3067: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:3063:19: error: 'FILE {aka struct _IO_FILE}' has no member named '_cnt'
+ FILE *f = stdin; f->_cnt = 0;
+                   ^~
+configure: failed program was:
+#line 3060 "configure"
+#include "confdefs.h"
+#include <stdio.h>
+int main() {
+FILE *f = stdin; f->_cnt = 0;
+; return 0; }
+configure:3084: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:3080:19: error: 'FILE {aka struct _IO_FILE}' has no member named '__cnt'
+ FILE *f = stdin; f->__cnt = 0;
+                   ^~
+configure: failed program was:
+#line 3077 "configure"
+#include "confdefs.h"
+#include <stdio.h>
+int main() {
+FILE *f = stdin; f->__cnt = 0;
+; return 0; }
+configure:3102: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:3098:19: error: 'FILE {aka struct _IO_FILE}' has no member named '_r'
+ FILE *f = stdin; f->_r = 0;
+                   ^~
+configure: failed program was:
+#line 3095 "configure"
+#include "confdefs.h"
+#include <stdio.h>
+int main() {
+FILE *f = stdin; f->_r = 0;
+; return 0; }
+configure:3120: gcc -c -g -O2  conftest.c 1>&5
+configure: In function 'main':
+configure:3116:19: error: 'FILE {aka struct _IO_FILE}' has no member named 'readCount'
+ FILE *f = stdin; f->readCount = 0;
+                   ^~
+configure: failed program was:
+#line 3113 "configure"
+#include "confdefs.h"
+#include <stdio.h>
+int main() {
+FILE *f = stdin; f->readCount = 0;
+; return 0; }
+configure:3255: checking whether ELF binaries are produced
+configure:3283: gcc -o conftest -g -O2   conftest.c -ldl -lcrypt -lm  1>&5
+configure:3268:1: warning: return type defaults to 'int' [-Wimplicit-int]
+ main() {
+ ^~~~
+configure: In function 'main':
+configure:3273:5: warning: implicit declaration of function 'read'; did you mean 'rand'? [-Wimplicit-function-declaration]
+  if(read(i,&buffer[0],4)<4)
+     ^~~~
+     rand
+configure:3313: checking whether OS depend dynamic link works

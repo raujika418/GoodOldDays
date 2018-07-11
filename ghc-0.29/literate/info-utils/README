@@ -1,0 +1,15 @@
+This is a hacked version of the std GNU `info' and `makeinfo'.
+The last version compared against was in the texinfo-2.15 package.
+
+The version of Dave Gillespie's info.el is 1.05; it's *great*!
+
+"makeinfo" is the only pgm which we've mangled significantly.  The
+diffs vs the GNU-distributed `makeinfo' and our "enhancements", both
+turned on by #defines:
+
+* -DALLOW_JUNK puts the text of unrecognized commands through (vs
+   tossed away)
+
+* -DTRACK_SRCFILE puts in additional commands @srcfile and @srclineno,
+  which try to allow tracking of the original src file (assuming the
+  .texinfo file was generated from something else).

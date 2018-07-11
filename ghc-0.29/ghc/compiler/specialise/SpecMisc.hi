@@ -1,0 +1,96 @@
+{-# GHC_PRAGMA INTERFACE VERSION 6 #-}
+interface SpecMisc where
+import Bag(Bag)
+import CmdLineOpts(GlobalSwitch)
+import CoreSyn(CoreArg, CoreAtom, CoreBinding, CoreExpr)
+import Id(Id)
+import IdInfo(SpecInfo)
+import Maybes(Labda)
+import Pretty(PrettyRep)
+import SpecMonad(CloneInfo)
+import SplitUniq(SplitUniqSupply)
+import TyCon(TyCon)
+import TyVar(TyVar)
+import UniType(UniType)
+import UniqFM(UniqFM)
+data CallInstance   = CallInstance Id [Labda UniType] [CoreArg Id] (UniqFM Id) (Labda SpecInfo)
+data DictBindDetails   = DictBindDetails [Id] (CoreBinding Id Id) (UniqFM Id) (UniqFM TyVar)
+type FreeTyVarsSet = UniqFM TyVar
+type FreeVarsSet = UniqFM Id
+data TyConInstance   = TyConInstance TyCon [Labda UniType]
+data UsageDetails   = UsageDetails (Bag CallInstance) (Bag TyConInstance) [DictBindDetails] (UniqFM Id) Int Int
+addDictBinds :: [Id] -> CoreBinding Id Id -> UsageDetails -> UsageDetails -> UsageDetails
+	{-# GHC_PRAGMA _A_ 4 _U_ 2211 _N_ _S_ "LLU(LLLLAA)U(LLLLLL)" _N_ _N_ #-}
+checkSpecOK :: Id -> [UniType] -> Id -> [UniType] -> a -> a
+	{-# GHC_PRAGMA _A_ 4 _U_ 21222 _N_ _S_ "LLLS" _N_ _N_ #-}
+checkUnspecOK :: Id -> [UniType] -> a -> a
+	{-# GHC_PRAGMA _A_ 2 _U_ 122 _N_ _S_ "U(LLLS)L" {_A_ 5 _U_ 222222 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+cmpCI :: CallInstance -> CallInstance -> Int#
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "U(U(U(P)AAA)LAAA)U(U(U(P)AAA)LAAA)" {_A_ 4 _U_ 2121 _N_ _N_ _F_ _IF_ARGS_ 0 4 XXXX 7 \ (u0 :: Int#) (u1 :: [Labda UniType]) (u2 :: Int#) (u3 :: [Labda UniType]) -> case _APP_  _WRKR_ _ORIG_ Id cmpId [ u0, u2 ] of { _PRIM_ 0# -> _APP_  _ORIG_ UniTyFuns cmpUniTypeMaybeList [ u1, u3 ]; (u4 :: Int#) -> u4 } _N_} _F_ _ALWAYS_ \ (u0 :: CallInstance) (u1 :: CallInstance) -> case u0 of { _ALG_ _ORIG_ SpecMisc CallInstance (u2 :: Id) (u3 :: [Labda UniType]) (u4 :: [CoreArg Id]) (u5 :: UniqFM Id) (u6 :: Labda SpecInfo) -> case u2 of { _ALG_ _ORIG_ Id Id (u7 :: Unique) (u8 :: UniType) (u9 :: IdInfo) (ua :: IdDetails) -> case u7 of { _ALG_ _ORIG_ Unique MkUnique (ub :: Int#) -> case u1 of { _ALG_ _ORIG_ SpecMisc CallInstance (uc :: Id) (ud :: [Labda UniType]) (ue :: [CoreArg Id]) (uf :: UniqFM Id) (ug :: Labda SpecInfo) -> case uc of { _ALG_ _ORIG_ Id Id (uh :: Unique) (ui :: UniType) (uj :: IdInfo) (uk :: IdDetails) -> case uh of { _ALG_ _ORIG_ Unique MkUnique (ul :: Int#) -> case _APP_  _WRKR_ _ORIG_ Id cmpId [ ub, ul ] of { _PRIM_ 0# -> _APP_  _ORIG_ UniTyFuns cmpUniTypeMaybeList [ u3, ud ]; (um :: Int#) -> um }; _NO_DEFLT_ }; _NO_DEFLT_ }; _NO_DEFLT_ }; _NO_DEFLT_ }; _NO_DEFLT_ }; _NO_DEFLT_ } _N_ #-}
+cmpCI_tys :: CallInstance -> CallInstance -> Int#
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "U(ASAAA)U(ASAAA)" {_A_ 2 _U_ 11 _N_ _N_ _F_ _IF_ARGS_ 0 0 X 1 _ORIG_ UniTyFuns cmpUniTypeMaybeList _N_} _F_ _IF_ARGS_ 0 2 CC 5 \ (u0 :: CallInstance) (u1 :: CallInstance) -> case u0 of { _ALG_ _ORIG_ SpecMisc CallInstance (u2 :: Id) (u3 :: [Labda UniType]) (u4 :: [CoreArg Id]) (u5 :: UniqFM Id) (u6 :: Labda SpecInfo) -> case u1 of { _ALG_ _ORIG_ SpecMisc CallInstance (u7 :: Id) (u8 :: [Labda UniType]) (u9 :: [CoreArg Id]) (ua :: UniqFM Id) (ub :: Labda SpecInfo) -> _APP_  _ORIG_ UniTyFuns cmpUniTypeMaybeList [ u3, u8 ]; _NO_DEFLT_ }; _NO_DEFLT_ } _N_ #-}
+cmpTyConI :: TyConInstance -> TyConInstance -> Int#
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "U(SL)U(SL)" {_A_ 4 _U_ 2121 _N_ _N_ _F_ _IF_ARGS_ 0 4 XXXX 7 \ (u0 :: TyCon) (u1 :: [Labda UniType]) (u2 :: TyCon) (u3 :: [Labda UniType]) -> case _APP_  _ORIG_ TyCon cmpTyCon [ u0, u2 ] of { _PRIM_ 0# -> _APP_  _ORIG_ UniTyFuns cmpUniTypeMaybeList [ u1, u3 ]; (u4 :: Int#) -> u4 } _N_} _F_ _ALWAYS_ \ (u0 :: TyConInstance) (u1 :: TyConInstance) -> case u0 of { _ALG_ _ORIG_ SpecMisc TyConInstance (u2 :: TyCon) (u3 :: [Labda UniType]) -> case u1 of { _ALG_ _ORIG_ SpecMisc TyConInstance (u4 :: TyCon) (u5 :: [Labda UniType]) -> case _APP_  _ORIG_ TyCon cmpTyCon [ u2, u4 ] of { _PRIM_ 0# -> _APP_  _ORIG_ UniTyFuns cmpUniTypeMaybeList [ u3, u5 ]; (u6 :: Int#) -> u6 }; _NO_DEFLT_ }; _NO_DEFLT_ } _N_ #-}
+cmpTyConI_tys :: TyConInstance -> TyConInstance -> Int#
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "U(AS)U(AS)" {_A_ 2 _U_ 11 _N_ _N_ _F_ _IF_ARGS_ 0 0 X 1 _ORIG_ UniTyFuns cmpUniTypeMaybeList _N_} _F_ _IF_ARGS_ 0 2 CC 5 \ (u0 :: TyConInstance) (u1 :: TyConInstance) -> case u0 of { _ALG_ _ORIG_ SpecMisc TyConInstance (u2 :: TyCon) (u3 :: [Labda UniType]) -> case u1 of { _ALG_ _ORIG_ SpecMisc TyConInstance (u4 :: TyCon) (u5 :: [Labda UniType]) -> _APP_  _ORIG_ UniTyFuns cmpUniTypeMaybeList [ u3, u5 ]; _NO_DEFLT_ }; _NO_DEFLT_ } _N_ #-}
+dumpCIs :: Bag CallInstance -> Bool -> Bool -> [CallInstance] -> [Id] -> [Id] -> Bag CallInstance
+	{-# GHC_PRAGMA _A_ 0 _U_ 221222 _N_ _N_ _N_ _N_ #-}
+dumpDBs :: [DictBindDetails] -> Bool -> [TyVar] -> [Id] -> UniqFM Id -> ([CoreBinding Id Id], [DictBindDetails], [Id], UniqFM Id)
+	{-# GHC_PRAGMA _A_ 5 _U_ 22222 _N_ _S_ "SLLLL" _N_ _N_ #-}
+dumpUDs :: UsageDetails -> Bool -> Bool -> [CallInstance] -> [Id] -> [TyVar] -> ([CoreBinding Id Id], UsageDetails)
+	{-# GHC_PRAGMA _A_ 6 _U_ 121222 _N_ _S_ "U(LLLLLL)LLLLL" _N_ _N_ #-}
+emptyUDs :: UsageDetails
+	{-# GHC_PRAGMA _A_ 0 _N_ _N_ _N_ _N_ _N_ #-}
+eqCI_tys :: CallInstance -> CallInstance -> Bool
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "U(ASAAA)U(ASAAA)" {_A_ 2 _U_ 11 _N_ _N_ _F_ _IF_ARGS_ 0 2 XX 5 \ (u0 :: [Labda UniType]) (u1 :: [Labda UniType]) -> case _APP_  _ORIG_ UniTyFuns cmpUniTypeMaybeList [ u0, u1 ] of { _PRIM_ 0# -> _!_ True [] []; (u2 :: Int#) -> _!_ False [] [] } _N_} _F_ _IF_ARGS_ 0 2 CC 7 \ (u0 :: CallInstance) (u1 :: CallInstance) -> case u0 of { _ALG_ _ORIG_ SpecMisc CallInstance (u2 :: Id) (u3 :: [Labda UniType]) (u4 :: [CoreArg Id]) (u5 :: UniqFM Id) (u6 :: Labda SpecInfo) -> case u1 of { _ALG_ _ORIG_ SpecMisc CallInstance (u7 :: Id) (u8 :: [Labda UniType]) (u9 :: [CoreArg Id]) (ua :: UniqFM Id) (ub :: Labda SpecInfo) -> case _APP_  _ORIG_ UniTyFuns cmpUniTypeMaybeList [ u3, u8 ] of { _PRIM_ 0# -> _!_ True [] []; (uc :: Int#) -> _!_ False [] [] }; _NO_DEFLT_ }; _NO_DEFLT_ } _N_ #-}
+explicitCI :: Id -> [Labda UniType] -> SpecInfo -> UsageDetails
+	{-# GHC_PRAGMA _A_ 3 _U_ 222 _N_ _N_ _N_ _N_ #-}
+getCIids :: Bool -> [Id] -> [Id]
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "ES" _N_ _N_ #-}
+getCIs :: Bool -> [Id] -> UsageDetails -> ([CallInstance], UsageDetails)
+	{-# GHC_PRAGMA _A_ 3 _U_ 111 _N_ _S_ "LLU(LLLLLL)" _N_ _N_ #-}
+getLocalSpecTyConIs :: Bool -> UsageDetails -> ([TyConInstance], UsageDetails)
+	{-# GHC_PRAGMA _A_ 2 _U_ 01 _N_ _S_ "AU(LLLLLL)" {_A_ 1 _U_ 1 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+isCIofTheseIds :: [Id] -> CallInstance -> Bool
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "SU(LAAAA)" {_A_ 2 _U_ 12 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+isExplicitCI :: CallInstance -> Bool
+	{-# GHC_PRAGMA _A_ 1 _U_ 1 _N_ _S_ "U(AAAAS)" {_A_ 1 _U_ 1 _N_ _N_ _F_ _IF_ARGS_ 0 1 C 4 \ (u0 :: Labda SpecInfo) -> case u0 of { _ALG_ _ORIG_ Maybes Ni (u1 :: SpecInfo) -> _!_ True [] []; _ORIG_ Maybes Hamna  -> _!_ False [] []; _NO_DEFLT_ } _N_} _F_ _IF_ARGS_ 0 1 C 5 \ (u0 :: CallInstance) -> case u0 of { _ALG_ _ORIG_ SpecMisc CallInstance (u1 :: Id) (u2 :: [Labda UniType]) (u3 :: [CoreArg Id]) (u4 :: UniqFM Id) (u5 :: Labda SpecInfo) -> case u5 of { _ALG_ _ORIG_ Maybes Ni (u6 :: SpecInfo) -> _!_ True [] []; _ORIG_ Maybes Hamna  -> _!_ False [] []; _NO_DEFLT_ }; _NO_DEFLT_ } _N_ #-}
+isLocalSpecTyConI :: Bool -> TyConInstance -> Bool
+	{-# GHC_PRAGMA _A_ 2 _U_ 01 _N_ _S_ "AU(SA)" {_A_ 1 _U_ 2 _N_ _N_ _F_ _IF_ARGS_ 0 0 X 1 _CONSTM_ NamedThing isLocallyDefined (TyCon) _N_} _F_ _IF_ARGS_ 0 2 XC 3 \ (u0 :: Bool) (u1 :: TyConInstance) -> case u1 of { _ALG_ _ORIG_ SpecMisc TyConInstance (u2 :: TyCon) (u3 :: [Labda UniType]) -> _APP_  _CONSTM_ NamedThing isLocallyDefined (TyCon) [ u2 ]; _NO_DEFLT_ } _N_ #-}
+isTyConIofThisTyCon :: TyCon -> TyConInstance -> Bool
+	{-# GHC_PRAGMA _A_ 2 _U_ 21 _N_ _S_ "SU(SA)" {_A_ 2 _U_ 22 _N_ _N_ _F_ _IF_ARGS_ 0 2 XX 5 \ (u0 :: TyCon) (u1 :: TyCon) -> case _APP_  _ORIG_ TyCon cmpTyCon [ u0, u1 ] of { _PRIM_ 0# -> _!_ True [] []; (u2 :: Int#) -> _!_ False [] [] } _N_} _F_ _IF_ARGS_ 0 2 XC 6 \ (u0 :: TyCon) (u1 :: TyConInstance) -> case u1 of { _ALG_ _ORIG_ SpecMisc TyConInstance (u2 :: TyCon) (u3 :: [Labda UniType]) -> case _APP_  _ORIG_ TyCon cmpTyCon [ u0, u2 ] of { _PRIM_ 0# -> _!_ True [] []; (u4 :: Int#) -> _!_ False [] [] }; _NO_DEFLT_ } _N_ #-}
+isUnboxedCI :: CallInstance -> Bool
+	{-# GHC_PRAGMA _A_ 1 _U_ 1 _N_ _S_ "U(ASAAA)" {_A_ 1 _U_ 1 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+mkCall :: Id -> [(CoreArg Id, UsageDetails, CoreExpr Id Id -> CoreExpr Id Id)] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> (Bool, CoreExpr Id Id)
+	{-# GHC_PRAGMA _A_ 2 _U_ 122222 _N_ _S_ "U(LLLS)L" {_A_ 5 _U_ 222222222 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+mkCallInstance :: Id -> Id -> [(CoreArg Id, UsageDetails, CoreExpr Id Id -> CoreExpr Id Id)] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> UsageDetails
+	{-# GHC_PRAGMA _A_ 3 _U_ 2222222 _N_ _S_ "LLS" _N_ _N_ #-}
+mkTyConInstance :: Id -> [UniType] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> UsageDetails
+	{-# GHC_PRAGMA _A_ 2 _U_ 222221 _N_ _N_ _N_ _N_ #-}
+not_dict_or_defm :: Id -> Bool
+	{-# GHC_PRAGMA _A_ 1 _U_ 1 _N_ _S_ "U(ASAL)" {_A_ 2 _U_ 22 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+pprCI :: CallInstance -> Int -> Bool -> PrettyRep
+	{-# GHC_PRAGMA _A_ 1 _U_ 122 _N_ _S_ "U(LLLAL)" {_A_ 4 _U_ 211122 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+recordTyConInst :: Id -> [UniType] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> Labda [Labda UniType]
+	{-# GHC_PRAGMA _A_ 2 _U_ 122222 _N_ _S_ "U(AAU(AAU(S)AAAAAAA)A)L" {_A_ 2 _U_ 222222 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+singleCI :: Id -> [Labda UniType] -> [CoreArg Id] -> UsageDetails
+	{-# GHC_PRAGMA _A_ 3 _U_ 222 _N_ _N_ _N_ _N_ #-}
+singleConUDs :: Id -> UsageDetails
+	{-# GHC_PRAGMA _A_ 1 _U_ 2 _N_ _N_ _N_ _N_ #-}
+singleFvUDs :: CoreAtom Id -> UsageDetails
+	{-# GHC_PRAGMA _A_ 1 _U_ 1 _N_ _S_ "S" _N_ _N_ #-}
+singleTyConI :: TyCon -> [Labda UniType] -> UsageDetails
+	{-# GHC_PRAGMA _A_ 2 _U_ 22 _N_ _N_ _N_ _N_ #-}
+take_dict_args :: [a] -> [(CoreArg b, c, d)] -> Labda ([CoreArg b], [(CoreArg b, c, d)])
+	{-# GHC_PRAGMA _A_ 2 _U_ 12 _N_ _N_ _N_ _N_ #-}
+take_type_args :: [a] -> [b] -> [(CoreArg c, d, e)] -> Labda ([UniType], [CoreArg c], [(CoreArg c, d, e)])
+	{-# GHC_PRAGMA _A_ 3 _U_ 122 _N_ _S_ "SLL" _N_ _N_ #-}
+tickSpecCall :: Bool -> UsageDetails -> UsageDetails
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "LU(LLLLLL)" _N_ _N_ #-}
+tickSpecInsts :: UsageDetails -> UsageDetails
+	{-# GHC_PRAGMA _A_ 1 _U_ 1 _N_ _S_ "U(LLLLLL)" _N_ _N_ #-}
+unionUDList :: [UsageDetails] -> UsageDetails
+	{-# GHC_PRAGMA _A_ 1 _U_ 2 _N_ _S_ "S" _F_ _IF_ARGS_ 0 1 X 4 \ (u0 :: [UsageDetails]) -> _APP_  _TYAPP_  _TYAPP_  foldr { UsageDetails } { UsageDetails } [ _ORIG_ SpecMisc unionUDs, _ORIG_ SpecMisc emptyUDs, u0 ] _N_ #-}
+unionUDs :: UsageDetails -> UsageDetails -> UsageDetails
+	{-# GHC_PRAGMA _A_ 2 _U_ 11 _N_ _S_ "U(LLLLLL)U(LLLLLL)" _N_ _N_ #-}
+

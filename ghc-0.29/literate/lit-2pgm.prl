@@ -1,0 +1,61 @@
+sub spit_out_ribbons_code {
+    local(@Ribbons_to_get) = @_;
+    local($r);
+    print STDERR "spitting code for ribbons @Ribbons_to_get\n" if $Debugging;
+
+    foreach $r (@Ribbons_to_get) {
+        local(@ribbon_blk_nos) = split(/,/,$Ribbon_blks{$r});
+        local($b);
+        foreach $b (@ribbon_blk_nos) {
+	    print &mk_line_directive($Blk_srcfile_name[$b],$Blk_srcfile_lineno[$b]);
+
+	    if ($Blk_txt[$b] !~ /\\insertribbon/) {
+		# safe to just go "dump"...
+		# de-Birdize the code block; urgh
+		$* = 1; # multiline matches...
+		$Blk_txt[$b] =~ s/^>//g;
+		if ( $Code_lang eq 'c') { # we will try to strip comments...
+		    while($Blk_txt[$b] =~ /\/\*[^\*]*\*+([^\/\*][^\*]*\*+)*\//) {
+			# Preserve newlines
+			local($before) = $`;
+			local($comment) = $&;
+			local($after) = $';
+			$comment =~ s/\\\n//g;
+			local($nl) = ($comment =~ tr/\n//);
+			$Blk_txt[$b] = $before . ("\n" x $nl) . $after;
+		    }
+		    print $Blk_txt[$b];
+		} else {
+		    print $Blk_txt[$b];
+		}
+		$* = 0; # back to one-line matches...
+
+	    } else { # gotta look around...
+		local(@blk_txt_lns) = split(/\n/,$Blk_txt[$b]);
+		local($l, $called_ribbon);
+
+		local($i) = 0;
+		foreach $l (@blk_txt_lns) {
+		    if ($l =~ /^\s*\\insertribbon\{(.*)\}\s*$/) { # must be alone on line
+			$called_ribbon = $1;
+			if (! $Ribbon_blks{$called_ribbon}) {
+			    &not_OK($Blk_srcfile_name[$b],($Blk_srcfile_lineno[$b]+$i),
+				"no code found for ribbon: $called_ribbon\n");
+
+			} else { # recurse...
+			    &spit_out_ribbons_code($called_ribbon);
+			}
+		    } else {
+			# de-Birdize the code line...
+			$l =~ s/^>//;
+			print "$l\n";
+		    }
+		    $i++;
+		}
+	    }
+        }
+    }
+}
+
+# a trailing 1 seems to be the habit for inc'd perl files
+1;

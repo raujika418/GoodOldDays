@@ -1,0 +1,92 @@
+<html>
+<head>
+<title>Haskell 1.3 I/O Errors: PreludeIOError</title>
+</head>
+<body>
+
+
+[<a href="PreludeMonadicIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeStdIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>I/O Errors "PreludeIOError"</h2>
+
+Haskell 1.2 does not provide standard error values for I/O errors.
+This is unacceptable for portable implementations which indulge in
+non-trivial I/O.  The <code>IOError</code> type has therefore been
+extended from Haskell 1.2, and possible error values have been
+identified for all standard operations.
+<a href="Rationale.html#PreludeIOError">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeIOError where
+</pre>
+<p>
+
+<pre>
+> data IOError = AlreadyExists String
+>              | HardwareFault String
+>              | IllegalOperation String
+>              | InappropriateType String
+>              | Interrupted String
+>              | InvalidArgument String
+>              | NoSuchThing String
+>              | OtherError String
+>              | PermissionDenied String
+>              | ProtocolError String
+>              | ResourceBusy String
+>              | ResourceExhausted String
+>              | ResourceVanished String
+>              | SystemError String
+>              | TimeExpired String
+>              | UnsatisfiedConstraints String
+>              | UnsupportedOperation String
+>              | UserError String
+>              | EOF
+</pre>
+<p>
+
+<pre>
+> instance Text IOError where
+>    showsPrec _ e s = ...
+</pre>
+<p>
+<code>SystemError</code> is reserved for the low-level operating system 
+interface routines, such as those defined in <a
+href="Posix.html"><code>LibPOSIX</code></a>, and should not be returned
+by the high-level routines in the Prelude.
+<p>
+The <code>String</code> part of an <code>IOError</code> is
+platform-dependent.  However, to provide a uniform mechanism for
+distinguishing among errors within these broad categories, each
+platform-specific standard shall specify the exact strings to be used
+for particular errors.  For errors not explicitly mentioned in the
+standard, any descriptive string may be used.
+<p>
+<hr><p>
+
+
+[<a href="PreludeMonadicIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeStdIO.html">Next</a>]
+<p>
+
+
+</body>
+
+<hr>
+
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+

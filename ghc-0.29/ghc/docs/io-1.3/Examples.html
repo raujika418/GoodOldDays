@@ -1,0 +1,157 @@
+<html>
+<head>
+<title>Haskell 1.3 Examples</title>
+</head>
+<body>
+
+[<a href="IO.html">Up</a>]
+<hr><p>
+
+<h1>Examples</h1>
+
+Here are some simple examples showing how the Haskell 1.3 I/O
+operations can be used.  <p>
+
+<p><hr><p>
+
+<h2>Hello World</h2>
+
+The Hello World program in Haskell 1.3.
+<p>
+
+<pre>
+> main =  putStr "Hello World\n"
+</pre>
+
+<p><hr><p>
+<h2>Summing Two Numbers</h2>
+
+This program is adapted from the Haskell 1.2 report.  It reads and
+sums two integers (default overloading resolution is used to
+resolve the types of <code>x1</code> and <code>x2</code> to be <code>Int</code>).
+<p>
+
+<pre>
+> main =
+>       hSetBuffering stdout NoBuffering                  >>
+>       putStr   "Enter an integer: "                     >>
+>       readLine                                          >>= \ x1 -> 
+>       putStr   "Enter another integer: "                >>
+>       readLine                                          >>= \ x2 -> 
+>       putStr  ("Their sum is " ++ show (x1+x2) ++ "\n")
+>
+>  where readLine = isEOF                                 >>= \ eof ->
+>                   if eof then return []
+>                   else getChar                          >>= \ c ->
+>                        if c `isIn` ['\n','\p'] then
+>                           return []
+>                        else
+>                           readLine                      >>= \ cs ->
+>                           return (c:cs)
+</pre>
+<p>
+
+<p><hr><p>
+
+<h2>Copying Files</h2>
+
+A simple program to create a copy of a file, with all lower-case
+characters translated to upper-case.  This program will not allow a
+file to be copied to itself.  This version uses character-level I/O.
+<p>
+
+<pre>
+> main   =  getArgs                           >>=        \ [f1,f2] ->
+>           openFile f1 ReadMode              >>=        \ h1      ->
+>           openFile f2 WriteMode             >>=        \ h2      ->
+>           copyFile h1 h2                    >>
+>           hClose h1                         >>
+>           hClose h2
+</pre><p>
+
+<pre>
+> copyFile h1 h2 =
+>           hIsEOF h1                         >>=        \ eof ->
+>           if eof
+>             return ()
+>           else
+>             hGetChar h1                     >>=        \ c       ->
+>             hPutChar h2 (toUpper c)         >>
+>             copyFile h1 h2
+</pre><p>
+
+An equivalent but much shorter version, using string I/O is:
+<p>
+
+<pre>
+> main =    getArgs                           >>=        \ [f1,f2] ->
+>           readFile f1                       >>=        \ s       ->
+>           writeFile f2 (map toUpper s)
+</pre>
+<p>
+
+<p><hr><p>
+
+<h2>A Simple Talk Program</h2>
+
+It could be argued that this is somewhat whimsical, but it shows
+how some more advanced features can be used to good effect.
+<p>
+
+Assume that opening the &quot;file&quot <code>"u@h"</code> will open a connection
+to user <code>u</code> at host <code>h</code> (so
+<code>"kh@dcs.glasgow.ac.uk"</code> will open a connection to Kevin
+Hammond at Glasgow), then the following is a simple communication
+program that allows the user to communicate across the network.
+<p>
+
+<pre>
+> main =   getArgs                            >>=        \ [user,host] ->
+>          let username = (user ++ "@" ++ host) in
+>          openFile username ReadWriteMode    >>=        \ cd          ->
+>          hSetBuffering NoBuffering stdin    >>
+>          hSetBuffering NoBuffering stdout   >>
+>          hSetBuffering NoBuffering cd       >>
+>          hPutString speakString             >>
+>          speak cd
+>
+> speakString = "Someone wants to speak with you"
+</pre><p>
+
+<pre>
+> speak cd =
+>          hReady cd                          >>=        \ ready       ->
+>          if ready then (hGetChar cd >>= putChar)
+>          else return ()                     >>
+>
+>          hReady stdin                       >>=        \ ready       ->
+>          if ready then (getChar >>= hPutChar cd)
+>          else return ()                     >>
+>
+>          speak cd
+</pre><p>
+
+Note the use of <code>hReady</code> to allow interleaved
+communication, and <code>hSetBuffering</code> to disable buffered
+input and output.
+<p>
+
+
+<hr><p>
+
+[<a href="IO.html">Up</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+
+</html>

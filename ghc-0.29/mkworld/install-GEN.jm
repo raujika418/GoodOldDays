@@ -1,0 +1,148 @@
+/* Where and how to install things (generally) */
+/* [An individual project is likely to have its own ideas] */
+/* WHERE: */
+
+/* InstRootDir and InstBinRootDir should be set by a configure script */
+
+/* platform-specific binaries */
+#ifndef InstBinDir
+# if AT_GLASGOW
+#  define InstBinDir $(exec_prefix)/bin/`/usr/local/gnu/bin/hw_os`
+# else
+#  define InstBinDir $(exec_prefix)/bin
+# endif
+#endif
+
+/* scripts are platform-independent executables */
+#ifndef InstScriptDir
+#define InstScriptDir $(exec_prefix)/bin
+#endif
+
+/* "Lib" is where platform-specific stuff goes;
+ * "Data" is where platform-independent stuff goes.
+ * [arbitrary]
+ */
+#ifndef InstLibDir
+#define InstLibDir $(prefix)/lib/$(HOSTPLATFORM)
+#endif
+#ifndef InstDataDir
+#define InstDataDir $(prefix)/lib
+#endif
+prefix        = InstRootDir
+exec_prefix   = InstBinRootDir
+INSTBINDIR    = InstBinDir
+INSTSCRIPTDIR = InstScriptDir
+INSTLIBDIR    = InstLibDir
+INSTDATADIR   = InstDataDir
+
+/* top of manual page tree to install in */
+/* NB: not necessarily the same place as to look for man pages (?) */
+#ifndef InstManRoot
+#define InstManRoot $(prefix)
+#endif
+
+/* prefix for man page _sources_ (vs .../cat) */
+#ifndef InstManSrcRoot
+#define InstManSrcRoot $(INSTMANROOT)/man
+#endif
+/* man pages for commands */
+#ifndef InstComManDir /* man pages for commands */
+#define InstComManDir CAT2($(INSTMANSRCROOT),$(COMMANSUFFIX))
+#endif
+/* man pages for library routines */
+#ifndef InstLibManDir
+#define InstLibManDir CAT2($(INSTMANSRCROOT),$(LIBMANSUFFIX))
+#endif
+/* man pages for system commands */
+#ifndef InstSysManDir
+#define InstSysManDir CAT2($(INSTMANSRCROOT),$(SYSMANSUFFIX))
+#endif
+
+/* suffix for installing commands'/etcs' man pages */
+#ifndef ComManSuffix
+#define ComManSuffix 1
+#endif
+#ifndef LibManSuffix
+#define LibManSuffix 3
+#endif
+#ifndef SysManSuffix
+#define SysManSuffix 8
+#endif
+INSTMANROOT    = InstManRoot
+INSTMANSRCROOT = InstManSrcRoot
+INSTCOMMANDIR  = InstComManDir
+INSTLIBMANDIR  = InstLibManDir
+INSTSYSMANDIR  = InstSysManDir
+COMMANSUFFIX   = ComManSuffix
+LIBMANSUFFIX   = LibManSuffix
+SYSMANSUFFIX   = SysManSuffix
+
+#ifndef InstInfoDir
+#if AT_GLASGOW
+#define InstInfoDir /local/doc/info
+#else
+#define InstInfoDir $(prefix)/info
+#endif
+#endif
+INSTINFODIR    = InstInfoDir
+
+/* HOW: */
+/* this stuff about "who" does the installing doesn't have make vars
+ * as it is not intended to be runtime-changeable.
+ */
+#ifndef InstOwner
+#ifdef Owner
+#define InstOwner -o Owner
+#else
+#define InstOwner       /* as nothing */
+#endif
+#endif
+#ifndef InstGroup
+#ifdef Group
+#define InstGroup -g Group
+#else
+#define InstGroup       /* as nothing */
+#endif
+#endif
+
+#ifndef InstFileFlags
+#define InstFileFlags   /* as nothing */
+#endif
+#ifndef InstStrip
+#define InstStrip       /* as nothing */
+#endif
+#ifndef InstBinFlags
+#define InstBinFlags -m 0755 InstOwner InstGroup InstFileFlags InstStrip
+#endif
+/*
+	No strip flags on rest of these -- avoids message from install
+	about stripping non-binaries.
+*/
+#ifndef InstScriptFlags
+#define InstScriptFlags -m 0755 InstOwner InstGroup InstFileFlags
+#endif
+#ifndef InstLibFlags
+#define InstLibFlags -m 0644 InstOwner InstGroup InstFileFlags
+#endif
+#ifndef InstDataLibFlags
+#define InstDataLibFlags -m 0644 InstOwner InstGroup InstFileFlags
+#endif
+#ifndef InstIncFlags
+#define InstIncFlags -m 0644 InstOwner InstGroup InstFileFlags
+#endif
+#ifndef InstDataFlags
+#define InstDataFlags -m 0644 InstOwner InstGroup InstFileFlags
+#endif
+#ifndef InstManFlags
+#define InstManFlags -m 0644 InstOwner InstGroup InstFileFlags
+#endif
+#ifndef InstRanlibFlags
+#define InstRanlibFlags /*none*/
+#endif
+INSTBINFLAGS    = InstBinFlags
+INSTSCRIPTFLAGS = InstScriptFlags
+INSTLIBFLAGS    = InstLibFlags
+INSTINCFLAGS    = InstIncFlags		/* flags for include files */
+INSTDATAFLAGS   = InstDataFlags
+INSTMANFLAGS    = InstManFlags
+INSTRANLIBFLAGS = InstRanlibFlags

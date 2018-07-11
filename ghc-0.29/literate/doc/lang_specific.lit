@@ -1,0 +1,50 @@
+\section[Language_specific]{Language-specific processing}
+
+This \sectiontype{Language_specific} describes the processing of code
+in documents that is done in a language-specific way.  This is mainly
+to do with indexing, typesetting, and similar matters.
+
+First, however, we give the default rules used when the programming
+language used is unsupported or unknown.
+
+%-------------------------------------------------------------------
+\subsection[Default_rules]{Rules for unknown or unsupported languages}
+
+[Not finished yet.]
+
+No hidden comments or explicit index entries in code.
+
+%-------------------------------------------------------------------
+\subsection[Haskell_rules]{Language-specific rules for \Haskell{}}
+
+[This section is not finished yet.]
+
+An explicit code index entry comment is of the form:
+\tr{--idx::<whatever>}, on a line of its own.
+
+A hidden comment is of the form: \tr{--hide::<whatever>}, on a line
+of its own.
+
+%-------------------------------------------------------------------
+\subsection[Perl_rules]{Language-specific rules for \tr{perl}}
+
+[This section is not finished yet.]
+
+An explicit code index entry comment is of the form:
+\tr{#idx::<whatever>}, on a line of its own.
+
+A hidden comment is of the form: \tr{#hide::<whatever>}, on a line of
+its own.
+
+%-------------------------------------------------------------------
+\subsection[C_rules]{Language-specific rules for \tr{C}}
+
+[This section is not finished yet.]
+
+%-------------------------------------------------------------------
+\subsection[Fortran_rules]{Language-specific rules for \tr{FORTRAN}}
+
+[This section is not finished yet.]
+
+The FORTRAN-specific support was provided by Adriaan Joubert
+(adriaan\@dcs.qmw.ac.uk).

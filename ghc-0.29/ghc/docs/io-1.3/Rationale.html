@@ -1,0 +1,699 @@
+<html>
+<head>
+<title>Haskell 1.3 I/O Rationale</title>
+</head>
+<body>
+[<a href="IO.html">Up</a>]
+<p>
+
+<hr><p>
+
+Last Modified On Wed Dec 14 16:32:27 GMT 1994 By Kevin Hammond
+<h1>Rationale for the Haskell 1.3 I/O Definition</h1>
+
+<strong>Note: the text in this rationale is for explanation only
+and does not form part of the Haskell 1.3 definition.  If
+the rationale conflicts with the definition, then the text
+of the definition always takes precedence.</strong>
+<p>
+
+The rationale is organised into a general section, and by module.
+<ul>
+<li><a href="#General">General</a>
+  <ul>
+  <li><a href="#Non-Determinism">Non-Determinism</a>
+  <li><a href="#Libraries">Libraries</a>
+  <li><a href="#Conformance">Conformance</a>
+  <li><a href="#Compatibility">Compatibility with Haskell 1.2</a>
+    <ul>
+    <li><a href="#Conversion">Converting Existing Programs</a>
+    </ul>
+  <li><a href="#Omissions">Omissions</a>
+  </ul>  
+<li><a href="#PreludeIO">PreludeIO</a>
+  <ul>
+  <a href="#interact">interact</a>
+  </ul>
+<li><a href="#PreludeMonadicIO">PreludeMonadicIO</a>
+<li><a href="#PreludeIOError">PreludeIOError</a>
+<li><a href="#PreludeStdIO">PreludeStdIO</a>
+  <ul>
+  <li><a href="#Handle-Reuse">Handle Reuse</a>
+  <li><a href="#Semi-closing">Semi-Closing</a>
+  <li><a href="#Standard-Handles">Standard Handles</a>
+  <li><a href="#Opening-Files">Opening Files</a>
+    <ul>
+    <li><a href="#OpenBinary">Text/Binary Files</a>
+    <li><a href="#ReadWrite">ReadWrite Mode</a>
+    <li><a href="#Locking">File Locking</a>
+    </ul>
+  <li><a href="#FileSize">File Sizes</a>
+  <li><a href="#Buffering">Buffering</a>
+    <ul>
+    <li><a href="#Buffer-Modes">Buffer Modes</a>
+    </ul>
+  <li> <a href="#Seeking">Changing the I/O position</a>
+    <ul>
+    <li> <a href="#hGetPosn">Revisiting an I/O position</a>
+    <li> <a href="#hSeek">Seeking to a new I/O position</a>
+    </ul>
+  <li> <a href="#Properties">Handle Properties</a>
+  <li> <a href="#Lookahead">Reading Ahead</a>
+  </ul>
+<li><a href="#PreludeReadTextIO">PreludeReadTextIO</a>
+  <ul>
+  <li> <a href="#hReady">Checking for Input</a>
+  </ul>
+<li><a href="#PreludeWriteTextIO">PreludeWriteTextIO</a>
+<li><a href="#LibDirectory">LibDirectory</a>
+<li><a href="#LibSystem">LibSystem</a>
+  <ul>
+  <li> <a href="#ExitCodes">Exit Codes</a>
+  <li> <a href="#getEnv">Environment Variables</a>
+  </ul>
+<li><a href="#LibTime">LibTime</a>
+<li><a href="#LibCPUTime">LibCPUTime</a>
+<li><a href="#LibUserInterrupt">LibUserInterrupt</a>
+<li><a href="#LibPOSIX">LibPOSIX</a>
+</ul>
+<p>
+
+<hr>
+<p>
+
+<a name="General"><h2>General</h2></a>
+
+The proposal (like most of Haskell) is supposed to be rather boring.
+It provides a basic interface to common operating systems such as
+Unix, DOS, VMS, or the Macintosh, but does not address future
+operating systems, include ones based on object-orientation or
+persistence, or even graphical interface issues.  Like other aspects
+of the Haskell design, it is somewhat more exciting than might be
+imagined, since it represents an attempt to provide
+"industrial-strength" input/output in a purely functional context.
+Other languages which have tried to do something like this are 
+<a href="Biblio.html#Hope+">Hope+</a>
+and <a href="Biblio.html#Clean">Clean</a>.
+<p>
+
+<a name="Non-Determinism"><h3>Non-Determinism</h3></a>
+
+I/O is not deterministic.  That is, the same program
+could have different results when run multiple times (for example
+if a user gives different input from the keyboard).  This is a
+requirement for real-world interaction.
+<p>
+
+The Haskell language is, however, both deterministic and referentially
+transparent.  This apparent contradiction is resolved because I/O
+operations exist outside the language.  Typically, a Haskell program
+is one process in a side-effecting operating system.  The operating
+system affects the environment that the Haskell program exists in, and
+may respond to the result produced by that program (a series of
+monadic values>) by side-effecting the environment and returning the
+result as an input to the program.  Internally, however, all
+expressions in the Haskell program are free from side-effect (including those
+of type <code>IO a</code>).  
+<p>
+
+<a name="Libraries"><h3>Libraries</h3></a>
+
+In Haskell 1.3, Library modules are
+distinguished from Prelude modules in order to avoid cluttering the
+name space with infrequently used names, and also so that
+implementations can avoid loading unreferenced names.  This should
+help produce faster translators and smaller binaries.<p>
+
+<a name="Conformance"><h3>Conformance</h3></a>
+
+Two levels of conformance are defined so
+that programmers can rely on exact portability between
+<em>strictly-conforming</em> Haskell implementations, while allowing
+implementation flexibility on systems where some operations are
+unnatural, or difficult to implement.  Documentation of
+non-conformance, and of all implementation dependencies, is required
+so that programmers know exactly how their program will behave without
+needing to test it under each new implementation.<p>
+
+<a name="Compatibility"><h3>Compatibility with Haskell 1.2</h3></a>
+
+The goal of strict backwards compatibility was abandoned in favour of
+a more compact, more flexible approach to I/O.  Existing
+implementations are encouraged to continue to provide Haskell 1.2 I/O
+functions where possible, but new programs should be written using
+Haskell 1.3 operations.
+<p>
+
+<a name="Conversion"><h4>Converting Existing Programs</h4></a>
+
+Most existing Haskell programs written using continuation-passing
+style or streams should be easily convertible to monadic I/O.
+<p>
+
+The following operations which were supported in Haskell 1.2
+are not supported in Haskell 1.3:
+<ul>
+<li> Binary files
+<li> Echoing control
+<li> Channels as distinct entities from files
+<li> File and channel status operations
+<li> Setting environment variables
+</ul>
+<p>
+
+<a name="Omissions"><h3>Omissions</h3></a>
+
+There is a tension between providing enough functionality to allow
+sensible applications to be written, and providing a reasonably
+compact, easily implemented I/O system.  This definition is intended
+to provide the functionality that most students or practising
+functional programmers are likely to need.
+<p>
+
+Here are some of the I/O operations that were considered, but which were
+not included in the final definition.
+<ul>
+<li> Determining file existence
+<li> Controlling file access permissions and locks
+<li> Truncating a file
+<li> Merging input from multiple handles
+<li> General interrupt handling
+<li> File information operations
+<li> Process control primitives
+<li> Binary file operations
+<li> Terminal control (echoing etc.) 
+<li> Setting environment variables
+<li> Synchronising disks
+<li> Asynchronous I/O operations
+<li> Indexed file access
+<li> More primitive monadic operations (GHC's <code>IO</code>)
+<li> Parsing primitives based on <code>read</code>
+<li> Interlanguage working
+<li> Spawning lazy computations
+<li> Creating fixpoints
+<li> Mutable variables
+</ul>
+<p>
+
+
+<hr><p>
+<a name="PreludeIO"><h2>PreludeIO</h2></a>
+
+<a name="interact"><h3>interact</h3></a>
+
+<a href="PreludeIO.html#interact"><code>interact</code></a> was provided in Haskell
+1.2 as a way to write simple I/O programs as functions from input
+strings to output strings.  This emulates the functionality provided
+by many previous functional languages, such as SASL.
+<p>
+
+<em>Example</em>: a program to replace all lower-case letters with their
+upper-case equivalents.
+<p>
+<pre>
+> main = interact (map toUpper)
+</pre>
+<p>
+
+<hr><p>
+<a name="PreludeMonadicIO"><h2>PreludeMonadicIO</h2></a>
+
+<a name="error"><h3>Use of fail rather than error</h3></a>
+<code>error</code> aborts the program without giving any opportunity
+to recover from the error.  It can be used in <em>any</em> type of
+expression.  <code>fail</code> allows the error to be handled if
+appropriate, using operations such as <a
+href="PreludeMonadicIO.html#handle"><code>handle</code></a> and <a
+href="PreludeMonadicIO.html#try"><code>try</code></a> but can only be used
+in expressions of type <code>IO a</code>.  <p>
+
+<hr><p>
+<a name="PreludeIOError"><h2>PreludeIOError</h2></a>
+
+This module tries to identify all errors which might arise when
+performing the I/O operations defined in the standard.  It is much
+more informative than Haskell 1.2 in that it gives specific names to
+errors rather than relying on the general classes
+<code>ReadError</code>, <code>WriteError</code>, etc.  This allows
+meaningful handlers to be written which are not
+implementation-dependent.
+
+<p>
+
+<hr><p>
+<a name="PreludeStdIO"><h2>PreludeStdIO</h2></a>
+
+The module is defined in terms of items read from a handle, rather
+than characters, to allow the possibility of reading structured files
+in an extended implementation.  <a
+href="PreludeReadTextIO.html"><code>PreludeReadTextIO</code></a> and
+<a href="PreludeWriteTextIO.html"><code>PreludeWriteTextIO</code></a> provide
+read and write operations for handles operating on steams of
+characters.
+<p>
+
+<a name="Handle-Reuse"><h3>Handle Reuse</h3></a>
+
+If an implementation reused a handle after it was closed while there
+where still implicit references to it from within the functional program,
+then the I/O semantics could be subverted, and cause non-intuitive
+results.  For example, in
+<p>
+<pre>
+> openFile ReadMode "foo" >>= \ foo ->
+> hClose foo              >>
+> openFile ReadMode "bar" >>= \ bar ->
+> hGetChar foo
+</pre><p>
+if handle <code>foo</code> was reused for <code>bar</code>, then
+this code sequence would return the first character in <code>"bar"</code>
+rather than raising an error.  This is therefore prohibited by the
+language semantics.
+<p>
+
+<a name="Semi-closing"><h3>Semi-Closing</h3></a>
+
+Semi-closing is used to emulate the lazy stream reading found in
+almost all functional languages.
+<p>
+
+<a name="Semi-Close-Discard">Errors are discarded</a> on a
+semi-closed handle because it is not possible to handle them!  The
+value read from the semi-closed handle is fixed as a list of items,
+but in order to raise an error this would need to be a list of
+<code>IO</code> items.  Using such a type would defeat the purpose of
+having semi-closed streams, which is to model lazy stream reading
+by returning a list of items from that stream.
+<p>
+
+Normally semi-closed handles will be closed automatically when the
+contents of the associated stream have been read completely.
+<a name="Semi-Close-Close">
+Occasionally, the programmer may want to force a semi-closed handle to be closed</a>
+before this happens, by using <code>hClose</code> (e.g. if an error occurs
+when reading a handle, or if the entire contents is not needed but the
+file must be overwritten with a new value).  In this case, the
+implementation defines exactly which characters have been read from
+the handle and which are frozen as the contents of the handle.
+<p>
+
+<a name="Standard-Handles"><h3>Standard Handles</h3></a>
+
+Most operating systems provide a notion of standard program input and
+output.  For interactive text-based programs, these are normally
+connected to the user's keyboard.  Operating systems which do not
+have this concept (such as the Macintosh) are normally graphics-based.
+In such a system, it does not make sense to have a text-based program,
+unless some primitive text emulation is performed.  Since, however, the
+majority of operating systems are still text-based, and it is unclear
+how to standardise a set of portable windowing operations for the
+graphics-based systems, the notion of standard input, output and
+error handles has been retained.
+<p>
+
+<a name="stderr">The <code>stderr</code> handle</a> is provided because it is often useful
+to separate error output from normal user output on
+<code>stdout</code>.  In operating systems which support this, one or
+the other is often directed into a file.  If an operating system
+doesn't distinguish between user and error output, a sensible
+default is for the two names to refer to the same handle.
+<p>
+
+<a name="Opening-Files"><h3>Opening Files</h3></a>
+
+The <code>openFile</code> operation proved surprisingly controversial,
+and difficult to specify.  In the interests of simplicity and
+portability, a single high-level <code>openFile</code> has been
+provided.  It would be possible to separate this into simpler
+operations (such as <code>open</code>,<code> create</code>,<code>
+truncate</code>,<code> lock</code>,<code> seek</code>,<code>
+setAccessRights</code>, etc. etc.), but this would be awkward to use, and
+probably non-portable.
+Programmers should use the relevant operating-system specific bindings
+if they require these lower levels of file access.
+<p>
+
+<a name="OpenBinary"><h4>Text/Binary Files</h4></a>
+
+The definition doesn't distinguish text and binary file types.  Files
+should be opened in the appropriate mode whenever possible.  On some
+systems the operations permitted on the two types of file are
+different, but the file types are distinguished by convention rather
+than by the operating system.  For these systems, it is important to
+specify whether a file is opened as in text or binary mode.
+In these cases, we recommend that the implementation introduces an extension,
+providing an additional <code>openBinaryFile</code> operation with the
+same parameters and results as <code>openFile</code>.  If this
+proves sufficiently useful, and general, it will be promoted to the
+core definition.
+<p>
+
+<a name="ReadWrite"><h4>ReadWrite Mode</h4></a>
+
+It has been argued that this mode is not necessary, but many useful
+applications are impossible to write otherwise.  Perhaps existing
+functional programmers only write compilers or similar functions
+from streams to streams?  If a file is large and changes are
+small, however, it is much more efficient to make a small incremental
+change than to copy an entire file.
+<p>
+
+An on-screen interactive text editor is an example of an application
+where this mode is useful (it is possible to write editors which work
+on streams, but they can be unpleasant to use!), and there are many
+business examples.  Providing this mode significantly extends the
+range of Haskell applications that can be written at almost no
+implementation cost.  It is rare to find a modern operating system
+that does not provide this kind of access directly.  <p>
+
+<a name="Locking"><h4>File Locking</h4></a>
+
+A consistent problem with Haskell 1.2 was that implementations were
+not required to lock files when they where opened.  Consequently, if a
+program reopened a file for writing while it was still being read, the
+results returned from the read could be garbled.  Because of lazy
+evaluation and implicit buffering (also not specified by Haskell 1.2),
+it was possible for this to happen on some but not all program
+executions.  This problem only occurs with languages which implement
+lazy stream input (<a
+href="PreludeReadTextIO.html#hGetContents"><code>hGetContents</code></a>)
+and also have non-strict semantics.  <p>
+
+It has been argued that programmers should avoid opening a file when
+it has already been opened in an incompatible way.  Unfortunately, in
+general, this is difficult or even impossible to do -- almost all
+non-trivial programs open user-supplied filenames, and there is often
+no way of telling from the names whether two filenames refer to the
+same file.  The only safe thing to do is implement file locks whenever
+a file is opened.  This could be done by the programmer if a suitable locking
+operation was provided, but to be secure this would need to be done on
+every <code>openFile</code> operation, and might also require knowledge
+of the operating system.
+<p>
+
+The definition requires that identical files are locked against
+accidental overwriting within a single Haskell program (single-writer,
+multiple-reader).  Two physical files are certainly identical if they
+have the same filename, but may be identical in other circumstances.
+A good implementation will use operating-system level locking
+(mandatory or advisory), if they are appropriate, to protect the
+user's data files.  Even so, the definition <em>only</em> requires an
+implementation to take precautions to avoid obvious and persistent
+problems due to lazy file I/O (a language feature): it does not
+require the implementation to protect against interference by other
+applications or the operating system itself.  <strong>Caveat
+user</strong>.  <p>
+
+<a name="FileSize"><h3>File Sizes</h3></a>
+
+The file size is given as an integral number of bytes.  On some operating
+systems, it is possible
+that this will not be an accurate indication of the number of characters
+that can be read from the file.
+<p>
+
+<a name="Extents"><h4>File Extents</h4></a>
+
+On some systems (e.g. the Macintosh), it is much more efficient to
+define the maximum size of a file (or extent) when it is created, and
+to increase this extent by the total number of bytes written if the
+file is appended to, rather than increasing the file size each time a
+block of data is written.  This may allow a file to be laid out
+contiguously on disk, for example, and therefore accessed more
+efficiently.  In any case, the actual file size will be no greater than the extent.
+<p>
+
+While efficient file access is a desirable characteristic, the
+designers felt that dealing with this aspect of I/O led to a design
+which was over-complex for the normal programmer.  The core Haskell
+I/O definition therefore does not distinguish between file size (the
+number of bytes in the file), and file extent (the amount of disk
+occupied by a file).  <p>
+
+<a name="End-of-file"><h3>End of File</h3></a>
+
+There are two alternative ways of detecting end-of-file, either by
+testing using <a href="PreludeStdIO.html#EOF"><code>hIsEOF</code></a> or
+by handling the <code>EOF</code> error after a <code>getChar</code> or
+similar operation.  While this may seem redundant, end-of-file
+detection often has algorithmic implications.  This design allows
+error handlers to be reserved for unusual or unexpected situations.
+<p>
+
+<a name="Buffering"><h3>Buffering</h3></a>
+
+Buffering interacts with many of the operations provided here.  While
+it might seem desirable to eliminate this complexity, for correct I/O
+semantics it is sometimes necessary to specify that a device should
+not be buffered, or that it should have a particular buffer size.  In
+the absence of such strict buffering semantics, it can also be
+difficult to reason (even informally) about the contents of a file
+following a series of interacting I/O operations.
+<p>
+
+While it would be sufficient to provide <a href="#hFlush"><code>hFlush</code></a>, this
+would be tedious to use (for any kind of buffering other than
+<code>BlockBuffering</code>), error-prone, and would
+require programmers to cooperate by providing optional flushing after
+each I/O operations when writing library functions.
+<p>
+
+<a name="Buffer-Modes"><h4>Buffer Modes</h4></a>
+
+The three buffer modes mirror those provided by <a
+href="Biblio.html#ANSI-C">ANSI C</a>.  The programmer should normally
+accept the buffering modes that the implementation chooses as default.
+<p>
+
+<a name="Seeking"><h3>Changing the I/O position</h3></a>
+
+Many applications need direct access to files if they are
+to be implemented efficiently.  Examples are text editors,
+or simple database applications.  It is surprising how
+complicated such a common and apparently simple operation as changing
+the I/O position is in practice.  The design given here draws
+heavily on the <a href="Biblio.html#ANSI-C">ANSI C standard</a>.
+<p>
+
+<a name="hGetPosn"><h4>Revisiting an I/O position</h4></a>
+
+On some operating systems or devices, it is not possible to seek to
+arbitrary locations, but only to ones which have previously been
+visited.  For example, if newlines in text files are represented by
+pairs of characters (as in DOS), then the I/O position will not be the
+same as the number of characters which have been read from the file up
+to that point and absolute seeking is not sensible.  
+<a href="PreludeStdIO.html#hGetPosn>
+<code>hGetPosn</code></a> and <a href="PreludeStdIO.html#hSetPosn>
+<code>hSetPosn</code></a> together provide this functionality, using
+an abstract type to represent the positioning information (which may
+be an <code>Integer</code> or any other suitable type).
+Note that there is no way to convert a <code>handlePosn</code> into
+an <code>Integer</code> offset.  Since this is not generally possible,
+and it is not normally difficult for a programmer to record the current
+I/O position if using <code>hSeek</code>,
+on balance the designers felt that this should be omitted.
+<pre>
+> toOffset :: HandlePosn -> Integer
+</pre>
+<p>
+
+<a name="hSeek"><h4>Seeking to a new I/O position</h4></a>
+
+Other operating systems (such as Unix or the Macintosh) allow I/O at
+any position in a file.  The <a
+href="PreludeStdIO.html#hSeek"><code>hSeek</code></a> operation
+allows three kinds of positioning: absolute positioning, positioning
+relative to the current I/O position, and positioning relative
+to the current end-of-file.  Some implementations may only support
+some of these operations.
+<p>
+
+All positioning offsets are an integral number of bytes.  This seems
+to be fairly widely supported and is quite simple.  The alternatives
+(e.g. defining positioning in terms of the number of items which
+can be read from the file)
+seem to give designs which are difficult both to understand and to use.
+<p>
+
+<a name="Properties"><h3>Handle Properties</h3></a>
+
+The original Haskell 1.3 design provided a single operation to return
+all the properties of a handle.  This proved to be very unwieldy, and
+would also have been difficult to extend to cover other properties
+(since Haskell does not have named records).
+The operation was therefore split into many component operations,
+one for each property that a handle must have (determining the I/O position
+is <a href="#hGetPosn> treated separately</a>).
+<p>
+
+Note that while there are <code>hIsOpen</code> and <code>hIsClosed</code> operations,
+there is no way to test whether a
+handle is semi-closed.  This was felt to be of marginal utility for
+most programmers, and is easy to define if necessary.  
+<p>
+<pre>
+> hIsSemiClosed     :: Handle -> IO Bool
+> hIsSemiClosed h   =  hIsOpen h                 >>= \ ho ->
+>                      hIsClosed h               >>= \ hc ->
+>                      return (not (ho || hc))
+</pre>
+<p>
+
+<hr><p>
+<a name="PreludeReadTextIO"><h2>PreludeReadTextIO</h2></a>
+
+<a name="hReady"><h3>Checking for Input</h3></a>
+
+<code>hReady</code> is intended to help write interactive programs or
+ones which manage multiple input streams.  Because it is non-blocking,
+this can lead to serious inefficiency if it is used to poll several
+handles.
+<p>
+
+One solution is to define an operation based on Unix <code>select</code>.
+<pre>
+> type SelectData = ([Handle], [Handle], [Handle], Maybe Integer)
+> select :: SelectData -> IO (Maybe SelectData)
+</pre>
+<p>
+
+<code>SelectData</code> consists of three sets of handles (which need
+not be disjoint) and an optional time interval.<p>
+
+Computation <code>select</code> (<var>ihs</var>, <var>ohs</var>, <var>ehs</var>,
+<var>mb</var>) waits until input is possible on at least one member
+of 
+<var>ihs</var>, output is available on at least one member of <var>ohs</var>
+or an exceptional condition arises on at least one member of <var>ehs</var>.
+All handles in the sets which meet the specified conditions are returned.
+If a timeout is given (<var>mb</var> is
+<code>Just</code> <var>i</var>) the computation waits at most <var>i</var> nanoseconds
+before timing out; in which case it returns <code>Nothing</code>.
+Otherwise, the time remaining before the timeout would occur is returned
+as the fourth component of the result (<code>Nothing</code> if no timeout was given).
+<p>
+
+<a name="Lookahead"><h3>Reading Ahead</h3></a>
+
+It can be useful to examine the next character in the input stream
+when writing a lexical analyser or similar input-processing function.
+The functionality of <a href="Biblio.html#Ada9x">Ada's</a> <code>lookAhead</code> was 
+preferred over that
+of <a href="Biblio.html#ANSI-C">ANSI C's</a> <code>ungetc</code> because 
+it is much less problematic
+to implement.  Compared with Modula-3's <code>unGetChar</code>,
+this definition avoids needing to record in each handle whether the last I/O
+operation was a <code>getChar</code>.  Even so, it is not entirely 
+cost-free: a one-character buffer must be provided even
+for unbuffered handles.
+<p>
+
+<hr><p>
+<a name="PreludeWriteTextIO"><h2>PreludeWriteTextIO</h2></a>
+
+There seems to be much less controversy over character-level output
+than input, and therefore no rationale is provided.
+<p>
+
+<hr><p>
+<a name="LibDirectory"><h2>LibDirectory</h2></a>
+
+No status operations are provided.
+Haskell 1.2 <code>statusFile</code>/<code>statusChan</code> were
+rarely, if ever, used.  Their functionality is probably better
+provided by operating-system specific operations, which can give
+more exact information.
+<p>
+
+<hr><p>
+<a name="LibSystem"><h2>LibSystem</h2></a>
+
+<a name="ExitCodes"><h3>Exit Codes</h3></a>
+
+Only <code>ExitSuccess</code> and <code>ExitFailure</code> are
+available.  Some operating systems may wish to test whether a program
+failed due to an unhandled interrupt.  This is best done using an
+operating-system specific routine, such as those provided in the POSIX
+binding <a href="Posix.html"><code>LibPosix</code></a>.
+<p>
+
+<a name="getEnv"><h3>Environment Variables</h3></a>
+
+<code>getEnv</code> is generally available in most operating
+systems in some form or other.  When available it provides
+a useful way of communicating infrequently-changed information to a program
+(which it is inconvenient to specify on the command-line for shell-based
+systems).
+Setting environment variables is a much less common feature. Although
+this can be highly useful when available, it is therefore not provided
+as part of the core definition.
+<p>
+
+<hr><p>
+<a name="LibTime"><h2>LibTime</h2></a>
+
+This library codifies existing practice in the shape of the
+<code>Time</code> library provided by <code>hbc</code>.  Unlike that
+library it is not Unix-specific, and it provides recognised support
+for international time standards, including time-zone information.
+Time differences are recorded in a meaningful datatype rather
+than as a double-precision number.
+<p>
+
+There are two obvious ways to specify subseconds.  <code>hbc</code>
+has chosen to use a <code>Double</code> to represent fractions of
+a second.  Because of limitations on floating-point accuracy, this is 
+potentially unacceptable if these values are actually significant (for example
+if they are used to timestamp similarly-timed stock-market transactions).
+Since Haskell does not define the precision of <code>Double</code>, it is
+also not clear that double-precision values are sufficiently accurate for
+sub-second timings.
+<p>
+
+An <code>Integer</code> has therefore been used instead.
+Subseconds are specified to picosecond precision (but not necessarily
+accuracy!), which should be more than accurate enough for the forseeable
+future.
+<p>
+
+<hr><p>
+<a name="LibCPUTime"><h2>LibCPUTime</h2></a>
+
+<code>getCPUTime</code> is specified to nanosecond precision, since
+this is the precision used by the most accurate existing clocks that
+are in common use.  Note that while OSF/1 for the DEC Alpha specifies
+timings to nanosecond precision, the times returned are only accurate
+to around 1ms.
+<p>
+
+<hr><p>
+<a name="LibUserInterrupt"><h2>LibUserInterrupt</h2></a>
+
+User-produced interrupts are the most important class of interrupt
+which programmers commonly want to handle.  Almost all platforms,
+including small systems such as Macintosh and DOS, provide some ability
+to generate user-produced interrupts.
+<p>
+
+<hr><p>
+<a name="LibPOSIX"><h2>LibPOSIX</h2></a>
+
+This section intentionally left blank.
+<p>
+
+[<a href="IO.html">Up</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>

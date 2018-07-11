@@ -1,0 +1,155 @@
+<html>
+<head>
+<title>Haskell 1.3 Monadic I/O Definition</title>
+</head>
+<body>
+
+<img src="Haskell.gif" alt="(Haskell Logo)"></a>.
+<p>
+
+<p><hr><p>
+Last Modified On Thu Dec 8 02:32:27 GMT 1994 By Kevin Hammond
+<h1>The Definition of Monadic I/O for Haskell 1.3</h1>
+
+Haskell 1.3 is a revision of Haskell 1.2 (<A
+href="Biblio.html#haskell1.2">Hudak 92</a>).  This document defines a
+standard monadic programming model for input/output (I/O) in Haskell
+1.3.  There is also a <strong>BIG</strong> <a
+href="Unstructured.html">unstructured version</a> of this document,
+suitable for printing, searching or FTPing.  Note: to keep it
+reasonably short and simple, the unstructured version does not include
+any of the sample operating system bindings such as <a
+href="Posix.html"><code>LibPOSIX</code></a>, and tags refer to the
+structured version.  <p>
+
+A good general overview of the problems faced in designing an I/O
+standard, with tips to help implementors and programmers maximise
+portability can be found in
+<a href="Biblio.html#ANSI-C-Library">Plauger's book on the Standard
+C library</a>.
+<p>
+
+<h2>Purpose</h2>
+
+The purpose of this definition is to provide a framework for Haskell
+I/O on a variety of commonly used operating systems.  This document
+defines basic high-level I/O functionality for Haskell in a series of
+Prelude and Library modules.<p>
+
+Entities defined in Prelude modules (whose names begin with
+<code>Prelude</code>) are in scope unless explicitly renamed or
+hidden. Entities defined in Library modules (whose names begin with
+<code>Lib</code>) are in scope <em>only</em> if that module is
+explicitly imported <a href="Rationale.html#Libraries">
+<img src="Rationale.gif" alt="(Rationale)"></a>.
+<p>
+
+<h2>Conformance</h2>
+
+A strictly-conforming Haskell 1.3 implementation implements the Core
+I/O operations completely and exactly.  A mostly-conforming Haskell
+1.3 implementation implements a large subset of the Core I/O
+operations, and provides full and complete documentation of any
+extensions to or deviations from the semantics given here.  For any
+conforming implementation, all implementation dependencies which are
+allowed by the standard must be explicitly documented.
+ <a href="Rationale.html#Conformance">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<h3>Bindings</h3>
+
+It is possible to build on this framework to produce implementations
+which conform to accepted I/O standards or operating system
+interfaces.  One such "binding" (for the <a href="Biblio.html#POSIX">POSIX</a>
+standard -- IEEE 1003 --
+<a href="Posix.html"><code>LibPosix</code></a>) has already been defined, and similar bindings
+should be defined for the Win32 and Macintosh environments, amongst
+others.  As experience is gained with the I/O definition, it is
+expected that some common functions will be promoted into the Core
+I/O definition.
+<p>
+
+<h2>The Definition</h2>
+
+Some of the computations defined here are specified in terms of other
+Haskell functions.  This is done <em>solely</em> to simplify the semantics
+of the definition.  An implementation is free to use any semantically
+correct definition of these computations.<p>
+
+<ul>
+<li><a href="Credits.html">Credits</a>
+<li><a href="HighLights.html">Highlights</a>
+<li><a href="Notation.html">Notation</a>
+<li><a href="Summary.html">Summary of I/O Operations</a>
+<li>The Haskell 1.3 Core I/O Definition
+  <ul>
+  <li>Prelude Modules
+    <ul>
+    <li><a href="Programs.html">Programs</a>
+    <li><a href="PreludeIO.html">Top-Level I/O: "PreludeIO"</a>
+    <li><a href="PreludeMonadicIO.html">Monadic I/O Primitives: "PreludeMonadicIO"</a>
+      <ul>
+      <li><a href="PreludeMonadicIO.html#IO-Monad">The IO Monad</a>
+      <li><a href="PreludeMonadicIO.html#Error-Handling">Error Handling</a>
+      <li><a href="PreludeMonadicIO.html#User-Errors">User-Defined Errors</a>
+      <li><a href="PreludeMonadicIO.html#HOFs">Higher-Order Utility Functions</a>
+      </ul>
+    <li><a href="PreludeIOError.html">I/O Errors: "PreludeIOError"</a>
+    <li><a href="PreludeStdIO.html">Standard I/O Operations: "PreludeStdIO"</a>
+      <ul>
+      <li><a href="PreludeStdIO.html#Handles">Handles</a>
+      <li><a href="PreludeStdIO.html#StandardHandles">Standard Handles</a>
+      <li><a href="PreludeStdIO.html#OpeningClosing">Opening and Closing Files</a>
+      <li><a href="PreludeStdIO.html#EOF">Detecting the End of Input</a>
+      <li><a href="PreludeStdIO.html#Buffering">Buffering Operations</a>
+      <li><a href="PreludeStdIO.html#Query">Handle Properties</a>
+      <li><a href="PreludeStdIO.html#Seeking">Repositioning Handles</a>
+      </ul>
+    <li><a href="PreludeReadTextIO.html">Text Input: "PreludeReadTextIO"</a>
+    <li><a href="PreludeWriteTextIO.html">Text Output: "PreludeWriteTextIO"</a>
+    </ul>
+  <li>Library Modules
+    <ul>
+    <li><a href="LibDirectory.html">Directory Operations: "LibDirectory"</a>
+    <li><a href="LibSystem.html">System Interaction: "LibSystem"</a>
+    <li><a href="LibTime.html">Time of Day: "LibTime"</a>
+    <li><a href="LibCPUTime.html">CPU Time Usage: "LibCPUTime"</a>
+    <li><a href="LibUserInterrupt.html">User Interrupt Handling: "LibUserInterrupt"</a>
+    </ul>
+  </ul>
+<li>Operating System Bindings
+  <ul>
+  <li><a href="Posix.html">POSIX Binding: "LibPOSIX"</a>
+  </ul>
+<li><a href="Examples.html">Examples</a>
+</ul>
+<p>
+
+<h2>Bibliography</h2>
+
+This is the <a href="Biblio.html">Bibliography</a> of 
+<a href="Biblio.html#Language-Standards">language standards</a>,
+<a href="Biblio.html#Operating-Systems"> operating system references</a>,
+and
+<a href="Biblio.html#FP-References">functional programming references</a>
+consulted when defining this standard.
+<p>
+
+<h2>Recent Changes</h2>
+
+A log of recent changes can be found <a href="ChangeLog.html">here</a>.
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>

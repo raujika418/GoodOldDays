@@ -1,0 +1,30 @@
+\section[storage-manager-init]{Initialising the storage manager}
+
+To initialise the storage manager, we pass it:
+\begin{itemize}
+\item
+An @argc@/@argv@ combo, which are the command-line arguments that have
+been deemed to belong to the runtime system.  The initialisation
+routine can slurp around in there for information of interest to
+it.
+
+\item
+A filehandle to which any storage-manager statistics should be written.
+\end{itemize}
+
+\begin{code}
+#define NULL_REG_MAP
+#include "SMinternal.h"
+\end{code}
+
+\section[storage-manager-exit]{Winding up the storage manager}
+
+\begin{code}
+rtsBool
+exitSM (smInfo *sm_info)
+{
+    stat_exit(sm_info->hp - hp_start);
+
+    return rtsTrue; /* I'm happy */
+}
+\end{code}

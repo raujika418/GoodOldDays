@@ -1,0 +1,658 @@
+\section[notation-tut]{A \LaTeX{}-like document markup language (tutorial-ish)}
+\index{latex-like markup language@LaTeX-like markup language}
+
+Here is a simple silly literate \Haskell{} program:
+
+\begin{verbatim}
+\documentstyle[literate]{report}
+\rootsectiontype{\part}
+\begin{document}
+Here is my \Haskell{} program to send a message to my friends:
+\begin{code}
+main _ = [ AppendChan stdout (message ++ " to " ++ my_friends) ]
+\end{code}
+
+\section[message]{The Message}
+\begin{code}
+message = "Hello"
+\end{code}
+\subsection{Comments about the message and its implementation}
+\begin{enumerate}
+\item
+The message is given as a top-level pattern binding.
+\item
+The @message@ binding does not violate the monomorphic restriction;
+its type is \tr{[Char]}, which is not overloaded.
+\end{enumerate}
+
+\section[friends]{My friends}
+
+\begin{code}
+my_friends = ( \ y -> "Bob and Joe" ) 3
+\end{code}
+
+\printindex
+\end{document}
+\end{verbatim}
+
+Here are some things to see in this example (don't worry if it doesn't
+make sense first time):
+\begin{itemize}
+\item
+The compilable program (the parts between \tr{\begin{code}}s and
+\tr{\end{code}}s) is simply contained in marked-off parts of your
+document, and the code therein is completely ordinary (no special
+programming notation).
+
+Such {\em code}\index{code (vs text)} is one ``kind of stuff'' in your
+literate program; {\em text}\index{text (vs code)} is the other.
+\item
+The overall document is arranged hierarchically (\tr{\section},
+\tr{\subsection}, etc.) and looks an awful lot like a \LaTeX{}
+document.
+\item
+There is quite a bit about {\em what} makes up your document
+(sections, code, enumerated lists) and very little about {\em how}
+your document should be formatted (e.g., ``skip 2 lines'').  This is
+``declarative'' markup.
+\item
+Your program code will be indexed automatically; the \tr{\printindex}
+command is how you say where you want the index included.
+\item
+You can refer to things-in-your-code in the text parts of your
+document, by enclosing the reference in \tr{@}'s, as in
+\tr{@message@}.  The reference will be suitably indexed.
+\item
+The sectioning commands (e.g., \tr{\section}) are odd (if you are
+used to \LaTeX{}).  Most important, a sectioning command gives a {\em
+relative} position in the hierarchy; this means that commands like
+\tr{\rootsectiontype} can be used to adjust the absolute sectioning in
+the final document.  In this example, the topmost section would be a
+\LaTeX{} \tr{\chapter} by default, but it's been changed to be a \tr{\part}.
+\item
+More not-\LaTeX{} trivia: the optional argument to \tr{\section}
+serves both as a label name (for \tr{\ref}, etc.) and as a node name
+for GNU Info files.
+\end{itemize}
+
+The following sections describe the more interesting parts of our
+\LaTeX{}-like notation, illustrated in the example above.  (Before
+that is a micro-tutorial on \LaTeX{} conventions, in
+\sectionref{micro-latex}.)
+\begin{itemize}
+\item
+As the example above showed, the sectioning commands diverge quite
+significantly from \LaTeX{}.  \Sectionref{Sectioning} gives the full
+details about sectioning.
+\item
+The example shows how program code is included in a document in the
+simplest way: just begin \tr{\begin{code}} and \tr{\end{code}} around it.
+\Sectionref{code-in-doc} describes the more involved uses of this
+feature.
+\item
+\Sectionref{Cross_references} and \Sectionref{Indexing} describe how
+to take full advantage of the cross-referencing and indexing
+facilities in your literate programs.
+\item
+\Sectionref{Examples} is supposed to include several complete examples
+of literate programs but IT IS NOT FINISHED YET.
+\end{itemize}
+
+Remember: \Sectionref{Command_reference} is (supposed to be) a
+complete reference document about the \LaTeX{}-like commands you may
+safely use.
+
+\subsection[micro-latex]{A micro-tutorial on our \LaTeX{}-like conventions}
+
+\LaTeX{} is a document preparation system (described in a book of
+almost that name, by Leslie Lamport), and its notation is the basis of
+that used in this literate programming system.
+Unsurprisingly, one thing you can do with your literate programs is
+turn them into real \LaTeX{} documents (for typesetting), using the
+program \tr{lit2latex}.
+
+A few things to know about our literate-programming markup notation:
+\begin{itemize}
+\item
+Backslash (\tr{\}) is the starts-a-command character.  Therefore,
+\tr{\item} and \tr{\/} are commands, but \tr{dog} and \tr{(+)} are
+just plain text.
+\item
+{\em Mandatory} arguments to a command are given inside curly braces.  So,
+we would use \tr{\foo{bar}} to pass one argument to the command
+\tr{\foo}; we would use \tr{\bar{hey1}{hey2}} to pass two arguments to
+the command \tr{\bar}.
+\item
+{\em Optional} arguments to a command are given in square brackets and
+come before mandatory arguments.  So, for example,
+\tr{\help[everyone]{lunch}} passes one optional and one mandatory
+argument to the command \tr{\help}.
+\item
+\tr{\foo} is a {\em command} called ``foo'', while \tr{\begin{foo}}
+\pl{<text in-between>} \tr{\end{foo}} is an {\em environment} called
+``foo'' with \pl{<text in-between>} being inside that environment.
+\item
+The above isn't everything you need to know.
+\end{itemize}
+
+\subsection[Sectioning]{Sectioning commands}
+\index{sectioning}
+
+[APRIL91: After you read this, you may want to see some proposed
+changes in \sectionref{revised-sectioning}.]
+
+\subsubsection[section<n>]{The \tr{\section<n>} command}
+
+There is really just one sectioning command:
+\begin{verbatim}
+\section<n>[Info-node-name]{Section heading}
+\end{verbatim}
+where \tr{<n>} is a positive integer, the sectioning depth.  For example, you
+might have:
+\begin{verbatim}
+\documentstyle[literate]{book}
+\rootsectiontype{\chapter}
+\begin{document}
+\section1[Node-1]{The top}
+
+\section2[Node-2]{The next level}
+\section3[Node-3]{The bottom level}
+\section3[Node-4]{More on the bottom level}
+
+\section2[Node-5]{Second part of the middle level}
+\section3[Node-6]{Bottom level, next section}
+\section3[Node-7]{Last section on bottom level}
+\end{document}
+\end{verbatim}
+As a convenience, the following synonyms are supported:
+\begin{verbatim}
+\section           \section1
+\subsection        \section2
+\subsubsection     \section3
+\subsubsubsection  \section4
+\end{verbatim}
+
+Saying \tr{\rootsectiontype{\chapter}} causes \tr{\section1},
+\tr{\section2}, and \tr{\section3} to be translated into the \LaTeX{}/Texinfo
+commands \tr{\chapter}, \tr{\section}, and \tr{\subsection},
+respectively.  This system supports deeper section nesting than
+\LaTeX{} (12 levels vs.~7).
+
+If you want a section heading but don't want anything to appear in the
+table of contents, put a \tr{*} after the command name (just like
+\LaTeX{}); for example:
+\begin{verbatim}
+\subsection*[\pageref]{\pl{\pageref{<label-or-node-name>}}}
+\end{verbatim}
+
+If you want something that looks like a section heading but really
+isn't (no table-of-contents entry, no Info node), you probably want
+the \tr{\heading{<title>}} command.
+
+[Support your local creaky implementation:
+you must put sectioning commands on lines of their own.]
+
+In making an Info file, the hierarchy of \tr{\section<n>}
+commands will be turned into a corresponding hierarchy of Info nodes.
+With \tr{info},
+you navigate along one level of the hierarchy with \tr{Next}- and
+\tr{Prev}-node links; you move up the hierarchy with \tr{Up}-node
+links; and you move down the hierarchy (e.g., from a \tr{\section<n>}
+to its \tr{\section<n+1>}s) by choosing from an
+(automatically-generated) Info menu.
+
+\subsubsection[How_to_section]{How to use \tr{\section<n>}}
+
+The presumption is that {\em every file in a literate document will begin its
+sectioning with a \tr{\section}} (equivalently, \tr{\section1}) and
+further sectioning will reflect a reasonable hierarchical structure
+{\em within} the file.  You usually know this when you are typing in a
+particular file.
+
+What you often do {\em not} know is how the file fits into the larger
+document, and it is most annoying (as happens sometimes with \LaTeX{})
+to have to rename all \tr{\chapter}s to \tr{\section}s, or some such.
+The information on how things go together is usually in a ``root
+file,'' which sticks things together with \tr{\input},
+\tr{\downsection} and \tr{\upsection}; this example is typical:
+\begin{verbatim}
+ \section[Desugar_match]{@match@: compiling out pattern-matching}
+ \downsection
+ % each of the following files would start with a \section
+ \input{Match.lhs}
+ \input{DeTwiddle.lhs}
+ \input{MatchCon.lhs}
+ \input{MatchLit.lhs}
+ \upsection
+\end{verbatim}
+
+The \tr{\upsection}s and \tr{\downsection}s determine what actual
+\LaTeX{}/Texinfo sectioning command is generated for a particular
+\tr{\section<n>} command.  Unfortunately, the desired \LaTeX{}/Texinfo
+sectioning command for the {\em top} section in your hierarchy depends
+on the kind of document you are producing.  For example, should it be
+a \tr{\part} or a \tr{\chapter}?  The solution here is to let you
+choose, with the
+\tr{\rootsectiontype{\foo}}\index{rootsectiontype@\rootsectiontype}
+command. It says that \tr{\section1}s at the ``top level'' should be
+typeset as \LaTeX{}/Texinfo \tr{\foo}'s.  The defaults based on the
+\tr{\documentstyle} should usually be adequate:
+\begin{verbatim}
+\documentstyle  \rootsectiontype
+
+article         \section
+report          \chapter
+book            \chapter
+\end{verbatim}
+For a report, a useful variant might be \tr{\rootsectiontype{\part}}.
+
+\subsubsection[sectiontype-and-ref]{The \tr{\sectiontype} and \tr{\sectionref} commands}
+
+Another annoying thing with \LaTeX{} sectioning is to type
+\tr{Section~\ref{foo}} only to have \tr{foo} turn out to be a ``chapter''
+(not a ``section'').  In this system, you can type
+\tr{\sectiontype{Node-name}}\index{sectiontype@\sectiontype} and the type of the
+sectioning command at node \tr{Node-name} (e.g., ``chapter,''
+``section'') will be inserted [any unit below sections will be called
+``section''].  To have the inserted text be
+capitalised, use \tr{\Sectiontype{Node-name}}.
+
+For the common idiom,
+\tr{\sectiontype{Node-name}~\ref{Node-name}}, you may use
+\tr{\sectionref{Node-name}}\index{sectionref@\sectionref}
+(similarly for \tr{\Sectionref}).\index{sectionref@\Sectionref}
+[I use this all the time. --WDP]
+
+\subsubsection[Node_specifications]{GNU Info node specifications with \tr{\section<n>}}
+\index{node specification}
+
+[APRIL91: Don't overlook the new ideas in
+\sectionref{revised-sectioning}.]
+
+When making an on-line Info document from a literate program, the text
+between two sectioning commands is turned into an Info node.
+Moreover, the sectioning commands are used to determine how the nodes
+should be linked together---almost always in the hierarchical structure
+implied by the sectioning.  However, you can tweak the process as much
+as you wish (almost no-one ever wishes...).
+
+Each \tr{\section<n>} command may have an optional ``node specification'',
+with which you may specify the name of the Info node and how it should
+be linked to other nodes.  For common practice, I
+recommend giving a (unique) node name and enjoying the default links;
+for example:
+\begin{verbatim}
+\section[Foo-Sem]{Foo Semantics}
+\end{verbatim}
+Besides serving as the node name, \tr{Foo-Sem} will also be a \LaTeX{}
+\tr{\label} and may be \tr{\ref}'d or \tr{\pageref}'d: for example,
+you could say, ``The semantics are given in
+section\pl{~\ref{Foo_Sem}}''.  (This is more likely to work than
+introducing a \tr{\label} of your own and \tr{\ref}'ing that.)
+
+%\begin{comment}
+%I've considered making an unadorned \tr{\section{Foo Semantics}} mean the
+%same thing as \tr{\section[Foo Semantics]{Foo Semantics}}, but I suspect
+%something bad would eventually happen.
+%\end{comment}
+
+Node names must not contain commas (and other unpleasant characters I
+don't want to think about) and spaces are probably asking for trouble.
+
+The next example shows the {\em general} form for a node
+specification, in which you want to specify all of a node's
+links by hand:\footnote{Ignore the rest of this
+\sectiontype{Node_specifications} unless you enjoy pain---it presumes
+some familiarity with Texinfo/Info
+specifics; see \tr{info info} and/or \tr{info texinfo}.}
+\begin{verbatim}
+\section1[This-Node,Next-Node,Prev-Node,Up-Node]{Bar Semantics}
+\end{verbatim}
+
+A \tr{?} may be given for any of the four node-names; then the default is
+used:
+\begin{enumerate}
+\item
+The default node-name is the section number.
+\item
+The default
+next-node is the one associated with the next same-level sectioning
+command (i.e., the next \tr{\section<n>} command if this is a
+\tr{\section<n>} command.
+\item
+Analogously for the default
+previous-node\ldots{}
+\item
+The default up-node is the last-seen
+next-level-up sectioning command, e.g., if at a \tr{\section<n>}, then the
+last \tr{\section<n-1>} command seen.
+\end{enumerate}
+Any text before the first
+\tr{\section} command goes in node \tr{Top}, which has node
+specification ``\tr{Top,,,(dir)}''.
+
+The recommended form \tr{\section[Foo-Sem]{Foo Semantics}} is
+just short for \tr{\section1[Foo-Sem,?,?,?]{Foo Semantics}}.
+
+Additional Info nodes that are unrelated to sectioning commands may be
+added with the \tr{\node} command.  [Note: not well tested.]
+
+% To prevent a node being generated for a sectioning command, give the
+% node specification \tr{NO-NODE}, as in \tr{\section[NO-NODE]{Foo}}.
+
+If you want a \LaTeX{}-style sectioning command (e.g., to
+specify a table-of-contents entry), use \tr{onlyinfo} and \tr{onlylatex}
+environments.
+
+\subsection[code-in-doc]{Including program code in your document}
+
+Central to literate programming is having program code in your
+document that can be directly extracted and compiled/executed.
+
+\subsubsection[usual-code-in-doc]{The usual ways to put code in a documents}
+
+The most straightforward way to do this is to put all the code in a
+file in one or more \tr{\begin{code}} ... \tr{\end{code}}
+environments---the code can then be extracted (in the order it appears
+in the text) and fed to your favourite compiler/interpreter/whatever.
+
+An equivalent notation preferred by some is ``Bird tracks'', so-called
+because it started with Richard Bird (and because Cordy calls them
+that); lines starting with a \tr{>} are extracted; for example:
+\begin{verbatim}
+>main _ = [AppendChan stdout "hello, world\n"]
+\end{verbatim}
+is equivalent to:
+\begin{verbatim}
+\begin{code}
+main _ = [AppendChan stdout "hello, world\n"]
+\end{code}
+\end{verbatim}
+A block of Bird-tracked code lines must have a blank line before and
+after (not having one usually indicates a typo).
+
+\begin{comment}
+ToDo: Simon wants to know how code looks in (a)~a \LaTeX{}'d document and
+(b)~an Info'd document.
+\end{comment}
+
+\subsubsection[ribbons-details]{Code ribbons: the fancy stuff}
+
+Both of the above are shorthand notation for messier stuff going on
+underneath...  Strictly speaking, the code in a particular document is
+made up of one or more
+{\em ribbons}\index{ribbons, code}\index{code ribbons} of code.  For
+example,
+\begin{verbatim}
+A common thing to say to the world is ``Hello, world!''
+\begin{code}[hello-goodbye]
+void HELLO() { printf("HELLO, WORLD!\n"); }
+\end{code}
+
+However, you might want to be less exuberant:
+\begin{code}[wimp]
+void hello() { printf("hello, world!\n"); }
+\end{code}
+
+And perhaps you are trying to tune out, not tune in.
+\begin{code}[hello-goodbye]
+void goodbye() { printf("Good-bye, cruel world...\n"); }
+\end{code}
+\end{verbatim}
+
+As always, code to be extracted goes inside a
+\tr{\begin{code}}...\tr{\end{code}}; the {\em optional} argument after
+\tr{\begin{code}} is the name of the code-ribbon to which the
+program-text belongs.  The example above has two ribbons,
+\tr{hello-goodbye} and
+\tr{wimp}.  You can extract any code-ribbon(s) you wish [see
+\tr{lit2pgm}'s -r option]; the disjoint
+pieces of a particular ribbon (e.g., \tr{hello-goodbye} above) are
+catenated together in the order seen.
+
+Usually, this ribbon-business is just a bother, so there is the good
+ol' default ribbon, \tr{main}.  For example, the
+way-you-normally-write-things:
+\begin{verbatim}
+\begin{code}
+void adieu() { printf("Adieu, cruel world...\n"); }
+\end{code}
+\end{verbatim}
+is actually short for:
+\begin{verbatim}
+\begin{code}[main]
+void adieu() { printf("Adieu, cruel world...\n"); }
+\end{code}
+\end{verbatim}
+
+Unsurprisingly, \tr{main} is the default code-ribbon when one is in
+the ribbon-extraction business.  Similarly, code included
+with \tr{>} signs in the leftmost column (``Bird tracks'') is just
+tacked onto the \tr{main} ribbon, too:
+\begin{verbatim}
+>void
+>adieu()
+>{ printf("Adieu, cruel world...\n"); }
+\end{verbatim}
+
+\subsubsection[reordering-with-insertribbon]{Code reordering with \tr{\insertribbon}}
+
+If you are feeling particularly notorious, one piece of code may be
+appended to several ribbons (a comma-separated list of ribbon names,
+please---spaces are significant except for beside the commas):
+\begin{verbatim}
+\begin{code}[ribbon1, ribbon2, ribbon3]
+void adieu() { printf("Bon soir, cru\\'el world...\n"); }
+\end{code}
+\end{verbatim}
+
+To get the effect of WEB-like parameterless macros, one ribbon
+may use \tr{\insertribbon} to include a copy of another one, as in:
+\begin{verbatim}
+\begin{code}
+void adieu()
+    \insertribbon{message}
+\end{code}
+
+\begin{code}[message]
+{ printf("Adieu, cruel world...\n"); }
+\end{code}
+\end{verbatim}
+
+ToDo: CHANGE \tr{\insertribbon} SO IT'S OUTSIDE OF code ENVIRONMENT.
+
+I don't recommend \tr{\insertribbon}.  You can make a terrible mess
+with it.  I haven't tested it for months.
+
+\subsubsection[pseudocode]{Stuff that looks like code but isn't}
+
+If you want to include alternate versions of code (for illustrative
+purposes, presumably), to be typeset as code but {\em not} subject to
+extraction by \tr{lit2pgm}, put the extra versions in \tr{pseudocode}
+environments.
+
+\subsubsection[magic-things-in-code]{Magic things you can put in your code}
+
+Generally speaking, you enter your program code inside a
+\tr{code} environment {\em exactly} as you would
+otherwise (the principle discussed in
+\sectionref{code-verissimilitude}), and it will appear in your
+documents as shown (nicely typeset, we hope).  There are two magic
+things that you can put in your code that do not appear in your
+document (directly):
+\begin{description}
+\item[Index entries:]
+\index{code index entries, extra}\index{index entries, extra ones in code}
+Code is automagically indexed, but you may wish additional index
+entries of your own choosing.
+
+\item[Hidden comments:]
+\index{hidden comments}\index{comments, hidden}
+You will sometimes want comments in your actual code that you do not
+want printed.  An example: you might want to record next to each code
+block the names of the the test files used to exercise it.  This is
+{\em really boring} information to all but the most dedicated reader.
+\end{description}
+
+In both cases, the information {\em could} be provided outside the
+code environment (i.e., without any special construct), but it could
+quite easily get lost (code blocks can be big, even if they shouldn't
+be :-).
+
+In all cases, these annotations are in a form recognised as a comment
+by the compiler/whatever for that language.  Please see
+\sectionref{Language_specific} for the exact form used for the
+language you are interested in.  A \Haskell{} example of both magic
+bits might be:
+\begin{verbatim}
+\begin{code}
+main _ = [AppendChan stdout "Hello, world...?\n"]
+--idx:: world, state of
+--hide:: use testfile093.hs
+\end{code}
+\end{verbatim}
+
+[APRIL91: Yell if you really dislike (or like) these two forms of
+``magic things in code''.]
+
+\subsection[Cross_references]{Cross-referencing}
+
+For cross-referencing, the normal thing is to use node-names on
+sectioning commands as labels, and to \tr{\ref{<label>}} and
+\tr{\pageref{<label>}} them, as is the \LaTeX{} custom.
+\tr{\pageref}s are discouraged, as there is no concept of page numbers
+in Info files.
+
+Similarly, if you heave in a \tr{\label{<some text>}}, the Info side
+of things will assume that \tr{<some text>} is just another label for
+the current node [NOT IMPLEMENTED (ToDo)].
+
+APRIL91:  Cross-referencing is normally used to help you move from a
+{\em use} of a code-thing to its {\em definition}.  There should
+probably be an option to let you get cross-referencing that will also
+let you move from a definition to all of its uses.
+
+\subsection[Indexing]{Indexing}
+
+[APRIL91: changes are envisaged; see \sectionref{multiple-indexes}.]
+
+Indexing is assumed to work with the program
+\tr{makeindex}\index{makeindex}, so you should put a
+a \tr{\printindex}\index{printindex@\printindex} command where you want the
+index to appear (almost always just before \tr{\end{document}}).
+(A \LaTeX{} \tr{\makeindex}\index{makeindex@\makeindex} command is supplied
+automagically before \tr{\begin{document}}.)
+
+Roughly speaking, code portions of your document are {\em automatically}
+indexed, and then you index the text portion {\em manually}, with
+\tr{\index} commands.
+
+\tr{\index{<entry text>}} is the basic indexing command and offers a
+simplified \tr{makeindex} interface.
+\begin{itemize}
+\item
+If you want just plain simple ``foo'' to appear in the index, use
+\tr{\index{foo}}.
+\item
+If you want subitems in an index entry, separate them with \tr{!}s
+[useful].
+\item
+If you want separate text for sorting and printing an index entry, put
+the two texts in that order, separated by an unescaped \tr{@}.
+\item
+To put a \tr{!} or \tr{@} in your index entry, escape it with a
+backslash \tr{\}.
+\item
+All other (semi-normal) characters work as is.
+\end{itemize}
+
+I don't encourage trying to have index entries pop out in different
+fonts---it doesn't work in plain Info files.  You can write devious
+\LaTeX{}/\tr{makeindex} code on your own...
+
+Code-stuff in text (stuff inside \tr{@...@}) is indexed automatically,
+just like ``real code''.  What actually happens depends on the support
+for your programming language---\sectionref{Language_specific} gives
+all the language-specific indexing idiosyncracies.  The {\em default}
+bare-bones mechanism is that whitespace-free code-in-text over three
+characters long (e.g., \tr{@typecheck@}) will generate an index entry.
+To suppress automatic indexing of a piece of code-in-text, put a
+\tr{\noindex}\index{noindex@\noindex} immediately following, as in
+\tr{@typecheck@\noindex}.
+
+As mentioned in \sectionref{magic-things-in-code}, you can add
+index entries for your code by inserting specially-formatted comments
+(this depends on how well your programming language is supported).
+For example, for \Haskell{}, you might use [NB: NOT IMPLEMENTED YET (ToDo?)]:
+\begin{verbatim}
+f x y z = (y z) x
+-- the next line is a comment that will cause an index entry
+-- equivalent to: \index{foo-bar-baz}
+--#idx::foo-bar-baz
+\end{verbatim}
+
+For a chunk of code, a mini-index pointing to the definitions of the
+things it refers to (one possible definition of ``things:'' top-level
+functions) will be produced right after the code.  (For the Info file,
+as part of the menu for that node.)
+\begin{comment}
+The Info part is done; I'm still thinking about what should be done
+for \LaTeX{}.
+\end{comment}
+[APRIL91: this is one of the things contemplated in
+\sectionref{multiple-indexes}.]
+
+At least some provision has been made for ``stop lists'' for the
+automagical indexing (I'm not sure how well it works...).  You put
+words/strings that are normally picked up by the indexing into a file,
+then tell the system this is your ``stop list file'' (\tr{-s} option,
+I think), meaning ``Don't index these things---I'm not interested.''
+
+\subsection[Examples]{Some complete examples [NOT FINISHED]}
+
+NOT FINISHED YET.  Some day...
+
+Meanwhile, you will find some reasonable not-over-huge examples in the
+\tr{literate/tests} directory in the source.
+
+\subsubsection[Simple_example]{A simple example}
+
+\subsubsection[Typical_example]{A typical example}
+
+\subsubsection[Hairy_example]{A hairy example}
+
+\subsection[Shortcuts]{Helpful short-cut notations}
+
+APRIL91: There is discussion about these sorts of things scattered
+through the ``new ideas'' in \sectionref{april91-new-ideas}.
+
+\subsubsection[code-in-text]{Referring to code things in your text}
+
+In the text part of a literate program, one often wishes to refer to
+things in the code (e.g., function names) or have code expressions in
+the running text, and so forth.  One would like this code-in-text to
+be typeset just like the real-code-parts (currently verbatim, but that
+could change).  To mark off code-in-text, surround it with `at' signs:
+as in \tr{@code in text@}; to put an `at' sign in in-line code, you've
+got to put in two `ats': \tr{@x @@ (y, z)@}.  Line-breaks are prevented
+inside ``attified'' code-text.
+
+Because things inside `at' signs are so often just what you want to be
+indexed, the rule is: if the at-signed thing contains no whitespace,
+an index entry is generated.  (How to prevent indexing and how to do
+fancier things about indexing and cross-referencing are given
+\sectionref{Indexing}.)
+
+APRIL91: see comments in \sectionref{text-in-code}.
+
+\subsubsection[fonts-in-text]{Using different ``fonts'' in your text}
+
+[APRIL91: Be sure to see \sectionref{diff-fonts-in-text}.]
+
+The \tr{\tr{<text>}} command sets \tr{<text>} in typewriter font, with
+no need for escape characters or anything---provided the braces nest
+properly.
+
+The same trick using a ``plain'' (roman) font is
+\tr{\pl{<text>}}, to produce \pl{<text>}.
+

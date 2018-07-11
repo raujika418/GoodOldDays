@@ -1,0 +1,575 @@
+sub first_link_pass { # just collecting information
+    &init_section_data_structures();
+    $S = -1; # section counter; should be bumped before use!!!
+
+    $pipe_string = "$Lit_inputter $Verbose 1 $Litinputs $Input_file";
+    print STDERR "link(1):in=$pipe_string\n" if $Verbose;
+    print STDERR "       out=/dev/null\n" if $Verbose;
+    # NB: not supposed to have any output...
+    &do_std_opens($pipe_string,'/dev/null');
+
+    while (<INPIPE>) {
+	if (/^\001(down|up)section\003$/) {
+	    $Base_sec_depth++ if $1 eq 'down';
+	    $Base_sec_depth-- if $1 eq 'up';
+
+	} elsif (/^\001rootsectiontype\003(\d+)\002$/) {
+    	    $Sec_depth_offset = $1;
+
+	} elsif (/^\001section\003(.+)\002(.*)\002(.*)\002(.*)\002(.*)\002(.*)\002(.*)\002(.*)\002(.*)/) {
+	    local($sec_depth)	= $1;
+	    local($nodename)	= $2;
+	    local($nodespec)	= $3;
+	    local($owner)	= $4;
+	    local($xtra_menu)   = &deatified2verb_nl($5); # restore newlines
+	    local($codethings_defd) = $6;
+	    local($aliases)         = $7;
+	    local($codethings_used) = $8;
+	    local($restofline)  = $9; # restore newlines
+	    # restofline has srcfile on the front...
+	    local($srcfilename,$srcfilelineno);
+	    $restofline =~ /^(.*)#%%#(.+)#%%#(.*)/;
+	    $srcfilename = $1; $srcfilelineno = $2;
+	    $restofline = &deatified2verb_nl($3);
+
+	    $S++; # new "section"
+
+	    $Sec_depth[$S]     = $sec_depth;
+	    if ($sec_depth == 0) { # this is a magical depth
+		$Sec_abs_depth[$S] = 0;
+	    } else {
+		$Sec_abs_depth[$S] = $Base_sec_depth + $Sec_depth_offset + $sec_depth - 1;
+	    }
+	    if ($Sec_abs_depth[$S] < 0) {
+		&not_OK('???', '???', "section depth not positive: $_");
+		$Sec_abs_depth[$S] = 1;
+	    } elsif ($Sec_abs_depth[$S] > $MAX_SEC_DEPTH) {
+		&not_OK('???', '???', "section depth more than $MAX_SEC_DEPTH: $_");
+		$Sec_abs_depth[$S] = $MAX_SEC_DEPTH;
+	    }
+	    &incr_Sec_vec($Sec_abs_depth[$S]);
+	    $Sec_numstr[$S]	= join('.',@Sec_vec);
+	    $Sec_numstr_exists{$Sec_numstr[$S]} = $S;
+	    $Sec_nodename[$S] = $nodename;
+	    $Nodename_sec{$nodename} = $S;
+	    $Sec_aliases[$S] = $aliases;
+	    local($a);
+	    foreach $a (split(/,/,$aliases)) { # aliases too
+		$Nodename_sec{$a} = $S if $a;
+	    }
+	    $Sec_nodespec[$S] = $nodespec;
+	    $Sec_title[$S] = $restofline; # this will only be right for lit2texi
+#out	    $Sec_title[$S] =~ s/\001starred\003//; # will pick up on 2nd pass
+	    # maybe should leave it in so \tableofcontents works as expected...
+	    $Sec_owner[$S] = $owner;
+	    $Sec_extra_menu_entries[$S] = $xtra_menu;
+	    $Sec_codethings_used[$S] = $codethings_used;
+	    $Sec_codethings_defd[$S] = $codethings_defd;
+	    local($d);
+	    foreach $d (split(/\001/,$codethings_defd)) {
+		$Codething_defd_sec{$d} = $S if $d;
+	    }
+	    $Sec_first_blk[$S] = 0; $Sec_last_blk[$S] = -1; # dummies
+	}
+    }
+    &do_std_closes();
+}
+
+sub second_link_pass {
+    $S = -1; # section counter; should be bumped before use!!!
+
+    $Table_of_contents_please = 0;
+
+    # may be only grabbing (-g <node>) a subtree of nodes rooted at
+    # node; so first figure out what sections these are.
+    # NB: the first (pre-amble) and last (\end{document}) sections are
+    # ALWAYS printed.
+    ($First_sec_to_grab, $Last_sec_to_grab) = &calc_grab_range();
+    print STDERR "grab range: $First_sec_to_grab--$Last_sec_to_grab\n" if $Debugging;
+
+    $pipe_string = "$Lit_inputter $Verbose 1 $Litinputs $Input_file";
+    print STDERR "link(2):in=$pipe_string\n" if $Verbose;
+    print STDERR "       out=$Link_outfile\n" if $Verbose;
+    &do_std_opens($pipe_string,$Link_outfile);
+
+    &print_setfilename() if $Lit2texi;
+
+    while (<INPIPE>) {
+	if (/^srcfile!_!.*!_!\d+!_!$/) {
+	    next; # junk from lit-inputter
+
+	} elsif (/^\001(down|up)section\003$/) {
+	    next;
+
+	} elsif (/\001rootsectiontype\003(\d+)\002/) {
+	    next;
+
+	} elsif (/\001beginrawlatex\003/) {
+	    $_ = <INPIPE>;
+	    while ($_ ne '' && ! /\001endrawlatex\003/) {
+		print $_;
+		$_ = <INPIPE>;
+	    }
+	    next;
+
+	} elsif (/^\001section\003(.+)\002(.*)\002(.*)\002(.*)\002(.*)\002(.*)\002(.*)\002(.*)\002(.*)/) {
+	    local($sec_depth)	= $1;
+	    local($nodename)	= $2;
+	    local($nodespec)	= $3;
+	    local($owner)	= $4;
+	    local($xtra_menu)   = &deatified2verb_nl($5); # restore newlines
+	    local($codethings_defd) = $6;
+	    local($aliases)         = $7;
+	    local($codethings_used) = $8;
+	    local($restofline)  = $9; # restore newlines
+	    # restofline has srcfile on the front...
+	    local($srcfilename,$srcfilelineno);
+	    $restofline =~ /^(.*)#%%#(.+)#%%#(.*)/;
+	    $srcfilename = $1; $srcfilelineno = $2;
+	    $restofline = &deatified2verb_nl($3);
+
+	    $S++; # new "section"
+
+	    # we take sections in the grab range, plus any at
+	    # the magic absolute-depth 0 (pre-amble and \end{document},
+	    # presumably)
+	    #
+	    # first an unfortunate hack so that grabbed things start
+	    # out on a page of their own
+	    print "\\pagebreak\n" if $S == 1 && $Grab_node ne 'Top';
+
+	    next if ! ($Sec_abs_depth[$S] == 0
+		       || ($S >= $First_sec_to_grab && $S <= $Last_sec_to_grab));
+
+	    if ($Lit2texi) {
+		&end_of_section_stuff($S-1) if $S > 0; # end previous section
+
+		print &mk_line_directive($srcfilename,($srcfilelineno - 3))
+		    if $srcfilename && $srcfilelineno >= 4;
+		# guessed how much extra junk got put in...
+
+		&print_node_header($S) if $Sec_nodespec[$S];
+
+		if ($Sec_abs_depth[$S] > 0 && $restofline !~ /\001starred\003/) {
+		    print "\@",$SECDEPTH_TCMD[$Sec_abs_depth[$S]]," ";
+		    print $Sec_title[$S],"\n";
+		    print "\n[The `owner' of this section is $owner.]\n\n" if $owner;
+		} elsif ($Sec_abs_depth[$S] > 0) {
+		    local($temp_title) = $Sec_title[$S];
+		    $temp_title =~ s/\001starred\003//;
+		    print "\n$temp_title\n\n";
+		}
+	    } elsif ($Lit2html) {
+		&end_of_section_stuff($S-1) if $S > 0;
+		if ($Sec_abs_depth[$S] > 0 && $restofline !~ /\001starred\003/){
+		    if ($Sec_title[$S]) {
+			print "<H$Sec_depth[$S]>";
+		    	print $Sec_title[$S];
+		    	print "</H$Sec_depth[$S]>\n";
+		    	print "\n[The `owner' of this section is $owner.]\n\n" if $owner;
+		    }
+		} elsif ($Sec_abs_depth[$S] > 0) {
+		    local($temp_title) = $Sec_title[$S];
+		    $temp_title =~ s/\001starred\003//;
+		    print "\n<h5>$temp_title</h5>\n\n" if $temp_title;
+		}
+	    } elsif ($Lit2latex) {
+		print &mk_line_directive($srcfilename,$srcfilelineno)
+		    if $srcfilename && $srcfilelineno >= 1;
+
+		if ($Sec_abs_depth[$S] > 0) {
+		    print "\\",$SECDEPTH_LCMD[$Sec_abs_depth[$S]];
+		    print "\*" if $restofline =~ /\001starred\003/;
+		    local($temp_title) = $Sec_title[$S];
+		    $temp_title =~ s/\001starred\003//;
+		    print "$temp_title\n";
+		    print "\n[The `owner' of this section is $owner.]\n\n" if $owner;
+		}
+	    }
+
+        } else {
+	    next if ! ($Sec_abs_depth[$S] == 0
+		       || ($S >= $First_sec_to_grab && $S <= $Last_sec_to_grab));
+
+	    if (/^\001index_uses\003(.*)/ && $Lang_xref !~ /noindex/) {
+		&print_index_entries_for_uses($1);
+
+	    } elsif (/^\001xref_uses\003(.*)/) {
+		&print_xrefs_for_uses($1);
+
+    	    } elsif (/\\[Ss]ectiontype/ || ($Lit2texi && /\@[Ss]ectiontype/)) {
+		s/\@([Ss])ectiontype/\\$1ectiontype/g; # sigh
+		print &subst_sectiontypes('???','???',$_);
+
+    	    } elsif (($Lit2texi || $Lit2html) && /\@tableofcontents/) {
+		$Table_of_contents_please = 1;
+	    } else {
+		if ($Lit2texi) {
+		    # some of our xrefs may be to aliases (labels), not to nodenames proper.
+		    # sigh
+		    while (/\@xref\{([^\}]+)\}/) {
+			local($label) = $1; # assume the guts are clean
+
+			if ( ! defined($Nodename_sec{$label})) {
+			    &not_OK('???','???',"I can't dig the \\ref to: $label (no such node?)\n");
+			} else { # canonicalize to real node name
+			    $label = $Sec_nodename[$Nodename_sec{$label}];
+			}
+			s/\@xref\{([^\}]+)\}/\@xref!_\{$label\}/; #temp
+		    }
+		    s/\@xref!_\{/\@xref\{/g; # fix temps
+		}
+		print $_;
+	    }
+	}
+    }
+    &do_std_closes();
+}
+
+sub print_setfilename { # make up @setfilename command for Texinfo
+    if ($Infofilename) {
+        print "\@setfilename $Infofilename\n";
+
+    } elsif ($Inputfile_root && $Inputfile_root ne '???') { # it's something reasonable
+    	$Infofilename = "$Inputfile_root\.info";
+	print "\@setfilename $Infofilename\n";
+
+    } else {
+	&not_OK("","","can't generate Info file name from inputfile root:$Inputfile_root\n");
+    }
+}
+
+sub print_node_header {
+    local($s) = @_;
+
+    local($this, $next, $prev, $up) = split(/,/, $Sec_nodespec[$s]);
+    local($depth) = $Sec_abs_depth[$s];
+    local($numstr_this) = $Sec_numstr[$s];
+    local(@numstr_this) = split(/\./, $numstr_this);
+
+#   print STDERR "this:\t",join('.',@numstr_this),"\n" if $Debugging;
+
+    if ($next eq '?') {
+        #  default 'next' node is NEXT one at same depth (-L: or plain NEXT) or NONE
+        local(@numstr_next)  = @numstr_this;
+        $numstr_next[$depth] = $numstr_this[$depth] + 1;
+#       print STDERR "next:\t",join('.',@numstr_next),"\n" if $Debugging;
+
+        $next = $Sec_numstr_exists{join('.',@numstr_next)};
+	if (defined($next)) {
+	    $next = $Sec_nodename[$next];
+	} elsif ($Opt_node_links && defined($Sec_nodename[$s + 1])) {
+	    $next = $Sec_nodename[$s + 1];
+	} else {
+	    $next = ' ';
+	}
+    }
+
+    if ($prev eq '?') {
+        #  default 'prev' node is PREVIOUS one at same depth (-L: or plain PREVIOUS) or NONE
+        # prev will be same as up-node if first section at a level
+        local(@numstr_prev)  = @numstr_this;
+        $numstr_prev[$depth] = $numstr_this[$depth] - 1;
+#       print STDERR "prev:\t",join('.',@numstr_prev),"\n" if $Debugging;
+
+        $prev = $Sec_numstr_exists{join('.',@numstr_prev)};
+	if (defined($prev)) {
+	    $prev = $Sec_nodename[$prev];
+	} elsif ($Opt_node_links && defined($Sec_nodename[$s - 1])) {
+	    $prev = $Sec_nodename[$s - 1];
+	} else {
+	    $prev = ' ';
+	}
+    }
+
+    if ($up eq '?') {
+        #  default 'up' node is same numstr w/ this depth zeroed out
+        #  it should always exist, because of default node `Top'
+        local(@numstr_up)  = @numstr_this;
+        $numstr_up[$depth] = 0;
+#       print STDERR "up:\t",join('.',@numstr_up),"\n" if $Debugging;
+        
+        $up = $Sec_numstr_exists{join('.',@numstr_up)};
+        if (! defined($up)) {
+            &not_OK('???','???',
+	    	"couldn't make up-node from numstr:".join('.',@numstr_up)."\n");
+            $up = 'Top';
+        } else {
+            $up = $Sec_nodename[$up];
+        }
+    }
+
+    print "\n\@node $this, $next, $prev, $up\n";
+    print "\@comment node, next, previous, up\n";
+}
+
+sub calc_grab_range {
+    if ($Grab_node eq 'Top') {
+    	return (0, $#Sec_depth); # that is, all sections
+
+    } elsif (! defined($Nodename_sec{$Grab_node})) { # a little error-checking...
+	&not_OK('???','???',"No such node to grab: $Grab_node\n");
+	if ($#Files_to_tidy >= 0) {
+	    print STDERR "rm -f @Files_to_tidy\n" if $Verbose;
+	    unlink ( @Files_to_tidy );
+	}
+	exit $Status;
+
+    } else {
+    	local($first_sec) = $Nodename_sec{$Grab_node}; # that's easy
+    	# we now look for the next sec at the same depth;
+	# the sec preceding it will be the last one
+	local($depth)		 = $Sec_abs_depth[$first_sec];
+	local($first_sec_numstr) = $Sec_numstr[$first_sec];
+	local(@first_sec_numstr) = split(/\./, $first_sec_numstr);
+        local(@next_sec_numstr)  = @first_sec_numstr;
+	$next_sec_numstr[$depth] = $first_sec_numstr[$depth] + 1;
+
+	while ($depth >= 1) {
+#	    print STDERR "next guess=@next_sec_numstr\n";
+
+	    if (defined($Sec_numstr_exists{join('.',@next_sec_numstr)})) {
+		return($first_sec,
+		       $Sec_numstr_exists{join('.',@next_sec_numstr)} - 1);
+
+	    } else { # try next higher level
+		$next_sec_numstr[$depth] = 0;
+		$depth--;
+		$next_sec_numstr[$depth] = $first_sec_numstr[$depth] + 1;
+	    }
+	}
+	return ($first_sec, $#Sec_depth);
+    }
+}
+
+sub subst_sectiontypes {
+    local($srcfilename, $srclineno, $_) = @_;
+    local($type);
+
+    while (/\\([Ss])ectiontype\{([^\}]+)\}/) {
+    	local($capped)   = $1;
+    	local($nodename) = $2; 
+	if (! defined($Nodename_sec{$nodename})) {
+    	    &not_OK($srcfilename,$srclineno,"\\sectiontype/ref of unknown node: $nodename (very approx line no)\n");
+	    $type = '???failed sectiontype???';
+    	} else {
+    	    local($depth) = $Sec_abs_depth[$Nodename_sec{$nodename}];
+	    if (! defined($Sec_abs_depth[$Nodename_sec{$nodename}])) {
+		&not_OK($srcfilename,$srclineno,"failed to do \\sectiontype/ref\n");
+		$type = '???failed sectiontype???';
+	    } elsif ($depth >= 3) {
+	    	$type = 'section';
+	    } else {
+		# we use the LaTeX table here ...
+		$type = $SECDEPTH_LCMD[$depth];
+	    }
+    	    if ($capped eq 'S') {
+                local($first) = $type;
+                $first =~ s/^(.).*/$1/;
+                $first =~ y/a-z/A-Z/;
+                local($rest)  = $type;
+                $rest  =~ s/^.(.*)/$1/;
+                $type  = $first . $rest;
+            }
+	}
+        s/\\[Ss]ectiontype\{([^\}]+)\}/$type/g;
+    }
+    $_;
+}
+
+sub end_of_section_stuff { # lit2texi and lit2html only
+    local($s) = @_;
+
+    @Menu_lines = ();
+    &gen_endofsection_menu_lines($s);
+#print STDERR "1::",@Menu_lines;
+    if ($Sec_extra_menu_entries[$s]) {
+	push(@Menu_lines, "\n") if $Lit2texi;
+	push(@Menu_lines, "<p>\n") if $Lit2html;
+	push(@Menu_lines, split(/\n/, $Sec_extra_menu_entries[$s]));
+    }
+#print STDERR "2::",@Menu_lines;
+    push(@Menu_lines, "\n") if $Lit2texi;
+    push(@Menu_lines, "<p>\n") if $Lit2html;
+    &gen_codething_menu_lines($s);
+#print STDERR "3::",@Menu_lines;
+    if ($s == 0 && $Table_of_contents_please == 1) {
+	&gen_texinfo_table_of_contents_lines() if $Lit2texi;
+	&gen_html_table_of_contents_lines() if $Lit2html;
+    }
+#print STDERR "4::",@Menu_lines;
+
+    if ( $#Menu_lines >= 1 ) { # more than just what I put there
+	if ($Menu_lines[0] eq "\n") { # nuke a leading blank line
+	    shift(@Menu_lines);
+	}
+	if ($Lit2texi) {
+	    print "\n\@menu\n";
+	    &format_and_print_texi_menu_lines();
+	    print "\@end menu\n";
+	}
+	elsif ($Lit2html) {
+          local($guts)=&format_and_print_html_menu_lines();
+	  if ($guts) { # if there are any elts.
+	     print "<p><menu>\n".$guts."\n</menu>\n";
+	  }
+	}
+    }
+}
+
+sub format_and_print_texi_menu_lines {
+    # just to be beautiful, let's find the longest menu item
+    # (for printing purposes)
+    local($longest_item) = 0;
+    local($ml);
+
+    foreach $ml (@Menu_lines) {
+	if ( $ml =~ /^\*(\s+[^:\n]+):/ ) {
+	    local($mi_length) = length( $1 );
+	    if ( $mi_length > $longest_item) {
+	    	$longest_item = $mi_length;
+	    }
+    	}
+    }
+    # add two to "longest_item" for "::"
+    $longest_item += 2;
+
+    $* = 1;
+    foreach $ml (@Menu_lines) {
+	if ( $ml =~ /^\*(\s+[^:\n]+)(:+)\s*(.*)/ ) {
+	    local($m_item) = $1;
+	    local($m_sep)  = $2;
+	    local($m_descr)= $3;
+
+	    printf "*%-${longest_item}s  %s\n", $m_item.$m_sep, $m_descr;
+	} else {
+	    print $ml;
+	}
+    }
+    $* = 0;
+}
+
+sub format_and_print_html_menu_lines {
+local($ml);
+    $* = 1;
+	foreach $ml (@Menu_lines) {
+        if ( $ml =~ /^\*\s+([^:\n]+)(:+)\s*(.*)/ ) {
+            local($m_item) = $1;
+            local($m_sep)  = $2;
+            local($m_descr)= $3;
+
+#            print "<a name=\"$m_item\">$m_descr</a>\n";
+	}
+    }
+    $* = 0;
+}
+
+sub gen_endofsection_menu_lines {
+    local($s) = @_;
+
+    local($depth) = -1;
+    if ($Sec_abs_depth[$s] > 0) {
+	$depth = $Sec_abs_depth[$s] + 1;
+    } elsif ($Sec_abs_depth[$s] == 0) {
+	$depth = $Sec_depth_offset; # where rootsectiontype takes us
+    }
+    die "got depth $depth when doing print_endofsection_menu\n" if $depth < 0;
+
+    local(@numstr_subsec)  = split(/\./, $Sec_numstr[$s]);
+    $numstr_subsec[$depth] = 1; # 1st subsection, if it exists
+
+    $n = $Sec_numstr_exists{join('.',@numstr_subsec)};
+
+    while (defined($n) && $n > 0) {
+
+	local($temp_title) = $Sec_title[$n];
+	$temp_title =~ s/\001starred\003//;
+
+	push(@Menu_lines, "* $Sec_nodename[$n]:: $temp_title.\n") if $Lit2texi;
+	push(@Menu_lines, "<li>$temp_title<p>\n") if $Lit2html;
+
+	$numstr_subsec[$depth] = $numstr_subsec[$depth] + 1;
+	$n = $Sec_numstr_exists{join('.',@numstr_subsec)};
+    }
+}
+
+sub gen_codething_menu_lines { 
+    local($s) = @_;
+    # generate menu entries for (defined) codethings that have been used
+    # in this section. (don't print if definition is merely elsewhere in
+    # this section).
+
+    local($u);
+    foreach $u (split(/\001/, $Sec_codethings_used[$s])) {
+	if (defined($Codething_defd_sec{$u})) {
+	    local($item_name)    = $u;
+	    $item_name =~ s/\@/\@\@/g;
+	    local($sec_defd_in)  = $Codething_defd_sec{$u};
+	    local($node_defd_in) = $Sec_nodename[$sec_defd_in];
+	    push(@Menu_lines, "\* $item_name: $node_defd_in.\n") if $sec_defd_in != $s;
+	}
+    }
+}
+
+sub print_index_entries_for_uses {
+    local($uses) = @_;
+
+#no # print entries for the used things that HAVE definitions
+    local($u);
+#    print "<ul>\n" if $Lit2html;
+    foreach $u (split(/\001/, $uses)) {
+#	if (defined($Codething_defd_sec{$u})) {
+	    if ($Lit2texi) {
+		print "\@cindex ".&mk_texi_index_entry($u)."\n";
+	    } elsif ($Lit2html) {
+#
+# Generating a list of uses per code-block works for .html,
+# but the produced result is rather silly. The lists tend to be
+# fairly long and obscures the reading of the document.
+#
+# Merging the links with the actual code could be worthwhile,
+# but links would be underlined.
+#		print "<li><a href=\"#$u\"><i>$u</i></a><br>\n";
+#
+	    } else {
+		# thinking about a "\|ttize" in there, too
+		print "\\index\{".&mk_latex_index_entry('tt',$u)."\}\%\n";
+	    }
+#	}
+    }
+#    print "<\/ul>\n" if $Lit2html;
+}
+
+sub print_xrefs_for_uses { # latex only
+    local($uses) = @_;
+
+    return if ! $Codedef_blurbs; # some people don't want them
+
+    # print entries for the used things that HAVE definitions
+    local(@use) = split(/\001/, $uses);
+    local($u);
+    local($i) = 0;
+    while ( $i <= $#use ) {
+	$u = $use[$i];
+	if (defined($Codething_defd_sec{$u})) {
+	    # fiddling must match that in lit-2latex
+	    local($fiddled_u);
+	    ($fiddled_u = $u) =~ s/\%/<percent>/g; # and other funny chars?
+	    $fiddled_u =~ s/\$/<dollar>/g;
+	    $fiddled_u =~ s/\\/<slash>/g;
+
+	    $use[$i]  = &std_mk_code_frag($u) . ": p.~\\pageref\{def::$fiddled_u\}\%\n";
+	    # really should use lang-specific "mk_code_frag" but at
+	    # link time we don't necessarily know what language is
+	    # called for... and it could vary through a big document
+	    $i++;
+	} else { # not defined -- remove it
+	    splice(@use, $i, 1);
+	}
+    }
+    $u =  join('; ',@use); # join up
+    print "\n\n\{\\small \[Definitions: $u\]\}\n\n" if $u;
+}
+
+# a trailing 1 seems to be the habit for inc'd perl files
+1;

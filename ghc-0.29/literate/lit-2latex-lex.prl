@@ -1,0 +1,19 @@
+sub print_code_blk { # just use the std
+    local($codetxt) = @_;
+
+    if ($Lang_typeset =~ /tgrind/) {
+	# 'yacc' is the nearest thing
+	&std_tgrind_code_blk('yacc', $codetxt);
+    } else {
+        &std_print_code_blk($codetxt);
+    }
+}
+
+sub mk_code_frag {
+    local($codetxt) = @_;
+
+    &std_mk_code_frag($codetxt);
+}
+
+# this keeps 'do'ing happy
+1;

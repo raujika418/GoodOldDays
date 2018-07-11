@@ -1,0 +1,413 @@
+%!PS-Adobe-2.0
+%%BoundingBox:	0 0 560 800
+%%Title: 	pm 7 19 10 +RTS -bP -bp8 -bl400 
+%%Creator: 	qp2ap
+%%CreationDate:	Mon Jun 17 19:38:58 BST 1996
+%%EndComments
+% -----------------------------------------------------------------------------
+% Tunable Parameters:
+% The width of a line representing a task
+/width 21.4285714285714 def
+% Scaling factor for the y-axis (usful to enlarge)
+/y-scale 1 def
+% -----------------------------------------------------------------------------
+/total-len 2065536 def
+/show-len 790 def
+/x-offset 100 def
+/y-offset 50 def
+% normalize is the PS version of the formula: 
+%   int((/2065536) * (790-100) + 100) 
+% in psout.
+/normalize { total-len div show-len x-offset sub mul x-offset add floor } def
+/x-normalize { exch show-len mul total-len div exch } def
+/y-normalize { y-offset sub y-scale mul y-offset add } def
+/str-len 12 def
+/prt-n { cvi str-len string cvs 
+         dup stringwidth pop 
+         currentpoint pop 780 gt { 10 sub } { 2 div } ifelse 
+         neg 0 rmoveto 
+         show  } def 
+        % print top-of-stack integer centered at the current point
+/R { 0.8 0 0 } def
+/G { 0 0.9 0.1 } def
+/B { 0 0.1 0.9 } def
+/set-bg { setrgbcolor } def
+% RL: runlineto; draws a horizontal line in given color
+% Operands: x-from x-to y color
+/RL { set-bg   % set color 
+      newpath y-normalize  % mangle y val
+      2 index 1 index moveto width setlinewidth 
+      lineto pop stroke} def
+% SL: suspendlineto; draws a horizontal line in given color (thinner)
+% Operands: x-from x-to y color
+/SL { set-bg   % set color 
+      newpath y-normalize  % mangle y val
+      2 index 1 index moveto width 2 div setlinewidth 
+      lineto pop stroke} def
+% FL: fetchlineto; draws a horizontal line in given color (thinner)
+% Operands: x-from x-to y color
+/FL { set-bg   % set color 
+      newpath y-normalize  % mangle y val
+      2 index 1 index moveto width  2  div setlinewidth 
+      lineto pop stroke} def
+/printText { 0 0 moveto (GrAnSim) show } def
+/asciilogo { 5 sub moveto HB16 setfont (GrAnSim) show } def
+/logo { gsave 
+        translate 
+        .95 -.05 0
+          { dup 1 exch sub 0 exch setrgbcolor printText 1 -.5 translate } for 
+        1 0 0 setrgbcolor printText
+        grestore} def
+% For debugging PS uncomment this line and add the file behandler.ps
+%  begin printonly endprint 
+/HE10 /Helvetica findfont 10 scalefont def
+/HE12 /Helvetica findfont 12 scalefont def
+/HE14 /Helvetica findfont 14 scalefont def
+/HB16 /Helvetica-Bold findfont 16 scalefont def
+% -----------------------------------------------------------------------------
+newpath
+-90 rotate
+-785 30 translate
+0 8.000000 moveto
+0 525.000000 760.000000 525.000000 8.000000 arcto
+4 {pop} repeat
+760.000000 525.000000 760.000000 0 8.000000 arcto
+4 {pop} repeat
+760.000000 0 0 0 8.000000 arcto
+4 {pop} repeat
+0 0 0 525.000000 8.000000 arcto
+4 {pop} repeat
+0.500000 setlinewidth
+stroke
+newpath
+4.000000 505.000000 moveto
+4.000000 521.000000 752.000000 521.000000 4.000000 arcto
+4 {pop} repeat
+752.000000 521.000000 752.000000 501.000000 4.000000 arcto
+4 {pop} repeat
+752.000000 501.000000 4.000000 501.000000 4.000000 arcto
+4 {pop} repeat
+4.000000 501.000000 4.000000 521.000000 4.000000 arcto
+4 {pop} repeat
+0.500000 setlinewidth
+stroke
+HE14 setfont
+100 505 moveto
+(pm 7 19 10 +RTS -bP -bp8 -bl400  ) show
+(Mon Jun 17 19:38:58 BST 1996) dup stringwidth pop 750 exch sub 505.000000 moveto show
+-40 -40 translate
+% -----------------------------------------------------------------------------
+% Print x-axis:
+/y-val 50 def % { y-offset 40 sub 2 div y-offset add } def
+0.5 setlinewidth
+x-offset y-val moveto total-len normalize x-offset sub 0 rlineto stroke
+0 total-len 10 div total-len
+ { dup normalize dup y-val moveto 0 -2 rlineto stroke  % tic
+   y-val 10 sub moveto HE10 setfont round prt-n  % print label 
+ } for 
+1 setlinewidth
+% -----------------------------------------------------------------------------
+% ---------------------------------------------------------------------------
+% Y-Axis:
+% ---------------------------------------------------------------------------
+0 0 0 setrgbcolor
+gsave
+HE12 setfont
+(tasks)
+dup stringwidth pop
+500
+exch sub
+55 exch
+translate
+90 rotate
+0 0 moveto
+show
+grestore
+0.5 setlinewidth
+HE12 setfont
+100 50 moveto
+100 500 lineto
+% Total number of tasks: 14
+% Number of ticks: 10
+100 500 moveto
+95 500 lineto
+70 500 moveto
+(14) show
+100 371.428571428571 moveto
+95 371.428571428571 lineto
+70 371.428571428571 moveto
+(10) show
+100 339.285714285714 moveto
+95 339.285714285714 lineto
+70 339.285714285714 moveto
+(9) show
+100 307.142857142857 moveto
+95 307.142857142857 lineto
+70 307.142857142857 moveto
+(8) show
+100 275 moveto
+95 275 lineto
+70 275 moveto
+(7) show
+100 242.857142857143 moveto
+95 242.857142857143 lineto
+70 242.857142857143 moveto
+(6) show
+100 210.714285714286 moveto
+95 210.714285714286 lineto
+70 210.714285714286 moveto
+(5) show
+100 178.571428571429 moveto
+95 178.571428571429 lineto
+70 178.571428571429 moveto
+(4) show
+100 146.428571428571 moveto
+95 146.428571428571 lineto
+70 146.428571428571 moveto
+(3) show
+100 114.285714285714 moveto
+95 114.285714285714 lineto
+70 114.285714285714 moveto
+(2) show
+100 82.1428571428571 moveto
+95 82.1428571428571 lineto
+70 82.1428571428571 moveto
+(1) show
+100 50 moveto
+95 50 lineto
+70 50 moveto
+(0) show
+ stroke
+1 setlinewidth
+% ---------------------------------------------------------------------------
+212 213 114 G RL
+212 215 114 B FL
+215 216 114 G RL
+215 216 146 G RL
+215 216 114 B FL
+216 217 114 G RL
+215 217 146 B FL
+217 218 146 G RL
+217 218 178 G RL
+216 217 114 B FL
+217 219 114 G RL
+217 219 146 B FL
+219 220 146 G RL
+217 219 178 B FL
+219 220 114 B FL
+219 220 178 G RL
+219 220 114 G RL
+219 220 146 B FL
+220 221 210 G RL
+220 221 146 G RL
+219 221 178 B FL
+219 221 114 B FL
+221 222 178 G RL
+220 222 210 B FL
+222 223 210 G RL
+221 222 178 B FL
+222 223 242 G RL
+222 223 178 G RL
+222 224 210 B FL
+224 225 210 G RL
+221 224 114 G RL
+222 224 242 B FL
+224 225 210 B FL
+224 225 114 B FL
+225 226 275 G RL
+225 226 114 G RL
+224 226 242 G RL
+225 226 210 G RL
+225 227 275 B FL
+225 227 114 B FL
+227 228 307 G RL
+227 228 275 G RL
+227 229 307 B FL
+229 230 339 G RL
+229 231 307 G RL
+227 231 114 G RL
+229 232 339 B FL
+231 232 114 B FL
+232 233 371 G RL
+232 233 114 G RL
+232 233 339 G RL
+232 234 371 B FL
+232 234 114 B FL
+234 235 403 G RL
+234 235 371 G RL
+234 237 403 B FL
+237 238 435 G RL
+237 238 403 G RL
+237 239 435 B FL
+239 240 467 G RL
+239 240 435 G RL
+239 241 467 B FL
+242 243 500 G RL
+241 243 467 G RL
+242 244 500 B FL
+244 245 500 G RL
+100 266 82 G RL
+234 283 114 G RL
+280 283 210 G RL
+280 283 467 G RL
+280 283 500 G RL
+283 284 114 B FL
+283 284 210 B FL
+284 285 210 G RL
+283 285 467 B FL
+285 286 467 G RL
+281 285 403 R SL
+283 285 500 B FL
+285 286 500 G RL
+286 287 210 G RL
+286 287 500 B FL
+284 287 114 G RL
+286 287 210 B FL
+287 288 210 G RL
+285 289 403 G RL
+288 289 210 G RL
+288 289 114 G RL
+289 290 210 B FL
+287 290 500 G RL
+281 290 435 R SL
+289 290 114 B FL
+290 291 114 G RL
+289 290 403 B FL
+290 291 403 G RL
+281 290 339 R SL
+291 292 114 G RL
+292 293 114 B FL
+290 292 210 G RL
+294 295 210 G RL
+290 295 435 G RL
+294 295 210 B FL
+292 295 114 G RL
+290 296 339 G RL
+281 296 275 R SL
+295 296 435 B FL
+296 297 435 G RL
+281 296 371 R SL
+297 298 114 G RL
+297 298 114 B FL
+295 298 210 G RL
+299 300 210 G RL
+296 302 275 G RL
+300 302 210 B FL
+296 302 371 G RL
+302 303 275 B FL
+302 303 275 G RL
+281 303 178 R SL
+302 303 371 B FL
+303 304 371 G RL
+303 304 371 B FL
+302 304 210 G RL
+306 307 210 G RL
+306 307 210 B FL
+304 307 371 G RL
+281 307 307 R SL
+298 311 114 G RL
+311 312 114 B FL
+307 312 210 G RL
+307 315 307 G RL
+315 316 307 B FL
+313 316 210 G RL
+312 317 114 G RL
+316 317 210 B FL
+317 322 210 G RL
+303 323 178 G RL
+322 323 210 B FL
+317 323 114 G RL
+323 324 178 B FL
+323 324 178 G RL
+286 323 467 R SL
+316 326 307 G RL
+326 327 307 B FL
+324 327 114 G RL
+323 328 210 G RL
+327 328 114 B FL
+323 330 467 G RL
+328 331 114 G RL
+330 331 467 B FL
+329 331 210 G RL
+331 332 114 B FL
+332 333 114 G RL
+327 332 307 G RL
+281 332 242 R SL
+331 332 210 B FL
+332 335 210 G RL
+336 341 210 G RL
+341 342 210 B FL
+342 343 210 G RL
+333 348 114 G RL
+348 349 114 B FL
+349 354 114 G RL
+354 355 114 B FL
+354 358 114 G RL
+358 359 114 B FL
+358 359 114 G RL
+343 362 210 G RL
+362 363 210 B FL
+360 364 114 G RL
+363 368 210 G RL
+369 371 210 G RL
+371 372 210 B FL
+365 371 114 G RL
+371 372 114 B FL
+372 373 114 G RL
+373 374 114 G RL
+371 375 210 G RL
+374 375 114 B FL
+375 376 210 B FL
+376 377 210 G RL
+375 379 114 G RL
+379 381 114 G RL
+376 381 210 G RL
+381 382 114 B FL
+381 384 210 B FL
+332 384 242 G RL
+382 385 114 G RL
+384 385 210 G RL
+384 387 242 B FL
+385 387 114 B FL
+387 388 114 G RL
+385 388 210 B FL
+388 389 210 G RL
+388 389 114 G RL
+388 390 210 G RL
+390 391 210 B FL
+387 390 242 G RL
+281 390 146 R SL
+390 391 82 G RL
+390 394 210 G RL
+394 395 210 B FL
+394 398 210 G RL
+398 399 210 B FL
+398 401 210 G RL
+331 430 467 G RL
+291 430 403 R SL
+390 448 146 G RL
+291 448 500 R SL
+448 449 82 G RL
+448 479 500 G RL
+479 480 500 B FL
+430 487 403 G RL
+297 487 339 R SL
+480 511 500 G RL
+297 511 435 R SL
+487 542 339 G RL
+303 542 275 R SL
+511 568 435 G RL
+309 568 371 R SL
+542 595 275 G RL
+325 595 178 R SL
+568 621 371 G RL
+333 621 307 R SL
+595 632 178 G RL
+633 635 82 G RL
+621 664 307 G RL
+391 664 242 R SL
+664 670 242 G RL
+670 790 82 G RL
+HE14 setfont
+50 550 logo
+showpage

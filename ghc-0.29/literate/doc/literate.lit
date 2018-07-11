@@ -1,0 +1,104 @@
+\begin{onlystandalone}
+\documentstyle[11pt,literate]{article}
+\begin{document}
+\title{Glasgow Literate Programming\\ User's Guide}
+
+\author{
+The GRASP Team \\
+Contact: Will Partain (partain\@dcs.glasgow.ac.uk)
+}
+\date{September 1992}
+\maketitle
+\begin{onlylatex}
+\tableofcontents
+\end{onlylatex}
+\clearpage
+\end{onlystandalone}
+
+This
+\standaloneornot{guide}{\sectiontype{Literate_guide}}
+introduces a suite of programs for literate programming.
+They support documentation as a natural part of programming;
+a program's organization focusses on understanding by humans.
+
+If you installing this system as a standalone entity, please
+see~\sectionref{lit-install}, near the end.
+
+This document begins with a few words about literate programming, the
+objectives of this system, and the Neat Stuff that this system is
+supposed to do for you (i.e., cheap, tasteless self-promotion).
+See~\sectionref{Highlights}.
+
+The real goods come next, most notably:
+\begin{itemize}
+\item
+an alleged ``tutorial'' on the \LaTeX{}-like markup language in which
+documents/programs are written (\sectionref{notation-tut});
+\item
+a ``reference manual'' about the same markup language; this tends to
+be what you consult once you are using the system
+(\sectionref{Command_reference});
+\item
+the programs/tools to mangle your documents/programs into useful forms
+(\sectionref{Programs-and-options}).
+\end{itemize}
+There are other sections, too, in greater-or-less states of
+usefulness.
+
+It would be a good idea to understand the rudiments of GNU Info files
+before reading much further---type \tr{info info} at your favourite
+Unix prompt.  Or you could just ignore all mention of Info files...
+
+YOUR SUGGESTIONS FOR IMPROVING THIS SYSTEM ARE MOST WELCOME.
+
+DISCLAIMER: ``Literate programming'' is not my(WDP)/our area of
+expertise.  This system has been developed mainly to suit our needs
+and has evolved on a grease-the-squeaky-wheel principle.  However, we
+wouldn't bother to document it if we didn't think there was something
+to it!
+
+APRIL91 PROPOSALS: I am thinking about some changes to the system, NOT
+YET IMPLEMENTED.  Discussion about most (all?) of them is gathered
+together in \sectionref{april91-proposals}.  (You can find all
+discussion of proposed changes by grepping for ``APRIL91''.)
+
+SEPT92 THOUGHTS: Still haven't really worked on this system.  I have
+typed a few further thoughts at the obvious place.  I have fixed one
+or two bugs, and I have incorporated Adriaan Joubert's
+(adriaan\@dcs.qmw.ac.uk) stuff for ``literate Fortran,'' for which I
+am most grateful.  (See, it really is easy to extend :-)
+
+For more information about ``real'' literate programming, the
+bibliography of literate programming in the (approx: ToDo) March~1991
+SIGPLAN Notices may be of use.
+
+% section on who should and shouldn't use this system?
+% (now in highlights)
+\input{highlights.lit}
+
+\input{lang_tut.lit}
+
+\input{lang_ref.lit}
+
+\input{lang_specific.lit}
+
+\input{habits.lit}
+
+\input{caveats.lit}
+
+\input{programs.lit}
+
+\input{using.lit}
+
+\input{april91.lit}
+
+\input{sept92.lit}
+
+\input{install.lit}
+
+%\input{lit_mode.lit}
+
+\begin{onlystandalone}
+\printindex
+\end{document}
+\end{onlystandalone}

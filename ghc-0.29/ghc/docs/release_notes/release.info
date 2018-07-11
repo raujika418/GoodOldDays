@@ -1,0 +1,1722 @@
+This is Info file release.info, produced by Makeinfo-1.47 from the
+input file release.texi.
+
+
+File: release.info,  Node: Top,  Up: (dir)
+
+                   Release notes for Glasgow Haskell
+
+                   Will Partain (for the AQUA Team)
+
+                    Department of Computing Science
+
+                         University of Glasgow
+
+                           Glasgow, Scotland
+
+                                G12 8QQ
+
+                                   
+     Email: glasgow-haskell-{users,bugs}-request@dcs.glasgow.ac.uk
+
+* Menu:
+
+* release-0-26::      Release notes for version 0.26 -- 7/95.
+* release_2::         Non-release notes for versions 0.24 and 0.25.
+* release-0-23::      Release notes for version 0.23 -- 12/94.
+* release-0-22::      Release notes for version 0.22 -- 7/94.
+* release-0-19::      Release notes for version 0.19 -- 12/93.
+* release-0-16::      Release notes for version 0.16 -- 07/93.
+* release-0-10::      Release notes for version 0.10 -- 12/92.
+* release-0-09::      Release 0.09 -- 9/92.
+* release-0-08::      Release notes for version 0.08 -- 7/92.
+* release-0-07::      Release 0.07.
+* release-0-06::      Release notes for version 0.06 -- 3/92.
+* release-0-05::      Release notes for version 0.05 -- 12/91.
+* releases-0-03-04::  Releases between 0.02 and 0.05.
+* release-0-02::      Release notes for version 0.02 -- 8/91.
+
+
+File: release.info,  Node: release-0-26,  Next: release_2,  Prev: Top,  Up: Top
+
+Release notes for version 0.26 -- 7/95
+======================================
+
+Release 0.26 is a major public release of Glasgow Haskell. It
+incorporates our new work for the first half of 1995.
+
+The announcement for this release is distributed as `ANNOUNCE-0.26' in
+the top-level directory.
+
+You'll need to recompile everything if you're switching from a previous
+version of GHC.  (If you don't, you'll get "consistency errors".)  Some
+day, we will stop doing this to you :-)
+
+Information about "what's ported to which machine" is now given in the
+Installation Guide. The new ports since 0.23 are: `hppa1.1-hp-hpux',
+`i386-*-linuxaout', and `mips-sgi-irix5'.
+
+* Menu:
+
+* 0-26-config::            New configuration things in 0.26.
+* 0-26-user-visible::      User-visible changes in 0.26, including incompatibilities.
+* 0-26-options::           New or changed GHC command-line options.
+* 0-26-io::                New in monadic I/O.
+* 0-26-new-in-compiler::   New in the compiler proper.
+* 0-26-new-in-libraries::  In the prelude and libraries.
+* 0-26-new-in-rts::        In the runtime system.
+* 0-26-new-elsewhere::     Other new stuff.
+
+
+File: release.info,  Node: 0-26-config,  Next: 0-26-user-visible,  Prev: release-0-26,  Up: release-0-26
+
+New configuration things in 0.26
+--------------------------------
+
+We are moving towards one `configure' script for all Glasgow
+functional-programming tools.  Consequently, the configure options have
+been tweaked.  Doing `./configure --help' will show you the current
+state of play.
+
+
+File: release.info,  Node: 0-26-user-visible,  Next: 0-26-options,  Prev: 0-26-config,  Up: release-0-26
+
+User-visible changes in 0.26, including incompatibilities
+---------------------------------------------------------
+
+The names `scc', `ccall', and `casm' are no longer stolen from the
+user's name space.  (The magical constructs they once were have been
+known as `_scc_', `_ccall_', and `_casm_' for some time now...)
+
+Similarly, `trace' is no longer built-in (so you can use the name if
+you want to).  You can get `trace' either as `_trace' (Glasgow
+extension), or as itself via `import Trace' with `-syslib hbc' (i.e.,
+exactly like HBC).
+
+Lazy, or irrefutable, patterns with unboxed-type components are no
+longer allowed.  You'll need to rewrite `let (I# x) = exp ...' as
+`let x = case exp of { I# i -> i } in ... '.
+
+GHC now supports hexadecimal and octal numeric syntax for integer
+constants. (But `read' doesn't grok it yet...)
+
+GHC now supports specialised instances (as in HBC); you can write:
+     instance Eq a => Eq (Foo a) where { ... }
+     {-# SPECIALIZE instance Eq (Foo Bool) #-}
+
+GHC's pragmas for specialised values now have a magical `= blah' form,
+in which you specify the code to be used for the specialised value. For
+example:
+     f :: Ord a => a -> Int -> a
+     {-# SPECIALIZE f :: Double -> Int -> Double = f_Double #-}
+     
+     f_Double :: Double -> Int -> Double
+     f_Double ...
+In some cases, the `= blah' form can be a *big* win.
+
+What we used to call "threaded" Haskell, we now call "Concurrent
+Haskell."  And there's a paper about it.  Please see the User's Guide.
+
+"Parallel Haskell," running under PVM, is here.  Again, see the User's
+Guide.
+
+
+File: release.info,  Node: 0-26-options,  Next: 0-26-io,  Prev: 0-26-user-visible,  Up: release-0-26
+
+New or changed GHC command-line options
+---------------------------------------
+
+The `-g', `-p', `-pg', `-fpic', and `-fPIC' are no longer passed
+straight through to GCC.  They probably buy you nothing, while
+potentially causing substantial mischief.  If you know what you're
+doing, you can still use them, via `-optcO-...'.
+
+The main option for Concurrent Haskell is `-concurrent'; for Parallel
+Haskell, it's `-parallel'.
+
+The `-dict-all' option, used with `-prof', has died.  It never did
+anything anyway.
+
+Besides the `-fshow-specialisations' option to see what specialisations
+have occurred, you may also use the `-fshow-import-specs' option to see
+what specialisations GHC would like to have had available. By then
+adding these "desirable" pragmas to your code, you can squash most of
+the overloading from your program.
+
+There are some new sanity-checking options.  Use
+`-fsignatures-required' if you want to force all top-level definitions
+to have type signatures.  Use `-fshadowing-not-ok' if you want to
+disallow name shadowing.  You can't use the latter on modules that
+include circular definitions.
+
+The `-Rghc-timing' option gives a convenient one-line summary to GHC's
+runtime and heap allocation.
+
+The `-odump' option may be used to save GHC's standard-error output to
+a file. (It normally shows up on your screen.)
+
+You can now use `-H0' and `-K0' to reset the heap and stack sizes.  As
+these sizes are normally "maxxed up" (`-H32m -H16m' gets you a 32MB
+heap), you can use this form to decrease the size: `-H6m -H0 -H250k'
+gives you a heap of 250KB.
+
+
+File: release.info,  Node: 0-26-io,  Next: 0-26-new-in-compiler,  Prev: 0-26-options,  Up: release-0-26
+
+New in monadic I/O
+------------------
+
+GHC 0.26 is still a Haskell 1.2 compiler (and will remain so until
+there is a non-DRAFT 1.3 standard).
+
+We killed the `PreludePrimIO' interface.  You can get all the same
+functions from `PreludeGlaST'.
+
+All the `_IVar' and `_MVar' operations are now in the 1.3 `IO' monad,
+not the non-standard `PrimIO' monad.  You now get them from
+`Concurrent', not from `PreludeGlaST'.
+
+
+File: release.info,  Node: 0-26-new-in-compiler,  Next: 0-26-new-in-libraries,  Prev: 0-26-io,  Up: release-0-26
+
+New in the compiler proper
+--------------------------
+
+The main new things are "foldr-build" deforestation (by Andy Gill) and
+ever-more-glorious specialisation (by Patrick Sansom).
+
+And the usual few megabytes of gratuitous changes.
+
+
+File: release.info,  Node: 0-26-new-in-libraries,  Next: 0-26-new-in-rts,  Prev: 0-26-new-in-compiler,  Up: release-0-26
+
+In the prelude and libraries
+----------------------------
+
+All of the basic state-transformer stuff now comes from `PreludeGlaST'.
+ The `PreludePrimIO' interface no longer exists.
+
+The function `foldrPrimIO' went away.  The function `forkPrimIO' sprang
+to life.
+
+The what-you-need-for-Concurrent-Haskell interface is `Concurrent'. The
+GHC option is `-concurrent'.  Please see the User's Guide. Note that
+the operations `threadDelay' and `threadWait' now come from
+`Concurrent', not `PreludeGlaMisc'.
+
+I-Vars and M-Vars (synchronising variables) are now specifically I/O
+operations, not general state-transformer operations. They also come
+from the `Concurrent' interface.
+
+Renamings: what used to be the `newMVar' operation is now called
+`newEmptyMVar'; what was `initMVar' is now `newMVar'.
+
+The what-you-need-for-Parallel-Haskell interface is `Parallel'. The GHC
+option is `-parallel'.  At the moment, the `Parallel' interface just
+provides `par' and `seq'.  But that will change.
+
+`LibPosix' now provides `runProcess', our candidate for the high-level
+OS-independent operation.
+
+NEW: The `Regex' (`-syslib ghc') interface provides direct access to
+the GNU regexp (regular expressions on strings) package. The `MatchPS'
+interface is higher-level, providing string-matching functions on
+`_PackedStrings'.  (All by Sigbjorn Finne)
+
+NEW: The `Readline' interface (also `-syslib ghc') provides access to
+the GNU readline package.  Instant command-line editing for your
+Haskell programs.  (By Darren Moffat)
+
+NEW: A "network interface toolkit" by Darren Moffat.  BSD sockets for
+Haskell -- way cool.
+
+The `FiniteMap' module has two new functions, `isEmptyFM' and `elemFM'.
+
+The `Maybes' module now uses the Haskell 1.3 built-in `Maybe' type; you
+should use `-fhaskell-1.3' with this module now.
+
+The HBC library modules `Maybe', `Either', and `Option' are *gone*. 
+Just use `-fhaskell-1.3' and get the types directly from the Prelude.
+
+All system-library modules that use the `Maybe' type now require
+`-fhaskell-1.3'.  For the GHC library, that means `FiniteMap',
+`Maybes', `Util', `Set', `Regex', and `MatchPS'.  For the HBC library,
+that means `ListUtil', `Native', and `Parse'.  (In some cases, you
+could avoid the `-fhaskell-1.3' requirement by doing selective imports.)
+
+GHC now supports `trace' exactly like HBC: `import Trace' and do
+`-syslib hbc'.  The built-in no-import-required version is now called
+`_trace'.
+
+Instances for `Shorts' and `Bytes' have been added to the HBC library
+module `Word'.
+
+As part of the GHC system library, we now provide an interface to the
+GNU regexp (regular-expression) library; the `Regexp' interface. A
+higher-level interface, to do matches on `_PackedString's comes from
+the `MatchPS' interface.
+
+We no longer provide specialisations of Prelude functions to the
+`Float' type; only to `Double'.  It saves space, and we want to
+discourage the use of single-precision floating-point.
+
+
+File: release.info,  Node: 0-26-new-in-rts,  Next: 0-26-new-elsewhere,  Prev: 0-26-new-in-libraries,  Up: release-0-26
+
+In the runtime system
+---------------------
+
+GHC now supplies some very simple "hooks" to let you change the failure
+messages for stack and heap overflow, `error', and pattern-matching
+failure.  Please see the User's Guide.
+
+You can now force garbage collection after every N bytes of allocation
+(presumably for stats collection, or something).  Use the `-j' RTS
+option.
+
+"Squeezing out" update frames at garbage-collection time is now *on* by
+default.  (You can turn it off with the `-Z' RTS option, but I can't
+think why you would want to.)
+
+
+File: release.info,  Node: 0-26-new-elsewhere,  Prev: 0-26-new-in-rts,  Up: release-0-26
+
+Other new stuff
+---------------
+
+The GHC distribution now includes an "examples" directory, including a
+simple shell (`hsh' and quite a few to do with 1.3 I/O (`ioNNN') and
+`LibPosix' (`poNNN').  All in `ghc/misc/examples'...
+
+
+File: release.info,  Node: release_2,  Next: release-0-23,  Prev: release-0-26,  Up: Top
+
+Non-release notes for versions 0.24 and 0.25
+============================================
+
+Version 0.24 (March 1995) was a tidy-up release; it mostly fixed some
+"threads" problems (now "Concurrent Haskell"), some I/O problems, and
+some porting problems.
+
+Version 0.25 was a binary-only dump of a `i386-*-linuxaout' build, just
+so people could try it.
+
+
+File: release.info,  Node: release-0-23,  Next: release-0-22,  Prev: release_2,  Up: Top
+
+Release notes for version 0.23 -- 12/94
+=======================================
+
+Release 0.23 is the fifth public release of Glasgow Haskell. It
+incorporates our new work for the second half of 1994.
+
+The announcement for this release is distributed as `ANNOUNCE-0.23' in
+the top-level directory.
+
+* Menu:
+
+* 0-23-ports::             What machines GHC 0.23 runs on.
+* 0-23-config::            New configuration things in 0.23.
+* 0-23-user-visible::      User-visible changes in 0.23, including incompatibilities.
+* 0-23-io::                New in I/O, esp. "monadic," esp. "1.3".
+* 0-23-support::           New in support tools (e.g., profiling).
+* 0-23-new-in-compiler::   New in the compiler proper.
+* 0-23-new-in-libraries::  In the prelude and runtime support.
+* 0-23-new-elsewhere::     Other new stuff.
+
+
+File: release.info,  Node: 0-23-ports,  Next: 0-23-config,  Prev: release-0-23,  Up: release-0-23
+
+What machines GHC 0.23 runs on
+------------------------------
+
+NOTE: the porting situation is essentially unchanged between 0.22 and
+0.23, except for adding the native-code generator for DEC Alphas.
+
+We use Sun4s running SunOS 4.1.3 and DEC Alphas running OSF/1 V2.0, so
+those are the "fully-supported" platforms, unsurprisingly.  Both have
+native-code generators, for quicker compilations.
+
+The GHC hierarchy of Porting Goodness: (a) Best is a native-code
+generator; (b) next best is a "registerised" port; (c) the bare minimum
+is an "unregisterised" port. "Unregisterised" Haskell programs are much
+bigger and slower, but the port is much easier to get going.
+
+Here's everything that's known about GHC ports, as of 0.23:
+Sun4 running SunOS 4.1.3 (`sparc-sun-sunos4'):
+     Fully supported, including native-code generator.
+
+Sun4 running Solaris 2.x (`sparc-sun-solaris2'):
+     Fully supported, including native-code generator. (NB: not tested
+     before release.)
+
+DEC Alpha running OSF/1 V2.0 (`alpha-dec-osf1'):
+     Fully supported, including native-code generator.
+
+Sun3 running SunOS 4.1.3 (`m68k-sun-sunos4'):
+     GHC 0.23 works registerised.  No native-code generator.
+
+HP-PA box running HP/UX 9.x:
+     An unregisterised port of 0.21 (last "internal" release before
+     0.23) seems to work, except that floating-point is definitely
+     busted. 0.23 should be the same.
+
+Silicon Graphics box running IRIX 5.x:
+     An unregisterised port of 0.21 seemed to work.  0.23 should be the
+     same.
+
+DECstation (MIPS-based):
+     An unregisterised port back around the time of 0.17 seemed to work;
+     0.23 should be the same, modulo a little bit-rot.
+
+x86 PCs running Linux/NetBSD/FreeBSD:
+     This really needs a native-code generator to be viable.  No recent
+     progress.
+
+GRIP multiprocessor:
+     GRIP is a 68020-based multiprocessor for running parallel Haskell
+     programs; too bad we have the only machine!  We run GHC 0.16 on it,
+     with no plans to upgrade.
+
+     We are working on other parallel stuff.  Stay tuned.
+
+NeXT box running whatever NeXTs run:
+     Carsten Schultz succeeded with a "registerised" port of GHC 0.19.
+     There's probably a little bit-rot since then, but otherwise it
+     should still be fine.  Had a report that things were basically OK
+     at 0.22.
+
+Macintosh, using MPW:
+     As mind-blowing at it may seem, David Wright in Tasmania has
+     actually gotten GHC to run on a Macintosh.  Ditto James Thomson
+     here at Glasgow. You may be able to get Thomson's from here.  (Not
+     sure that it will excite you to death, but...)
+
+
+File: release.info,  Node: 0-23-config,  Next: 0-23-user-visible,  Prev: 0-23-ports,  Up: release-0-23
+
+New configuration things in 0.23
+--------------------------------
+
+Essentially, upgraded to Autoconf 2.  Probably the easiest way to see
+what all the options are now is to type `./configure --help' and look
+at the stuff near the end.
+
+
+File: release.info,  Node: 0-23-user-visible,  Next: 0-23-io,  Prev: 0-23-config,  Up: release-0-23
+
+User-visible changes in 0.23, including incompatibilities
+---------------------------------------------------------
+
+You'll need to recompile everything if you're switching from a previous
+version of GHC.  (If you don't, you'll get "consistency errors".)  Some
+day, we will stop doing this to you :-)
+
+Monadic I/O has taken yet another shake-up; that is outlined in the
+next section.
+
+To use the 1.3-DRAFT I/O features, you use a `-fhaskell-1.3' flag. This
+also nets you, from your Prelude, the `Maybe' and `Either' types, and
+the functions `thenMaybe', `curry', and `uncurry'.
+
+The driver supports a heap-and-stack-sizes scaling flag.  For example,
+`-Rscale-sizes2' would cause the driver to use twice as much heap/stack
+space as it would otherwise.  This is a convenient way to move between
+machines with differing memory setups (e.g., 32-bit vs 64-bit) without
+changing millions of -H flags in a Makefile.  Note: something like
+`-Rscale-sizes1.5' is OK, too.
+
+"Lit-lit" literals are now overloaded.  They can be any `_CCallable'
+type, not just `_Addrs'.  The price of this extra convenience is that
+you sometimes have to insert a type signature.
+
+The shift-right primitive-operation, `shiftR#', has been renamed and
+clarified to `shiftRA#' (arithmetic).  A new prim-op `shiftRL#'
+(logical) has been added.
+
+Comparable shift primitive-ops on `Int#s' (rather than `Word#s') have
+been added: `iShiftL#', `iShiftRA#', and `iShiftRL#'. Long live
+high-level languages!
+
+
+File: release.info,  Node: 0-23-io,  Next: 0-23-support,  Prev: 0-23-user-visible,  Up: release-0-23
+
+New in I/O, esp. "monadic," esp. "1.3"
+--------------------------------------
+
+GHC 0.23 is still a Haskell 1.2 compiler.  Do nothing weird, and it
+should work exactly as before.
+
+If you give GHC a `-fhaskell-1.3' flag (both compile and link time,
+please!), it will use a VERY EARLY, LARGELY UNTESTED implementation of
+the DRAFT 1.3 I/O PROPOSAL.
+
+The `PreludeGlaIO' interface, which was based on a long-ago 1.3 I/O
+proposal, is DEAD.  It was in a pretty bad state, anyway. Putting
+`PreludeGlaIO' code through as 1.3 code, I got pretty far with just
+these few impedance-matching definitions:
+     > type Void = ()
+     > returnIO = return
+     > thenIO = (>>=)
+     > mapIO  :: (a -> IO b) -> [a] -> IO [b]
+     > mapIO f =  accumulate {-was:listIO-} . map f
+
+We supply the DRAFT 1.3 I/O PROPOSAL in `ghc/docs/io-1.3/'. It is in
+HTML format.
+
+We still give access to our underlying `PrimIO' monad, via the
+`PreludePrimIO' interface.  This is the level at which `_ccall_s'
+operate.  It should still be quite solid, and counts as a good fall-back
+position when the 1.3-DRAFT stuff dies on you.  See the User's Guide.
+
+
+File: release.info,  Node: 0-23-support,  Next: 0-23-new-in-compiler,  Prev: 0-23-io,  Up: release-0-23
+
+New in support tools (e.g., profiling)
+--------------------------------------
+
+The reports from profiling should be a bit tidier.  The "automagic"
+cost-centres for, e.g., "all the CAFs in module X", will now be
+reported against `CAFs_in_... X'.  Which seems fair enough.
+
+GHCI -- an INTERPRETER for Glasgow Haskell!  The brainchild and work of
+Alastair Reid, before he defected to the Enemy at Yale.  Accepts full
+Glasgow Haskell, including many extensions.  Can mix interpreted and
+compiled code, the Prelude being a notably case of the latter. MASSIVE
+HACK VALUE!  The problem is it doesn't quite compile under 0.23 (I ran
+out of time), and some of its dodgy bits (used to mix interpreted and
+compiled code) need upgrading to work with the new info tables.  It
+lives in `ghc/compiler' and below, notably the `interpreter'
+subdirectory.  Don't be shy now -- roll up your sleeves and strut your
+hacking stuff!
+
+
+File: release.info,  Node: 0-23-new-in-compiler,  Next: 0-23-new-in-libraries,  Prev: 0-23-support,  Up: release-0-23
+
+New in the compiler proper
+--------------------------
+
+The compiler is quite a bit faster at compiling, *without* `-O'.  We
+are in the HBC league now.  I don't remember all the HACKs that we
+threw in to make this happen :-)
+
+New-format "info tables" (work by Bryan O'Sullivan and friends).
+Essentially, static info used by the garbage-collector has been moved
+one indirection further away, into a "rep table," of which there are a
+fixed number.  So the same GC info isn't replicated over and over
+again.  This is our main space-savings gain in 0.23.
+
+A native-code generator for the DEC Alpha.  Jim Mattson did it in one
+weekend.  What a great system!
+
+Rather than have a separate Yacc-parser process that spews a long
+"prefix form" string into the compiler, the compiler now just does a
+`_ccall_ yyparse' and then walks the resulting parse tree directly.
+(Not quite *that* simple, but... still pretty cool.)
+
+A *selective* lambda-lifter.  (Simon is very excited about its
+selectiveness.)  That means it only does lambda-lifting if there is a
+benefit in doing so.  It's done on the STG syntax (quite late in the
+compilation).
+
+
+File: release.info,  Node: 0-23-new-in-libraries,  Next: 0-23-new-elsewhere,  Prev: 0-23-new-in-compiler,  Up: release-0-23
+
+In the prelude and runtime support
+----------------------------------
+
+PackedStrings (now called `_PackedString's) are now a built-in type,
+just like `Int's, say.  Their interface is described with the Glasgow
+extensions in the User's Guide.  There is also a "extensions-free"
+interface (no underscores on the front of names) which you can get at
+as a system library (`-syslib ghc').
+
+The pretty-printing code that we use in GHC is now available in the GHC
+system library (`-syslib ghc' and `import Pretty').  We would claim it
+is more "industrial strength" than the one in the HBC system library...
+
+Because of name-grabbing by the DRAFT-1.3-I/O, two functions in the HBC
+library's `Parse' module have been renamed: `(>>)' is now `act', and
+`fail' is now `failP'.  (We will change these again if Lennart does
+something differently.)
+
+
+File: release.info,  Node: 0-23-new-elsewhere,  Prev: 0-23-new-in-libraries,  Up: release-0-23
+
+Other new stuff
+---------------
+
+We've added a new utility, `pphs', for pretty-printing Haskell code in
+LaTeX documents.  It was written by Andrew Preece, a student at
+Glasgow.  The code is in `ghc/CONTRIB/pphs'.
+
+Over in literate-land, we've hidden a copy of a slightly-tweaked
+`texi2html' script (in `literate/texi2html/texi2html').  This is
+probably the most painless way to turn "literate" things into Webbable
+HTML documents.  (Use our literate stuff to make Texinfo files, then
+convert with `texi2html'.)  NB: not really tested.
+
+
+File: release.info,  Node: release-0-22,  Next: release-0-19,  Prev: release-0-23,  Up: Top
+
+Release notes for version 0.22 -- 7/94
+======================================
+
+Release 0.22 is the fourth public release of Glasgow Haskell. It
+incorporates our new work for the first half of 1994.
+
+The announcement for this release is distributed as `ANNOUNCE-0.22' in
+the top-level directory.
+
+* Menu:
+
+* 0-22-ports::             What machines GHC 0.22 runs on.
+* 0-22-user-visible::      User-visible changes in 0.22, including incompatibilities.
+* 0-22-support::           New in support tools (e.g., profiling).
+* 0-22-new-in-compiler::   New in the compiler proper.
+* 0-22-new-in-libraries::  In the prelude and runtime support.
+* 0-22-new-elsewhere::     Other new stuff.
+
+
+File: release.info,  Node: 0-22-ports,  Next: 0-22-user-visible,  Prev: release-0-22,  Up: release-0-22
+
+What machines GHC 0.22 runs on
+------------------------------
+
+We use Sun4s running SunOS 4.1.3 and DEC Alphas running OSF/1 V2.0, so
+those are the "fully-supported" platforms, unsurprisingly.  For Sun4s,
+we have a native-code generator, which makes for somewhat quicker
+compilations.  (We actually produce better code by compiling
+intermediate C with GCC.)
+
+The GHC hierarchy of Porting Goodness: (a) Best is a native-code
+generator [only for Sun4s, now]; (b) next best is a "registerised"
+port; (c) the bare minimum is an "unregisterised" port.
+"Unregisterised" Haskell programs are much bigger and slower, but the
+port is much easier to get going.
+
+Here's everything that's known about GHC ports, as of 0.22:
+Sun4 running SunOS 4.1.3:
+     Fully supported, including native-code generator.
+
+DEC Alpha running OSF/1 V2.0:
+     Fully supported, but no native-code generator (none planned).
+
+Sun3 running SunOS 4.1.3:
+     GHC 0.22 should work, registerised.  (0.21 did work.)
+
+Sun4 running Solaris 2.x:
+     We expect to finish a "registerised" port ourselves, in the
+     foreseeable future.  Feel free to ask about it, if interested.  Not
+     sure about native-code...
+
+HP-PA box running HP/UX 9.x:
+     An unregisterised port of 0.21 (last "internal" release before
+     0.22) seems to work, except that floating-point is definitely
+     busted. 0.22 should be the same.
+
+Silicon Graphics box running IRIX 5.x:
+     An unregisterised port of 0.21 seemed to work.  0.22 should be the
+     same.
+
+DECstation (MIPS-based):
+     An unregisterised port back around the time of 0.17 seemed to work;
+     0.22 should be the same, modulo a little bit-rot.
+
+x86 PCs running Linux/NetBSD/FreeBSD:
+     This really needs a native-code generator to be viable.  No recent
+     progress.
+
+GRIP multiprocessor:
+     GRIP is a 68020-based multiprocessor for running parallel Haskell
+     programs; too bad we have the only machine!  We run GHC 0.16 on it,
+     with no plans to upgrade.
+
+     We are working on other parallel stuff.  Stay tuned.
+
+NeXT box running whatever NeXTs run:
+     Carsten Schultz succeeded with a "registerised" port of GHC 0.19.
+     There's probably a little bit-rot since then, but otherwise it
+     should still be fine.
+
+Macintosh, using MPW:
+     As mind-blowing at it may seem, David Wright in Tasmania has
+     actually gotten GHC to run on a Macintosh.  Ditto James Thomson
+     here at Glasgow. You may be able to get Thomson's from here.  (Not
+     sure that it will excite you to death, but...)
+
+
+File: release.info,  Node: 0-22-user-visible,  Next: 0-22-support,  Prev: 0-22-ports,  Up: release-0-22
+
+User-visible changes in 0.22, including incompatibilities
+---------------------------------------------------------
+
+You'll need to recompile everything if you're switching from a previous
+version of GHC.  (If you don't, you'll get "consistency errors".)
+
+Lazy pattern-matching (e.g., `let (x,y) = ... in ...') no longer
+carries with it the threat of a space leak.  (It used to be that, as
+long as *either* of `x' or `y' was "live," the storage manager would
+hang onto *both* chunks of graph.)  No longer.
+
+We've done a complete overhaul of the state-transformer stuff which
+underlies our array, I/O, and C-calling support.  The "state interface
+document," distributed in `ghc/docs/state-interface.dvi' defines what
+we have done.  You may wish to check our abstracts
+(`ghc/docs/abstracts/') to find papers about this stuff.  If you've
+written code that grovels around in GHC innards (e.g., uses "primitive
+operations" directly), it will probably need updating.
+
+We do *not* support Haskell 1.3 monadic I/O (any draft version), but we
+will once the dust settles.  We still support the `PreludeGlaIO'
+interface that we have had for some time.
+
+You can now build GHC to support "threaded" execution.  (Configure
+`--with-threads=yes', then use GHC with a `-threads' option.) Using the
+`_seq_' and `_par_' constructs,
+
+GHC does a better job of not stealing from the user's name space (for
+its own extensions, etc.).  For example, the "set cost-centre" keyword
+is now `_scc_', rather than `scc' (though the latter will continue to
+be accepted for a while).  With the `-fglasgow-exts' flag on, names may
+begin with an underscore (`_').
+
+We have friendly interaction between "Haskell land" and "C land" via
+(a) *stable pointers* (pass Haskell pointers to C and have the
+garbage-collector not forget about them); and (b) *malloc pointers*
+(return C pointers to Haskell and tell Haskell "throw this away when
+you're finished with it").  See the User's Guide for more info.
+
+
+File: release.info,  Node: 0-22-support,  Next: 0-22-new-in-compiler,  Prev: 0-22-user-visible,  Up: release-0-22
+
+New in support tools (e.g., profiling)
+--------------------------------------
+
+The profiling system of GHC has been improved in version 0.22 in the
+following ways:
+Now uses the "hybrid scheme":
+     (Rather than pure "lexical scoping") What this means for you:
+     "CAF" cost-centres will no longer be blamed for gigantic chunks of
+     the time in your program.
+
+Uses the generational garbage-collector:
+     (At least when doing time profiling)  It used to use a two-space
+     copying GC; it still does when space profiling.  You should be
+     able to profile larger programs.
+
+
+File: release.info,  Node: 0-22-new-in-compiler,  Next: 0-22-new-in-libraries,  Prev: 0-22-support,  Up: release-0-22
+
+New in the compiler proper
+--------------------------
+
+The "simplifier" -- the program-transformation engine in the middle of
+the compiler -- has settled down (at least until Simon has another
+Brain Wave).  We've made "per-simplification" flags, so that each run
+of the simplifier can be controlled separately -- this allows very
+precise control.  (But makes it pretty hard to exercise any control
+from the command-line.)  More in the docs.
+
+Related to simplifier stuff was a revision of the "unfoldery"
+machinery.  We try very hard to find and exploit unfolding (or
+inlining), including across module boundaries.
+
+
+File: release.info,  Node: 0-22-new-in-libraries,  Next: 0-22-new-elsewhere,  Prev: 0-22-new-in-compiler,  Up: release-0-22
+
+In the prelude and runtime support
+----------------------------------
+
+We've introduced a "GHC system library," similar to the "HBC system
+library" which we have supported for some time.  Just say `-syslib ghc'
+and the GHC library stuff is at your fingertips. See the User's Guide
+for exactly what's on offer (not a lot right now, but more will show
+up).
+
+The `PackedString' module that comes with the system is even beefier
+than before; see the User's Guide.  (This module really should be in
+the GHC library.)
+
+
+File: release.info,  Node: 0-22-new-elsewhere,  Prev: 0-22-new-in-libraries,  Up: release-0-22
+
+Other new stuff
+---------------
+
+We have two new mailing lists about Glasgow Haskell.
+glasgow-haskell-users:
+     This list is for GHC users to chat among themselves.  Subscribe by
+     sending mail to `glasgow-haskell-users-request@dcs.glasgow.ac.uk'.
+     Messages for the list go to `glasgow-haskell-users'.
+
+glasgow-haskell-bugs:
+     This used to be an address for some lonely person who received bug
+     reports.  It is now a mailing list for the sort of people who
+     discuss, well, bug reports when they go to a party.
+
+     Subscribe via `glasgow-haskell-bugs-request@dcs.glasgow.ac.uk';
+     send bug reports and rumination thereupon go to
+     `glasgow-haskell-bugs'.
+
+
+File: release.info,  Node: release-0-19,  Next: release-0-16,  Prev: release-0-22,  Up: Top
+
+Release notes for version 0.19 -- 12/93
+=======================================
+
+Release 0.19 was the third public release of this compilation system.
+It incorporates our new work for the last half of 1993.
+
+The announcement for this release is distributed as `ANNOUNCE-0.19' in
+the top-level directory.
+
+* Menu:
+
+* 0-19-user-visible::      User-visible changes in 0.19, including incompatibilities.
+* 0-19-new-docs::          New documentation.
+* 0-19-new-in-compiler::   New in the compiler proper.
+* 0-19-new-in-libraries::  In the prelude and runtime support.
+* 0-19-new-ports::         In the porting department.
+* 0-19-new-elsewhere::     New elsewhere.
+
+
+File: release.info,  Node: 0-19-user-visible,  Next: 0-19-new-docs,  Prev: release-0-19,  Up: release-0-19
+
+User-visible changes in 0.19, including incompatibilities
+---------------------------------------------------------
+
+You'll need to recompile everything if you're switching from a previous
+version of GHC.  (If you don't, you'll get "consistency errors".)
+
+Default declarations: in.
+
+Derived instances of `Ix' and `readsPrec' (`Text' class): in. (Random
+Prelude instances of weird things: in.)  You can avoid the `readsPrec'
+methods by using the `-fomit-derived-read' option.
+
+Should be *faster*, for two reasons: (1) A native-code generator for
+the SPARC architecture (avoids C compilation time); (2) an array-based
+[vs naive list-based...] substitution mechanism in the typechecker. 
+Using `-O2' or `-fvia-C' avoids the native-code generator.
+
+(Shouldn't be too much faster, because we spent a lot of the winnings
+:-()
+
+`MkInt' and friends *renamed*: `MkInt', `MkChar', `MkFloat',
+`MkDouble', and `MkInteger' are now `I#', `C#', `F#', `D#', and `J#',
+respectively. We won't change them again, we promise.
+
+`-i'/`-I' flags changed: You used to specify directories to search for
+interface files with `-I <dir>'; now you do it with `-i<dir>' [*no
+space after the `-i'*] (same as HBC). `-I' is reserved for when doing
+`-cpp' and for the C compiler, when it is run.
+
+Renaming, feature horribilis that it is, is more-or-less fully
+implemented.  The User's Guide lists one or two exceptions.
+
+Specialised versions of overloaded functions: these are created
+automagically with `-O', and also when you ask for them with
+`SPECIALIZE' pragmas.  See the User's Guide for how to do this (same as
+HBC).  (We don't have specialised instance declarations yet.)
+
+GHC tries hard to do inlining (or "unfolding") across module
+boundaries; just look at `-O'-produced interface files.  You can
+enliven this process with `INLINE' pragmas.
+
+The `__GLASGOW_HASKELL__' CPP directive is only set when pre-processing
+Haskell source (and not when pre-processing generated C).
+
+Revised scheme for using system-provided libraries (e.g., the HBC
+library).  Just use a `-syslib <name>' option when compiling and
+linking.  See the User's Guide for details.
+
+
+File: release.info,  Node: 0-19-new-docs,  Next: 0-19-new-in-compiler,  Prev: 0-19-user-visible,  Up: release-0-19
+
+New documentation
+-----------------
+
+See `ghc/docs/README' for a full list of documentation.
+
+The updated User's Guide has new sections including: (a) advice for
+creating smaller and faster programs more quickly, and (b) about the
+HBC library [stolen documentation].
+
+We've dropped papers from the distribution (they're big, and you can
+get them easily anyway); instead, we provide abstracts of all documents
+about all relevant work at Glasgow; see `ghc/docs/abstracts'.
+
+New: "A Simple Country Boy's Guide to Monadic-Style Programming" (Will
+Partain).  In `ghc/docs/simple-monad.lhs'.
+
+
+File: release.info,  Node: 0-19-new-in-compiler,  Next: 0-19-new-in-libraries,  Prev: 0-19-new-docs,  Up: release-0-19
+
+New in the compiler proper
+--------------------------
+
+Strictness analyser: produces/handles "nested" strictness -- e.g.,
+`U(SLL)' means "this single-constructor argument is strict, and it is
+also strict in its first component."  There's also "absence analysis"
+in there: `U(ASA)' means "strict in the second component, and the
+first/third are not used at all."
+
+New simplifier: the program-transformation engine in the middle of the
+compiler.  The "old simplifier," primarily the work of Andre Santos,
+has retired to an Old Simplifier's Home on the coast of Brazil, where
+it is collecting a well-deserved monadic pension.
+
+
+File: release.info,  Node: 0-19-new-in-libraries,  Next: 0-19-new-ports,  Prev: 0-19-new-in-compiler,  Up: release-0-19
+
+In the prelude and runtime support
+----------------------------------
+
+A couple of new functions in the `PackedString' module that comes with
+the system.  Mentioned in the User's Guide.
+
+The HBC library has been upgraded to match the latest HBC release
+(0.999.5).  We now support the `Native' and `NameSupply' modules, which
+we didn't before.
+
+Alastair Reid's implementation of "stable pointers," which he uses to
+do callbacks with the X Window System (yow!), is in.  I (WDP) don't
+know about documentation.... send mail if you need to know.
+
+
+File: release.info,  Node: 0-19-new-ports,  Next: 0-19-new-elsewhere,  Prev: 0-19-new-in-libraries,  Up: release-0-19
+
+In the porting department
+-------------------------
+
+We use Sun4s running SunOS 4.1.3, so those are the best-supported
+machines.  For these, we have a native-code generator (the best); next
+best is a "registerised" port; the bare minimum is an "unregisterised"
+port.
+
+The 0.19 infrastructure for "stealing" registers for a registerised port
+(using a GCC extension) is much more robust -- take note, brave porters.
+
+Here's everying that's known about the porting world:
+Sun3 running SunOS 4.1.3:
+     A registerised port is done; could be made available.
+
+GRIP multiprocessor:
+     68020-based multiprocessor for running parallel Haskell programs.
+     A registerised port is done; too bad we have the only machine! If
+     you have something parallel you *really* wanted to run on it,
+     please get in touch with us.
+
+HP-PA box running HP/UX:
+     An unregisterised port of 0.17 (0.16+portability fixes) seems to
+     work, except that floating-point is definitely busted.  0.19
+     should be no worse.
+
+DECstation (MIPS-based):
+     An unregisterised port of 0.17 works; 0.19 should be the same.
+
+DEC Alpha running OSF/1:
+     We've done an unregisterised port (unreleased), and a registerised
+     port is not far off.
+
+Sun running Solaris 2.x:
+     We've started on this ourselves and foresee no obstacle to a
+     "registerised" port.  Not sure about native-code...
+
+x86 PCs running Linux:
+     This really needs a native-code generator to be viable.  We hope
+     the elves will give us one for Christmas!
+
+Macintosh, using MPW:
+     As mind-blowing at it may seem, David Wright in Tasmania has
+     actually gotten GHC to run on a Macintosh.  I believe it's still
+     in the "you can do it, but you don't want to" stage.
+
+
+File: release.info,  Node: 0-19-new-elsewhere,  Prev: 0-19-new-ports,  Up: release-0-19
+
+New elsewhere
+-------------
+
+In the "literate programming" stuff that happens to come with GHC: a
+few bug fixes, plus a significant contribution from Chris Toshok
+(`toshok@cs.uidaho.edu') of "lit2html" stuff; i.e., to convert your
+literate programs into HTML, the Hypertext Markup Language used on the
+World-Wide Web.  I (WDP) am not sure it's completely finished, or
+exactly what you invoke to do what, but it seems Way Cool.
+
+
+File: release.info,  Node: release-0-16,  Next: release-0-10,  Prev: release-0-19,  Up: Top
+
+Release notes for version 0.16 -- 07/93
+=======================================
+
+Release 0.16 was the second public release of this compilation system.
+It was primarily a bug-fixing and "solidifying" release.
+
+The announcement for this release is distributed as `ANNOUNCE-0.16' in
+the top-level directory.
+
+* Menu:
+
+* 0-16-new-docs::          New documentation.
+* 0-16-new-in-compiler::   New in the compiler proper.
+* 0-16-new-in-libraries::  In the prelude and runtime support.
+* 0-16-new-elsewhere::     New elsewhere.
+
+
+File: release.info,  Node: 0-16-new-docs,  Next: 0-16-new-in-compiler,  Prev: release-0-16,  Up: release-0-16
+
+New documentation
+-----------------
+
+We're providing a few more papers, in `ghc/docs/papers'.  See
+`ghc/docs/README' for a full list of documentation.
+
+
+File: release.info,  Node: 0-16-new-in-compiler,  Next: 0-16-new-in-libraries,  Prev: 0-16-new-docs,  Up: release-0-16
+
+New in the compiler proper
+--------------------------
+
+New strictness analyser and update analyser; their use will be
+reflected in the pragmas in your interface files.  The format of these
+interface pragmas *will probably change*.
+
+Errors related to misuse of Prelude identifiers are more likely to be
+caught.
+
+For some unknown reason, our "wired-in" default declaration in 0.10 was
+`default (Integer,Double)'.  We changed it to `default (Int,Double)',
+as the Report suggests (which is less safe).
+
+We've switched from basing our derived instances on a non-standard
+`cmp3' method (class `Ord'), to basing them on another non-standard
+method `tagCmp'.  The relevant types and things are...
+     cmp3 :: b -> b -> b -> a -> a -> b
+     
+     tagCmp :: a -> a -> CMP_TAG
+     data CMP_TAG = LT_TAG | EQ_TAG | GT_TAG
+If you peer into the `ghc/lib/prelude/*.hs' code, it will be obvious
+what's going on here.  We hope to make further improvements on
+comparison code in the foreseeable future.
+
+
+File: release.info,  Node: 0-16-new-in-libraries,  Next: 0-16-new-elsewhere,  Prev: 0-16-new-in-compiler,  Up: release-0-16
+
+In the prelude and runtime support
+----------------------------------
+
+The libraries underpinning Glasgow monadic I/O, sequencing, primitive
+arrays, and variables have been reworked, with some consequent changes.
+ If you encounter difficulties, you should consult the
+`PreludeGlaIO.hi' and `PreludeGlaArray.hi' interfaces in your `imports'
+directory.
+
+Andy Gill's proposal for access to standard Haskell I/O functions from
+the monadic I/O world has been implemented.  So you have functions such
+as `getArgsIO', `appendChanIO', etc., etc.
+
+The stuff you used to get from `Stdio.hi' now comes directly from
+`PreludeGlaIO.hi'.
+
+The `packString#' function has been moved into a module of its own,
+`PackedString', and *its type has changed*.  The functions now in that
+module are (to be elaborated...):
+     packString  :: String -> PackedString
+     packString# :: String -> Arr# Char#
+The latter is very useful to preparing `String' arguments to pass to C.
+
+The HBC library modules that compile readily with GHC are available,
+you'll need to give a `-lHShbc' option to the driver.  These modules
+are:
+     Either, Hash, ListUtil, Maybe, Miranda, Number, Parse, Pretty, QSort,
+     Random, Time, Word
+
+The GNU multi-precision (GMP) package which underpins our `Integer'
+support has been upgraded to version 1.3.2.
+
+
+File: release.info,  Node: 0-16-new-elsewhere,  Prev: 0-16-new-in-libraries,  Up: release-0-16
+
+New elsewhere
+-------------
+
+0.16 has a new and much uglier "assembler mangler"
+(`ghc/driver/ghc-asm-*.lprl'), which is what converts GCC-produced
+assembly-language output into the stuff you actually run.  Besides
+throwing away function prologues/epilogues, it parks "info tables" next
+to entry code, and fast-entry code right next to slow-entry code.
+
+The net effect of this assembler-mangler is that there is *very little
+runtime penalty* for compiling via GCC.
+
+The way we go about mapping "STG registers" to real machine registers
+(`ghc/imports/StgRegs.lh') is different.  It should be particularly
+better for machines with few registers (though we still don't have a
+good solution for x86 machines).
+
+We can now "steal" caller-save registers; in the past, we could only
+steal callee-save registers.
+
+
+File: release.info,  Node: release-0-10,  Next: release-0-09,  Prev: release-0-16,  Up: Top
+
+Release notes for version 0.10 -- 12/92
+=======================================
+
+Release 0.10 was the first major, public release of this compilation
+system.
+
+The announcement (now distributed in `ghc/docs/ANNOUNCE-0.10')
+describes the most notable features of this release.  These notes,
+therefore, just cover some of the fine points...
+
+* Menu:
+
+* 0-10-new-docs::          New documentation.
+* 0-10-new-in-usage::      User-visible changes.
+* 0-10-new-in-compiler::   New in the compiler proper.
+* 0-10-new-in-libraries::  In the prelude and runtime support.
+
+
+File: release.info,  Node: 0-10-new-docs,  Next: 0-10-new-in-usage,  Prev: release-0-10,  Up: release-0-10
+
+New documentation
+-----------------
+
+We're providing a few more papers, in `ghc/docs/papers'.  See
+`ghc/docs/README' for a full list of documentation.
+
+
+File: release.info,  Node: 0-10-new-in-usage,  Next: 0-10-new-in-compiler,  Prev: 0-10-new-docs,  Up: release-0-10
+
+User-visible changes
+--------------------
+
+An "Appel-style" generational garbage collector is now the default. (It
+used to be a two-space copying collector.)
+
+The flag to use the unboxery and other Glasgow extensions was
+`-funboxed'.  We've changed it to `-fglasgow-exts'.  We may elaborate
+this further, eventually...
+
+(If 0.06 is the last version you looked at, flags/options have changed
+a fair bit since then.)
+
+
+File: release.info,  Node: 0-10-new-in-compiler,  Next: 0-10-new-in-libraries,  Prev: 0-10-new-in-usage,  Up: release-0-10
+
+New in the compiler proper
+--------------------------
+
+Derived instances are in, well partly.  We'll put in the rest when
+there's a demand (or we have nothing better to do).
+
+`Integers' (arbitrary-precision integers) are now in properly. Just as
+HBC does, we use the GNU multi-precision arithmetic package. Source is
+in `ghc/runtime/gmp'.
+
+We did a bunch of stuff in the typechecker region to support
+overloading better; we called it "dictionary stomping."  One
+side-effect of this work is that error messages related to overloading
+have a slight chance of being sensible (which they weren't before).
+
+"Primitive arrays," on top of which efficient, regular Haskell arrays
+can be (are) built, went in.  There's a *little* about using them, in
+the "Glasgow extensions" section of the User's Guide.
+
+Similarly, the mechanisms for calling C directly (`ccall' and `casm')
+are more likely to be useful.  Again, a little documentation in the
+same place...
+
+
+File: release.info,  Node: 0-10-new-in-libraries,  Prev: 0-10-new-in-compiler,  Up: release-0-10
+
+In the prelude and runtime support
+----------------------------------
+
+Our standard prelude conforms to the Haskell 1.2 report.
+
+We support a non-standard `fromInt' method for the `Num' class, just as
+HBC does.
+
+We support a non-standard `cmp3' method for the `Ord' class.  Snoop
+around in the `ghc/lib/prelude/*.hs' code, if you care.  (We use it in
+code generated for derived instances.)
+
+
+File: release.info,  Node: release-0-09,  Next: release-0-08,  Prev: release-0-10,  Up: Top
+
+Release 0.09 -- 9/92
+====================
+
+This was an unannounced pseudo-release to a few people.
+
+
+File: release.info,  Node: release-0-08,  Next: release-0-07,  Prev: release-0-09,  Up: Top
+
+Release notes for version 0.08 -- 7/92
+======================================
+
+0.08 was not an announced release, so these notes are of historical
+interest, at best.
+
+* Menu:
+
+* 0-08-new-docs::                 New documentation, especially for hackers!.
+* 0-08-new-in-usage::             Main user-visible changes.
+* 0-08-new-in-compiler::          To do with the compiler proper.
+* 0-08-new-in-compiler-contrib::  In contributed bits of the compiler.
+* 0-08-new-in-libraries::         In `Prelude' and runtime support.
+* 0-08-new-in-mkworld::           In distribution/build/installation machinery.
+* 0-08-new-misc::                 Miscellaneous new things.
+
+
+File: release.info,  Node: 0-08-new-docs,  Next: 0-08-new-in-usage,  Prev: release-0-08,  Up: release-0-08
+
+New documentation, especially for hackers!
+------------------------------------------
+
+
+File: release.info,  Node: 0-08-new-in-usage,  Next: 0-08-new-in-compiler,  Prev: 0-08-new-docs,  Up: release-0-08
+
+Main user-visible changes
+-------------------------
+
+`ghc' driver flag fiddling:
+     These things change... A good thing to try is `ghc -help', unless
+     of course you think the documentation might be right (in which case
+     look there :-).
+
+`ghc' driver more "policy-free":
+     The driver no longer has great wads of built-in options for its
+     constituent phases (parser, Haskell compiler, C compiler, etc.). 
+     It is much easier to configure these (if required) at build time. 
+     A better idea, which we use, is to wired in very few options, but
+     to use the "make world" machinery to ensure that the desired (wads
+     of options) are always passed explicitly.
+
+-OC:
+     We got rid of the `-OC' flag.
+
+
+File: release.info,  Node: 0-08-new-in-compiler,  Next: 0-08-new-in-compiler-contrib,  Prev: 0-08-new-in-usage,  Up: release-0-08
+
+To do with the compiler proper
+------------------------------
+
+"Renamer" is in:
+     Essentially, this implements module-system stuff.  Checks for
+     naming/scoping errors have been moved out of the typechecker into
+     the renamer, which should be faster.
+
+Interface-file (`.hi' file) generation:
+     It works.
+
+Ambiguous-type resolution:
+     It's basically right now, except that we still don't grok `default'
+     declarations (which we have yet to see in a real Haskell program
+     :-).
+
+Smaller C output:
+Code generator:
+     Improvements related to the information carried around about
+     closures (`ClosureInfo' and `LambdaFormInfo' types); matches the
+     STG-machine paper.
+
+     CAFs fully supported (notably updatable ones).
+
+     Black-holing (at garbage-collection time) fully supported.
+
+Simplifiers:
+     Further work on the `Core'-to-`Core' local-transformation passes
+     (in `compiler/simplCore/').  Also, we have added some
+     `STG'-to-`STG' transformations; for example, floating `lets'
+     outward is most conveniently done at the STG level...
+
+Cost-centre-style profiling:
+Improvements to basic datatypes:
+     Notably to `Ids' (`basicTypes/Id.lhs') and names
+     (`basicTypes/NameTypes.lhs').  There is a new compiler-wide class,
+     `NamedThing' (`utils/Outputable.lhs').  Essentially it is easier to
+     ask of an entity: where did you come from? (e.g., PreludeCore?,
+     imported?) what are you? (a data-constructor? a dictionary
+     selector?) what is your original name? where are you going?
+     (exported or not...)
+
+
+File: release.info,  Node: 0-08-new-in-compiler-contrib,  Next: 0-08-new-in-libraries,  Prev: 0-08-new-in-compiler,  Up: release-0-08
+
+In contributed bits of the compiler
+-----------------------------------
+
+Evaluation-transformer bits:
+     Denis Howe has sent us an initial version (`compiler/evalTran').
+     It isn't used by default, but is presumably play-withable...
+
+     This `Core'-to-`Core' transformation makes all lets of the form
+          let VAR = eval EXPR in ...
+     strict.  `eval' is a dummy name which is thrown away (i.e.,
+     `eval x = x').
+
+Please send us *your* bits for next time!
+
+
+File: release.info,  Node: 0-08-new-in-libraries,  Next: 0-08-new-in-mkworld,  Prev: 0-08-new-in-compiler-contrib,  Up: release-0-08
+
+In `Prelude' and runtime support
+--------------------------------
+
+Prelude is 1.2.
+
+The compiler has basically all of `PreludeCore' wired into it (see
+`compiler/prelude/'); the rest is brought in with a straightforward
+`import Prelude' (which brings in `imports/Prelude.hi').  [The old
+`MiniPrel*' files are dead and unmissed.]
+
+
+File: release.info,  Node: 0-08-new-in-mkworld,  Next: 0-08-new-misc,  Prev: 0-08-new-in-libraries,  Up: release-0-08
+
+In distribution/build/installation machinery
+--------------------------------------------
+
+The "make world" machinery has many small improvements.
+
+It works notably better in a shared-symlink-tree world (which we use at
+Glasgow).
+
+We have abandoned efforts to use one build tree for making object files
+for multiple platforms.  We can make simpler Makefiles as a result.
+
+There's a new standard setup, called `fast'.  The name is inappropriate
+at present, but it is intended to be for people who value
+compiled-code-speed above all else (within reason, of course).
+
+
+File: release.info,  Node: 0-08-new-misc,  Prev: 0-08-new-in-mkworld,  Up: release-0-08
+
+Miscellaneous new things
+------------------------
+
+New version of Denis Howe's `mira2hs' script.
+
+
+File: release.info,  Node: release-0-07,  Next: release-0-06,  Prev: release-0-08,  Up: Top
+
+Release 0.07
+============
+
+This was an unannounced pseudo-release to a few people.
+
+
+File: release.info,  Node: release-0-06,  Next: release-0-05,  Prev: release-0-07,  Up: Top
+
+Release notes for version 0.06 -- 3/92
+======================================
+
+The really new thing about release 0.06 is this: if you can get your
+program through the compiler, then it should actually work when you run
+it!
+
+Another thing we have worked hard on recently is *documentation* (see
+next section).
+
+* Menu:
+
+* 0-06-new-docs::                 New documentation, especially for hackers!.
+* 0-06-new-in-compiler::          To do with the compiler proper.
+* 0-06-new-in-compiler-contrib::  In contributed bits of the compiler.
+* 0-06-new-in-libraries::         In `Prelude' and runtime support.
+* 0-06-new-in-mkworld::           In distribution/build/installation machinery.
+* 0-06-new-misc::                 Miscellaneous new things.
+
+
+File: release.info,  Node: 0-06-new-docs,  Next: 0-06-new-in-compiler,  Prev: release-0-06,  Up: release-0-06
+
+New documentation, especially for hackers!
+------------------------------------------
+
+See the file `docs/README' for a full "roadmap" to all known
+documentation.
+
+STG-machine paper.
+     A monster (70+-page) paper which gives a detailed description of
+     the Spineless Tagless G-machine, on which the back end of the
+     compiler is based. Simon is Jolly Proud of this paper.
+
+     This paper isn't in the distribution, but is available by asking
+     Simon, or by FTP from
+     `ftp.dcs.glasgow.ac.uk:pub/glasgow-fp/stg.dvi'.
+
+`imports/SMinterface.lh'.
+     The storage manager is carefully isolated from the rest of the
+     runtime system behind a carefully identified interface.  This
+     paper documents the interface, and says a little about the
+     implementation.  NB: "literate" `.h' file!
+
+`docs/C_optimisation'.
+     Lots of details about how we use C as a target language, and the
+     tricks we use to make it go fast.  Still drafty.
+
+`docs/runtime'.
+     The *beginnings* of a description of details of the runtime system
+     which aren't covered by the STG paper above.
+
+`docs/typecheck'.
+     The *beginnings* of a description of tricky corners of the type
+     checker.
+
+`docs/arrays'.
+     A work-in-progress on how to handle arrays properly.
+
+`docs/core-overview':
+     The beginnings of a description of the Core data type, plus the
+     other data types you need to know about to write programs which
+     manipulate the Core data type.
+
+     The "how to add to the compiler" document (`docs/add_to_compiler')
+     has some of this stuff in it, too.
+
+Type classes paper:
+     This is a short (20-page) form of the massive "Static Semantics of
+     Haskell" paper.  We submitted it to Lisp and FP 1992, but they
+     (unaccountably) rejected it.
+
+     This paper isn't in the distribution; please ask for it.
+
+
+File: release.info,  Node: 0-06-new-in-compiler,  Next: 0-06-new-in-compiler-contrib,  Prev: 0-06-new-docs,  Up: release-0-06
+
+To do with the compiler proper
+------------------------------
+
+1.2 syntax:
+     The parser handles the Haskell syntax given in the Haskell report,
+     version 1.2.  See `parsers/hsp'.
+
+Graph reduction:
+     Updates are in and we're doing graph reduction!  (All the bells and
+     whistles for doing a good job of [avoiding] updates are not in
+     yet.)
+
+     See `compiler/codeGen/{CodeGen,CgClosure}.lhs' and
+     `runtime/main/Update.lhc' for the main bits.
+
+Closure layout less deeply wired into compiler:
+     Rather than knowing word-for-word how each closure is layed out in
+     memory, the compiler emits C macro calls to access/fill-in the
+     "fixed header" and "variable header" parts of each closure (all
+     described in the storage-manager document).
+
+     This means, for example, that the very same C code used on
+     sequential machines can be used on GRIP as well, even though
+     closures in GRIP have some extra fields -- all that is required is
+     suitable `.h' files to define the header macros accordingly!
+
+     Anyone whose efforts involve munging around in or pinning things
+     onto closures should like this "feature."
+
+Statistics about program execution:
+     The compiler emits macro calls into the C output which, if expanded
+     (use `-DDO_RUNTIME_PROFILING', default: on), will accumulate
+     statistics about program behaviour.  To have those statistics
+     printed out (to `stderr'), give your program the `-p' RTS flag,
+     thusly:
+
+          % a.out +RTS -p
+
+     We welcome any interesting profiles that you may churn up!
+
+     See `imports/StgProfile.h' and `runtime/main/StgProfile.lc', plus
+     insertions of those macro calls in `compiler/codeGen'.
+
+New simplifier/transformation stuff:
+     Contributed by research students Andre Santos and Andy Gill.  In
+     `compiler/simplify' and `compiler/stranal-triv'; it's still
+     thoroughly experimental.
+
+     The old-but-reliable brain-damaged simplifier is now in
+     `compiler/simplify0' and is still the default.
+
+Compiler is compilable with Chalmers's HBC or Glasgow prototype compiler:
+     The default set of `compiler/*/*.hi' interface files in the
+     distribution are for compiling with HBC (this seems to be the
+     people's preference); version 0.997.3 or greater, please.
+
+     A separate set of `.hi' files are provided for those who use the
+     Glasgow prototype compiler.  These are in the file
+     `ghc-0.06-proto-hi-files.tar.Z', available wherever you got the
+     basic distribution.  The installation document says how to deal
+     with these various blobs of files.
+
+     The possibility of using HBC means you can compile the Glasgow
+     Haskell compiler on any machine supported for HBC (Sun3s, Sun4s,
+     DEC 3100s [and one or two more flavours?]).
+
+
+File: release.info,  Node: 0-06-new-in-compiler-contrib,  Next: 0-06-new-in-libraries,  Prev: 0-06-new-in-compiler,  Up: release-0-06
+
+In contributed bits of the compiler
+-----------------------------------
+
+Semantique strictness analyser:
+     The one in the distribution now builds; in `compiler/stranal-sem'.
+     This would only be of interest to those who might want to play with
+     it.  The rest of the compiler can't use its results.
+
+     If you want to build this strictness analyser, you need to
+     configure appropriately (see `mkworld/Project-ghc-full.*', when
+     you get to that part of the installation instructions).
+
+Please send us *your* bits for next time!
+
+
+File: release.info,  Node: 0-06-new-in-libraries,  Next: 0-06-new-in-mkworld,  Prev: 0-06-new-in-compiler-contrib,  Up: release-0-06
+
+In `Prelude' and runtime support
+--------------------------------
+
+"Binary bloat" from the prelude, ameliorated:
+     The C files produced from compiling the prelude are chopped into
+     some 400 separate C files, which are individually compiled and
+     banged into an archive.  Result is that you only get the bits you
+     "need," and binary sizes have about halved. (There is more work to
+     do in this department.)
+
+Naive implementation of Haskell I/O:
+     At least `ReadChan stdin' and `AppendChan stdout' requests work.
+     It shouldn't be too hard to add support for other requests in
+     `lib/io/DialogueToIO.lhs'. (Only [extended] Haskell hacking
+     needed!)
+
+Storage management moved behind a safe wall:
+     It's now in `runtime/storage/.'  All four flavours of garbage
+     collector (two-space copying, one-space compacting, dual-mode, and
+     Appel-like generational) seem to work.
+
+     Patrick Sansom, research student and hacker extraordinaire, did all
+     of this.
+
+Flags-to-RTS machinery in place:
+     When your `ghc'-compiled Haskell program starts up, any
+     command-line arguments bracketted by `+RTS' and `-RTS' (or the end
+     of the arguments) are assumed to be flags for the runtime system. 
+     These flags are used to alter the heap size, ask for
+     garbage-collection stats, etc.
+
+     To see what flags are available, try: `myprog +RTS -f'.
+
+     Patrick did this, too.
+
+C-optimisation sleaziness also better hidden:
+     It is in `runtime/c-as-asm/'.  (It needs to be tidier, but...)
+
+     We are still actively working on getting this right.  Please get in
+     touch if you are interested.
+
+
+File: release.info,  Node: 0-06-new-in-mkworld,  Next: 0-06-new-misc,  Prev: 0-06-new-in-libraries,  Up: release-0-06
+
+In distribution/build/installation machinery
+--------------------------------------------
+
+Better line numbers, and Emacs-able TAGS files:
+     (Yes, they're related!) Error messages should come out with better
+     line numbers than before.
+
+     The distribution now includes tags-making things: souped-up `etags'
+     program [for C], `perltags' [for perl], and `hstags' [for Haskell]
+     (mostly in `utils/scripts').  The Haskell tags program uses the
+     parser, so it Does It Right.
+
+     `make tags fulltags' at the top of the distribution tree will make
+     a huge TAGS file for the whole compilation system.
+
+`make install' might do something sensible:
+     Yes, it does.  But you'd be well advised to do a `make -n install'
+     just to check first!
+
+
+File: release.info,  Node: 0-06-new-misc,  Prev: 0-06-new-in-mkworld,  Up: release-0-06
+
+Miscellaneous new things
+------------------------
+
+Consistency-checking for executables:
+     Given that our system can generate `.o' object files which are
+     seriously *incompatible* with each other, depending on choice of
+     garbage collector, degree of optimisation, whether or not compiling
+     for GRIP, etc., we have implemented a scheme (in the driver `ghc')
+     that checks that all the linked bits in an executable "belong"
+     together.
+
+Scripts from Denis Howe:
+     We have included his `fptags' and `mira2hs' scripts that he posted
+     to `comp.lang.functional'.
+
+
+File: release.info,  Node: release-0-05,  Next: releases-0-03-04,  Prev: release-0-06,  Up: Top
+
+Release notes for version 0.05 -- 12/91
+=======================================
+
+1.1 syntax:
+     Does Haskell version 1.1 syntax.  The code for the parser
+     (`parsers/hsp/') has been tidied up quite a bit [nice job, Kevin].
+
+Expressions and patterns:
+     All forms of expressions and patterns work, including overloaded
+     patterns and `n+k' patterns.
+
+A big part of the standard prelude is operational:
+     These parts (in `lib/prelude') have been compiled with the new
+     compiler, and programs compiled with the new compiler can be
+     linked to it.
+
+     With the exceptions of (a) hooking in the standard Haskell I/O
+     system (see next item) and (b) special pleading for
+     constant-time-access arrays (or other magical features), all
+     Prelude stuff is either done or easily do-able.
+
+Simple resolution of ambiguous overloading of numeric types:
+     (As per Haskell report, section 4.3.4).  `default' declarations do
+     *NOT* work; however, the "default default"
+     (`default (Int, Double)') is wired in.  This should clear up nearly
+     all annoying "ambiguous dictionary" errors.
+
+Better non-standard I/O:
+     We have implemented the bare bones of the I/O described in
+     `docs/io-design/'.  It's not standard Haskell I/O (we haven't yet
+     implemented the impedance-matcher discussed in the doc), and it's
+     not the same as what was there in 0.02.  However, you can now
+     write a simple reads-stdin/writes-stdout program:
+
+          #include "GhcPrelude.h"
+          
+          main = readString `thenIO` ( \ s ->
+                 writeString (my_String_to_String_manglification s) )
+
+     The implementation of `error' (via `sysError') is also as
+     described in the I/O document.
+
+Faster compiler:
+     The compiler is faster than version 0.02 -- we promise -- but the
+     significant tuning work is not yet done.  We will do it after The
+     Mangler (renamer) is in.
+
+Run compiled code on a Sun4:
+     If you compile your program to C (`.hc' files), with, e.g.:
+
+          % glhc -C Foo.hs
+
+     then you compile the output on a Sun4 with:
+
+          % glhc -c Foo.hc
+
+     and, if you have the right things to link to, you can link with:
+
+          % glhc -o foo Foo.o
+
+     The "right things to link to" include: the runtime system (
+     `cd runtimes/standard; make' on a sun4), and the standard libraries
+     (`cd lib; make all' on a sun4).
+
+     We have not yet tried to make this work for Every Known Unix Box In
+     The Universe.  (But we plan to, with your help :-)
+
+Upheaval during FPCA:
+     As advertised with 0.02: Files moved around, modules and data types
+     were renamed, and a generally Much Cleaner World now exists.  We
+     have no plans to do more of the same (at least for the compiler
+     proper).
+
+
+File: release.info,  Node: releases-0-03-04,  Next: release-0-02,  Prev: release-0-05,  Up: Top
+
+Releases between 0.02 and 0.05
+==============================
+
+There were a couple of private releases to highly zealous people,
+mainly our friends at York.  There are README files in the
+`release_notes/' dir about those, if you are really interested.
+
+
+File: release.info,  Node: release-0-02,  Prev: releases-0-03-04,  Up: Top
+
+Release notes for version 0.02 -- 8/91
+======================================
+
+Nothing about version 0.02, our very first release, is still
+interesting :-)
+
+
+
+Tag Table:
+Node: Top94
+Node: release-0-261376
+Node: 0-26-config2598
+Node: 0-26-user-visible2990
+Node: 0-26-options4677
+Node: 0-26-io6347
+Node: 0-26-new-in-compiler6866
+Node: 0-26-new-in-libraries7216
+Node: 0-26-new-in-rts10262
+Node: 0-26-new-elsewhere10928
+Node: release_211247
+Node: release-0-2311691
+Node: 0-23-ports12593
+Node: 0-23-config15282
+Node: 0-23-user-visible15623
+Node: 0-23-io17193
+Node: 0-23-support18412
+Node: 0-23-new-in-compiler19430
+Node: 0-23-new-in-libraries20678
+Node: 0-23-new-elsewhere21640
+Node: release-0-2222274
+Node: 0-22-ports23049
+Node: 0-22-user-visible25678
+Node: 0-22-support27749
+Node: 0-22-new-in-compiler28449
+Node: 0-22-new-in-libraries29185
+Node: 0-22-new-elsewhere29825
+Node: release-0-1930606
+Node: 0-19-user-visible31362
+Node: 0-19-new-docs33597
+Node: 0-19-new-in-compiler34302
+Node: 0-19-new-in-libraries35048
+Node: 0-19-new-ports35714
+Node: 0-19-new-elsewhere37567
+Node: release-0-1638086
+Node: 0-16-new-docs38704
+Node: 0-16-new-in-compiler38969
+Node: 0-16-new-in-libraries40080
+Node: 0-16-new-elsewhere41518
+Node: release-0-1042421
+Node: 0-10-new-docs43078
+Node: 0-10-new-in-usage43340
+Node: 0-10-new-in-compiler43874
+Node: 0-10-new-in-libraries44950
+Node: release-0-0945441
+Node: release-0-0845636
+Node: 0-08-new-docs46392
+Node: 0-08-new-in-usage46589
+Node: 0-08-new-in-compiler47431
+Node: 0-08-new-in-compiler-contrib49129
+Node: 0-08-new-in-libraries49740
+Node: 0-08-new-in-mkworld50205
+Node: 0-08-new-misc50892
+Node: release-0-0751081
+Node: release-0-0651260
+Node: 0-06-new-docs52099
+Node: 0-06-new-in-compiler54049
+Node: 0-06-new-in-compiler-contrib56964
+Node: 0-06-new-in-libraries57648
+Node: 0-06-new-in-mkworld59426
+Node: 0-06-new-misc60311
+Node: release-0-0560988
+Node: releases-0-03-0463865
+Node: release-0-0264217
+
+End Tag Table

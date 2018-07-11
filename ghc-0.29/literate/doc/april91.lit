@@ -1,0 +1,572 @@
+\section[april91-proposals]{APRIL91 PROPOSALS}
+
+%************************************************************************
+%*									*
+\subsection[april91-new-ideas]{New ideas}
+%*									*
+%************************************************************************
+
+These ideas have piled up over the past six months.  NONE OF THEM ARE
+IMPLEMENTED.  And some are TINY little things (and some are BIG).
+
+JULY91: I have fleshed out the \sectionref{literate-para-mode} and
+\sectionref{lit2lit} comments, as these directions piqued the interest
+of some fellow GRASPers.
+
+%************************************************************************
+%*									*
+\subsubsection[delatexify-commands]{Make the commands look less like \LaTeX{}}
+%*									*
+%************************************************************************
+
+The biggest practical problem that has arisen among the (few) users of
+the literate programming stuff is that they think they're writing
+\LaTeX{} files and are surprised/disappointed when \LaTeX{} fails to
+grok their files.  We have been too successful in making the notation
+``\LaTeX{}-like!''
+
+One way to make the notation less \LaTeX{}-like while maintaining the
+notation's familiarity is to switch to mixed-case names, used in a
+consistent manner; for example:
+\begin{verbatim}
+CURRENTLY		WOULD BECOME ...
+\documentstyle		\documentStyle
+\printindex		\printIndex
+\begin{flushleft}	\begin{flushLeft}
+\end{verbatim}
+Command/environment names that are one word (e.g.,
+\tr{\begin{enumerate}}) would be unchanged.
+
+Alternatively, we could make the literate-system case-insensitive
+where command names are concerned and merely make it our {\em
+convention} to use mixed-case names.
+
+%************************************************************************
+%*									*
+\subsubsection[multiple-indexes]{Multiple indexes}
+%*									*
+%************************************************************************
+
+Having one index for a pretty-big program is a dubious proposition;
+you get a {\em huge} index.  I think you need multiple indexes---in
+the case of a compiler, you might then have a separate index for:
+parser, typechecker, syntactic desugarer, optimiser, etc.
+
+Let's assume you index all the pieces of a compiler (as above) as
+self-contained units.  PROBLEM: it is the uses of functions, etc.,
+that {\em cross} such boundaries that you would MOST like to have your
+attention drawn to.
+
+That problem aside, I think this is the basic solution:
+\begin{description}
+\item[\pl{\defineindex{<index-tag-string>}}:]
+Says that \pl{<index-tag-string>} is ``legal'' hereafter.
+Requiring/encouraging these \tr{\defineindex} will help to catch typos.
+
+\item[\pl{\index[<index-tag-string>]{<entry>}}:]
+The \tr{\index} command has an optional \pl{<index-tag-string>} with
+which this \pl{<entry>} should be tagged.  The default tag
+string is \tr{main} (unless reset with \tr{\setindex...}; below).
+
+\item[\pl{\printindex[<index-tag-strings>]}:]
+Print an index here, made up from all the entries that have one of the
+\pl{<index-tag-strings>}.  The default tag string is (same
+caveats...) \tr{main}.
+
+\item[\pl{\setcurrentindex{<index-tag-string>}}:]
+Set the default tag string for \tr{\index} commands in text.
+\end{description}
+
+I think you could use the mechanism above to come close to Texinfo's
+idea about multiple indexes.
+
+%************************************************************************
+%*									*
+\subsubsection[better-Haskell-indexing]{Better \Haskell{} indexing}
+%*									*
+%************************************************************************
+
+(The idea probably carries over to other languages.)  Stick the whole
+literate-program \Haskell{} source into an ``interesting-thing
+finder'' (call it \tr{htags} :-), getting back (source-location,
+index-entry) pairs.  Then the only trick is to tack each index-entry
+onto the code block nearest to the reported source-location.
+
+%************************************************************************
+%*									*
+\subsubsection[revised-sectioning]{Revisions to the sectioning commands}
+%*									*
+%************************************************************************
+
+The main thing that is a pain about the current sectioning (see
+\sectionref{Sectioning}) is making up unique node names all the time.
+I propose the following ``system'' for the optional arg to
+\tr{\section<n>}; shown by example:
+\begin{description}
+\item[\pl{\section{<title>}}:]
+(As currently.) A default node name, made from the section number.
+No \tr{\label} created.
+
+\item[\pl{\section[]{<title>}}:]
+No node name, no node, no \tr{\label}.  Not recommended :-)
+
+\item[\pl{\section[<the-usual>]{<title>}}:]
+(As currently.) Arguably, the stuff to let you specific next/prev/up
+explicitly should be dropped (to partly de-Info-ise the notation).
+
+\item[\pl{\section["]{<title>}}:]
+(The new one.)  The node name should be the same as the \pl{<title>}
+(``ditto'').  No \tr{\label} would be generated.  Some massaging would
+be required to remove nodename-hostile characters from the title
+(e.g., colons).
+\end{description}
+
+%************************************************************************
+%*									*
+\subsubsection[BNF-grammars]{A ``BNF grammar'' environment}
+%*									*
+%************************************************************************
+
+This would work like the \tr{verbatim} program used with the
+\Haskell{} report; you could say:
+\begin{verbatim}
+\begin{grammar}
+exp -> aexp				
+    |  exp aexp
+    |  exp_1 op exp_2
+    |  @-@ aexp
+    |  @\@ apat_1 ... apat_n [gd] @->@ exp
+    |  @if@ exp_1 @then@ exp_2 @else@ exp_3
+    |  exp @where@ @{@ decls @}@
+    |  @case@ exp @of@ @{@ alts @}@
+    |  exp @::@ [context @=>@] atype
+\end{grammar}
+\end{verbatim}
+and respectable BNF-looking stuff would appear in your output.  Index
+entries for the definitions of nonterminals would be generated;
+possibly a \tr{[noindex]} option to suppress that.
+
+I'd also like to do something for inference rules, but I'm fairly
+baffled about what that might be.  (They can be mightily complicated,
+and it's not clear that a plain-ASCII form is possible.)
+
+%************************************************************************
+%*									*
+\subsubsection[pseudo-C-preprocessor]{Fake ``C pre-processing''}
+%*									*
+%************************************************************************
+
+Change things so that literate documents are first put through a
+``fake C pre-processor'' (this section assumes you know what a C
+pre-processor does).  Notes:
+\begin{enumerate}
+\item
+The relevant commands would start with \tr{##} (to avoid confusion w/
+the real thing); hence, \tr{##if}, \tr{##endif}, \tr{##define},
+\tr{##include}, etc.
+
+\item
+(Very important.)  This pseudo-C-preprocessor does NOTHING inside:
+\begin{itemize}
+\item
+Code environments (and the Bird-track equivalent).
+\item
+Verbatim environments.
+\item
+\tr{\tr} and \tr{\pl} commands (and any friends they may have).
+\item
+\tr{rawlatex} environments (next section).
+\end{itemize}
+
+\item
+All of the current dubious \tr{only<this-or-that>} environments and so
+on would go away; what you currently write as:
+\begin{verbatim}
+ \begin{onlystandalone}
+ \documentstyle[11pt,literate]{article}
+ \begin{document}
+ \title{Glasgow Literate Programming\\ User's Guide}
+ \date{April 1991}
+ \maketitle
+ \begin{onlylatex}
+ \tableofcontents
+ \end{onlylatex}
+ \clearpage
+ \end{onlystandalone}
+\end{verbatim}
+would be re-written as:
+\begin{verbatim}
+ ##if defined(STANDALONE)
+ \documentstyle[11pt,literate]{article}
+ \begin{document}
+ \title{Glasgow Literate Programming\\ User's Guide}
+ \date{April 1991}
+ \maketitle
+ ##if defined(MK_LATEX)
+ \tableofcontents
+ ##endif /* MK_LATEX */
+ \clearpage
+ ##endif /* STANDALONE */
+\end{verbatim}
+
+\item
+\tr{##include} would take the place of the current bogosity
+\tr{\inputnow}.
+
+\item
+\tr{##define} would take over from the current emasculated
+\tr{\define} and would emphasise the point that this literate notation
+is a fixed notation, lacking general macros.
+
+\item
+Running this or that program would pre-\pl{##define} certain symbols
+(e.g., \pl{MK_LATEX}), but I don't know exactly which just yet.
+
+\item
+Using \pl{##defines} and \pl{##ifdef}'ing easily generalises the
+``standalone/partofdoc'' dichotomy (which badly needs generalising).
+\end{enumerate}
+
+%************************************************************************
+%*									*
+\subsubsection[invisible-code]{Invisible code}
+%*									*
+%************************************************************************
+
+I am wondering if we shouldn't have a code environment of the form:
+\begin{verbatim}
+\begin{invisiblecode}
+main (int argc, char **argv)
+{
+    printf("Hello, Seaworld!\n");
+}
+\end{invisiblecode}
+\end{verbatim}
+for code that {\em should} be extracted (\tr{lit2pgm}) but that {\em
+should not} be displayed in \tr{lit2latex/lit2texi} documents.
+This would probably be used when you want to include most, but not all,
+of a program's code---in a paper for publication, for example.
+
+My only fear is that it is too easily subject to abuse.
+
+Perhaps the C-pre-processing stuff is a better idea...
+(\sectionref{pseudo-C-preprocessor}).
+
+%************************************************************************
+%*									*
+\subsubsection[text-in-code]{Plain text in your code}
+%*									*
+%************************************************************************
+
+In Knuth's WEB, you can refer to code-things in the text parts of the
+document/program {\em and} to text-things in your code.  (As I recall,
+putting \tr{|} around text switches it to
+whatever-you're-not-doing-now (code or text)).
+
+We have the first (the \tr{@...@} shorthand to refer to code things
+while in text), but not the second: what's in a code environment is
+code just like you would see in an illiterate program in the same
+language.
+
+I guess the right solution is to have specially-marked comments
+(again, language-dependent) that say, ``Don't treat this as just a
+comment in this programming language, but extract it and
+mangle/massage it as if it were literate-document text.''
+
+A pain to implement.  Not worth it?
+
+%************************************************************************
+%*									*
+\subsubsection[diff-fonts-in-text]{Using many ``fonts'' in text}
+%*									*
+%************************************************************************
+
+I find the \tr{\tr} (``typewriter font'') and \tr{\pl} (``plain
+font'') commands quite useful.  (Yes, I know they go against the
+intensional markup principle (\sectionref{ASCII-declarative-markup}),
+but they are {\em so} convenient...)
+
+I'm inclined to make up notations for italics, small caps, and bold
+(and their ASCII-only ``equivalents'') and then try to systematize
+their use.  Hmmm....
+
+I've found the Texinfo attempt to have a command for every different
+kind of thing you might want to talk about in a document to be too
+much and also unsatisfying.
+
+%************************************************************************
+%*									*
+\subsubsection[code-in-text-formatting]{Formatting code-ish things in text}
+%*									*
+%************************************************************************
+
+Right now, the \tr{@...@} shortcut notation means: Format this and
+automagically index it as for the code parts of the document.
+
+Strictly speaking then, I think the \tr{@...@} notation should only be
+used to refer to things that {\em actually exist} in the code parts of
+the document, and {\em not} for code snippets, fragments, and other
+things mentioned along the way.
+
+For this latter task, perhaps a \tr{\code[<language>]{<text>}} command
+is in order.  This says: format this \pl{<text>} as for
+\pl{<language>}, but don't index it or pretend that it actually has
+anything to do with the real code in the program.
+
+%************************************************************************
+%*									*
+\subsubsection[interface-with-papers]{Interface with plain \LaTeX{} papers}
+%*									*
+%************************************************************************
+
+At least in our setting, it is likely we've written one or more papers
+about some interesting part of the literate program we're writing.
+The paper is likely to be:
+\begin{itemize}
+\item
+relatively polished (so you'd like to re-use that effort);
+\item
+either a decent introduction to some part of the program, or a
+succinct synopsis of some part;
+\item
+in straight \LaTeX{}, but using features quite beyond our literate
+markup, and including figures, etc.;
+\item
+not to be changed in any way.
+\end{itemize}
+
+At the least, I'd like to be able to include the paper in toto, and
+have pointers into it (refs to its labels).
+
+More/better ideas welcome.
+
+%************************************************************************
+%*									*
+\subsubsection[literate-para-mode]{A literate Para mode}
+%*									*
+%************************************************************************
+
+[See also \sectionref{lit2lit}.]
+
+The sad fact is that, at the moment, these literate programs/documents
+are typed in as just plain files and manipulated as such.  They are
+only processed into LaTeX/Info documents after the fact (and only
+occasionally).
+
+Para mode is a GNU emacs mode that (roughly...) lets you both edit
+Texinfo files {\em and} jump around in them like Info files, based on
+the node structure.  Either edit-as-normal or navigate-as-Info.
+
+I think there are possibilities for doing the same thing with these
+literate documents/programs.  Then you'd get the benefits of
+navigation, following indexery, etc., {\em as you create the files}.
+
+One major problem (?): the literate sectioning makes it quite easy to
+navigate {\em within} a file, but, for it to be worth it, you'd like
+the ``literate Para mode'' (in navigation mode) to be able to carry
+you to the right place when you, e.g., want to go ``up'' from the
+first \tr{\section} in a file.
+
+Implementation: my first cut would be: run something over all the
+literate files in a program to collect ``Para-useful'' information;
+save this somewhere---this is the moral equivalent of a TAGS file.
+Then the navigation commands, etc., would use the pseudo-TAGS info to
+do their thing.  Because the info would get out of date as you hack on
+your program, you'd re-make the pseudo-TAGS stuff whenever you stepped
+out for coffee, lunch, or sleep.
+
+%************************************************************************
+%*									*
+\subsubsection[lit2lit]{A \tr{lit2lit} program (to help implement a Para system)}
+%*									*
+%************************************************************************
+
+[This might be a better way to implement a literate Para ...]  Have a
+program that takes a set of \tr{.lit} files, munges them to do all the
+usual cross-referencing, etc., etc., and then writes out {\em versions
+of the original files} with all the linking info, etc., etc., inserted
+as {\em comments}.  Call the program \tr{lit2lit}...
+
+If you took the \tr{lit2lit} output and re-ran it through one of the
+other programs, e.g., \tr{lit2latex}, it would produce {\em exactly}
+the same output.
+
+The purpose of the information stored in comments would be to provide an
+Emacs mode (or something) enough information to help you jump around
+in a large program or generally do useful stuff.
+
+For example, it might insert links and things for something like Bob
+Weiner's Hyperbole system.
+
+I'm thinking that \tr{lit2lit} would be re-run over a system's sources
+every night by \tr{cron(1)}.
+
+%************************************************************************
+%*									*
+\subsubsection[xtex-options]{Generating \LaTeX{} documents especially for \tr{xtex}}
+%*									*
+%************************************************************************
+
+\tr{Xtex} is a (free) DVI previewer with some hypertext-ish features;
+in particular, if you click on a reference to a label, then it takes
+you to the page where that label is defined.  By generating a
+``\LaTeX{}'' document with all the linking info explicit (in the form
+of labels and references to them), \tr{xtex} would do almost all the
+jumping-around stuff that \tr{info} and \tr{xinfo} do for you.  {\em
+And you don't lose the font information.}
+
+%************************************************************************
+%*									*
+\subsubsection[free-text-index]{A free-text ``index''}
+%*									*
+%************************************************************************
+
+OK, even with all the automagical indexing, cross-referencing, etc.,
+occasions will arise when you say, ``Help!  I need to look absolutely
+everywhere for \pl{<foo>}!''  (Like you do with grep/tags, but
+preferably nicer---all the tricks of the free-text indexing trade.)
+
+It would be great to have a ``free text index'' button or pseudo-node
+(an Info ``node'' that, when you jump to it, puts you in a
+free-text-search mode.  Of course, the free-text-search should be able
+to plunk you down in the Info node you finally select).
+
+I really don't want to implement this myself :-)
+
+%************************************************************************
+%*									*
+\subsubsection[magic-Info-nodes]{Other ``magic'' Info nodes...}
+%*									*
+%************************************************************************
+
+The ``free text index'' magic Info node makes me wish for {\em other}
+nodes-that-do-weird-things when you jump to them...  You jump to it
+and... it starts up a PostScript previewer and shows me a picture...
+or sound...  or my text editor so I can send a gripe to the maintainer
+of \pl{foo}...  and so on.
+
+%************************************************************************
+%*									*
+\subsubsection[revised-pgm-options]{Revise the way options are fed to \tr{lit2*} programs}
+%*									*
+%************************************************************************
+
+Using getopt(3)-style one-letter options is getting messy---there are
+too many of them.  Perhaps time for something more complicated...
+
+%************************************************************************
+%*									*
+\subsubsection[mixing-Bird-code-and-other]{Mixing code in ``Bird tracks'' with other code}
+%*									*
+%************************************************************************
+
+When you put something in a code environment, e.g.,
+\begin{verbatim}
+\begin{code}
+main _ = [ AppendChan stdout "Hi, Mom!\n" ]
+\end{code}
+\end{verbatim}
+there is no doubt about what should be considered the ``first
+column''.  On the other hand, if you see a ``Bird track'' equivalent:
+\begin{verbatim}
+> main _ = [ AppendChan stdout "Hi, Mom!\n" ]
+\end{verbatim}
+obviously the initial \tr{>} should be stripped, but what about the
+space following?  This matters if the code is to be put through, e.g.,
+a C pre-processor, which looks for \pl{#}'s in column~1.
+
+The solution I lean to is to have an option that says how much whitespace
+should be stripped off the front of Bird-track style code lines.
+
+%************************************************************************
+%*									*
+\subsubsection[code-reading-and-printing]{Decouple code reading and printing styles}
+%*									*
+%************************************************************************
+
+Code may come in either in code environments or in Bird-tracks.  At
+present, it is printed in the same style as it came.  This should
+remain the default.
+
+However, it would be nice to be able to say (with options), ``OK,
+print {\em all} the code as if it were in Bird-track form'' (or vice
+versa).  This allows uniform presentation, while preserving
+programmers' preference for typing in one style rather than the other.
+
+%************************************************************************
+%*									*
+\subsection[april91-old-ideas]{Old ideas that still haven't gone anywhere}
+%*									*
+%************************************************************************
+
+These are ideas that have been around for a long time, HAVE NOT BEEN
+IMPLEMENTED, and no-one seems to have minded much.
+
+%************************************************************************
+%*									*
+\subsubsection[recording-who-to-blame]{\pl{\owner{<name>}}}
+%*									*
+%************************************************************************
+\index{owner@\owner}
+(Not \tr{lit2pgm}.) Give the ``name'' that should be listed as the
+``owner'' of a section.  If no \tr{\owner} command has been seen, then
+the owner of the source file in which the first piece of text in the
+section was found is used.
+
+[I haven't really decided how this should work.]
+
+%************************************************************************
+%*									*
+\subsubsection[test-burying]{Burying test cases in your document}
+%*									*
+%************************************************************************
+
+The idea is that you can say:
+\begin{verbatim}
+\begin{test}{foo}
+<Weird stuff in here>
+\end{test}
+\end{verbatim}
+For this test \tr{foo}, the \tr{<weird stuff in here>} would somehow
+say how to run the test, what should be fed to standard input (etc.),
+and what results to expect on standard output, standard error, and
+perhaps certain output files.
+
+The idea is to put the (simple?) test cases right next to the code that
+will be exercised.
+
+The problem is: tests can do pretty arbitrary things, and I don't see
+any neat way to encode that fact.  Simply bunging full-blown shell
+scripts into the middle of your literate program hardly seems the
+solution.  Hmmm.....
+
+If we had them: test environments don't nest.
+
+See ????? (ToDo) for a note on using hidden comments to highlight test
+information.
+
+
+%************************************************************************
+%*									*
+\subsubsection[recording-changes]{Recording changes to your documents}
+%*									*
+%************************************************************************
+
+Vaguely like the test case stuff, you might say:
+\begin{verbatim}
+\begin{change}
+<who> & <when> & <tag> & <description of first change> \\
+<who> & <when> & <tag> & <description of second change> \\
+... and so on ...
+\end{change}
+\end{verbatim}
+This is intended to be like the ChangeLog stuff supported in Emacs
+(\tr{C-x 4 a}).  It really only makes sense to use it after software
+is no longer undergoing cataclysmic change (after it is released
+perhaps?).
+
+Anyway, the idea is to record your change notes right next to where
+you make them.  [The program(s) to extract these notes and to collate
+them in the manner of your choice are not written yet.]
+
+These change environments don't nest.

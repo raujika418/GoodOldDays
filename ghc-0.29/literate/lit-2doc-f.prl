@@ -1,0 +1,146 @@
+sub rm_embedded_stuff { # return clean code + index entries (\002 separated)
+    local($codetxt) = @_;
+    
+    ($codetxt, '');
+}
+
+sub add_code_interests { # DO NOTHING
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $_) = @_;
+    local($defs_to_return) = '';
+    local($uses_to_return) = '';
+
+    &setup_fortran_keywords();
+
+    $* = 1; # multi-line searches
+    s/^>//g;                    # de-Bird-ize
+    s/^C.*$//g;                 # de-commentize
+#    s/([^\\\n])!.*$/$1/g;        Is this valid ????? ! comment
+    s/\"[^\"\n]*\"//g;          # de-stringize
+    s/\'[^\'\n]*\'//g;
+
+    # OK, the "interesting" DEFS are subroutines, functions and common blocks
+    # i.e
+    #   SUBROUTINE <thing> <rubbish>
+    #   <rubbish> FUNCTION <thing> <rubbish>
+    #   COMMON /<thing>/ <rubbish>
+    #      /^(\s*\S+\s+FUNCTION\s+)([A-Za-z0-9_]+)(\s*\()/   ||
+
+    while (/^(\s*SUBROUTINE\s+)([A-Za-z0-9_]+)(\s*\()/ ||
+           /^(\s*[A-Za-z0-9\*]+\s+FUNCTION\s+)([A-Za-z0-9_]+)(\s*\()/   ||
+           /^(\s*COMMON\s*)([A-Za-z0-9_]+)(\s*\/)/ ) {
+
+        local($before) = $1;
+        local($interesting_thing) = $2; # see hacks below
+        local($after) = $3;
+
+#       print STDERR "defs=>$before::$interesting_thing::$after::\n";
+        local($really_interesting_thing) = (defined($IGNORE_WD{$interesting_thing})) ? '' : $interesting_thing;
+        if ($really_interesting_thing) {
+            if ($s != -1) {
+                $Blk_codethings_defd[$b] .= "$really_interesting_thing\001";
+                $Sec_codethings_defd[$s] .= "$really_interesting_thing\001";
+            } else {
+                $defs_to_return .= "$really_interesting_thing\001";
+            }
+        }
+        $before =~ s/\s+/\\s\+/g;
+        $before =~ s/\*/\\*/g;
+        $after =~ s/\s+/\\s\+/g;
+        $after =~ s/\(/\\\(/;
+        $after =~ s/\)/\\\)/;
+
+        s/$before$interesting_thing$after//g;
+#       print STDERR "repl=>$before::$interesting_thing::$after::\n";
+    }
+    # uses are the same sorts of things
+    # CALL <thing>
+    # EXTERNAL <thing>
+    while (/^(\s*CALL\s*)([A-Za-z0-9_]+)(\s*)/ ||
+           /^(\s*EXTERNAL\s*)([A-Za-z0-9_]+)(\s*)/) {  
+        local($before) = $1;
+        local($interesting_thing) = $2; # more hacks below
+        local($after) = $3;
+
+#        print STDERR "uses=>$before::$interesting_thing::$after::\n";
+
+        local($really_interesting_thing) = (defined($IGNORE_WD{$interesting_thing})) ? '' : $interesting_thing;
+        if ($really_interesting_thing) {
+            if ($s != -1) {
+                $Blk_codethings_used[$b] .= "$really_interesting_thing\001";
+                $Sec_codethings_used[$s] .= "$really_interesting_thing\001";
+            } else {
+                $uses_to_return .= "$really_interesting_thing\001";
+            }
+        }
+        $before =~ s/\s+/\\s\+/g;
+        $after =~ s/\s+/\\s\+/g;
+        $after =~ s/\(/\\\(/;
+        $after =~ s/\)/\\\)/;
+
+        s/$before$interesting_thing$after//g;
+    }
+    $* = 0;
+
+    ($defs_to_return, $uses_to_return);
+}
+
+sub setup_fortran_keywords {
+   $IGNORE_WD{'REAL*8'} = 1;
+   $IGNORE_WD{'REAL'} = 1;
+   $IGNORE_WD{'CHARACTER'} = 1;
+   $IGNORE_WD{'LOGICAL'} = 1;
+   $IGNORE_WD{'COMPLEX'} = 1;
+   $IGNORE_WD{'DOUBLE'} = 1;
+   $IGNORE_WD{'INTEGER'} = 1;
+   $IGNORE_WD{'FLOAT'} = 1;
+   $IGNORE_WD{'PROGRAM'} = 1;
+   $IGNORE_WD{'COMMON'} = 1;
+   $IGNORE_WD{'SUBROUTINE'} = 1;
+   $IGNORE_WD{'FUNCTION'} = 1;
+   $IGNORE_WD{'CONTINUE'} = 1;
+   $IGNORE_WD{'WHILE'} = 1;
+   $IGNORE_WD{'IF'} = 1;
+   $IGNORE_WD{'ENDIF'} = 1;
+   $IGNORE_WD{'THEN'} = 1;
+   $IGNORE_WD{'ELSE'} = 1;
+   $IGNORE_WD{'DO'} = 1;
+   $IGNORE_WD{'END'} = 1;
+   $IGNORE_WD{'DATA'} = 1;
+   $IGNORE_WD{'PARAMETER'} = 1;
+   $IGNORE_WD{'EXTERNAL'} = 1;
+   $IGNORE_WD{'RETURN'} = 1; 
+   $IGNORE_WD{'FORMAT'} = 1; 
+   $IGNORE_WD{'STOP'} = 1; 
+   $IGNORE_WD{'CALL'} = 1;
+   $IGNORE_WD{'READ'} = 1;
+   $IGNORE_WD{'WRITE'} = 1;
+   $IGNORE_WD{'PRINT'} = 1;
+   $IGNORE_WD{'IOSTAT'} = 1;
+   $IGNORE_WD{'FILE'} = 1;
+   $IGNORE_WD{'STATUS'} = 1;
+   $IGNORE_WD{'ABS'} = 1;
+   $IGNORE_WD{'COS'} = 1;
+   $IGNORE_WD{'SQRT'} = 1;
+   $IGNORE_WD{'SQR'} = 1;
+   $IGNORE_WD{'SIN'} = 1;
+   $IGNORE_WD{'CMPLX'} = 1;
+   $IGNORE_WD{'CONJG'} = 1;
+   $IGNORE_WD{'IMAG'} = 1;
+   $IGNORE_WD{'DBLE'} = 1;
+   $IGNORE_WD{'INT'} = 1;
+   $IGNORE_WD{'EXP'} = 1;
+   $IGNORE_WD{'LOG'} = 1;
+   $IGNORE_WD{'LT'} = 1;
+   $IGNORE_WD{'LE'} = 1;
+   $IGNORE_WD{'EQ'} = 1;
+   $IGNORE_WD{'NE'} = 1;
+   $IGNORE_WD{'GE'} = 1;
+   $IGNORE_WD{'GT'} = 1;
+   $IGNORE_WD{'NOT'} = 1;
+   $IGNORE_WD{'AND'} = 1;
+   $IGNORE_WD{'OR'} = 1;
+}
+
+# this keeps 'do'ing happy
+1;

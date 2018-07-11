@@ -1,0 +1,90 @@
+XCOMM ** DO NOT EDIT! **
+XCOMM This file is obliterated every time 'configure' is run!
+
+#ifndef GhcBuild_normal
+#define GhcBuild_normal YES
+#endif
+#ifndef GhcBuild_p
+#define GhcBuild_p YES
+#endif
+#ifndef GhcBuild_t
+#define GhcBuild_t NO
+#endif
+#ifndef GhcBuild_u
+#define GhcBuild_u NO
+#endif
+#ifndef GhcBuild_mc
+#define GhcBuild_mc YES
+#endif
+#ifndef GhcBuild_mr
+#define GhcBuild_mr NO
+#endif
+#ifndef GhcBuild_mt
+#define GhcBuild_mt NO
+#endif
+#ifndef GhcBuild_mp
+#define GhcBuild_mp YES
+#endif
+#ifndef GhcBuild_mg
+#define GhcBuild_mg YES
+#endif
+#ifndef GhcBuild_2s
+#define GhcBuild_2s NO
+#endif
+#ifndef GhcBuild_1s
+#define GhcBuild_1s NO
+#endif
+#ifndef GhcBuild_du
+#define GhcBuild_du NO
+#endif
+#ifndef GhcBuild_a
+#define GhcBuild_a NO
+#endif
+#ifndef GhcBuild_b
+#define GhcBuild_b NO
+#endif
+#ifndef GhcBuild_c
+#define GhcBuild_c NO
+#endif
+#ifndef GhcBuild_d
+#define GhcBuild_d NO
+#endif
+#ifndef GhcBuild_e
+#define GhcBuild_e NO
+#endif
+#ifndef GhcBuild_f
+#define GhcBuild_f NO
+#endif
+#ifndef GhcBuild_g
+#define GhcBuild_g NO
+#endif
+#ifndef GhcBuild_h
+#define GhcBuild_h NO
+#endif
+#ifndef GhcBuild_i
+#define GhcBuild_i NO
+#endif
+#ifndef GhcBuild_j
+#define GhcBuild_j NO
+#endif
+#ifndef GhcBuild_k
+#define GhcBuild_k NO
+#endif
+#ifndef GhcBuild_l
+#define GhcBuild_l NO
+#endif
+#ifndef GhcBuild_m
+#define GhcBuild_m NO
+#endif
+#ifndef GhcBuild_n
+#define GhcBuild_n NO
+#endif
+#ifndef GhcBuild_o
+#define GhcBuild_o NO
+#endif
+#ifndef GhcBuild_A
+#define GhcBuild_A NO
+#endif
+#ifndef GhcBuild_B
+#define GhcBuild_B NO
+#endif

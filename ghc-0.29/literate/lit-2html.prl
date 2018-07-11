@@ -1,0 +1,493 @@
+#% \section[lit2html_only]{Code for generating HTML files}
+#% 
+#% \begin{code}
+sub htmlize_text {
+    # is given deatified text
+    # returns text and index entries
+    #
+    local($srcfilename,$srclineno,$_) = @_;
+    local($idx_real)  = '';
+    local($idx_maybe) = '';
+
+    # do \MathMode, \tr, and \codeInText first because they might be
+    # inside other things
+
+    while (/\\MathMode\{([^\}]*)\}/) { # I like this easy stuff
+	local($guts) = $1;
+
+	# arrows to start with...
+	$guts =~ s/\\leftarrow/->/g;
+	$guts =~ s/\\Leftarrow/=>/g;
+	$guts =~ s/\\rightarrow/<-/g;
+	$guts =~ s/\\Rightarrow/<=/g;
+	$guts =~ s/\\leftrightarrow/<->/g;
+	$guts =~ s/\\Leftrightarrow/<=>/g;
+	$guts =~ s/\\longleftarrow/-->/g;
+	$guts =~ s/\\Longleftarrow/==>/g;
+	$guts =~ s/\\longrightarrow/<--/g;
+	$guts =~ s/\\Longrightarrow/<==/g;
+	$guts =~ s/\\longleftrightarrow/<-->/g;
+	$guts =~ s/\\Longleftrightarrow/<==>/g;
+
+	$guts =~ s/\\alpha/alpha/g;
+	$guts =~ s/\\beta/beta/g;
+
+	s/\\MathMode\{([^\}]*)\}/$guts/;
+
+    }
+
+    while (/\\(pl|tr)\{([^\}]*)\}/) {
+	local($plain_or_typing) = $1;
+	local($guts)		= &htmlize_verb($2);
+	
+        # escape these ones inside (pl|tr) (hack
+        # to avoid commands being interpreted)
+	$guts =~ s/\\/\001backslash\003/g;
+	$guts =~ s/\001lbrace\003/\\\001lbrace\003/g;
+	$guts =~ s/\001rbrace\003/\\\001rbrace\003/g;
+
+	s/\\(pl|tr)\{[^\}]*\}/$guts/
+	    if $plain_or_typing eq 'pl';
+	s/\\(pl|tr)\{[^\}]*\}/<tt>$guts<\/tt>/
+	    if $plain_or_typing eq 'tr';
+    }
+
+    while (/\\url\{([^\}]*)\}\{([^\}]*)\}/) {
+	local($link_name) 	= $1;
+	local($url)		= &deatified2verb_nl($2);
+#	local($guts)		= &htmlize_verb(&deatified2verb_nl($2));
+
+	s/\\url\{[^\}]*\}[^\}]*\}/<a href="$url">$link_name<\/a>/;
+    }
+
+    while (/\\codeInText\{([^\}]*)\}/) {
+	local($raw_code) = $1;
+	local($indexing) = 1;
+
+	$raw_code =~ s/\\\@/\@/g; # remove the one kind of escape
+
+	if ($raw_code =~ /\001noindex\003/) {
+	    $indexing = 0;
+	    $raw_code =~ s/\001noindex\003//;
+	}
+
+	$munged_code = $raw_code;
+
+	if ($indexing) {
+	    local($cdefs, $cuses) = &add_code_interests(-1,-1,&deatified2verb($raw_code));
+	    local($c);
+	    # index all defs and uses
+
+	    foreach $c (split(/\001/, $cdefs)) {
+		if ($c) {
+		    local ($guts) = &mk_html_index_entry("$c");
+		    $idx_real .= "<a name=\"".$guts."\">$c<\/a>\n" if $guts;
+		}
+	    }
+	    # uses are only indexed if the defined thing is known
+	    # can't be done until link time
+	    foreach $c (split(/\001/, $cuses)) {
+		if ($c) {
+		    $idx_maybe .= "\001index_uses\003$c\n";
+		}
+	    }
+	}
+	# this really should use &mk_code_frag ...
+
+	s/\\codeInText\{[^\}]*\}/<a href="#$munged_code"><tt>$munged_code<\/tt><\/a>/;
+    }
+
+    if (/\\maketitle\n/) {
+	local($title_stuff) = '';
+        local($author) = &html_remove_escapes($Doc_author);
+        local($date)   = &html_remove_escapes($Doc_date);
+        local($title)  = &html_remove_escapes($Doc_title);
+
+        $author =~ s/\\\\/<br>\n/;
+        
+
+        $title_stuff .= "<head>\n";  # all header stuff put in here
+	$title_stuff .= "<title>$Doc_title</title>\n" if $Doc_title;
+	$title_stuff .= "</head>\n<body>\n";
+	$title_stuff .= "<h1>$title</h1>\n" if $Doc_title;
+        $title_stuff .= "<address>";
+	$title_stuff .= "$author<br>\n" if $Doc_author;
+	$title_stuff .= "<br>$date<br>\n" if $Doc_date;
+
+        $title_stuff .= "</address>\n";
+	$title_stuff .= "<hr><p>\n" if ($Doc_title || $Doc_author || $Doc_date);
+
+# 15/2/95
+# removed .gif img of horiz. line, <hr> is the HTML way of doing this.
+#img src = \"horiz_line.gif\"><p>\n" if ($Doc_title || $Doc_author || $Doc_date);
+#	if ($title_stuff ne '') {
+#	    print STDERR "$Pgm: warning: an unfixed perl 4.035 crashes here!\n";
+#	    print STDERR "(a patch for perl is distributed with Glasgow Haskell)\n";
+# what happened to idx stuff ?
+#	    $title_stuff = &htmlize_text($srcfilename, ($srclineno + $i), $title_stuff);
+#	}
+	s/\\maketitle\n/$title_stuff/;
+    }
+
+    while (/\\heading\{([^\}]+)\}\n/) {
+	local($title)    = &deatified2verb_nl($1);
+	s/\\heading\{([^\}]+)\}\n/<h3>$title<\/h3>\n/;
+    }
+
+    while (/\\index\{([^\}]+)\}/) {
+	local($guts) = &deatified2verb($1);
+        local($anchor);
+	
+	$guts =~ s/\\@/@/g;	# de-escape them
+	$guts =~ s/\\!/!/g;
+	local (@idxs) =  &mk_html_index_entry($guts);
+	local($i);
+
+	foreach $i (@idxs) {
+        	$anchor = "<a name=\"". $i . "\"><\/a>\n" if $i;
+		$idx_real .= $anchor;
+		s/\\index\{([^\}]+)\}/$anchor/;
+	}
+    }
+
+    s/\\item\s+([^\[\n]*)/<li>$1/g; # must be first for \item
+
+    # the following will get messed up if you do:
+    #	\item [ ......... ]  .......]
+
+
+    while (/\\item\s*\[(.+)\]\s*(\S)/) {
+	local($item_tag) = &deatified2verb($1);
+	s/\\item\s*\[(.+)\]\s*(\S)/<dt>$item_tag\n<dd>$2/;
+    }
+    while (/\\item\s*\[(.+)\]\s*\n/) {
+	local($item_tag) = &deatified2verb($1);
+	s/\\item\s*\[(.+)\]\s*\n/<li>$item_tag\n/;
+    }
+
+    while (/\\centerline\{([^\}]+)\}\n/) {
+	local($center_text) = &deatified2verb($1);
+	s/\\centerline\{([^\}]+)\}\n/<h3>$center_text<\/h3><p>\n/;
+    }
+
+
+    s/\\begin\{document\}\n/<html>\n<!-- Generated by lit2html -->\n/g;
+
+# Doubt you'll see \end{document}, but in the event..
+
+    s/\\end\{document\}/<\/body>\n<\/html>\n/g;
+
+    s/\\begin\{description\}/<dl>/g;
+    s/\\end\{description\}/<\/dl>/g;
+    s/\\begin\{enumerate\}/<ul>/g;
+    s/\\end\{enumerate\}/<\/ul>/g;
+    s/\\begin\{itemi[sz]e\}/<ul>/g;
+    s/\\end\{itemi[sz]e\}/<\/ul>/g;
+    s/\\begin\{quotation\}/<h5>/g;
+    s/\\end\{quotation\}/<\/h5>/g;
+    s/\\begin\{display\}/<p><pre>/g;
+    s/\\end\{display\}/<\/pre><p>/g;
+    s/\\begin\{flushdisplay\}/<p><pre>/g;
+    s/\\end\{flushdisplay\}/<\/pre><p>/g;
+    s/\\begin\{comment\}/<p><pre>\nCOMMENT:-----------------------/g;
+    s/\\end\{comment\}/-------------------------------\n<\/pre>/g;
+    s/\n\n+/\n<p>\n/g;
+
+    # check for unknown environments (only at beginning of lines; easier)
+    #  mark good ones as \begin!_/\end!_
+    #        bad ones as \begin!!/\end!!
+    while (/^\\(begin|end)\{([A-Za-z]+)\}/) {
+	if ( $KNOWN_ENV{$2} ) { # good
+	    s/\\(begin|end)\{([A-Za-z]+)\}/\\$1!_\{$2\}/;
+	} else { # bad
+	    s/\\(begin|end)\{([A-Za-z]+)\}/\\$1!!\{$2\}/;
+	}
+    }
+    # put begin/end display around bad ones and escape magic chars
+    while (/\\(begin|end)!!\{([A-Za-z]+)\}/) {
+	local($begin_or_end) = $1;
+	local($env_name)     = $2;
+
+	local($new_stuff) = "\\display\n" if $begin_or_end eq 'begin';
+	$new_stuff	 .= "\001backslash\003$begin_or_end\001lbrace\003$env_name\001rbrace\003\n";
+	$new_stuff	 .= "\\end display\n" if $begin_or_end eq 'end';
+	s/\\(begin|end)!!\{([A-Za-z]+)\}/$new_stuff/;
+    }
+    # unmark good ones
+    s/\\(begin|end)!_\{([A-Za-z]+)\}/\\$1\{$2\}/g;
+
+    local($_) = &fiddle_sectiontypes($_);
+
+    local($_) = &html_remove_escapes($_);
+
+    # \refs and \pagerefs
+    s/[ ~]\\ref\{(.*)\}/ <a href=\"#$1\">$1<\/a>/g;
+    #s/[ ~]\\ref\{/ \\xref\{/g;
+    s/^\\ref\{(.*)\}/<a href=\"#$1\">$1<\/a>/g;
+    #s/^\\ref\{/\\xref\{/g;
+    s/[ ~]\\sectionref\{(.*)\}/<a href=\"#$1\"> section on $1<\/a>/g;
+    s/^\\sectionref\{(.*)\}/<a href=\"#$1\"> section on $1<\/a>/g;
+    s/[ ~]\\pageref\{(.*)\}/<a href=\"#$1\"> on $1<\/a>/g;
+    s/^\\pageref\{(.*)\}/<a href=\"#$1\"> on $1<\/a>/g;
+	
+    # \xref handling must be deferred to link time
+
+    (&slashes2ats($_), (&slashes2ats($idx_real) . $idx_maybe));
+}
+
+sub slashes2ats { # and also the magic \001?\003 things put in by deatify; sigh
+    local($_) = @_;
+
+    $_ = &deatified2verb_nl($_);
+
+    s/\001backslash\003/\\/g; # those meant to survive...
+    s/\001twiddle\003/\~/g;
+
+    $_;
+}
+
+sub htmlize_verb {
+    local($_) = @_;
+
+    s/\@/@/g;
+#    s/\{/{/g;
+#    s/\}/}/g;
+    s/\\\{/\{/g;
+    s/\\\}/\}/g;
+    s/&/&amp;/g;
+    s/</&lt;/g;
+    s/>/&gt;/g;
+
+    $_;
+}
+
+#sub htmlize_code { # same as verb for now
+#    local($_) = @_;
+#
+#    s/\@/@/g;
+#    s/\{/{/g;
+#    s/\}/}/g;
+#    s/&/&amp;/g;
+#    s/</&lt/g;
+#    s/>/&gt/g;
+#
+#    $_;
+#}
+
+sub html_remove_escapes { 
+# Collection of substitute filters for
+# de-escaping and converting some constants
+# into html.
+
+  local($_) = @_;
+
+  # comments were mainly handled in lit-deatify
+  s/\\\%/\%/g; # remaining percent signs needn't be escaped
+
+  # now some easy ones
+  s/\\\_/_/g;
+  s/\\@/@/g;
+  s/\\\#/#/g;
+  s/\\\$/\$/g;
+  s/\\pounds\s*([0-9\?][0-9KkMm\.\,\?]*[0-9KkMm\?])/$1 pounds/g;
+  s/\\LaTeX\{\}/<b>LaTeX<\/b>/g;
+  s/\\TeX\{\}/<b>TeX<\/b>/g;
+  s/ToDo/<B>ToDo<\/B>/g;
+  s/\\Haskell\{\}/<b>Haskell<\/b>/g;
+  s/\{\\em\s*([^\}]*)\}/<i>$1<\/i>/g;
+  s/\\\///g;
+  s/\{\\tt\s*(.*)\}/<tt>$1<\/tt>/g;
+  s/\{\\sc\s*(.*)\}/<b>$1<\/b>/g;
+  s/``/"/g;	# except the ones in \tr and \pl (sigh)
+  s/''/"/g;
+  s/\001tex-open-double-quotes\003/``/g;
+  s/\001tex-close-double-quotes\003/''/g;
+  s/\001starred\003//g;
+  s/([^\\ ])~/$1 /g; # I expect to be beaten by twiddles...
+  s/([^-])---([^-])/$1 -- $2/g; # I don't like what makeinfo does
+
+  # 	I prefer to go after specific cases, e.g., \ref's below
+  # accents
+  s/\\"\\i/i/g; # dotless i
+  s/\\"//g;
+  s/\\`//g;
+  s/\\'//g;
+
+  $_;
+} 
+sub end_html_doc {
+	local($postlude) = '';
+	local($author)   = &html_remove_escapes($Doc_author);
+	local($date)     = &html_remove_escapes($Doc_date);
+
+	$postlude .= "<br><p>\n";
+        $postlude .= "<address>";
+        $postlude .= "Generated";
+        $postlude .= " by $author " if $Doc_author;
+ 	$postlude .= "on<br>\n" if $Doc_date;
+        $postlude .= " $date" if $Doc_date;
+        $postlude .= " using <tt>lit2html<\/tt>";
+        $postlude .= "<\/address><\/body><\/html>";
+    
+	$postlude;
+}
+   
+
+sub htmlize_table_body {
+    # is given deatified text
+    # returns text and index entries
+    local($_) = @_;
+
+    # convert &'s and \\'s to something hidden
+    s/^\&/\\tabularAnd/;
+    s/([^\\])\&/$1\\tabularAnd/g;
+    s/\\\\/\\tabularNewline/g;
+
+    local($ret_text,$ret_idxstuff) = &htmlize_text('???','???',$_);
+    ($ret_text,$ret_idxstuff);
+}
+
+sub htmlize_tabular {
+    local($_) = @_;
+
+    # newlines serve no purpose here
+    s/\n//g;
+
+    # split into "rows" based on \\
+    local(@row) = split(/\\tabularNewline/, $_);
+    local($r);
+
+    # find maximum column widths
+    local(@col_width) = ();
+    foreach $r (@row) {
+#	$r =~ s/\\&/\001and\003/g; # avoid escaped ampersands
+    	local(@row_col) = split(/\\tabularAnd/, $r);
+	local($rc_no);
+	for ($rc_no = 0; $rc_no <= $#row_col; $rc_no++) {
+	    # strip leading/trailing whitespace
+	    $row_col[$rc_no] =~ s/^\s+//;
+	    $row_col[$rc_no] =~ s/\s+$//;
+	    # \hline's throw the count off
+	    $row_col[$rc_no] =~ s/\@hline//g;
+#	    # convert funny ampersands
+#	    $row_col[$rc_no] =~ s/\001and\003/&/g;
+    	    if (!defined($col_width[$rc_no]) 
+		|| length($row_col[$rc_no]) > $col_width[$rc_no]) {
+		$col_width[$rc_no] = length($row_col[$rc_no]);
+    	    }
+	}
+    }
+    # and the total width ... (2 each for intercolumn gaps)
+    local($total_width) = 0;
+    local($cw);
+    foreach $cw (@col_width) {
+    	$total_width += $cw;
+    }
+    $total_width += ($#col_width * 2);
+    local($hline_text) = "<b>".('-' x $total_width)."</b>\n";
+
+    # now we know widths, let's make new text accordingly
+    foreach $r (@row) {
+	# escaped ampersands already under control
+    	local(@row_col) = split(/\\tabularAnd/, $r);
+	local($rc_no);
+	for ($rc_no = 0; $rc_no <= $#row_col; $rc_no++) {
+	    # strip leading/trailing whitespace
+	    $row_col[$rc_no] =~ s/^\s+//;
+	    $row_col[$rc_no] =~ s/\s+$//;
+
+	    # handle \hline's (AT BEGINNING OF LINE ONLY)
+	    while ($row_col[$rc_no] =~ /^\@hline\s*/) {
+		$outtext .= $hline_text;
+		$row_col[$rc_no] =~ s/^\@hline\s*//;
+	    }
+	    # and now the rest of the line...
+#	    # convert funny ampersands
+#	    $row_col[$rc_no] =~ s/\001and\003/&amp/g;
+
+	    # only left justify for now
+	    $outtext .= sprintf("%-".$col_width[$rc_no]."s  ", $row_col[$rc_no]);
+	}
+	$outtext .= "\n";
+    }
+
+    &slashes2ats($outtext);
+}
+
+sub mk_html_index_entry {
+    local($raw_text) = @_;
+    local(@sub_entries) = split(/\001idxsubitem\003/, $raw_text);
+    local($sube,$sortstuff,$printstuff);
+
+    foreach $sube (@sub_entries) {
+	if ($sube =~ /(.*[^\\])\001idxsort\003(.*)/) {
+	    $sortstuff  = $1;
+	    $printstuff = $2;
+	} else {
+	    $sortstuff  = '';
+	    $printstuff = $sube;
+	}
+	$sortstuff =~ s/\@/@/g;
+
+	$printstuff =~ s/\@/@/g;
+
+	if ($sortstuff) {
+	    $sube = "$sortstuff_$printstuff";
+	} else {
+	    $sube = $printstuff;
+	}
+    }
+    # stick it back together for makeindex
+    join(' -- ',@sub_entries);
+#    @sub_entries;
+}
+
+sub std_print_code_blk {
+    local($codetxt) = @_;
+
+    # language specific
+    local($newtxt,$idx_list) = &rm_embedded_stuff($codetxt);
+
+    print "<hr><pre>\n";
+
+    #
+    # OK, lets spit out the code indices
+    #
+    local($i);
+    foreach $i (split(/\002/, $idx_list )) {
+	print "<a name=".$i.">$i<\/a>\n" if $i;
+    }
+
+    print &htmlize_verb($newtxt);
+    print "</pre><hr>\n";
+}
+
+sub std_mk_code_frag {
+    local($codetxt) = @_;
+
+    "<code>" . &htmlize_verb($codetxt) . "</code>";
+}
+
+sub gen_html_table_of_contents_lines { # used by linker
+    push(@Menu_lines, "<h1>Detailed table of contents:</h1><p>\n\n");
+    
+    local($s) = 0;
+
+    while ($s <= $#Sec_depth) {
+	next if $Sec_abs_depth[$s] <= 0 || ! $Sec_nodename[$s];
+	next if $Sec_title[$s] =~ /\001starred\003/;
+
+	local($magic_str) = $Sec_numstr[$s];
+	$magic_str =~ s/^[0\.]+\.//;
+	$magic_str =~ s/\.[0\.]+$//;
+
+	push(@Menu_lines,
+	 ('<li>'. $Sec_title[$s].'<p>\n'));
+    } continue {
+	$s++;
+    }
+}
+
+# a trailing 1 makes this file's "do"ing a success
+1;
+#% \end{code}

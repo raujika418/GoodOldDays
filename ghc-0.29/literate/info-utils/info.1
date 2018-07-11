@@ -1,0 +1,101 @@
+.TH INFO 1 "26 June 1988"
+.SH NAME
+info \- Hierarchal information tree peruser
+.SH SYNOPSIS
+.B info
+[ -d info-directory-path ] 
+[ -f info-file ]
+[ -o dump-file ]
+[ -n node-name ]
+[ menu-name ...]
+.SH DESCRIPTION
+.I Info
+is an interactive tool for reading the on-line documentation made from
+texinfo files.  There are almost no differences between
+.I Info
+and the `M-x info' command from within
+.I Emacs.
+.I Info
+is a standalone program, and can be invoked from the command line.  The
+.I menu-name
+(s) are the series of menu options that you wish to follow from the main menu.
+For example, to get info about using buffers in Emacs, you might type `info
+emacs buffers'.  Try it, you'll like it.
+.PP
+.SH OPTIONS
+
+.IP -o
+dumps the contents of the node that you have specified, so that
+you can do with it what you please.  Note that you can print the node that you
+are currently looking at with `C-p' from within
+.I Info
+, so it isn't clear what you want to do with the output from -o.
+.PP
+.IP -d
+is a quick way for you to temporarily change the path searched by
+.I Info
+when it starts up.  You can also set the environment variable
+"INFO_DIRECTORY_PATHS" to a list of colon-separated directory names.
+.PP
+.IP -f
+is for specifying which Info file to load.  Normally,
+.I Info
+looks for the file `dir' in the info search path, and goes to node `Top' in
+that file.  The `dir' file contains a menu whose items all point to info
+files.  If the info file you wish to view is not in that menu, you can say
+`info -f info-filename', and that file specifically will be used.
+.PP
+.IP -n
+sets the initial node to look for.  This allows you to read an info file that
+doesn't have a `Top' node.
+.PP
+In order to find out more about
+.I Info
+, type `info', and press "h".  (You will be reminded of your options when you
+first start using the
+.I Info
+program anyway.)
+.PP
+You are welcome to submit documentation for use in
+.I Info
+, and in fact, whole-heartedly encouraged.  Remember to read the node on
+.I texinfo
+before submitting the text though, since it will likely only be accepted in that format.
+.PP
+
+
+.SH BUGS
+.PP
+The display on slow terminals is pretty gosh darn slow.  This is due to the
+crufty implementation, and will be fixed as soon as someone complains
+about it, or maybe before.
+.PP
+There is no specific X windows support.  X windows should be supported, and
+we should allow `hot spots' in the text of nodes, which could point to
+other nodes.
+.PP
+An info file without a `Top' node can only be viewed if you know the name of a
+node inside of it.  Maybe the 
+.I Makeinfo
+program should automatically make a menu of top-level nodes and place it in a
+node called `Top' if there is no such node in the info file.
+.SH FILES
+.br
+The default search path for a bare bones Info is
+.br
+".:/usr/gnu/info:/usr/local/emacs/info:/usr/local/lib/emacs/info"
+.PP
+You can change this with the INFOPATH environment variable.
+.SH SEE ALSO
+makeinfo (1)
+.SH ACKNOWLEDGEMENT
+Richard Stallman invented the Info concept many moons ago, even before
+the advent of hypertext.  He also suggested that I write this program.
+.SH AUTHOR
+Brian J. Fox (bfox@ai.mit.edu)
+.br
+Free Software Foundation
+.br
+Cambridge, MA
+.br
+September, 1987

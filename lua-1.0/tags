@@ -1,0 +1,575 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+A	Makefile	/^A=--------------------------------------------------------------------------$/;"	m
+ADDOP	opcode.h	/^ ADDOP,$/;"	e	enum:__anon2
+ADJUST	opcode.h	/^ ADJUST,$/;"	e	enum:__anon2
+ALIGNMENT	y_tab.c	14;"	d	file:
+AND	y_tab.c	165;"	d	file:
+AND	y_tab.h	29;"	d
+BEGIN	fixed/lex_yy.c	4;"	d	file:
+BEGIN	lex_yy.c	4;"	d	file:
+Byte	opcode.h	/^typedef unsigned char  Byte;$/;"	t
+CALLFUNC	opcode.h	/^ CALLFUNC,$/;"	e	enum:__anon2
+CFLAGS	Makefile	/^CFLAGS= -O2 -I.$/;"	m
+CONC	y_tab.c	170;"	d	file:
+CONC	y_tab.h	34;"	d
+CONCOP	opcode.h	/^ CONCOP,$/;"	e	enum:__anon2
+CREATEARRAY	opcode.h	/^ CREATEARRAY,$/;"	e	enum:__anon2
+Cfunction	opcode.h	/^typedef void (*Cfunction) (void);$/;"	t
+DEBUG	y_tab.c	163;"	d	file:
+DEBUG	y_tab.h	27;"	d
+DIVOP	opcode.h	/^ DIVOP,$/;"	e	enum:__anon2
+DO	y_tab.c	153;"	d	file:
+DO	y_tab.h	17;"	d
+ECHO	fixed/lex_yy.c	14;"	d	file:
+ECHO	lex_yy.c	14;"	d	file:
+ELSE	y_tab.c	150;"	d	file:
+ELSE	y_tab.h	14;"	d
+ELSEIF	y_tab.c	151;"	d	file:
+ELSEIF	y_tab.h	15;"	d
+END	y_tab.c	156;"	d	file:
+END	y_tab.h	20;"	d
+EQOP	opcode.h	/^ EQOP,$/;"	e	enum:__anon2
+FUNCTION	y_tab.c	160;"	d	file:
+FUNCTION	y_tab.h	24;"	d
+GE	y_tab.c	169;"	d	file:
+GE	y_tab.h	33;"	d
+HALT	opcode.h	/^ HALT,$/;"	e	enum:__anon2
+Hash	hash.h	/^typedef struct Hash$/;"	s
+Hash	hash.h	/^} Hash;$/;"	t	typeref:struct:Hash
+IF	y_tab.c	148;"	d	file:
+IF	y_tab.h	12;"	d
+IFFJMP	opcode.h	/^ IFFJMP,$/;"	e	enum:__anon2
+IFFUPJMP	opcode.h	/^ IFFUPJMP,$/;"	e	enum:__anon2
+INITIAL	fixed/lex_yy.c	5;"	d	file:
+INITIAL	lex_yy.c	5;"	d	file:
+Input	opcode.h	/^typedef int  (*Input) (void);$/;"	t
+JMP	opcode.h	/^ JMP,$/;"	e	enum:__anon2
+LE	y_tab.c	168;"	d	file:
+LE	y_tab.h	32;"	d
+LEOP	opcode.h	/^ LEOP,$/;"	e	enum:__anon2
+LOCAL	y_tab.c	158;"	d	file:
+LOCAL	y_tab.h	22;"	d
+LTOP	opcode.h	/^ LTOP,$/;"	e	enum:__anon2
+MAXARRAY	table.c	50;"	d	file:
+MAXCODE	y_tab.c	18;"	d	file:
+MAXCONSTANT	table.c	33;"	d	file:
+MAXFILE	table.c	56;"	d	file:
+MAXFUNCSTACK	inout.c	26;"	d	file:
+MAXSTACK	opcode.c	24;"	d	file:
+MAXSTRING	table.c	43;"	d	file:
+MAXSYMBOL	table.c	20;"	d	file:
+MAXVAR	y_tab.c	27;"	d	file:
+MINUSOP	opcode.h	/^ MINUSOP,$/;"	e	enum:__anon2
+MULTOP	opcode.h	/^ MULTOP,$/;"	e	enum:__anon2
+NAME	y_tab.c	161;"	d	file:
+NAME	y_tab.h	25;"	d
+NE	y_tab.c	167;"	d	file:
+NE	y_tab.h	31;"	d
+NIL	y_tab.c	147;"	d	file:
+NIL	y_tab.h	11;"	d
+NLSTATE	fixed/lex_yy.c	3;"	d	file:
+NLSTATE	fixed/lex_yy.c	745;"	d	file:
+NLSTATE	lex_yy.c	3;"	d	file:
+NLSTATE	lex_yy.c	745;"	d	file:
+NOP	opcode.h	/^ NOP,$/;"	e	enum:__anon2
+NOT	y_tab.c	164;"	d	file:
+NOT	y_tab.h	28;"	d
+NOTOP	opcode.h	/^ NOTOP,$/;"	e	enum:__anon2
+NUMBER	y_tab.c	159;"	d	file:
+NUMBER	y_tab.h	23;"	d
+Node	hash.h	/^} Node;$/;"	t	typeref:struct:node
+OBJS	Makefile	/^OBJS= hash.o inout.o lex_yy.c opcode.o table.o y_tab.o lua.o iolib.o mathlib.o strlib.o$/;"	m
+ONFJMP	opcode.h	/^ ONFJMP,$/;"	e	enum:__anon2
+ONTJMP	opcode.h	/^ ONTJMP,$/;"	e	enum:__anon2
+OR	y_tab.c	166;"	d	file:
+OR	y_tab.h	30;"	d
+Object	opcode.h	/^typedef struct Object$/;"	s
+Object	opcode.h	/^} Object;$/;"	t	typeref:struct:Object
+OpCode	opcode.h	/^} OpCode;$/;"	t	typeref:enum:__anon2
+POP	opcode.h	/^ POP,$/;"	e	enum:__anon2
+PUSH0	opcode.h	/^ PUSH0, PUSH1, PUSH2,$/;"	e	enum:__anon2
+PUSH1	opcode.h	/^ PUSH0, PUSH1, PUSH2,$/;"	e	enum:__anon2
+PUSH2	opcode.h	/^ PUSH0, PUSH1, PUSH2,$/;"	e	enum:__anon2
+PUSHBYTE	opcode.h	/^ PUSHBYTE,$/;"	e	enum:__anon2
+PUSHFLOAT	opcode.h	/^ PUSHFLOAT,$/;"	e	enum:__anon2
+PUSHGLOBAL	opcode.h	/^ PUSHGLOBAL,$/;"	e	enum:__anon2
+PUSHINDEXED	opcode.h	/^ PUSHINDEXED,$/;"	e	enum:__anon2
+PUSHLOCAL	opcode.h	/^ PUSHLOCAL,$/;"	e	enum:__anon2
+PUSHLOCAL0	opcode.h	/^ PUSHLOCAL0, PUSHLOCAL1, PUSHLOCAL2, PUSHLOCAL3, PUSHLOCAL4,$/;"	e	enum:__anon2
+PUSHLOCAL1	opcode.h	/^ PUSHLOCAL0, PUSHLOCAL1, PUSHLOCAL2, PUSHLOCAL3, PUSHLOCAL4,$/;"	e	enum:__anon2
+PUSHLOCAL2	opcode.h	/^ PUSHLOCAL0, PUSHLOCAL1, PUSHLOCAL2, PUSHLOCAL3, PUSHLOCAL4,$/;"	e	enum:__anon2
+PUSHLOCAL3	opcode.h	/^ PUSHLOCAL0, PUSHLOCAL1, PUSHLOCAL2, PUSHLOCAL3, PUSHLOCAL4,$/;"	e	enum:__anon2
+PUSHLOCAL4	opcode.h	/^ PUSHLOCAL0, PUSHLOCAL1, PUSHLOCAL2, PUSHLOCAL3, PUSHLOCAL4,$/;"	e	enum:__anon2
+PUSHLOCAL5	opcode.h	/^ PUSHLOCAL5, PUSHLOCAL6, PUSHLOCAL7, PUSHLOCAL8, PUSHLOCAL9,$/;"	e	enum:__anon2
+PUSHLOCAL6	opcode.h	/^ PUSHLOCAL5, PUSHLOCAL6, PUSHLOCAL7, PUSHLOCAL8, PUSHLOCAL9,$/;"	e	enum:__anon2
+PUSHLOCAL7	opcode.h	/^ PUSHLOCAL5, PUSHLOCAL6, PUSHLOCAL7, PUSHLOCAL8, PUSHLOCAL9,$/;"	e	enum:__anon2
+PUSHLOCAL8	opcode.h	/^ PUSHLOCAL5, PUSHLOCAL6, PUSHLOCAL7, PUSHLOCAL8, PUSHLOCAL9,$/;"	e	enum:__anon2
+PUSHLOCAL9	opcode.h	/^ PUSHLOCAL5, PUSHLOCAL6, PUSHLOCAL7, PUSHLOCAL8, PUSHLOCAL9,$/;"	e	enum:__anon2
+PUSHMARK	opcode.h	/^ PUSHMARK,$/;"	e	enum:__anon2
+PUSHNIL	opcode.h	/^ PUSHNIL,$/;"	e	enum:__anon2
+PUSHOBJECT	opcode.h	/^ PUSHOBJECT,$/;"	e	enum:__anon2
+PUSHSTRING	opcode.h	/^ PUSHSTRING,$/;"	e	enum:__anon2
+PUSHWORD	opcode.h	/^ PUSHWORD,$/;"	e	enum:__anon2
+REJECT	fixed/lex_yy.c	15;"	d	file:
+REJECT	lex_yy.c	15;"	d	file:
+REPEAT	y_tab.c	154;"	d	file:
+REPEAT	y_tab.h	18;"	d
+RESET	opcode.h	/^ RESET$/;"	e	enum:__anon2
+RETCODE	opcode.h	/^ RETCODE,$/;"	e	enum:__anon2
+RETURN	y_tab.c	157;"	d	file:
+RETURN	y_tab.h	21;"	d
+SETFUNCTION	opcode.h	/^ SETFUNCTION,$/;"	e	enum:__anon2
+SETLINE	opcode.h	/^ SETLINE,$/;"	e	enum:__anon2
+STACKGAP	opcode.h	11;"	d
+STOREFIELD	opcode.h	/^ STOREFIELD,$/;"	e	enum:__anon2
+STOREGLOBAL	opcode.h	/^ STOREGLOBAL,$/;"	e	enum:__anon2
+STOREINDEXED	opcode.h	/^ STOREINDEXED,$/;"	e	enum:__anon2
+STOREINDEXED0	opcode.h	/^ STOREINDEXED0,$/;"	e	enum:__anon2
+STORELOCAL	opcode.h	/^ STORELOCAL,$/;"	e	enum:__anon2
+STORELOCAL0	opcode.h	/^ STORELOCAL0, STORELOCAL1, STORELOCAL2, STORELOCAL3, STORELOCAL4,$/;"	e	enum:__anon2
+STORELOCAL1	opcode.h	/^ STORELOCAL0, STORELOCAL1, STORELOCAL2, STORELOCAL3, STORELOCAL4,$/;"	e	enum:__anon2
+STORELOCAL2	opcode.h	/^ STORELOCAL0, STORELOCAL1, STORELOCAL2, STORELOCAL3, STORELOCAL4,$/;"	e	enum:__anon2
+STORELOCAL3	opcode.h	/^ STORELOCAL0, STORELOCAL1, STORELOCAL2, STORELOCAL3, STORELOCAL4,$/;"	e	enum:__anon2
+STORELOCAL4	opcode.h	/^ STORELOCAL0, STORELOCAL1, STORELOCAL2, STORELOCAL3, STORELOCAL4,$/;"	e	enum:__anon2
+STORELOCAL5	opcode.h	/^ STORELOCAL5, STORELOCAL6, STORELOCAL7, STORELOCAL8, STORELOCAL9,$/;"	e	enum:__anon2
+STORELOCAL6	opcode.h	/^ STORELOCAL5, STORELOCAL6, STORELOCAL7, STORELOCAL8, STORELOCAL9,$/;"	e	enum:__anon2
+STORELOCAL7	opcode.h	/^ STORELOCAL5, STORELOCAL6, STORELOCAL7, STORELOCAL8, STORELOCAL9,$/;"	e	enum:__anon2
+STORELOCAL8	opcode.h	/^ STORELOCAL5, STORELOCAL6, STORELOCAL7, STORELOCAL8, STORELOCAL9,$/;"	e	enum:__anon2
+STORELOCAL9	opcode.h	/^ STORELOCAL5, STORELOCAL6, STORELOCAL7, STORELOCAL8, STORELOCAL9,$/;"	e	enum:__anon2
+STRING	y_tab.c	162;"	d	file:
+STRING	y_tab.h	26;"	d
+SUBOP	opcode.h	/^ SUBOP,$/;"	e	enum:__anon2
+Symbol	opcode.h	/^} Symbol;$/;"	t	typeref:struct:__anon5
+T	Makefile	/^T= lua$/;"	m
+THEN	y_tab.c	149;"	d	file:
+THEN	y_tab.h	13;"	d
+T_ARRAY	opcode.h	/^ T_ARRAY,$/;"	e	enum:__anon3
+T_CFUNCTION	opcode.h	/^ T_CFUNCTION,$/;"	e	enum:__anon3
+T_FUNCTION	opcode.h	/^ T_FUNCTION,$/;"	e	enum:__anon3
+T_MARK	opcode.h	/^ T_MARK,$/;"	e	enum:__anon3
+T_NIL	opcode.h	/^ T_NIL,$/;"	e	enum:__anon3
+T_NUMBER	opcode.h	/^ T_NUMBER,$/;"	e	enum:__anon3
+T_STRING	opcode.h	/^ T_STRING,$/;"	e	enum:__anon3
+T_USERDATA	opcode.h	/^ T_USERDATA$/;"	e	enum:__anon3
+Type	opcode.h	/^} Type; $/;"	t	typeref:enum:__anon3
+U	fixed/lex_yy.c	2;"	d	file:
+U	lex_yy.c	2;"	d	file:
+UNARY	y_tab.c	171;"	d	file:
+UNARY	y_tab.h	35;"	d
+UNTIL	y_tab.c	155;"	d	file:
+UNTIL	y_tab.h	19;"	d
+UPJMP	opcode.h	/^ UPJMP,$/;"	e	enum:__anon2
+Unput	opcode.h	/^typedef void (*Unput) (int );$/;"	t
+Value	opcode.h	/^} Value;$/;"	t	typeref:union:__anon4
+WHILE	y_tab.c	152;"	d	file:
+WHILE	y_tab.h	16;"	d
+Word	opcode.h	/^typedef unsigned short Word;$/;"	t
+YYABORT	y_tab.c	777;"	d	file:
+YYACCEPT	y_tab.c	776;"	d	file:
+YYBACKUP	y_tab.c	778;"	d	file:
+YYDEBUG	y_tab.c	613;"	d	file:
+YYDEBUG	y_tab.c	792;"	d	file:
+YYERRCODE	y_tab.c	180;"	d	file:
+YYERROR	y_tab.c	775;"	d	file:
+YYFLAG	y_tab.c	803;"	d	file:
+YYLAST	y_tab.c	482;"	d	file:
+YYLERR	fixed/lex_yy.c	6;"	d	file:
+YYLERR	lex_yy.c	6;"	d	file:
+YYLMAX	fixed/lex_yy.c	9;"	d	file:
+YYLMAX	lex_yy.c	9;"	d	file:
+YYMAXDEPTH	y_tab.c	177;"	d	file:
+YYNEWLINE	fixed/lex_yy.c	58;"	d	file:
+YYNEWLINE	lex_yy.c	58;"	d	file:
+YYNPROD	y_tab.c	481;"	d	file:
+YYOPTIM	fixed/lex_yy.c	8;"	d	file:
+YYOPTIM	lex_yy.c	8;"	d	file:
+YYRECOVERING	y_tab.c	790;"	d	file:
+YYSTATE	fixed/lex_yy.c	7;"	d	file:
+YYSTATE	lex_yy.c	7;"	d	file:
+YYSTYPE	y_tab.c	/^} YYSTYPE;$/;"	t	typeref:union:__anon6	file:
+YYSTYPE	y_tab.h	/^} YYSTYPE;$/;"	t	typeref:union:__anon8
+YYTYPE	fixed/lex_yy.c	490;"	d	file:
+YYTYPE	lex_yy.c	490;"	d	file:
+YYU	fixed/lex_yy.c	744;"	d	file:
+YYU	lex_yy.c	744;"	d	file:
+_POP_	y_tab.c	1083;"	d	file:
+_POP_	y_tab.c	1087;"	d	file:
+a	opcode.h	/^ struct Hash    *a;$/;"	m	union:__anon4	typeref:struct:__anon4::Hash
+advance	fixed/lex_yy.c	/^struct yywork { YYTYPE verify, advance; } yycrank[] = {$/;"	m	struct:yywork	file:
+advance	lex_yy.c	/^struct yywork { YYTYPE verify, advance; } yycrank[] = {$/;"	m	struct:yywork	file:
+align	y_tab.c	37;"	d	file:
+align_n	y_tab.c	/^static void align_n (unsigned size)$/;"	f	file:
+arraybuffer	table.c	/^static Hash             *arraybuffer[MAXARRAY];$/;"	v	file:
+avalue	opcode.h	115;"	d
+b	opcode.h	/^ Byte      	*b;$/;"	m	union:__anon4
+base	opcode.c	/^static Object *top=stack+1, *base=stack+1;$/;"	v	file:
+basepc	y_tab.c	/^static Byte  *basepc;$/;"	v	file:
+buffer	y_tab.c	/^static long   buffer[MAXCODE];$/;"	v	file:
+buildformat	fixed/iolib.c	/^static char *buildformat (char *e, lua_Object o)$/;"	f	file:
+buildformat	iolib.c	/^static char *buildformat (char *e, lua_Object o)$/;"	f	file:
+bvalue	opcode.h	114;"	d
+callfunc	fixed/lua.c	/^static void callfunc (void)$/;"	f	file:
+callfunc	lua.c	/^static void callfunc (void)$/;"	f	file:
+check 	type.lua	/^function check (object, class)$/;"	f
+code	y_tab.c	/^static Byte  *code = (Byte *)buffer;$/;"	v	file:
+code_byte	y_tab.c	/^static void code_byte (Byte c)$/;"	f	file:
+code_float	y_tab.c	/^static void code_float (float n)$/;"	f	file:
+code_number	y_tab.c	/^static void code_number (float f)$/;"	f	file:
+code_word	y_tab.c	/^static void code_word (Word n)$/;"	f	file:
+constantbuffer	table.c	/^static char  	       *constantbuffer[MAXCONSTANT] = {"mark","nil","number",$/;"	v	file:
+err	y_tab.c	/^static int     err;		     \/* flag to indicate error *\/$/;"	v	file:
+execstr	fixed/lua.c	/^static void execstr (void)$/;"	f	file:
+execstr	lua.c	/^static void execstr (void)$/;"	f	file:
+f	opcode.h	/^ Cfunction 	 f;$/;"	m	union:__anon4
+file	inout.c	/^static struct { int file; int function; } funcstack[MAXFUNCSTACK];$/;"	m	struct:__anon1	file:
+fileinput	inout.c	/^static int fileinput (void)$/;"	f	file:
+fileunput	inout.c	/^static void fileunput (int c)$/;"	f	file:
+firstnode	hash.c	/^static void firstnode (Hash *a, int h)$/;"	f	file:
+fp	inout.c	/^static FILE *fp;$/;"	v	file:
+freelist	hash.c	/^static void freelist (Node *n)$/;"	f	file:
+funcstack	inout.c	/^static struct { int file; int function; } funcstack[MAXFUNCSTACK];$/;"	v	typeref:struct:__anon1	file:
+function	inout.c	/^static struct { int file; int function; } funcstack[MAXFUNCSTACK];$/;"	m	struct:__anon1	file:
+fvalue	opcode.h	116;"	d
+hash_h	hash.h	10;"	d
+head	hash.c	/^static int head (Hash *t, Object *ref)		\/* hash function *\/$/;"	f	file:
+in	fixed/iolib.c	/^static FILE *in=NULL, *out=NULL;$/;"	v	file:
+in	iolib.c	/^static FILE *in=NULL, *out=NULL;$/;"	v	file:
+incr_nlocalvar	y_tab.c	/^static void incr_nlocalvar (void)$/;"	f	file:
+incr_ntemp	y_tab.c	/^static void incr_ntemp (void)$/;"	f	file:
+incr_nvarbuffer	y_tab.c	/^static void incr_nvarbuffer (void)$/;"	f	file:
+inout_h	inout.h	11;"	d
+input	fixed/lex_yy.c	/^static Input input;$/;"	v	file:
+input	fixed/lex_yy.c	11;"	d	file:
+input	fixed/lex_yy.c	37;"	d	file:
+input	lex_yy.c	/^static Input input;$/;"	v	file:
+input	lex_yy.c	11;"	d	file:
+input	lex_yy.c	37;"	d	file:
+io_execute	fixed/iolib.c	/^void io_execute (void)$/;"	f
+io_execute	iolib.c	/^void io_execute (void)$/;"	f
+io_read	fixed/iolib.c	/^static void io_read (void)$/;"	f	file:
+io_read	iolib.c	/^static void io_read (void)$/;"	f	file:
+io_readfrom	fixed/iolib.c	/^static void io_readfrom (void)$/;"	f	file:
+io_readfrom	iolib.c	/^static void io_readfrom (void)$/;"	f	file:
+io_remove	fixed/iolib.c	/^void io_remove  (void)$/;"	f
+io_remove	iolib.c	/^void io_remove  (void)$/;"	f
+io_write	fixed/iolib.c	/^static void io_write (void)$/;"	f	file:
+io_write	iolib.c	/^static void io_write (void)$/;"	f	file:
+io_writeto	fixed/iolib.c	/^static void io_writeto (void)$/;"	f	file:
+io_writeto	iolib.c	/^static void io_writeto (void)$/;"	f	file:
+iolib_open	fixed/iolib.c	/^void iolib_open (void)$/;"	f
+iolib_open	iolib.c	/^void iolib_open (void)$/;"	f
+list	hash.c	26;"	d	file:
+list	hash.h	/^ Node         **list;$/;"	m	struct:Hash
+localvar	y_tab.c	/^static Word    localvar[STACKGAP];$/;"	v	file:
+lua_CFunction	lua.h	/^typedef void (*lua_CFunction) (void);$/;"	t
+lua_Object	lua.h	/^typedef struct Object *lua_Object;$/;"	t	typeref:struct:Object
+lua_addfile	table.c	/^int lua_addfile (char *fn)$/;"	f
+lua_array	table.c	/^Hash  	              **lua_array = arraybuffer;$/;"	v
+lua_call	opcode.c	/^int lua_call (char *functionname, int nparam)$/;"	f
+lua_closefile	inout.c	/^void lua_closefile (void)$/;"	f
+lua_codeadjust	y_tab.c	/^static void lua_codeadjust (int n)$/;"	f	file:
+lua_codestore	y_tab.c	/^static void lua_codestore (int i)$/;"	f	file:
+lua_constant	table.c	/^char  	      	      **lua_constant = constantbuffer;$/;"	v
+lua_convtonumber	opcode.c	/^static Object *lua_convtonumber (Object *obj)$/;"	f	file:
+lua_copystring	opcode.c	/^char *lua_copystring (Object *object)$/;"	f
+lua_createarray	table.c	/^void *lua_createarray (void *a)$/;"	f
+lua_createstring	table.c	/^char *lua_createstring (char *s)$/;"	f
+lua_debug	inout.c	/^int lua_debug;$/;"	v
+lua_debugline	inout.c	/^int lua_debugline;$/;"	v
+lua_dofile	opcode.c	/^int lua_dofile (char *filename)$/;"	f
+lua_dostring	opcode.c	/^int lua_dostring (char *string)$/;"	f
+lua_error	inout.c	/^void lua_error (char *s)$/;"	f
+lua_errorfunction	inout.c	/^void lua_errorfunction (void (*fn) (char *s))$/;"	f
+lua_execute	opcode.c	/^int lua_execute (Byte *pc)$/;"	f
+lua_file	table.c	/^char  		       *lua_file[MAXFILE];$/;"	v
+lua_filename	table.c	/^char *lua_filename (void)$/;"	f
+lua_findconstant	table.c	/^int lua_findconstant (char *s)$/;"	f
+lua_findenclosedconstant	table.c	/^int lua_findenclosedconstant (char *s)$/;"	f
+lua_findsymbol	table.c	/^int lua_findsymbol (char *s)$/;"	f
+lua_getcfunction	opcode.c	/^lua_CFunction lua_getcfunction (Object *object)$/;"	f
+lua_getfield	opcode.c	/^Object *lua_getfield (Object *object, char *field)$/;"	f
+lua_getglobal	opcode.c	/^Object *lua_getglobal (char *name)$/;"	f
+lua_getindexed	opcode.c	/^Object *lua_getindexed (Object *object, float index)$/;"	f
+lua_getnumber	opcode.c	/^real lua_getnumber (Object *object)$/;"	f
+lua_getparam	opcode.c	/^Object *lua_getparam (int number)$/;"	f
+lua_getstring	opcode.c	/^char *lua_getstring (Object *object)$/;"	f
+lua_getuserdata	opcode.c	/^void *lua_getuserdata (Object *object)$/;"	f
+lua_h	lua.h	10;"	d
+lua_hashcreate	hash.c	/^Hash *lua_hashcreate (unsigned int nhash)$/;"	f
+lua_hashdefine	hash.c	/^Object *lua_hashdefine (Hash *t, Object *ref)$/;"	f
+lua_hashdelete	hash.c	/^void lua_hashdelete (Hash *h)$/;"	f
+lua_hashmark	hash.c	/^void lua_hashmark (Hash *h)$/;"	f
+lua_iscfunction	opcode.c	/^int lua_iscfunction (Object *object)$/;"	f
+lua_isnil	opcode.c	/^int lua_isnil (Object *object)$/;"	f
+lua_isnumber	opcode.c	/^int lua_isnumber (Object *object)$/;"	f
+lua_isstring	opcode.c	/^int lua_isstring (Object *object)$/;"	f
+lua_istable	opcode.c	/^int lua_istable (Object *object)$/;"	f
+lua_isuserdata	opcode.c	/^int lua_isuserdata (Object *object)$/;"	f
+lua_lasttext	fixed/lex_yy.c	/^char *lua_lasttext (void)$/;"	f
+lua_lasttext	lex_yy.c	/^char *lua_lasttext (void)$/;"	f
+lua_linenumber	inout.c	/^int lua_linenumber;$/;"	v
+lua_localname	y_tab.c	/^static int lua_localname (Word n)$/;"	f	file:
+lua_markobject	table.c	/^void lua_markobject (Object *o)$/;"	f
+lua_markstack	opcode.c	/^void lua_markstack (void)$/;"	f
+lua_markstring	table.h	26;"	d
+lua_marktable	table.c	/^static void lua_marktable (void)$/;"	f	file:
+lua_narray	table.c	/^Word    		lua_narray=0;$/;"	v
+lua_nconstant	table.c	/^Word    		lua_nconstant=T_CFUNCTION+1;$/;"	v
+lua_next	hash.c	/^void lua_next (void)$/;"	f
+lua_nextvar	table.c	/^void lua_nextvar (void)$/;"	f
+lua_nfile	table.c	/^int      		lua_nfile;$/;"	v
+lua_nstring	table.c	/^Word    		lua_nstring=0;$/;"	v
+lua_ntable	table.c	/^Word   	 		lua_ntable=5;$/;"	v
+lua_obj2number	opcode.c	/^void lua_obj2number (void)$/;"	f
+lua_openfile	inout.c	/^int lua_openfile (char *fn)$/;"	f
+lua_openstring	inout.c	/^int lua_openstring (char *s)$/;"	f
+lua_pack	table.c	/^static void lua_pack (void)$/;"	f	file:
+lua_parse	y_tab.c	/^int lua_parse (void)$/;"	f
+lua_pop	opcode.c	/^Object *lua_pop (void)$/;"	f
+lua_popfunction	inout.c	/^void lua_popfunction (void)$/;"	f
+lua_print	opcode.c	/^void lua_print (void)$/;"	f
+lua_pushcfunction	opcode.c	/^int lua_pushcfunction (lua_CFunction fn)$/;"	f
+lua_pushfunction	inout.c	/^int lua_pushfunction (int file, int function)$/;"	f
+lua_pushnil	opcode.c	/^int lua_pushnil (void)$/;"	f
+lua_pushnumber	opcode.c	/^int lua_pushnumber (real n)$/;"	f
+lua_pushobject	opcode.c	/^int lua_pushobject (Object *o)$/;"	f
+lua_pushstring	opcode.c	/^int lua_pushstring (char *s)$/;"	f
+lua_pushuserdata	opcode.c	/^int lua_pushuserdata (void *u)$/;"	f
+lua_pushvar	y_tab.c	/^static void lua_pushvar (long number)$/;"	f	file:
+lua_register	lua.h	15;"	d
+lua_reportbug	inout.c	/^void lua_reportbug (char *s)$/;"	f
+lua_setinput	fixed/lex_yy.c	/^void lua_setinput (Input fn)$/;"	f
+lua_setinput	lex_yy.c	/^void lua_setinput (Input fn)$/;"	f
+lua_setunput	fixed/lex_yy.c	/^void lua_setunput (Unput fn)$/;"	f
+lua_setunput	lex_yy.c	/^void lua_setunput (Unput fn)$/;"	f
+lua_storefield	opcode.c	/^int lua_storefield (lua_Object object, char *field)$/;"	f
+lua_storeglobal	opcode.c	/^int lua_storeglobal (char *name)$/;"	f
+lua_storeindexed	opcode.c	/^int lua_storeindexed (lua_Object object, float index)$/;"	f
+lua_strconc	opcode.c	/^static char *lua_strconc (char *l, char *r)$/;"	f	file:
+lua_strdup	opcode.c	/^char *lua_strdup (char *l)$/;"	f
+lua_string	table.c	/^char  		      **lua_string = stringbuffer;$/;"	v
+lua_table	table.c	/^Symbol	       	       *lua_table=tablebuffer;$/;"	v
+lua_tonumber	opcode.c	/^static int lua_tonumber (Object *obj)$/;"	f	file:
+lua_tostring	opcode.c	/^static int lua_tostring (Object *obj)$/;"	f	file:
+lua_type	opcode.c	/^void lua_type (void)$/;"	f
+lualib_h	lualib.h	9;"	d
+main	fixed/lua.c	/^int main (int argc, char *argv[])$/;"	f
+main	lua.c	/^int main (int argc, char *argv[])$/;"	f
+main	sort.lua	/^function main()$/;"	f
+mainbuffer	y_tab.c	/^static long   mainbuffer[MAXCODE];$/;"	v	file:
+maincode	y_tab.c	/^static Byte  *maincode = (Byte *)mainbuffer;$/;"	v	file:
+mark	hash.h	/^ char           mark;$/;"	m	struct:Hash
+markarray	hash.h	26;"	d
+math_abs	mathlib.c	/^static void math_abs (void)$/;"	f	file:
+math_acos	mathlib.c	/^static void math_acos (void)$/;"	f	file:
+math_asin	mathlib.c	/^static void math_asin (void)$/;"	f	file:
+math_atan	mathlib.c	/^static void math_atan (void)$/;"	f	file:
+math_ceil	mathlib.c	/^static void math_ceil (void)$/;"	f	file:
+math_cos	mathlib.c	/^static void math_cos (void)$/;"	f	file:
+math_floor	mathlib.c	/^static void math_floor (void)$/;"	f	file:
+math_max	mathlib.c	/^static void math_max (void)$/;"	f	file:
+math_min	mathlib.c	/^static void math_min (void)$/;"	f	file:
+math_mod	mathlib.c	/^static void math_mod (void)$/;"	f	file:
+math_pow	mathlib.c	/^static void math_pow (void)$/;"	f	file:
+math_sin	mathlib.c	/^static void math_sin (void)$/;"	f	file:
+math_sqrt	mathlib.c	/^static void math_sqrt (void)$/;"	f	file:
+math_tan	mathlib.c	/^static void math_tan (void)$/;"	f	file:
+mathlib_open	mathlib.c	/^void mathlib_open (void)$/;"	f
+n	opcode.h	/^ real    	 n;$/;"	m	union:__anon4
+name	opcode.h	/^ char   *name;$/;"	m	struct:__anon5
+ncform_sccsid	fixed/lex_yy.c	/^static	char ncform_sccsid[] = "@(#)ncform 1.6 88\/02\/08 SMI"; \/* from S5R2 1.2 *\/$/;"	v	file:
+ncform_sccsid	lex_yy.c	/^static	char ncform_sccsid[] = "@(#)ncform 1.6 88\/02\/08 SMI"; \/* from S5R2 1.2 *\/$/;"	v	file:
+new	hash.c	21;"	d	file:
+newvector	hash.c	22;"	d	file:
+next	hash.h	/^ struct node *next;$/;"	m	struct:node	typeref:struct:node::node
+nfuncstack	inout.c	/^static int nfuncstack=0;$/;"	v	file:
+nhash	hash.c	24;"	d	file:
+nhash	hash.h	/^ unsigned int   nhash;$/;"	m	struct:Hash
+nlocalvar	y_tab.c	/^static Byte    nlocalvar=0;	     \/* number of local variables *\/$/;"	v	file:
+node	hash.h	/^typedef struct node$/;"	s
+nodelist	hash.c	25;"	d	file:
+norma 	test.lua	/^function norma (x,y)$/;"	f
+ntemp	y_tab.c	/^static int     ntemp;		     \/* number of temporary var into stack *\/$/;"	v	file:
+nvalue	opcode.h	112;"	d
+nvarbuffer	y_tab.c	/^static Byte    nvarbuffer=0;	     \/* number of variables at a list *\/$/;"	v	file:
+object	opcode.h	/^ Object  object;$/;"	m	struct:__anon5
+opcode_h	opcode.h	8;"	d
+out	fixed/iolib.c	/^static FILE *in=NULL, *out=NULL;$/;"	v	file:
+out	iolib.c	/^static FILE *in=NULL, *out=NULL;$/;"	v	file:
+output	fixed/lex_yy.c	10;"	d	file:
+output	lex_yy.c	10;"	d	file:
+pByte	y_tab.c	/^ Byte *pByte;$/;"	m	union:__anon6	file:
+pByte	y_tab.h	/^ Byte *pByte;$/;"	m	union:__anon8
+pc	y_tab.c	/^static Byte  *pc;$/;"	v	file:
+present	hash.c	/^static Node *present(Hash *t, Object *ref, int h)$/;"	f	file:
+quicksort	sort.lua	/^function quicksort(r,s)$/;"	f
+real	opcode.h	15;"	d
+ref	hash.h	/^ Object ref;$/;"	m	struct:node
+ref_nvalue	hash.c	28;"	d	file:
+ref_svalue	hash.c	29;"	d	file:
+ref_tag	hash.c	27;"	d	file:
+retorno_multiplo 	test.lua	/^function retorno_multiplo ()$/;"	f
+s	opcode.h	/^ char      	*s;$/;"	m	union:__anon4
+s_avalue	opcode.h	126;"	d
+s_bvalue	opcode.h	125;"	d
+s_fvalue	opcode.h	127;"	d
+s_name	opcode.h	120;"	d
+s_nvalue	opcode.h	123;"	d
+s_object	opcode.h	121;"	d
+s_svalue	opcode.h	124;"	d
+s_tag	opcode.h	122;"	d
+s_uvalue	opcode.h	128;"	d
+save 	save.lua	/^function save ()$/;"	f
+savevar 	save.lua	/^function savevar (n,v)$/;"	f
+somaP 	test.lua	/^function somaP (x1,y1,x2,y2)$/;"	f
+sort	sort.lua	/^function sort(a,n)			-- selection sort$/;"	f
+st	inout.c	/^static char *st;$/;"	v	file:
+stack	opcode.c	/^static Object stack[MAXSTACK] = {{T_MARK, {NULL}}};$/;"	v	file:
+str_find	strlib.c	/^static void str_find (void)$/;"	f	file:
+str_len	strlib.c	/^static void str_len (void)$/;"	f	file:
+str_lower	strlib.c	/^static void str_lower (void)$/;"	f	file:
+str_sub	strlib.c	/^static void str_sub (void)$/;"	f	file:
+str_upper	strlib.c	/^static void str_upper (void)$/;"	f	file:
+streq	hash.c	18;"	d	file:
+streq	table.c	17;"	d	file:
+stringbuffer	table.c	/^static char 	       *stringbuffer[MAXSTRING];$/;"	v	file:
+stringinput	inout.c	/^static int stringinput (void)$/;"	f	file:
+stringunput	inout.c	/^static void stringunput (int c)$/;"	f	file:
+strlib_open	strlib.c	/^void strlib_open (void)$/;"	f
+strneq	hash.c	19;"	d	file:
+svalue	opcode.h	113;"	d
+t_name	y_tab.c	/^typedef struct { char *t_name; int t_val; } yytoktype;$/;"	m	struct:__anon7	file:
+t_val	y_tab.c	/^typedef struct { char *t_name; int t_val; } yytoktype;$/;"	m	struct:__anon7	file:
+table_h	table.h	9;"	d
+tablebuffer	table.c	/^static Symbol  		tablebuffer[MAXSYMBOL] = {$/;"	v	file:
+tag	opcode.h	/^ Type  tag;$/;"	m	struct:Object
+tag	opcode.h	111;"	d
+test	fixed/lua.c	/^void test (void)$/;"	f
+test	lua.c	/^void test (void)$/;"	f
+tonumber	opcode.c	20;"	d	file:
+top	opcode.c	/^static Object *top=stack+1, *base=stack+1;$/;"	v	file:
+tostring	opcode.c	21;"	d	file:
+trilha 	type.lua	/^function trilha (t)  check(t,typetrilha) end$/;"	f
+u	opcode.h	/^ void           *u;$/;"	m	union:__anon4
+unput	fixed/lex_yy.c	/^static Unput unput;$/;"	v	file:
+unput	fixed/lex_yy.c	12;"	d	file:
+unput	fixed/lex_yy.c	38;"	d	file:
+unput	lex_yy.c	/^static Unput unput;$/;"	v	file:
+unput	lex_yy.c	12;"	d	file:
+unput	lex_yy.c	38;"	d	file:
+usererror	inout.c	/^static void (*usererror) (char *s);$/;"	v	file:
+uvalue	opcode.h	117;"	d
+vFloat	y_tab.c	/^ float vFloat;$/;"	m	union:__anon6	file:
+vFloat	y_tab.h	/^ float vFloat;$/;"	m	union:__anon8
+vInt	y_tab.c	/^ int   vInt;$/;"	m	union:__anon6	file:
+vInt	y_tab.h	/^ int   vInt;$/;"	m	union:__anon8
+vLong	y_tab.c	/^ long  vLong;$/;"	m	union:__anon6	file:
+vLong	y_tab.h	/^ long  vLong;$/;"	m	union:__anon8
+vWord	y_tab.c	/^ Word  vWord;$/;"	m	union:__anon6	file:
+vWord	y_tab.h	/^ Word  vWord;$/;"	m	union:__anon8
+val	hash.h	/^ Object val;$/;"	m	struct:node
+value	opcode.h	/^ Value value;$/;"	m	struct:Object
+varbuffer	y_tab.c	/^static long    varbuffer[MAXVAR];$/;"	v	file:
+verify	fixed/lex_yy.c	/^struct yywork { YYTYPE verify, advance; } yycrank[] = {$/;"	m	struct:yywork	file:
+verify	lex_yy.c	/^struct yywork { YYTYPE verify, advance; } yycrank[] = {$/;"	m	struct:yywork	file:
+yyact	y_tab.c	/^int yyact[]={$/;"	v
+yyback	fixed/lex_yy.c	/^yyback(p, m)$/;"	f
+yyback	lex_yy.c	/^yyback(p, m)$/;"	f
+yybgin	fixed/lex_yy.c	/^struct yysvf *yybgin = yysvec+1;$/;"	v	typeref:struct:yysvf
+yybgin	lex_yy.c	/^struct yysvf *yybgin = yysvec+1;$/;"	v	typeref:struct:yysvf
+yychar	y_tab.c	/^int yychar;			\/* current input token number *\/$/;"	v
+yychk	y_tab.c	/^int yychk[]={$/;"	v
+yyclearin	y_tab.c	172;"	d	file:
+yycrank	fixed/lex_yy.c	/^struct yywork { YYTYPE verify, advance; } yycrank[] = {$/;"	v	typeref:struct:yywork
+yycrank	lex_yy.c	/^struct yywork { YYTYPE verify, advance; } yycrank[] = {$/;"	v	typeref:struct:yywork
+yydebug	y_tab.c	/^int yydebug;			\/* set to 1 to get debugging *\/$/;"	v
+yydef	y_tab.c	/^int yydef[]={$/;"	v
+yyerrflag	y_tab.c	/^int yyerrflag;			\/* error recovery flag *\/$/;"	v
+yyerrok	y_tab.c	173;"	d	file:
+yyerror	y_tab.c	/^void yyerror (char *s)$/;"	f
+yyestate	fixed/lex_yy.c	/^struct yysvf *yyestate;$/;"	v	typeref:struct:yysvf
+yyestate	lex_yy.c	/^struct yysvf *yyestate;$/;"	v	typeref:struct:yysvf
+yyexca	y_tab.c	/^int yyexca[] ={$/;"	v
+yyextra	fixed/lex_yy.c	/^char yyextra[] = {$/;"	v
+yyextra	lex_yy.c	/^char yyextra[] = {$/;"	v
+yyfnd	fixed/lex_yy.c	/^int *yyfnd;$/;"	v
+yyfnd	lex_yy.c	/^int *yyfnd;$/;"	v
+yyin	fixed/lex_yy.c	/^FILE *yyin = {NULL}, *yyout = {NULL};$/;"	v
+yyin	lex_yy.c	/^FILE *yyin = {NULL}, *yyout = {NULL};$/;"	v
+yyinput	fixed/lex_yy.c	/^yyinput(){$/;"	f
+yyinput	lex_yy.c	/^yyinput(){$/;"	f
+yyleng	fixed/lex_yy.c	/^int yyleng; extern char yytext[];$/;"	v
+yyleng	lex_yy.c	/^int yyleng; extern char yytext[];$/;"	v
+yylex	fixed/lex_yy.c	/^yylex(){$/;"	f
+yylex	lex_yy.c	/^yylex(){$/;"	f
+yylineno	fixed/lex_yy.c	/^int yylineno =1;$/;"	v
+yylineno	lex_yy.c	/^int yylineno =1;$/;"	v
+yylook	fixed/lex_yy.c	/^yylook(){$/;"	f
+yylook	lex_yy.c	/^yylook(){$/;"	f
+yylsp	fixed/lex_yy.c	/^struct yysvf *yylstate [YYLMAX], **yylsp, **yyolsp;$/;"	v	typeref:struct:
+yylsp	lex_yy.c	/^struct yysvf *yylstate [YYLMAX], **yylsp, **yyolsp;$/;"	v	typeref:struct:
+yylstate	fixed/lex_yy.c	/^struct yysvf *yylstate [YYLMAX], **yylsp, **yyolsp;$/;"	v	typeref:struct:yysvf
+yylstate	lex_yy.c	/^struct yysvf *yylstate [YYLMAX], **yylsp, **yyolsp;$/;"	v	typeref:struct:yysvf
+yylval	y_tab.c	/^YYSTYPE yylval, yyval;$/;"	v
+yymatch	fixed/lex_yy.c	/^char yymatch[] = {$/;"	v
+yymatch	lex_yy.c	/^char yymatch[] = {$/;"	v
+yymore	fixed/lex_yy.c	13;"	d	file:
+yymore	lex_yy.c	13;"	d	file:
+yymorfg	fixed/lex_yy.c	/^int yymorfg;$/;"	v
+yymorfg	lex_yy.c	/^int yymorfg;$/;"	v
+yynerrs	y_tab.c	/^int yynerrs;			\/* number of errors *\/$/;"	v
+yyolsp	fixed/lex_yy.c	/^struct yysvf *yylstate [YYLMAX], **yylsp, **yyolsp;$/;"	v	typeref:struct:
+yyolsp	lex_yy.c	/^struct yysvf *yylstate [YYLMAX], **yylsp, **yyolsp;$/;"	v	typeref:struct:
+yyother	fixed/lex_yy.c	/^	struct yysvf *yyother;$/;"	m	struct:yysvf	typeref:struct:yysvf::yysvf	file:
+yyother	lex_yy.c	/^	struct yysvf *yyother;$/;"	m	struct:yysvf	typeref:struct:yysvf::yysvf	file:
+yyout	fixed/lex_yy.c	/^FILE *yyin = {NULL}, *yyout = {NULL};$/;"	v
+yyout	lex_yy.c	/^FILE *yyin = {NULL}, *yyout = {NULL};$/;"	v
+yyoutput	fixed/lex_yy.c	/^yyoutput(c)$/;"	f
+yyoutput	lex_yy.c	/^yyoutput(c)$/;"	f
+yypact	y_tab.c	/^int yypact[]={$/;"	v
+yyparse	y_tab.c	/^yyparse()$/;"	f
+yypgo	y_tab.c	/^int yypgo[]={$/;"	v
+yyprevious	fixed/lex_yy.c	/^int yyprevious = YYNEWLINE;$/;"	v
+yyprevious	lex_yy.c	/^int yyprevious = YYNEWLINE;$/;"	v
+yyps	y_tab.c	/^static int *yyps;			\/* top of state stack *\/$/;"	v	file:
+yypv	y_tab.c	/^static YYSTYPE *yypv;			\/* top of value stack *\/$/;"	v	file:
+yyr1	y_tab.c	/^int yyr1[]={$/;"	v
+yyr2	y_tab.c	/^int yyr2[]={$/;"	v
+yyreds	y_tab.c	/^char * yyreds[] =$/;"	v
+yys	y_tab.c	/^static int *yys;			\/* state stack *\/$/;"	v	file:
+yysbuf	fixed/lex_yy.c	/^char yysbuf[YYLMAX];$/;"	v
+yysbuf	lex_yy.c	/^char yysbuf[YYLMAX];$/;"	v
+yysptr	fixed/lex_yy.c	/^char *yysptr = yysbuf;$/;"	v
+yysptr	lex_yy.c	/^char *yysptr = yysbuf;$/;"	v
+yystate	y_tab.c	/^static int yystate;			\/* current state *\/$/;"	v	file:
+yystoff	fixed/lex_yy.c	/^	struct yywork *yystoff;$/;"	m	struct:yysvf	typeref:struct:yysvf::yywork	file:
+yystoff	lex_yy.c	/^	struct yywork *yystoff;$/;"	m	struct:yysvf	typeref:struct:yysvf::yywork	file:
+yystops	fixed/lex_yy.c	/^	int *yystops;};$/;"	m	struct:yysvf	file:
+yystops	lex_yy.c	/^	int *yystops;};$/;"	m	struct:yysvf	file:
+yysvec	fixed/lex_yy.c	/^struct yysvf yysvec[] = {$/;"	v	typeref:struct:yysvf
+yysvec	lex_yy.c	/^struct yysvf yysvec[] = {$/;"	v	typeref:struct:yysvf
+yysvf	fixed/lex_yy.c	/^struct yysvf { $/;"	s	file:
+yysvf	lex_yy.c	/^struct yysvf { $/;"	s	file:
+yytchar	fixed/lex_yy.c	/^int yytchar;$/;"	v
+yytchar	lex_yy.c	/^int yytchar;$/;"	v
+yytext	fixed/lex_yy.c	/^char yytext[YYLMAX];$/;"	v
+yytext	lex_yy.c	/^char yytext[YYLMAX];$/;"	v
+yytmp	y_tab.c	/^static int yytmp;			\/* extra var (lasts between blocks) *\/$/;"	v	file:
+yytoks	y_tab.c	/^yytoktype yytoks[] =$/;"	v
+yytoktype	y_tab.c	/^typedef struct { char *t_name; int t_val; } yytoktype;$/;"	t	typeref:struct:__anon7	file:
+yytop	fixed/lex_yy.c	/^struct yywork *yytop = yycrank+423;$/;"	v	typeref:struct:yywork
+yytop	lex_yy.c	/^struct yywork *yytop = yycrank+423;$/;"	v	typeref:struct:yywork
+yyunput	fixed/lex_yy.c	/^yyunput(c)$/;"	f
+yyunput	lex_yy.c	/^yyunput(c)$/;"	f
+yyv	y_tab.c	/^static YYSTYPE *yyv;			\/* value stack *\/$/;"	v	file:
+yyval	y_tab.c	/^YYSTYPE yylval, yyval;$/;"	v
+yyvstop	fixed/lex_yy.c	/^int yyvstop[] = {$/;"	v
+yyvstop	lex_yy.c	/^int yyvstop[] = {$/;"	v
+yywork	fixed/lex_yy.c	/^struct yywork { YYTYPE verify, advance; } yycrank[] = {$/;"	s	file:
+yywork	lex_yy.c	/^struct yywork { YYTYPE verify, advance; } yycrank[] = {$/;"	s	file:
+yywrap	y_tab.c	/^int yywrap (void)$/;"	f

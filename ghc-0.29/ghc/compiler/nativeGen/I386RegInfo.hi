@@ -1,0 +1,11 @@
+{-# GHC_PRAGMA INTERFACE VERSION 6 #-}
+interface I386RegInfo where
+import AbsCSyn(MagicId)
+import AsmRegAlloc(Reg)
+import Maybes(Labda)
+baseRegOffset :: MagicId -> Int
+callerSaves :: MagicId -> Bool
+freeReg :: Int# -> Int#
+reservedRegs :: [Int]
+stgRegMap :: MagicId -> Labda Reg
+

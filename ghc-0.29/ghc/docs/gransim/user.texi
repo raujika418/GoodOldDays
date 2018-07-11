@@ -1,0 +1,3812 @@
+\def\line{\hbox to\hsize}
+\def\centerline#1{\line{\hss#1\hss}}
+%\input epsf
+\input psfig
+%\def\psfigurepath{/where/your/files/live}
+\input texinfo   @c -*-texinfo-*-
+@c ----------------------------------------------------------------------
+@c Time-stamp: <Thu Jul 25 1996 11:19:42 Stardate: [-31]7862.15 hwloidl>
+@c
+@c This is the GranSim User's Guide.
+@c ----------------------------------------------------------------------
+
+@c %**start of header
+@setfilename user.info
+@settitle GranSim User's Guide
+@c %**end of header
+
+@comment New index for options
+@defindex op
+@c @syncodeindex op cp
+
+
+@ifinfo
+The GranSim User's Guide discusses how to use the GranSim simulator for
+the parallel execution of Haskell programs. 
+
+Copyright @copyright{} 1994 -- 1996, 
+Hans-Wolfgang Loidl for the GRASP/AQUA Project, Glasgow University
+@end ifinfo
+
+@titlepage
+@sp 10
+@comment The title is printed in a large font.
+@center @titlefont{GranSim User's Guide}
+@center Version 0.03
+@sp 1
+@center July 1996
+@sp 5
+@center Hans-Wolfgang Loidl
+@center @t{hwloidl@@dcs.gla.ac.uk}
+@c The following two commands start the copyright page.
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1994 -- 1996, 
+Hans-Wolfgang Loidl for the GRASP/AQUA Project, Glasgow University
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries copying permission notice
+identical to this one except for the removal of this paragraph (this
+paragraph not being relevant to the printed manual).
+
+@end ignore
+
+@end titlepage
+
+@c ----------------------------------------------------------------------
+
+@ifinfo
+@node   Top, Quick Intro, (dir), (dir)
+@comment  node-name,  next,  previous,  up
+@top GranSim User's Guide
+@end ifinfo
+
+This   user's guide  describes  how to  use  GranSim  for simulating  the
+parallel execution of (annotated)  Haskell  programs. In passing we  will
+discuss how  to write parallel, lazy  functional programs and how to tune
+their performance.  To this end, some  visualisation tools for generating
+activity and granularity  profiles of the  execution will be discussed. A
+set of example programs demonstrates the use of GranSim.
+
+GranSim  is part of the Glasgow  Haskell Compiler (GHC),  in fact it is a
+special setup  of   GHC, which uses a    slightly modified compiler  (for
+instrumenting  the code) and an  extended runtime-system.   For users who
+are already familiar with the  GHC and parallel functional programming in
+general there is a quick  introduction to GranSim available (@pxref{Quick
+Intro}).
+
+@c For the impatient: add a node about differences to normal
+@c compilation/execution 
+
+@menu
+* Quick Intro::                 
+* Overview::                    
+* Setting-up GranSim::          
+* Parallelism Annotations::     
+* Runtime-System Options::      
+* Strategies::                  
+* Visualisation Tools::         
+* GranSim Profiles::            
+* Parallel NoFib Suite::        
+* Internals of GranSim::        
+* GranSim vs GUM::              
+* Future Extensions::           
+* Bug Reports::                 
+* Determinant (Example) ::      
+* Options Index::               
+* Concept Index::               
+@end menu
+
+@c ----------------------------------------------------------------------
+
+@c This section is sort of special and should not go into the overall
+@c menu
+
+@node Quick Intro, Overview, Top, Top
+@comment  node-name,  next,  previous,  up
+@chapter A Quick Introduction to GranSim
+
+If you already know how to compile a Haskell program  with GHC and if you
+have an installed  version  of GranSim  available there  are  only  a few
+changes necessary  to simulate parallel  execution.  Basically, a compile
+time  flag has to be  used to  generate instrumented code. Runtime-system
+flags then control the behaviour of the simulation.
+
+@enumerate
+@item
+Compile all modules with the additional options @t{-gransim} and
+@t{-fvia-C}. Use @t{-gransim} also when linking object files. For example
+
+@example
+ghc -gransim -fvia-C -o foo foo.hs
+@end example
+
+creates a GranSim executable file @t{foo}.
+@item
+When running the program use the runtime-system option @t{-bP} to
+generate a full GranSim profile (@pxref{Types of GranSim Profiles}).
+@xref{Runtime-System Options} for a description of all options that
+allow you to control the behaviour of the simulated parallel
+architecture. For example
+
+@example
+./foo +RTS -bP -bp16 -bl400
+@end example
+
+starts a simulation for a machine with 16 processors and a latency of 400
+machine cycles. It generates a GranSim profile @file{foo.gr}
+.
+@item
+Use   one of the  visualisation  tools  (@pxref{Visualisation Tools}) to
+examine the  behaviour   of  the  program.  The  first  bet is  to   use
+@file{gr2ps},  which generates a graph   showing the overall activity of
+the machine in a global picture.  For example
+
+@example
+gr2ps -O foo.gr
+@end example
+
+generates an activity profile as a colour PostScript file @file{foo.ps}.
+It shows how many threads in total have been running, runnable (but not
+running), blocked (on data under evaluation), fetching (remote data) and
+migrating (to another processor) at each point during the execution.  
+Other tools you might want to try are @file{gr2pe} (giving a per-PE
+activity profile) and @file{gr2ap} (giving a per-thread activity profile).
+
+Additionally, another set of visualisation tools  allows to focus on the
+granularity  of  the  generated  threads.   The   most important one  is
+@file{gr2gran}, which generates bucket statistics showing the runtime of
+the individual threads (@pxref{Granularity Profiles}).
+@end enumerate
+
+@iftex
+As an example for an overall activity profile the graph below shows the
+result of running a parfib program (@pxref{Example}) on 16 processors with a
+latency of 400 cycles. 
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=90,file=pf-bp16-bl400.ps,width=@hsize}}
+@sp 1
+@end iftex
+@ifhtml
+<p align=center>
+<img src="pf-bp16-bl400.ps" alt="Overall activity profile for parfib">
+</p>
+@end ifhtml
+
+Overall, for  this simple program the utilisation   is almost perfect as
+the green  (medium-gray) area reaches up to  16 almost through the whole
+computation. Only at  the end of the  computation there is a significant
+number  of runnable (amber  or  light-gray) and  blocked  (red or black)
+threads.
+
+The header of the picture shows the average  parallelism and the options
+used  for  this execution  (e.g.   the  @t{-bp16}  part  shows  that  16
+processors have been simulated).  The runtime shown in the footer of the
+picture is measured in machine cycles. In GranSim all times are given in
+machine  cycles.
+@end iftex
+
+@ifhtml
+As an example for an overall activity profile the graph below shows the
+result of running a parfib program (@pxref{Example}) on 16 processors with a
+latency of 400 cycles. 
+
+@sp 1
+@centerline{@psfig{angle=90,file=pf-bp16-bl400.ps,width=@hsize}}
+@sp 1
+
+Overall, for this simple program the utilisation is almost perfect as
+the green (medium-gray) area reaches up to 16 almost through the whole
+computation. Only at the end of the computation there is a significant
+number of runnable (amber or light-gray) and blocked (red or black)
+threads.
+
+The header of the picture shows the options used for this execution and
+the average parallelism. The runtime shown in the footer of the picture
+is measured in machine cycles. In GranSim all times are given in machine cycles.
+@end ifhtml
+
+@c ----------------------------------------------------------------------
+
+@node Overview, Setting-up GranSim, Quick Intro, Top
+@comment  node-name,  next,  previous,  up
+@chapter Overview
+@cindex Overview
+
+GranSim  is  mainly  intended to be   a research  tool for studying  the
+dynamic  behaviour of parallel, lazy  functional programs. By simulating
+the  parallel execution it is possible  to concentrate on the amount and
+structure of  the parallelism   exposed by  the  program  without  being
+distracted  by `external' details like  load  of the machine produced by
+other users or the basic network traffic. However, for obtaining results
+that are  of relevance for a  particular  machine it is  possible to set
+parameters in GranSim that very  accurately model the behaviour of  this
+machine.
+
+
+@menu
+* Components::                  
+* Semi-explicit Parallelism::   
+* GranSim Modes::               
+* Example::                     
+* Running it::                  
+@end menu
+
+@node Components, Semi-explicit Parallelism, Overview, Overview
+@comment  node-name,  next,  previous,  up
+@section Components of the GranSim System
+@cindex GHC
+
+The overall GranSim System consists of the following components:
+
+@itemize @bullet
+
+@item
+The @emph{GranSim Simulator} proper.
+
+@item
+Some @emph{Visualisation Tools}.
+
+@item 
+The @emph{GranSim Toolbox}. 
+
+@item 
+The @emph{GranSim T-shirt} (not available, yet, sorry).
+@end itemize
+
+The GranSim simulator is built on top  of the @dfn{runtime-system} (RTS)
+of the Glasgow Haskell Compiler (@dfn{GHC}).  Thus, the major part of it
+is  a  (rather big)  @emph{runtime  system   for GHC}.    This  part  is
+responsible  for    implementing   the   event  driven     simulation of
+parallelism.  For  example  communication   is modelled   by  adding new
+features to the appropriate routines in the sequential runtime-system.
+
+For  simulating parallelism the generated  code  has to be instrumented,
+which is  achieved  by a  slightly  modified code generator  in  GHC. To
+produce  instrumented code the compile time  option  @t{-gransim} of the
+Haskell  compiler has to   be used.  This  is   what we mean  by  saying
+`compiling under  GranSim'. Note that it  is not possible to  use object
+file compiled for another setup of  GHC to generate a GranSim executable
+file.
+
+Our  approach is   similar to  that  of  @dfn{GUM} (a portable  parallel
+implementation   of  Haskell), which has   also  been  developed in this
+department.  Both systems  are basically  extensions  of the  sequential
+runtime-system. GranSim is also similar to GUM in  the way it implements
+several features like the  communication  mechansim. To a  large  extend
+both systems  actually use  the same code.  @xref{GranSim  vs GUM} for a
+more detailled comparison.
+
+In order to analyse the  result of a simulation it  is very important to
+visualise the abundance of data. To this end the GranSim system contains
+a set of   @emph{visualisation tools} that generate  PostScript  graphs,
+focusing on specific aspects of the execution. The most important usage
+of these tools  is the generation of an  overall activity profile of the
+execution.
+
+The system contains a set of small tools, usually scripts processing the
+output of  a simulation.  These  tools are   collected in the  so-called
+@emph{GranSim Toolbox}.
+
+The final component, the @emph{GranSim T-shirt} has not been
+implemented, yet. If you have suggestions, feel free to email me.
+
+@node Semi-explicit Parallelism, GranSim Modes, Components, Overview
+@comment  node-name,  next,  previous,  up
+@section Semi-explicit Parallelism
+
+The  underlying execution model   of  GranSim  is one of   semi-explicit
+parallelism where expressions that should be  evaluated in parallel have
+to be annotated by  using the @t{par} annotation. However,  it is  up to
+the  runtime-system  to  decide when and   where  to create  a  parallel
+thread. It    may even  discard potential  parallelism   altogether. 
+
+The communication between the threads is  performed via accessing shared
+data structures.  If  a thread tries  to  access a  value that is  under
+evaluation,  it is put  into a blocking  queue attached to that closure.
+When the  closure  is  updated  by the result    this blocking queue  is
+released. So, the only extension  of the sequential evaluation mechanism
+is the addition of blocking queues.
+
+Because of these characteristics of  hiding as many low-level details as
+possible in the runtime-system  we call this  model semi-explicit. It is
+only necessary to mark potential  parallelism in the program. All issues
+related to communication, load balancing etc are  handled by the runtime
+system and can be ignored by the programmer.
+
+For example in the expression
+
+@smallexample
+ let 
+   squares = [ i^2 | i <- [1..n] ] 
+ in 
+ squares `par` sum squares
+@end smallexample
+
+the list of squares will be produced by  one thread (the @dfn{producer})
+and  the   result  sum  will  be   computed  by   another thread    (the
+@dfn{consumer}). Note  that this   producer-consumer  structure of   the
+algorithm  is  solely    determined by   the data-dependencies  in   the
+program.  All  the programmer   has  to  do   is  to  annotate  a  named
+subexpression (in this example @t{squares}), which should be computed in
+parallel. Thread placement,  communication and whether the thread should
+be created at all are up to the runtime-system.
+
+In this introduction we don't go into the operational details of this
+example. @xref{Example: Sum of Squares} for a discussion how to improve the
+parallelism of the algorithm.
+
+@c References to papers
+This model of using @t{par} and @t{seq} annotations is the same as it is
+used for the @t{GRIP} machine and for the @t{GUM} system. In fact, there
+is  a strong correspondence between the  GranSim and GUM. This allows to
+carry results of  a GranSim simulation over to  a real parallel  machine
+operating under  GUM (this  issue will  be addressed in  more  detail in
+@ref{GranSim vs GUM}.).
+
+@node GranSim Modes, Example, Semi-explicit Parallelism, Overview
+@comment  node-name,  next,  previous,  up
+@section GranSim Modes
+@cindex  GranSim-Light
+@cindex  Profiling
+
+This section outlines a  methodology  for parallelising lazy  functional
+programs.  The development   and    performance tuning of   a   parallel
+algorithm typically proceeds in several stages:
+
+@enumerate
+
+@item
+@emph{Profiling} of  the  sequential  algorithm   if  the goal   is  the
+parallelisation  of an  already existing  algorithm.  This stage  should
+give an idea about the `big computations' in the program. The programmer
+can then concentrate on parallelising this part of the algorithm.
+
+@item
+@emph{Extracting}  parallelism  out of the algorithm.   In  our model of
+computation this  means adding @t{seq}   and @t{par} annotations to  the
+program (@xref{Parallelism  Annotations},  for  a discussion  of  all
+available annotations).
+
+@item
+@emph{Restructuring}  parts of the algorithm   to increase the amount of
+parallelism.  This can be called performance tuning on an abstract level
+where the performance of the algorithm  is solely modelled by the amount
+of parallelism in the program.
+
+@item 
+@emph{Optimising} the  parallel  algorithm for  execution on  a specific
+machine. In this stage low-level details have to be addressed.
+
+@end enumerate
+
+To facilitate such a process  of parallelisation the GHC system provides
+several tools. In particular GHC and GranSim support different modes reflecting
+different stages:
+
+@enumerate
+
+@item
+The sequential @emph{profiling}   setup of GHC  allows to  get  accurate
+information    about  computation time and    heap    usage of   program
+expressions.  Especially for parallelising   big sequential programs the
+profiler gives invaluable information for  the proper parallelisation. A
+more  detailed description of  the profiler is  part of  the overall GHC
+documentation.
+
+@item
+The @emph{GranSim-Light} mode    simulates the parallel execution  of  a
+program with an  unbounded  number  of processors.    In this mode    no
+communication is  modelled (i.e.  access of  remote data is as expensive
+as access of local  data).  Thus, this mode  mainly shows the amount  of
+parallelism   in  the  program and  indicates    an upper  bound  of the
+parallelism when running the program on a real machine.
+
+@item 
+In the usual mode @emph{GranSim} can simulate the  execution of up to 32
+processors@footnote{In general the word size of the machine is the upper
+bound for the number of processors.} with an exact  modelling of communication. Thus, the execution
+on a particular machine with the chosen characteristics is simulated.
+
+@item
+A set  of  @emph{visualisation  tools}  allows  to generate activity  and
+granularity  profiles of the execution.   These  tools allow to  generate
+overall  profiles   as  well      as per-PE  and     per-thread  profiles
+(@pxref{Visualisation}).   This especially  facilitates the   performance
+tuning of the program.
+
+@end enumerate
+
+@c In order to analyse the dynamic behaviour of the program a set of 
+@c visualisation tools can be used to generate profiles of the execution
+@c (see @xref{Visualisation} for a discussion of these tools).
+
+@node Example, Running it, GranSim Modes, Overview
+@comment  node-name,  next,  previous,  up
+@section A Simple Example Program
+@cindex Example
+@cindex @t{nfib}
+@cindex @t{parfib}
+@cindex @t{Parallel} module
+
+This section gives an example of how to write a simple parallel program 
+in the parallel, lazy functional execution model. Due to a sad lack of
+imagination we take our good old friend, @t{nfib},  as an example
+program. This is the sequential function from which we start:
+
+@example
+nfib :: Int -> Int
+nfib 0 = 1
+nfib 1 = 1
+nfib n = nf1+nf2+1
+         where nf1  = nfib (n-1)
+               nf2  = nfib (n-2)
+@end example
+
+The straightforward idea for parallelising @t{nfib} is to start parallel
+processes for computing both recursive calls. This is expressed with the
+@t{par} annotation, which `sparks' a  parallel process for computing its
+first argument   and whose result  is  its  second argument  (the  exact
+operational semantics of @t{par} is  discussed in more detail in chapter
+@ref{Parallelism   Annotations}.).  This  gives  the following  parallel
+program:
+
+@example
+parfib :: Int -> Int
+parfib 0 = 1
+parfib 1 = 1
+parfib n = nf2 `par` (nf1 `par` (nf1+nf2+1))
+           where nf1 = parfib (n-1)
+                 nf2 = parfib (n-2)
+@end example
+
+The drawback of this program is the blocking of the main task on the two
+created child-tasks. Only when both child  tasks have returned a result,
+the  main task can  continue. It is  more efficient to  have  one of the
+recursive calls computed by the main task and to spark only one parallel
+process for  the other recursive call.   In order to guarantee  that the
+main  expression is evaluated in  the right order (i.e. without blocking
+the main task on the child task) the @t{seq} annotation is used:
+
+@example
+parfib :: Int -> Int
+parfib 0 = 1
+parfib 1 = 1
+parfib n = nf2 `par` (nf1 `seq` (nf1+nf2+1))
+           where nf1 = parfib (n-1)
+                 nf2 = parfib (n-2)
+@end example
+
+The operational reading of  this function is as  follows: First spark  a
+parallel process for computing  the  expression @t{parfib (n-2)}.   Then
+evaluate  the expression @t{parfib   (n-1)}. Finally, evaluate  the main
+expression. If  the parallel process has not  finished  by this time the
+main task will be blocked on @t{nf2}. Otherwise it will just pick up the
+result.
+
+This simple example already shows several basic aspects of parallel,
+lazy functional programming:
+
+@itemize @bullet
+
+@item
+For adding parallelism to the program @t{par} annotations on local
+variables (that appear in the main expression) are used.
+
+@item
+To specify evaluation order of the program @t{seq} annotations are
+used. It reduces the first argument (usually a variable occurring in the
+definition of the second argument) to weak head normal form (WHNF).
+
+@item 
+For the efficiency of the parallel program it is important to avoid
+unnecessary blocking during the execution.
+
+@end itemize
+
+Another aspect not shown in this example is the importance of evaluation
+degree. If  the parallel expressions  create  a compound  type  (e.g.  a
+list)  then  it is   important that they    are  evaluated to a  certain
+degree. Otherwise there won't be a lot of parallelism in the program. We
+will revisit this aspect again in @ref{Strategies}.
+
+Finally, here is the total example as  a stand-alone program:
+
+@smallexample
+module Main where
+
+import Parallel
+
+main = getArgs abort ( \ a -> 
+       let 
+         n = head ( map (\ a1 -> fst ((readDec a1) !! 0)) a )
+       in 
+       print ("parfib " ++ (show n) ++ " = " ++ (show (parfib n)) ++ "\n")  )
+
+nfib :: Int -> Int
+nfib 0 = 1
+nfib 1 = 1
+nfib n = nf1+nf2+1
+         where nf1 = nfib (n-1)
+               nf2 = nfib (n-2)
+
+parfib :: Int -> Int
+parfib 0 = 1
+parfib 1 = 1
+parfib n = nf2 `par` (nf1 `seq` (nf1+nf2+1) )
+           where nf1 = parfib (n-1)
+                 nf2 = parfib (n-2)
+@end smallexample
+
+@node Running it,  , Example, Overview
+@comment  node-name,  next,  previous,  up
+@section Running the Example Program
+@cindex Compiling under GranSim
+@cindex Running an example program
+
+In  a standard installation  of  GHC with  GranSim  enabled the  example
+program can be compiled as  usually but with  adding the compiler option
+@t{-gransim}.   So, if the  above program  is   in file @file{parfib.hs}
+compile a GranSim version of the program with
+
+@example
+ghc -gransim -fvia-C parfib.hs
+@end example
+
+GranSim requires a compilation using C code as an intermediate
+stage. Compiling with the native code generator is not supported.
+
+To simulate the execution on a machine with 4 processors type
+
+@example
+./a.out +RTS -bP -bp4
+@end example
+
+This will generate a granularity profile (@file{.gr} extension). For
+getting an overall activity profile of the execution use
+
+@example
+gr2ps -O a.out.gr
+@end example 
+
+Use your favourite PostScript viewer to examine the activity profile
+in @file{a.out.ps}. You'll get the best results with GNU ghostview and
+ghostscript version 2.6.1 or later.
+
+@c ----------------------------------------------------------------------
+
+@node Setting-up GranSim, Parallelism Annotations, Overview, Top
+@comment  node-name,  next,  previous,  up
+@chapter Setting-up GranSim
+
+@sc{[Warning: This is very drafty for now. If you have severe installation
+problems please let me know.]}
+
+This chapter describes how to get the latest version of GranSim, and how
+to install it.
+
+The system requirements are basically the same as for GHC itself. So far,
+GranSim has been tested on SUNs under SunOS 4.1 and Solaris 2, and on DEC
+Alphas under OSF 1 and OSF 3.2. The visualisation tools require Perl,
+Bash and Gnuplot (only for granularity profiles).
+
+@menu
+* Retrieving::                  
+* Installing::                  
+* Trouble Shooting::            
+@end menu
+
+@node Retrieving, Installing, Setting-up GranSim, Setting-up GranSim
+@comment  node-name,  next,  previous,  up
+@section Retrieving
+
+@c GranSim Home Page !?
+
+The important addresses to check for the latest information about GHC
+and GranSim:
+
+@itemize @bullet
+@item
+@ifhtml
+GranSim Home Page -- <a href="http://www.dcs.glasgow.ac.uk/fp/software/gransim.html">http://www.dcs.glasgow.ac.uk/fp/software/gransim.html</a>
+@end ifhtml
+@iftex
+GranSim Home Page -- http://www.dcs.glasgow.ac.uk/fp/software/gransim.html
+@end iftex
+@ifinfo
+GranSim Home Page -- http://www.dcs.glasgow.ac.uk/fp/software/gransim.html
+@end ifinfo
+@item
+@ifhtml
+Anonymous FTP Server -- <a href="ftp://ftp.dcs.glasgow.ac.uk/pub/haskell/glasgow/">ftp://ftp.dcs.glasgow.ac.uk/pub/haskell/glasgow/</a>
+@end ifhtml
+@iftex
+Anonymous FTP Server -- ftp://ftp.dcs.glasgow.ac.uk/pub/haskell/glasgow/
+@end iftex
+@ifinfo
+Anonymous FTP Server -- ftp://ftp.dcs.glasgow.ac.uk/pub/haskell/glasgow/
+@end ifinfo
+@item
+@ifhtml
+GHC home page -- <a href="http://www.dcs.glasgow.ac.uk/fp/software/ghc.html">http://www.dcs.glasgow.ac.uk/fp/software/ghc.html</a>
+@end ifhtml
+@iftex
+GHC home page -- http://www.dcs.glasgow.ac.uk/fp/software/ghc.html
+@end iftex
+@ifinfo
+GHC home page -- http://www.dcs.glasgow.ac.uk/fp/software/ghc.html (@pxref{(GHC)})
+@end ifinfo
+@item
+@ifhtml
+Glasgow FP group page -- <a href="http://www.dcs.glasgow.ac.uk/fp/">http://www.dcs.glasgow.ac.uk/fp/</a>
+@end ifhtml
+@iftex
+Glasgow FP group page -- http://www.dcs.glasgow.ac.uk/fp/
+@end iftex
+@ifinfo
+Glasgow FP group page -- http://www.dcs.glasgow.ac.uk/fp/
+@end ifinfo
+@end itemize
+
+To get the current version of GranSim go to the anonymous FTP Server at
+Glasgow and retrieve version 0.29 of GHC.
+The sources of the compiler with GranSim support are in 
+
+@quotation
+ghc-0.29-src.tar.gz
+@end quotation 
+
+Only if you don't already have an installed version of GHC for
+bootstrapping the new version you'll have to download the HC files in
+that directory, too.
+
+Check the README file on the FTP server to get more information about
+the different versions you can download. There should be at least one
+binary installation of GranSim available for Suns. If you have the right
+machine and operating system you can just download and unpack this version.
+
+@c Also download the GranSim specific hi files in 
+
+@c @quotation
+@c ghc-0.28-GranSim-hi-files.tar.gz
+@c @end quotation
+
+@c The visualisation tools and other scripts of the GranSim toolbox are
+@c available as a separate tar file
+
+@c @quotation
+@c ghc-0.28-GranSim-vis-tools.tar.gz
+@c @end quotation
+
+@node Installing, Trouble Shooting, Retrieving, Setting-up GranSim
+@comment  node-name,  next,  previous,  up
+@section Installing
+
+Follow the instructions in the GHC Installation Guide (in the
+subdirectory @file{ghc/docs/install_guide}.
+
+Note   that so far GranSim   has only been tested   with  Haskell 1.2. I
+recommend using that   version until I  have  had a closer  look  at the
+interaction of GranSim with the new, shiny GHC for 1.3.
+
+@c Unpack the hi files in the @t{ghc-0.29/ghc} subdirectory generated when
+@c unpacking the source files.
+
+The only things different from a normal installation are:
+
+@itemize @bullet
+@item
+Call the @code{configure} script with the additional option
+
+@quotation
+@t{--enable-gransim}
+@end quotation
+
+@item
+Typing 
+
+@quotation
+@t{make all}
+@end quotation
+
+(after @file{configure} and @file{STARTUP}) should create all necessary
+libraries. All GranSim specific libraries (and hi files) have the
+extension @file{_mg.a} (@file{_mg.hi}).
+@end itemize
+
+You can find a copy of the GranSim User's Guide in the
+subdirectory @file{ghc/docs/gransim}.
+
+@node Trouble Shooting,  , Installing, Setting-up GranSim
+@comment  node-name,  next,  previous,  up
+@section Trouble Shooting
+
+If an installation with @t{make all} doesn't run through smoothly, try to
+build the components by hand. Often it's just a problem with dependencies
+or old interface files. Try to recompile the modules by hand on which the
+failing module depends. 
+
+The top level files for the installation are
+
+@itemize @bullet
+@item
+@file{hsc} in the directory @file{ghc/compiler/}: the compiler proper.
+@item
+The libraries @file{libHS_mg.a} and @file{libHS13_mg.a} in the directory 
+@file{ghc/lib/}: these are the necessary built-in libraries
+(preludes). The libraries @file{libHSghc_mg.a} and @file{libHShbc_mg.a}
+are optional.
+@item
+@file{libHSrts_mg.a} in the directory @file{ghc/runtime/}: the runtime-system.
+@end itemize
+
+@c When compiling the RTS by hand be sure that the cpp variable @t{GRAN} is
+@c set (this is the default). 
+You can create a version of the RTS with
+debugging information (and all GranSim debugging options) by typing
+
+@smallexample
+make EXTRA_HC_OPTS="-optcO-DGRAN -optcO-DGRAN_CHECK -optcO-DDEBUG -optcO-g" 
+     libHSrts_mg.a
+@end smallexample
+
+For those Bravehearts who want to actually hack on the RTS I recommend
+first having a closer look at the hackers sections of the general GHC
+User's Guide (@pxref{(ghc-user-guide.info)Top}). Eventually, I'll add
+GranSim specific stuff to the chapter about the internals of GranSim
+(@pxref{GranSim Internals}) but for now there is not much in this chapter.
+
+@c Test files
+@c Vis tools etc
+
+@c Refer to ghc user's guide
+@c Basically: use --enable-gransim when configuring stuff
+
+@c ----------------------------------------------------------------------
+
+@c @node Overview, Parallelism Annotations, Introduction, Top
+@c @comment  node-name,  next,  previous,  up
+@c @chapter Overview
+
+@c @c All different set-ups and flavours of GranSim
+
+@node Parallelism Annotations, Runtime-System Options, Setting-up GranSim, Top
+@comment  node-name,  next,  previous,  up
+@chapter Parallelism Annotations
+
+This chapter discusses the constructs for adding parallelism to a Haskell
+program. All constructs are annotations that do not change the semantics of
+the program (one exception to this rule is the annotation for forcing sequential
+evaluation since it may change the strictness properties of the program).
+
+Normally the basic  annotations that are  discussed first are sufficient
+to write and tune a parallel program.  The advanced annotations allow to
+name static spark sites and to provide granularity information.
+
+@strong{NB:} To use these annotations the module @code{Parallel} must be
+imported as shown in the introductory example (@pxref{Example}).
+
+@menu
+* Basic Annotations::           
+* Advanced Annotations::        
+* Experimental Annotations::    
+@end menu
+
+@node Basic Annotations, Advanced Annotations, Parallelism Annotations, Parallelism Annotations
+@comment  node-name,  next,  previous,  up
+@section Basic Annotations
+@cindex @t{seq}
+@cindex @t{par}
+@cindex Spark
+
+The two basic parallelism annotations in GranSim (as well as in GUM and
+GRIP) are @code{par} and
+@code{seq}. Both take two arguments and return the value of the second
+argument as result.
+However, they differ in their operational behaviour:
+
+@c @itemize @bullet
+
+@c @item
+
+@deftypefn {Annotation} {} par @t{::  a -> b -> b}
+@code{par x y} creates a spark for evaluating @var{x} and returns
+the value of @var{y} as a result.
+@end deftypefn
+
+@deftypefn {Annotation} {} seq @t{::  a -> b -> b}
+@code{seq x y} reduces @var{x} to weak head normal form and then returns the value
+of @var{y} as a result.
+@end deftypefn
+
+@c @end itemize
+
+The process of sparking a parallel thread creates potential parallelism
+(a @dfn{spark}). Such a spark may be turned into a thread or may be
+discarded by the runtime system.
+Several important facts should be noted
+about these annotations:
+
+@itemize @bullet
+
+@item 
+Semantically the value of @code{seq x y} equals that of @var{y} only if the
+evaluation of @var{x} terminates and is error free. Thus, @code{seq} is
+strict in its first argument.
+
+@item
+Typically @var{x} is a local variable and @var{y} is an expression with
+@var{x} as a free variable. A typical idiom for using @code{par} is
+
+@smallexample
+let x = ... in x `par` f x
+@end smallexample
+
+If @var{x} does not occur in @var{y} speculative
+parallelism is created, which might trigger the evaluation of objects
+that are not needed for computing the result. This may also change the
+termination properties of the program.
+
+@item 
+The evaluation degree  of @var{y} is  unaffected by these annotations. It
+is  solely determined  by  the expression   in which the  result  of this
+annotated expression is used.
+
+@end itemize
+
+@node Advanced Annotations, Experimental Annotations, Basic Annotations, Parallelism Annotations
+@comment  node-name,  next,  previous,  up
+@section Advanced Annotations
+@cindex @t{parGlobal}
+@cindex @t{parLocal}
+@cindex @t{parAt}
+@cindex @t{parAtForNow}
+
+The annotations in the  previous section are actually specialisations of
+the following set of built-in functions which can be called directly:
+
+@c @itemize
+
+@c @item 
+@deftypefn {Annotation} {} parGlobal @t{::  Int -> Int -> Int -> Int -> a -> b -> b}
+@code{parGlobal n g s p x y} creates a spark for evaluating @var{x} and
+returns the value of @var{y} as a result. The spark gets the name @var{n}
+with the granularity information @var{g}, the size information @var{s} and
+a degree of parallelism of @var{p}. The @var{g}, @var{s} and @var{p}
+fields just forward information to the runtime system.
+@end deftypefn
+
+@deftypefn {Annotation} {} parLocal @t{::  Int -> Int -> Int -> Int -> a -> b -> b}
+@code{parLocal n g s p x y} behaves like @code{parGlobal} except
+that the thread (if it is generated at all) must be executed on the
+current processor.
+@end deftypefn
+
+@deftypefn {Annotation} {} parAt @t{::  Int -> Int -> Int -> Int -> a -> b -> c -> c}
+@code{parAt n g s p v x y} behaves like @code{parGlobal} except
+that the thread (if it is generated at all) must be executed on the
+processor that contains the expression @var{v}.
+@end deftypefn
+
+@deftypefn {Annotation} {} parAtForNow @t{::  Int -> Int -> Int -> Int -> a -> b -> c -> c}
+@code{parAtForNow n g s p v x y} behaves like @code{parAt} except
+that the generated thread may be migrated to another processor during
+the execution of the program.
+@end deftypefn
+
+@c @end itemize
+
+@node Experimental Annotations,  , Advanced Annotations, Parallelism Annotations
+@comment  node-name,  next,  previous,  up
+@section Experimental Annotations
+@cindex @t{parAtAbs}
+@cindex @t{parAtRel}
+
+Some experimental annotations currently available in GranSim are:
+
+@c Discussion of how to describe a topology of processes. 
+@c Is that really useful?
+
+@c @itemize
+
+@deftypefn {Annotation} {} parAtAbs @t{::  Int -> Int -> Int -> Int -> Int -> a -> b -> b}
+@code{parAtAbs n g s p m x y} behaves like @code{parAt} except that
+the thread must be executed on processor number @var{m} (the processors
+are numbered from 0 to p-1 where p is the runtime system  argument
+supplied via the @t{-bp} option).
+@end deftypefn
+
+@deftypefn {Annotation} {} parAtRel @t{::  Int -> Int -> Int -> Int -> Int -> a -> b -> b}
+@code{parAtRel n g s p m x y} behaves like @code{parAtAbs} except
+that the value of @var{m} is added to the number of the current processor
+to determine the target processor.
+@end deftypefn
+
+@deftypefn {Annotation} {} copyable @t{::  a -> a}
+@code{copyable x} marks the expression @var{x} to be
+copyable. This means that the expression will be transferred in its
+unevaluated form if it is needed on another processor. This  may
+duplicate work.
+
+@strong{This annotation is not yet implemented.}
+@end deftypefn
+
+@deftypefn {Annotation} {} noFollow @t{::  a -> a}
+@code{noFollow x} 
+
+@strong{This annotation is not yet implemented.}
+@c I don't even remember what that's supposed to do
+@end deftypefn
+
+@c @end itemize
+ 
+@c All variants of parGlobal etc (hidden in Parallel?)
+
+@c ---------------------------------------------------------------------------
+
+@node Runtime-System Options, Strategies, Parallelism Annotations, Top
+@comment  node-name,  next,  previous,  up
+@chapter Runtime-System Options
+
+@c A list of all the wonderful options and what they can do
+@c Create a separate options index
+
+GranSim provides a large number of runtime-system options for controlling
+the simulation. Most of these options allow to specify a particular
+parallel architecture in very much detail.
+
+As general convention all GranSim related options start with @t{-b} to
+separate them from other GHC RTS options. To separate the RTS options
+from usual options given to the Haskell program the meta-option @t{+RTS}
+has to be used. 
+
+If you are not interested in the details of the available options and
+just want to specify a somewhat generic setup for one class of parallel
+machines go to the last section of this chapter (@pxref{Specific
+Setups}).
+
+@c example
+@c refer to GHC user's guide for details on RTS options
+
+@menu
+* Basic Options::               
+* Special Features::            
+* Communication Parameters::    
+* Runtime-System Parameters::   
+* Processor Characteristics::   
+* Granularity Control Mechanisms::  
+* Miscellaneous Options::       
+* Debugging Options::           
+* General GHC RTS Options::     
+* Specific Setups::             
+@end menu
+
+@node Basic Options, Special Features, Runtime-System Options, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Basic Options
+@opindex @t{-bP}
+@opindex @t{-bs}
+@opindex @t{-bh}
+@opindex @t{-bp@var{n}}
+
+The options in this section are probably the most important GranSim
+options the programmer has to be aware of. They define the basic
+behaviour of GranSim rather than going down to a low level of specifying
+machine characteristics.
+
+@c -bP -bp<n> 
+@defvr {RTS Option} @t{-bP}
+This option controls the generation of a GranSim profile (@pxref{GranSim
+Profiles}). By default a
+reduced profile  (only @t{END} events) is created. With @t{-bP} a
+full GranSim profile is generated. Such a profile is necessary to create
+activity profiles. With @t{-b-P} no profile is generated at all. 
+@end defvr
+
+@defvr {RTS Option} @t{-bs}
+Generate a spark profile. The GranSim profile will contain events
+describing the creation, movement, consumption and pruning of sparks.
+@emph{Note:} This option will drastically increase the size of the
+generated GranSim profile.
+@end defvr
+ 
+@defvr {RTS Option} @t{-bh}
+Generate a heap profile. The GranSim profile will contain events
+describing heap allocations.
+@emph{Note:} This option will drastically increase the size of the
+generated GranSim profile.
+@end defvr
+
+@defvr {RTS Option} @t{-bp@var{n}}
+Choose the number of processors to simulate.  The value of @var{n} must
+be less than or equal to the word size on the machine (i.e. usually 32).
+If @var{n} is 0 GranSim-Light mode is enabled. 
+@end defvr
+
+@defvr {RTS Option} @t{-bp:}
+Enable GranSim-Light (same as @t{-bp0}). In this mode there is no limit
+on the number of processors but no communication costs are recorded.
+@end defvr
+
+@node Special Features, Communication Parameters, Basic Options, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Special Features
+
+The options in this section allow to simulate special features in the
+runtime-system of the simulated machine. This allows to study
+how these options influence the behaviour of different kinds of
+parallel machines. All of these flags can be turned of by inserting a
+@t{-} symbol after @t{b} (as in @t{-b-P}).
+
+@menu
+* Asynchronous Communication::  
+* Bulk Fetching::               
+* Migration::                   
+@end menu
+
+@node Asynchronous Communication, Bulk Fetching, Special Features, Special Features
+@comment  node-name,  next,  previous,  up
+@subsection Asynchronous Communication
+@cindex Fetching Strategies
+@cindex Asynchronous Communication 
+@cindex Synchronous Communication 
+@opindex @t{-bZ}
+@opindex @t{-by@var{n}}
+
+@c -bZ, -by
+If a thread fetches remote data by default the processor is blocked
+until the data arrives. This @dfn{synchronous communication} is usually
+only advantageous on machines with very low latency. On such machines it
+is better to wait and avoid the overhead of a context
+switch. Synchronous communication may also increase data locality as a
+thread is only descheduled when it gets blocked on data that is under
+evaluation by another thread.
+
+On machines with high latency @dfn{asynchronous communication} is
+usually better as it allows the processor to perform some useful
+computation while a thread waits for the arrival of remote data. 
+However, the processor might be even more aggressive in trying to get
+work while another thread is waiting for data. The aggressiveness of the
+processor to get new work is determined by the  @dfn{fetching
+strategy}. Currently five different strategies are
+supported.
+
+@defvr {RTS Option} @t{-by@var{n}}
+Choose a Fetching Strategy (i.e. determine what to do while the running
+thread fetches remote data):
+@enumerate 0
+@item 
+Synchronous communication (default). 
+@item 
+This and all higher fetching strategies implement asynchronous
+communication. This strategy schedules another runnable thread if one is
+available. This gives the same behaviour as @t{-bZ}.
+@item 
+If no runnable thread is available a local spark is turned into a thread.
+This adds task creation overhead to context switch overhead for
+asynchronous communication.
+@item 
+If no local sparks are available the processor tries to acquire a remote
+spark. 
+@item 
+If the processor can't get a remote spark it tries to acquire a runnable
+thread from another busy processor provided that migration is also
+turned on (@t{-bM}). 
+@end enumerate
+
+@end defvr
+
+@defvr {RTS Option} @t{-bZ}
+Enable asynchronous communication. This causes a thread to be
+descheduled when it fetches remote data. Its processor schedules
+another runnable thread. If none is available it becomes idle.
+This gives the same behaviour as @t{-by1}.
+@end defvr
+
+
+Note that fetching strategies 3 and 4 involve the sending of messages to
+other processors. Therefore, it's likely that by the time a spark (or
+thread) has been fetched, the original thread has already received its
+data and is being executed again. Therefore, in most cases strategies 1
+and 2 yield better results than 3 and 4.
+
+@c @node Packing Strategies, Bulk Fetching, Asynchronous Communication, Flags
+@c @comment  node-name,  next,  previous,  up
+@c @subsection Packing Strategies
+
+@node Bulk Fetching, Migration, Asynchronous Communication, Special Features
+@comment  node-name,  next,  previous,  up
+@subsection Bulk Fetching
+@cindex Incremental Fetching
+@cindex Bulk Fetching
+@cindex Packing Strategies
+@cindex Thunk
+@opindex @t{-bG}
+@opindex @t{-bQ@var{n}}
+@opindex @t{-Q@var{n}}
+
+@c -bG -bQ 
+When fetching remote data there are several possibilities how to
+transfer the data. The options @t{-bG} and @t{-bQ@var{n}} allow to
+choose among them. By default GranSim uses @dfn{incremental fetching}
+(also called single closure fetching, or lazy fetching).
+This means that only the closure that is immediately required is fetched
+from a remote processor. Again, this strategy is preferable for low
+latency systems as it minimises the total amount of data that has to be
+transferred. However, if the overhead for creating a packet and for
+sending a message are high it is better to perform @dfn{bulk fetching},
+which transfers a subgraph with the required closure as its root. 
+The size of the subgraph can be bounded by specifying the maximal size
+of a packet or by specifying the maximal number of @dfn{thunks} (unevaluated
+closures) that should be put into one packet. The way how to determine
+which closures to put into a packet is called @dfn{packing strategy}.
+
+@defvr {RTS Option} @t{-bG}
+Enable bulk fetching. This causes the whole subgraph with the needed
+closure as its root to be transferred. 
+@end defvr
+
+@defvr {RTS Option} @t{-bQ@var{n}}
+Pack at most @var{n}-1 non-root thunks into a packet. Choosing a value
+of 1 means that only normal form closures are transfered with the
+possible exception of the root, of course. The value 0 is interpreted as
+infinity (i.e. pack the whole subgraph). This is the default setting.
+@end defvr
+
+@defvr {RTS Option} @t{-Q@var{n}}
+Pack at most @var{n} words in one packet. This limits the size of the
+packet and does not distinguish between thunks and normal forms. The
+default packet size is 1024 words.
+@end defvr
+
+The option for setting the packet size differs from the usual GranSim
+naming scheme as it is also available for GUM. In fact, both
+implementations use almost the same source code for packing a graph. 
+
+@c Refer to GUM paper and experiences from using different packet sizes
+
+@node Migration,  , Bulk Fetching, Special Features
+@comment  node-name,  next,  previous,  up
+@subsection Migration
+@cindex Migration
+@cindex Thread migration
+@cindex Thread stealing
+@opindex @t{-bM}
+
+@c -bM
+When an idle processor looks for work it first checks its local spark
+pool, then it tries to get a remote spark. It might happen that no
+sparks are available in the system any more and that some processors
+have several runnable threads. In such a situation it might be
+advantageous to transfer a runnable thread from a busy processor to an
+idle one. However, this @dfn{thread migration} is very expensive and
+should be avoided unless absolutely necessary. Therefore, by default
+thread migration is turned off.
+
+@defvr {RTS Options} @t{-bM}
+Enable thread migration. When an idle process has no local sparks and
+can't find global sparks it tries to migrate (steal) a runnable thread from
+another busy processor.
+@end defvr
+
+Note that thread migration often causes a lot of fetching in order to
+move all required data to the new processor, too. This bears the risk of
+destroying data locality.
+
+@node Communication Parameters, Runtime-System Parameters, Special Features, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Communication Parameters
+@opindex @t{-bl@var{n}}
+@opindex @t{-ba@var{n}}
+@opindex @t{-bm@var{n}}
+@opindex @t{-bx@var{n}}
+@opindex @t{-br@var{n}}
+@opindex @t{-bg@var{n}}
+
+@c -bl<n>, 
+The options in this section allow to specify the overheads for
+communication. Note that in GranSim-Light mode all of these values are
+irrelevant (communication is futile).
+
+@defvr {RTS Option} @t{-bl@var{n}}
+Set the latency in the system to @var{n} machine cycles. Typical values
+for shared memory machines are 60 -- 100 cycles, for GRIP (a
+closely-coupled distributed memory machine) around 400 cycles and for 
+standard distributed memory machines between 1000 and 5000 cycles. The
+default value is 1000 cycles.
+@end defvr
+
+@defvr {RTS Option} @t{-ba@var{n}}
+Set the additional latency in the system to @var{n} machine cycles. The
+additional latency is the latency of follow-up packets within the same
+message. Usually this is much smaller than the latency of the first
+packet (default: 100 cycles). 
+@end defvr
+
+@defvr {RTS Option} @t{-bm@var{n}}
+Set the overhead for message packing to @var{n} machine cycles. This is
+the overhead for constructing a packet independent of its size.
+@end defvr
+
+@defvr {RTS Option} @t{-bx@var{n}}
+Set the overhead for tidying up the packet after sending it to @var{n}
+machine cycles. On some systems significant work is needed after having
+sent a packet. 
+@end defvr
+
+@defvr {RTS Option} @t{-br@var{n}}
+Set the overhead for unpacking a message to @var{n} machine
+cycles. Again, this overhead is independent of the message size.
+@end defvr
+
+@defvr {RTS Option} @t{-bg@var{n}}
+Set the overhead for fetching remote data to @var{n} machine cycles.
+By default this value is two times latency plus message unpack time.
+@end defvr
+
+
+
+@node Runtime-System Parameters, Processor Characteristics, Communication Parameters, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Runtime-System Parameters
+@opindex @t{-bt@var{n}}
+@opindex @t{-bq@var{n}}
+@opindex @t{-bc@var{n}}
+@opindex @t{-bd@var{n}}
+@opindex @t{-bn@var{n}}
+@opindex @t{-bu@var{n}}
+
+@c -bt<n>, -bc<n>
+The options in this section model overhead that is related to the
+runtime-system of the simulated parallel machine.
+
+@defvr {RTS Option} @t{-bt@var{n}}
+Set the overhead for thread creation to @var{n} machine cycles. This
+overhead includes costs for initialising a control structure describing
+the thread and allocating stack space for the execution.
+@end defvr
+
+@defvr {RTS Option} @t{-bq@var{n}}
+Set the overhead for putting a thread into the blocking queue of a
+closure to @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bc@var{n}}
+Set the overhead for scheduling a thread to @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bd@var{n}}
+Set the overhead for descheduling a thread to @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bn@var{n}}
+Set the overhead for global unblocking (i.e. blocking on a remote closure)
+to @var{n} machine cycles. This value does not contain the overhead
+caused by the communication between the processors.
+@end defvr
+
+@defvr {RTS Option} @t{-bu@var{n}}
+Set the overhead for local unblocking (i.e. putting a thread out of a
+blocking queue and into a runnable queue)
+to @var{n} machine cycles. This value does not contain the overhead
+caused by the communication between the processors.
+@end defvr
+
+
+@node Processor Characteristics, Granularity Control Mechanisms, Runtime-System Parameters, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Processor Characteristics
+@opindex @t{-bA@var{n}}
+@opindex @t{-bB@var{n}}
+@opindex @t{-bL@var{n}}
+@opindex @t{-bS@var{n}}
+@opindex @t{-bF@var{n}}
+@opindex @t{-bH@var{n}}
+
+@c -bA<n>, ...
+The options in this section specify the characteristics of the
+microprocessor of the simulated parallel machine. To this end the
+instructions of the processor are divided into six groups. 
+These groups have different weights reflecting their different relative costs.
+
+The groups of processor instructions are:
+@itemize @bullet
+@item
+Arithmetic instructions
+@item
+Load instructions
+@item
+Store instructions
+@item
+Branch instructions
+@item 
+Floating point instruction
+@item
+Heap allocations
+@end itemize
+
+The options for assigning weights to these groups are:
+
+@defvr {RTS Option} @t{-bA@var{n}}
+Set weight for arithmetic operations to @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bL@var{n}}
+Set weight for load operations to @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bS@var{n}}
+Set weight for store operations to @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bB@var{n}}
+Set weight for branch operations to @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bF@var{n}}
+Set weight for floating point operations to @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bH@var{n}}
+Set weight for heap allocations to @var{n} machine cycles. 
+@end defvr
+
+Strictly speaking, the heap allocation costs is a parameter of the
+runtime-system. However, in our underlying machine model allocating heap
+is such a basic operation that one can think of it as a special
+instruction.
+
+@node Granularity Control Mechanisms, Miscellaneous Options, Processor Characteristics, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Granularity Control Mechanisms
+@opindex @t{-bX@var{x}}
+@opindex @t{-bY@var{n}}
+@opindex @t{-bI}
+@opindex @t{-bK@var{n}}
+@opindex @t{-bO@var{n}}
+
+@c -bX, ...
+There are three granularity control mechanisms:
+@enumerate
+@item
+@emph{Explicit threshold}
+
+No spark whose priority is smaller than a given threshold will be turned
+into a thread.
+@item
+@emph{Priority sparking}
+
+The spark queue is sorted by priority. This guarantees that the highest
+priority spark is turned into a thread. Priorities are not maintained
+for threads.
+@item 
+@emph{Priority scheduling}
+
+The thread queue is sorted by priority, too. This guarantees that the
+biggest  available thread is scheduled next. This imposes a higher
+runtime overhead.
+@end enumerate
+
+@defvr {RTS Option} @t{-bY@var{n}}
+Use the value @var{n} as a threshold when turning sparks into threads. No
+spark with a priority smaller than @var{n} will be turned into a thread.
+@end defvr
+
+@defvr {RTS Option} @t{-bX@var{x}}
+Enable priority sparking. The letter @var{x} indicates how to use the
+granularity information attached to a spark site in the source code:
+
+@itemize @bullet
+@item 
+Use the granularity information field as a priority.
+@item @t{I}
+Use the granularity information field as an inverse priority.
+@item @t{R}
+Ignore the granularity information field and use a random priority.
+@item @t{N}
+Ignore the granularity information field and don't use priorities at all.
+@end itemize
+ 
+@end defvr
+
+@defvr {RTS Option} @t{-bI}
+Enable priority scheduling.
+@end defvr
+
+@defvr {RTS Option} @t{-bK@var{n}}
+Set the overhead for inserting a spark into a sorted spark queue
+to  @var{n} machine cycles. 
+@end defvr
+
+@defvr {RTS Option} @t{-bO@var{n}}
+Set the overhead for inserting a thread into a sorted thread queue
+to  @var{n} machine cycles. 
+@end defvr
+
+@node Miscellaneous Options, Debugging Options, Granularity Control Mechanisms, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Miscellaneous Options
+@opindex @t{-bC}
+@opindex @t{-be}
+@opindex @t{-bT}
+@opindex @t{-bN}
+@opindex @t{-bf@var{n}}
+@opindex @t{-bw@var{n}}
+
+@c -be, -bw
+@c A fish is looking for work; similar to GM but simulated.
+
+@defvr {RTS Option} @t{-bC}
+Force the system to eagerly turn a spark into a thread. This basically
+disables the lazy thread creation mechanism of GranSim and ensures that
+no sparks are discarded (except for sparks whose closures are already in
+normal form).
+@end defvr
+
+@defvr {RTS Option} @t{-be}
+Enable deterministic mode. This means that no random number generator is
+used for deciding where to get work from. With this option two runs of
+the same program with the same input will yield exactly the same result.
+@end defvr
+
+@defvr {RTS Option} @t{-bT}
+Prefer stealing threads over stealing sparks when looking for remote
+work. This is mainly an experimental option.
+@end defvr
+
+@defvr {RTS Option} @t{-bN}
+When creating a new thread prefer sparks generated by local closures over
+sparks that have been stolen from other processors.
+This is mainly an experimental option, which might improve data locality.
+@end defvr
+
+@defvr {RTS Option} @t{-bf@var{n}}
+Specify the maximal number of outstanding requests to acquire sparks from
+remote processors. High values of @var{n} may cause a more even
+distribution of sparks avoiding bottlenecks caused by a `spark explosion'
+on one processor. However, this might harm the data locality. The default
+value is 1.
+@end defvr
+
+@defvr {RTS Option} @t{-bw@var{n}}
+Set the time slice of the simulator 
+to  @var{n} machine cycles. 
+This is an internal variable that changes the behaviour of the
+simulation rather than that of the simulated machine. A longer time slice
+means faster but less accurate simulation. The default time slice is 1000
+cycles.
+@end defvr
+
+@node Debugging Options, General GHC RTS Options, Miscellaneous Options, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Debugging Options
+@opindex @t{-bDE}
+
+@c -bDE
+These options are mainly intended for debugging GranSim. Only those
+options that might be of interest to the friendly (i.e. non-hacking) user
+of GranSim  are listed here for now.
+
+@strong{Note:} These options are only available if the RTS has been
+compiled with the cpp flag @t{GRAN_CHECK} (@pxref{Installing}). 
+
+@defvr {RTS Option} @t{-bDE}
+Print an event statistics at the end of the computation. This also
+includes a statistics about the packages sent (if bulk fetching) has
+been enabled.
+@end defvr
+
+If you are @emph{really} interested in all the hidden options in GranSim
+look into the file @file{ghc/runtime/main/RtsFlags.lc}.
+
+@node General GHC RTS Options, Specific Setups, Debugging Options, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section General GHC RTS Options
+@cindex Garbage collectors
+@cindex Stack size
+@opindex @t{-o@var{n}}
+@opindex @t{-S@var{f}}
+
+Some options of the GHC runtime-system that are not specific for GranSim
+are of special interest, too. They are discussed in this section.
+
+@defvr {RTS Option} @t{-o@var{n}}
+This option sets the initial size of the stack of a thread to @var{n}
+words. This might be of importance for GranSim-Light, which can
+create an abundance of parallel threads filling up the heap. The default
+stack size in GranSim-Light is already reduced to 200 words (usually the
+default is 1024 words). If you run into problems with heap size in a
+GranSim-Light setup you might want to reduce it further.
+@end defvr
+
+@defvr {RTS Option} @t{-S@var{f}}
+Print messages about garbage collections to the file @var{f} (or to
+@var{stderr}). 
+@end defvr
+
+@defvr {RTS Option} @t{-F2s}
+Use a two-space garbage collector instead of a generational garbage
+collector. Previous versions of GranSim had problems with the latter. If
+you experience problems try this option and send me a bug report
+(@pxref{Bug Reports}). 
+@end defvr
+
+@node Specific Setups,  , General GHC RTS Options, Runtime-System Options
+@comment  node-name,  next,  previous,  up
+@section Specific Setups
+@cindex Setups
+
+When using GranSim a programmer often just wants to specify the general
+architecture of the machine rather than going down to the details of a
+specific machine. To facilitate this approach this section presents examples of
+standard set-ups for GranSim. 
+
+Note that these setups specify the characteristics of a machine, but not of
+the runtime-system. Thus characteristics like thread creation costs are
+left open. However, the default setting fairly closely reflect the real
+costs for example under GUM. So, unless you have a different
+implementation of runtime-system details in mind the default settings
+should be sufficiently accurate.
+
+
+@menu
+* The Ideal Machine::           
+* Shared Memory Machines::      
+* Strongly Connected DMMs::     
+* Distributed Memory Machines (DMMs)::  
+@end menu
+
+@node The Ideal Machine, Shared Memory Machines, Specific Setups, Specific Setups
+@comment  node-name,  next,  previous,  up
+@subsection The Ideal GranSim Setup
+@cindex Ideal setup
+@cindex Setups (ideal)
+
+This setup reflects the ideal case, where communication is for free and
+where there is no limit on the number of processors. This is used to
+show the maximal amount of parallelism in the program. Using such a
+@emph{GranSim-Light} setup is usually the first step in tuning the
+performance of a parallel, lazy functional program (@pxref{GranSim
+Modes}).
+
+The typical GranSim-Light setup is:
+
+@example
++RTS -bP -b:
+@end example
+
+@node Shared Memory Machines, Strongly Connected DMMs, The Ideal Machine, Specific Setups
+@comment  node-name,  next,  previous,  up
+@subsection GranSim Setup for Shared-Memory Machines
+@cindex Shared memory setup
+@cindex Setups (shared memory)
+
+In a shared memory machine the latency is roughly reduced to the costs
+of a load operation. Potentially, some additional overhead for managing
+the shared memory has to be added. Also the caching mechanism might be
+more expensive than in a sequential machine.
+@c @footnote{Note that caching
+@c is already accounted for by choosing the appropriate weight to load and
+@c store operations.}. 
+In general, the latency should be between 5 and 20 machine cycles. 
+
+For machines where the latency is of the same order of magnitude as
+loading and storing data, it is reasonable to assume incremental,
+synchronous communication. Migration should also be possible. 
+
+This gives the following setup (for 32 processors):
+@example
+ +RTS -bP -bp32 -bl10 -b-G -by0 -bM
+@end example
+
+@node Strongly Connected DMMs, Distributed Memory Machines (DMMs), Shared Memory Machines, Specific Setups
+@comment  node-name,  next,  previous,  up
+@subsection GranSim Setup for Strongly Connected Distributed Memory Machines
+@cindex Distributed memory setup
+@cindex Setups (distributed memory)
+
+Strongly connected DMMs put a specific emphasis on keeping the latency in the
+system as low as possible. One example of such a machine is GRIP, which
+has been built specifically for performing parallel graph
+reduction. Therefore, this setup is of special interest for us.
+
+Most  importantly the latency in  such machines is typically between 100
+and 500 cycles (400 for  GRIP). Furthermore, the GRIP runtime-system, as
+an  example for such  kind  of  machines, uses incremental,  synchronous
+communication. Migration is also possible.
+
+This gives the following setup (for 32 processors):
+@example
+ +RTS -bP -bp32 -bl400 -b-G -by0 -bM
+@end example
+
+@node Distributed Memory Machines (DMMs),  , Strongly Connected DMMs, Specific Setups
+@comment  node-name,  next,  previous,  up
+@subsection GranSim Setup for Distributed Memory Machines
+@cindex Distributed memory setup
+@cindex Setups (distributed memory)
+
+General distributed memory machines usually have latencies that are a
+order of magnitude higher than that of strongly connected DMMs. However,
+especially in this class of machines the differences between specific
+machines are quite significant. So, I strongly recommend to use the
+exact machine characteristics if GranSim should be  used to predict the
+behaviour on such a machine.
+
+The high latency requires a fundamentally different runtime-system to
+avoid long delays for fetching remote data. Therefore, usually
+synchronous bulk fetching is used. I'd recommend choosing a fetching
+strategy of 1 or 2 (it's hard to say which one is better in general). 
+Thread migration is such expensive on DMMs that it is often not
+supported at all.
+
+This gives the following setup (for 32 processors):
+@example
+ +RTS -bP -bp32 -bl2000 -bG -by2 -b-M
+@end example
+
+@c A special GUM setup ??
+@c ---------------------------------------------------------------------------
+
+@node Strategies, Visualisation Tools, Runtime-System Options, Top
+@comment  node-name,  next,  previous,  up
+@chapter Parallel Functional Programming in the Large: Strategies
+@cindex Strategies
+
+@sc{[See the strategy paper: "Strategies for writing parallel non-strict programs",  Trinder P.W., Loidl H.W., Hammond K., Peyton Jones S.L. (in preparation). ]}
+
+This chapter deals with parallel, lazy functional programming in the
+large. It introduces the notion of strategies and shows how they make it
+easier to develop large parallel programs.
+
+@menu
+* Motivation::                  
+* The Main Idea::               
+* Quicksort (Example)::         
+* Sum of Squares (Example)::    
+* A Class of Strategies::       
+* Experiences with Strategies::  
+@end menu
+
+@node Motivation, The Main Idea, Strategies, Strategies
+@comment  node-name,  next,  previous,  up
+@section Motivation for Strategies
+
+@c Replace this example with the quicksort example used in the Strategies
+@c paper
+
+The following naive version @code{parmap} often does not give good parallelism:
+
+@smallexample
+parmap :: (a -> b) -> [a] -> [b]
+parmap  f []     = []
+parmap  f (x:xs) = fx `par` pmxs `par` (fx:pmxs)
+                    where fx = f x
+                          pmxs = parmap f xs
+@end smallexample
+
+If in this   version  the spark   for @t{pmxs} is  discarded almost  all
+parallelism in the program is lost. On the other  hand, if all @t{par}'s
+are  executed more parallel threads  than necessary are created (two for
+each list element).
+
+An alternative version of @t{parmap} reduces the total number of
+generated threads by replacing the second @t{par} with a @t{seq}:
+
+@smallexample
+parmap :: (a -> b) -> [a] -> [b]
+parmap  f []     = []
+parmap  f (x:xs) = fx `par` pmxs `seq` (fx:pmxs)
+                    where fx = f x
+                          pmxs = parmap f xs
+@end smallexample
+
+The problem of this version is that in a context that requires the result of parmap
+only in weak head normal form, the recursive call to parmap will be
+deferred until its value is needed. This drastically reduces the total
+amount of parallelism in the program. Especially, if such a function is
+used as the producer in a program with  producer-consumer parallelism,
+this gives very poor parallelism (@pxref{Sum of Squares (Example)}).
+
+@c Example of a program using parmap with measurments showing almost no
+@c parallelism.
+
+To improve this behaviour one can write a forcing function, which guarantees that
+all of the result is demanded immediately:
+
+@smallexample
+forcelist []     = ()
+forcelist (x:xs) = x `seq` (forcelist xs)
+@end smallexample
+
+Using this function in @code{parmap} gives the following function:
+
+@smallexample
+parmap :: (a -> b) -> [a] -> [b]
+parmap  f []     = []
+parmap  f (x:xs) = fx `par`  (forcelist pmxs) `seq` (fx:pmxs)
+                   where fx = f x
+                         pmxs = parmap f xs
+@end smallexample
+
+@c Show same example with better behaviour here.
+
+However, following this approach yields  a big set of forcing  functions
+and a  mixture  of defining the result  and  driving the computation. We
+want to avoid both.
+
+@node The Main Idea, Quicksort (Example), Motivation, Strategies
+@comment  node-name,  next,  previous,  up
+@section The Main Idea
+
+@sc{[For now mainly the abstract of the Strategy paper]}
+
+Separate the components of a parallel, lazy functional program:
+
+@enumerate
+
+@item
+Parallelism
+
+@item
+Evaluation degree
+
+@item
+Definition of the result
+@end enumerate
+
+In  most current  parallel  non-strict functional languages, a  function
+must both  describe the  value   to be computed,  and the  @emph{dynamic
+behaviour}. The dynamic behaviour of a  function has two aspects: @emph{
+parallelism}, i.e. what values could be computed in parallel, and @emph{
+evaluation-degree}, i.e. how much  of each value should be  constructed.
+Our experience is that specifying   the dynamic behaviour of a  function
+obscures its semantics. Strategies  have been developed to address  this
+problem;  a  strategy being  an   explicit description of  a  function's
+potential dynamic behaviour. The philosophy  is that @emph{it should  be
+possible to  understand the semantics  of a function without considering
+it's dynamic behaviour}.
+
+In essence a strategy is a runtime function that traverses a data
+structure specifying how much of it should be evaluated, and possibly
+sparking threads to perform the construction in parallel. Because
+strategies are functions they can be defined on any type and can be
+combined to specify sophisticated dynamic behaviour. For example a
+strategy can control thread granularity or specify evaluation over an
+infinite structure. A disadvantage is that a strategy requires an
+additional runtime pass over parts of the data structure. Example
+programs are given that use strategies on divide-and-conquer, pipeline
+and data-parallel applications.
+
+@node Quicksort (Example), Sum of Squares (Example), The Main Idea, Strategies
+@comment  node-name,  next,  previous,  up
+@section Example Program: Quicksort
+@cindex Quicksort
+
+This section compares two version of parallel quicksort: one using a
+forcing function and another one using strategies.
+
+@menu
+* Forcing Function Version::    
+* Strategy Version::            
+@end menu
+
+@node Forcing Function Version, Strategy Version, Quicksort (Example), Quicksort (Example)
+@comment  node-name,  next,  previous,  up
+@subsection Parallel Quicksort using Forcing Functions
+
+The following
+naive attempt to introduce parallelism in quicksort fails because the threads
+generating @t{loSort} and @t{hiSort} only create a single cons cell.
+
+@smallexample
+quicksortN []     = []
+quicksortN [x]    = [x]
+quicksortN (x:xs) = 
+ losort `par`
+ hisort `par`
+ result        
+  where    
+   losort = quicksortN [y|y <- xs, y < x] 
+   hisort = quicksortN [y|y <- xs, y >= x]
+   result = losort ++ (x:hisort)
+@end smallexample
+
+The current practice of parallel Haskell programmers is to introduce
+a @emph{forcing function} that forces the evaluation of the required elements 
+of a data structure. For example
+
+@smallexample
+forceList :: [a] -> ()
+forceList [] = ()
+forceList (x:xs) = x `seq` forceList xs
+@end smallexample
+
+Quicksort can be rewritten to have the desired behaviour using
+@t{forceList} as follows.
+
+@smallexample
+quicksortF []      = []
+quicksortF [x]     = [x]
+quicksortF (x:xs)  = 
+ (forceList losort) `par`
+ (forceList hisort) `par`
+ losort ++ (x:hisort)
+  where
+   losort = quicksortF [y|y <- xs, y < x] 
+   hisort = quicksortF [y|y <- xs, y >= x]
+@end smallexample
+
+To obtain the required dynamic behaviour for the @t{parMap} example we
+might use @t{forceList} within the definition of @t{f}:
+
+@smallexample
+f x = forceList result `seq` result
+      where
+        result = [fib x]
+@end smallexample
+
+When programs are written in this style, a number of forcing functions
+are required: at least one for each type, e.g. @t{forcePair}. To obtain good
+dynamic behaviour, @t{par}, @t{seq} and forcing functions are inserted
+throughout the program. In consequence the dynamic behaviour and
+static semantics of the computation are intertwined. This intertwining
+obscures the semantics of the program. Small-scale programs remain
+manageable, but in larger programs, particularly those with complex
+data structures and parallel behaviour, discerning the meaning of a
+program becomes very hard. 
+
+@node Strategy Version,  , Forcing Function Version, Quicksort (Example)
+@comment  node-name,  next,  previous,  up
+@subsection Parallel Quicksort using Strategies
+
+In the strategy version we can specify the evaluation degree by applying
+one of the predefined strategies to the components of the result. These
+strategies are then combined by using either @t{par} or @t{seq} to specify
+the parallelism.
+
+In @t{quicksort}, each parallel thread should construct all of its
+result list, and @t{rnf} expresses this neatly. The interesting equation
+becomes
+
+@smallexample
+quicksortS (x:xs)  = losort ++ (x:hisort) `using` strategy 
+		    where
+                      losort = quicksortS [y|y <- xs, y < x] 
+                      hisort = quicksortS [y|y <- xs, y >= x]
+                      strategy result = 
+                        rnf losort `par`
+                        rnf hisort `par`
+                        rnf result `par`
+                        ()                  
+@end smallexample
+
+
+@c @xref{Sum of Squares (Example)} for a simple example of how to use
+@c strategies.
+
+@node Sum of Squares (Example), A Class of Strategies, Quicksort (Example), Strategies
+@comment  node-name,  next,  previous,  up
+@section Example Program: Sum of Squares
+@cindex Example
+@cindex Sum of squares (parallel)
+@cindex Producer consumer parallelism
+@cindex Forcing functions
+@cindex Evaluation degree
+
+Although the sum-of-squares program  is  a very simple  producer-consumer
+program,    it   already   shows     some  basic   problems     in   this
+model.  Unfortunately,  the  simple version of   the  program,  which was
+presented in   @ref{Semi-explicit  Parallelism},  produces    hardly  any
+parallelism at all. The reason for this behaviour is  that because of the
+lazy evaluation approach the producer will only create  the top cons cell
+of the intermediate list. When the consumer  then demands the rest of the
+list  it computes @t{squares}  as well as the result  sum. In the example
+below version 1 (with @t{res_naive}) shows this behaviour.
+
+To improve the parallelism  one can use  a @dfn{forcing function} on  the
+intermediate  list. The parallel thread is  then the  application of this
+forcing function on the  @t{squares} list. As  expected, this creates two
+threads that are computing  most  of the time  and occasionally  have  to
+exchange data. Version 2 (with @t{res_force}) shows this behaviour.
+
+A better  way to achieve  the same operational  behaviour is to define a
+strategy,   how  to compute  the  result.   The  strategy  describes the
+parallelism and the evaluation  degree. In doing so,  it uses the reduce
+to normal form  (@t{rnf})  strategy,   which  is defined  in  the  class
+@t{NFData}. Compared   to  version 2   the  strategy  version  3   (with
+@t{res_strategy}) achieves a clean separation of defining the result and
+specifying operational details like parallelism and evaluation degree.
+
+@smallexample
+module Main where
+
+import StrategiesVII
+
+main = getArgs abort ( \ a -> 
+       let 
+         args :: [Int]
+         args = map (\ a1 -> fst ((readDec a1) !! 0)) a       
+         version =  args !! 0      
+         n = args !! 1
+         -- l = [1..]
+         squares :: [Int] 
+         squares = [ i^2 | i <- [1..n] ]
+         -- Naive version sparks a producer for list squares but doesn't force it
+         res_naive = squares `par` sum squares
+         -- This version sparks a forcing function on the list (producer)
+         res_force = (foldl1 seq squares) `par` sum squares
+         -- The strategy version
+         res_strat = sum squares `using` (rnf squares `par` rnf)
+
+         res = case version of
+                1 -> res_naive		     
+                2 -> res_force		     
+                3 -> res_strat		     
+                _ -> res_naive
+         str = case version of
+                1 -> "Naive version"
+                2 -> "Forcing version"		     
+                3 -> "Strategy version"
+                _ -> "Naive version"
+       in 
+       print ("Sum of squares (" ++ str ++ ") of length " ++ (show n) ++ 
+              " = " ++ (show res) ++ "\n")  )
+@end smallexample
+
+@c Compare per thread activity profiles
+
+When running the naive version of this program the spark for the
+consumer process is pruned and all the computation of the consumer is
+subsumed by the producer. This gives a totally sequential program. The
+relevant parts of the GranSim profile are:
+
+@smallexample
+Granularity Simulation for sq 1 99 +RTS -bP -bp: -bs 
+
+++++++++++++++++++++
+
+PE  0 [0]: START    	0	0x100620	[SN 0]
+PE  0 [67445]: SPARK    	20004	0x347dbc	[sparks 0]
+PE  0 [68241]: PRUNED   	20004	0x347dbc	[sparks 1]
+PE  0 [327088]: END 0, SN 0, ST 0, EXP F, BB 847, HA 5426, RT 327088, BT 0 (0), FT 0 (0), LS 0, GS 1, MY T
+@end smallexample
+
+The other two versions of the program create one producer and one
+consumer thread as expected.
+
+@iftex
+The per  thread activity  profile shows  the behaviour  of the  strategy
+version  of the  program.  Thread 1  is the  main  thread which computes
+@t{sum squares} and therefore is the consumer process. It creates thread
+2 as the producer process,  which evaluates @t{squares}. The producer is
+evaluating  the  list  to normal  form   and therefore  is one continuous
+thread.  The consumer has to wait for the results from the producer from
+time to time and is blocked during these periods.
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=90,file=sq3-ap.ps,width=@hsize}}
+@sp 1
+@end iftex
+@ifhtml
+<p align=center>
+<img src="sq3-ap.ps" alt="Per-thread activity profile for sum of squares">
+</p>
+@end ifhtml
+
+@end iftex 
+
+@node A Class of Strategies, Experiences with Strategies, Sum of Squares (Example), Strategies
+@comment  node-name,  next,  previous,  up
+@section Using a Class of Strategies
+
+@sc{[For now this section is just a short discussion of the strategies  module]}
+
+This section discusses the contents of the strategies module. It shows how
+strategies are implemented on top of the basic @t{par} and @t{seq}
+annotations. Haskell's overloading mechanism is used to define a strategy for
+reducing to normal form. The current implementation is based on Haskell 1.2
+but in the near future we want to use constructor classes as provided in
+Haskell 1.3.
+
+@menu
+* Type and Application::        
+* Primitive Strategies::        
+* Basic Strategies::            
+* Strategy Combinators::        
+@end menu
+
+@node Type and Application, Primitive Strategies, A Class of Strategies, A Class of Strategies
+@comment  node-name,  next,  previous,  up
+@subsection Type Definition of Strategies
+
+A strategy does not return a meaningful result it only specifies parallelism
+and evaluation degree. Therefore, we use the following type for strategies
+
+@lisp
+type Strategy a = a -> ()
+@end lisp
+
+We can now define a @dfn{strategy application}, which adds information about
+the operational behaviour of the execution to an expression
+
+@lisp
+using :: a -> Strategy a -> a
+using x s = s x `seq` x
+@end lisp
+
+Note that @code{x `using` s} is a projection on @code{x}, i.e. both
+
+@itemize @bullet
+@item
+a retraction: @code{x `using` s [ x}
+@item			    -
+and idempotent: @code{(x `using` s) `using` s = x `using` s}
+@end itemize
+
+@node Primitive Strategies, Basic Strategies, Type and Application, A Class of Strategies
+@comment  node-name,  next,  previous,  up
+@subsection Primitive Strategies
+
+The primitive strategies are basically just syntactic sugar to fit @t{par}
+and @t{seq} into the strategy scheme.
+
+@code{sPar} is a strategy corresponding to @code{par}, i.e. 
+@code{x `par` e <=> e `using` sPar x}
+
+@lisp
+sPar :: a -> Strategy b
+sPar x y = x `par` ()
+@end lisp
+
+@code{sSeq} is a strategy corresponding to @code{seq}, i.e. 
+@code{x `seq` e <=> e `using` sSeq x}
+
+@lisp
+sSeq :: a -> Strategy b
+sSeq x y = x `seq` ()
+@end lisp
+
+@node Basic Strategies, Strategy Combinators, Primitive Strategies, A Class of Strategies
+@comment  node-name,  next,  previous,  up
+@subsection Basic Strategies
+
+Three basic strategies describe the evaluation degree of a data structure:
+
+@itemize @bullet
+@item
+@t{r0} is a strategy which performs no evaluation at all
+
+@lisp
+r0 :: Strategy a 
+r0 x = ()
+@end lisp
+
+@item
+@t{rwhnf} reduces a data structure to weak head normal form
+
+@lisp
+rwhnf :: Strategy a 
+rwhnf x = x `seq` ()  
+@end lisp
+
+@item
+@t{rnf} reduces a data structure to normal form. This strategy can't be
+defined independent of the type of the data structure. Therefore, we define a
+class @t{NFData} and overload the @t{rnf} strategy
+
+@lisp
+class NFData a where
+  -- rnf reduces it's argument to (head) normal form
+  rnf :: Strategy a
+  -- Default method. Useful for base types. A specific method is necessary for
+  -- constructed types 
+  rnf = rwhnf
+@end lisp
+
+@end itemize
+
+For primitive types like @t{Int}s and @t{Char}s the default methods can be
+used
+
+@lisp
+instance NFData Int 
+instance NFData Char
+...
+@end lisp
+
+@node Strategy Combinators,  , Basic Strategies, A Class of Strategies
+@comment  node-name,  next,  previous,  up
+@subsection Strategy Combinators
+
+When defining a strategy on a compound data type we can use these three basic
+strategies and compose them with the strategy combinators below. These
+combinators describe the parallelism in the evaluation.
+
+@lisp
+-- Pairs
+instance (NFData a, NFData b) => NFData (a,b) where
+  rnf (x,y) = rnf x `seq` rnf y
+
+seqPair :: Strategy a -> Strategy b -> Strategy (a,b)
+seqPair strata stratb (x,y) = strata x `seq` stratb y 
+
+parPair :: Strategy a -> Strategy b -> Strategy (a,b)
+parPair strata stratb (x,y) = strata x `par` stratb y
+
+-- Lists
+instance NFData a => NFData [a] where
+  rnf [] = ()
+  rnf (x:xs) = rnf x `seq` rnf xs
+
+-- Applies a strategy to every element of a list in parallel
+parList :: Strategy a -> Strategy [a]
+parList strat []     = ()
+parList strat (x:xs) = strat x `par` (parList strat xs)
+
+-- Applies a strategy to the first  n elements of a list  in parallel 
+parListN :: (Integral b) => b -> Strategy a -> Strategy [a]
+parListN n strat []     = ()
+parListN 0 strat xs     = ()
+parListN n strat (x:xs) = strat x `par` (parListN (n-1) strat xs)
+
+-- Sequentially applies a strategy to each element of a list 
+seqList :: Strategy a -> Strategy [a]
+seqList strat []     = ()
+seqList strat (x:xs) = strat x `seq` (seqList strat xs)
+
+
+-- Sequentially applies a strategy to the first  n elements of a list 
+seqListN :: (Integral a) => a -> Strategy b -> Strategy [b]
+seqListN n strat []     = ()
+seqListN 0 strat xs     = ()
+seqListN n strat (x:xs) = strat x `seq` (seqListN (n-1) strat xs)
+@end lisp
+
+Now we can use these predefined strategies to define a parallel map function
+
+@lisp
+-- parMap applies a function to each element of the argument list in
+-- parallel.  The result of the function is evaluated using `strat' 
+parMap :: Strategy b -> (a -> b) -> [a] -> [b]
+parMap strat f xs 	= map f xs `using` parList strat
+@end lisp
+
+For bigger programs the programmer only has  to define strategies on the
+most important  data structures in order  to introduce parallelism in to
+his program.   With this  approach the   parallel program  will   not be
+cluttered  with  @t{par}   annotations  and  it's easier  to   determine
+semantics and dynamic behaviour of the individual functions.
+
+@node Experiences with Strategies,  , A Class of Strategies, Strategies
+@comment  node-name,  next,  previous,  up
+@section Experiences with Strategies
+
+@sc{[Strategies are cool]}
+
+@c ----------------------------------------------------------------------
+
+@node Visualisation Tools, GranSim Profiles, Strategies, Top
+@comment  node-name,  next,  previous,  up
+@chapter Visualisation Tools
+
+The visualisation  tools that come together  with GranSim take a GranSim
+profile as input and create level 2 PostScript files  showing either activity or
+the granularity of the execution. A collection of scripts in the GranSim
+Toolbox allows to  focus on specific  aspects of the  execution like the
+`node flow' i.e. the movement of nodes (closures) between the PEs.
+
+Most of  these tools are  implemented as Perl   scripts. This means that
+they are very  versatile and it should  be easy to modify them. However,
+processing a large GranSim  profile can  involve  a quite big  amount of
+computation (and of memory). Speeding up crucial parts of the scripts is
+on my ToDo-list but better don't hold your breath.
+
+@menu
+* Activity Profiles::           
+* Granularity Profiles::        
+* Scripts::                     
+@end menu
+
+@node Activity Profiles, Granularity Profiles, Visualisation Tools, Visualisation Tools
+@comment  node-name,  next,  previous,  up
+@section Activity Profiles
+@cindex @file{gr2ps}
+@cindex @file{gr2pe}
+@cindex @file{gr2ap}
+
+@c Overall: gr2ps, Per-processor: gr2pe, per-thread: gr2ap
+
+Three tools allow to show the activity during the execution in three
+levels of detail:
+
+@itemize
+@item
+The @emph{overall activity profile} (created with @file{gr2ps}) shows the
+activity of the whole machine (@pxref{Overall Activity Profile}).
+@item
+The @emph{per-processor activity profile} (created with @file{gr2pe}) shows
+the activity of all simulated processors (@pxref{Per-Processor Activity
+Profile}). 
+@item
+The @emph{per-thread activity profile} (created with @file{gr2ap}) shows
+the activity of all generated threads (@pxref{Per-Thread Activity Profile}).
+@end itemize
+
+All tools discussed in  this  section print a  help message  when called
+with  the option @t{-h}.  This message  shows the available options.  In
+general, all  tools understand the  option @t{-o <file>}  for specifying
+the output file and   @t{-m} for  generating  a monochrome   profile (by
+default the tools generate colour PostScript).
+
+The @file{gr2ps} and @file{gr2ap} scripts work in two stages:
+
+@enumerate
+@item
+First the @file{.gr} file is translated into a @file{.qp} file, which
+is basically a stripped down version of a GranSim profile.
+
+@item
+Then the @file{.qp} file is translated into a @file{.ps} file.
+@end enumerate
+
+The @file{gr2pe} script works directly on the @file{.gr} file.
+
+@menu
+* Overall Activity Profile::    
+* Per-Processor Activity Profile::  
+* Per-Thread Activity Profile::  
+@end menu
+
+@node Overall Activity Profile, Per-Processor Activity Profile, Activity Profiles, Activity Profiles
+@comment  node-name,  next,  previous,  up
+@subsection Overall Activity Profile
+
+The @emph{overall activity profile} (created via @t{gr2ps}) shows the
+activity of the whole machine by separating the threads into up to five
+different groups. These groups describe the number of 
+
+@itemize @bullet
+@item
+running threads (i.e. threads that are currently performing a reduction),
+@item
+runnable threads (i.e. threads that could be executed but that have not
+found an idle PE),
+@item
+blocked threads (i.e. threads that wait for a result that is being
+computed by another thread),
+@item
+fetching threads (i.e. threads that are currently fetching data from a
+remote PE),
+@item 
+migrating threads (i.e. threads that are currently being transferred
+from a busy PE to an idle PE).
+@end itemize
+
+If the    GranSim profile includes  information   about  sparks (@t{-bs}
+option) it is also possible to show the  number of sparks. However, this
+number is usually much bigger than the number of all threads. Therefore,
+it doesn't make much  sense mixing the groups  for sparks and threads in
+one profile.
+
+The option @t{-O} reduces the size of the generated PostScript file.
+The option @t{-I <string>} is used to specify which groups of threads
+should be shown in which order. For example
+
+@example
+gr2ps -O -I "arb" parfib.gr
+@end example
+
+generates a profile @file{parfib.ps} showing only active (`a'), runnable (`r')
+and blocked (`b') threads. The letter code for the other groups are `f'
+for fetching, `m' for migrating and `s' for sparks.
+
+In the current version the marks on the  y-axis of the generated profile
+may be stretched or compressed.  This  might happen if many events occur
+at exactly the same time. If this is the  case, the initial count of the
+maximal number of y-values may be wrong causing a  rescaling at the very
+end. In   practice that happens   rarely (more  often for  GranSim-Light
+profiles, though).
+
+@iftex
+The picture below shows an overall activity profile for a simple
+parallel divide-and-conquer program.
+The header of the graph shows the runtime-system options 
+for the execution.
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=90,file=parbonzo.ps,width=@hsize}}
+@sp 1
+@end iftex
+@ifhtml
+<p align=center>
+<img src="parbonzo.ps" alt="Overall activity profile">
+</p>
+@end ifhtml
+
+The overall  runtime is    measured  in  machine  cycles.   The  average
+parallelism is the area covered  by the  running (green or  medium-gray)
+threads, normalised  with respect to the total  runtime.   In this graph
+only three groups  show up:  Most of  the  time 16 threads are  running,
+utilising all   available processors with  occasional  dips in the green
+area.  The big amber (or light-gray) area  of runnable threads indicates
+that  this program  can easily use  all available  processors. The large
+amount of blocking  indicated by the large red  (or  black) area in  the
+graph is  caused by nodes  near the root  in  the computation tree. They
+have to wait for the results of their children  to combine them into the
+overall result.  The sequential part at the beginning of the computation
+is due to  I/O overhead including  the initialisation  of the  basic I/O
+monad.  Towards the end of the computation,  when combining results near
+the  root   of the computation    tree, the  overall  utilisation  drops
+significantly.   In this setup  the latency  is so  small that  no large
+areas of fetching (blue) threads appear.  Also migration is turned of in
+this case (it can be turned on with the runtime system option @t{-bM}).
+@end iftex
+
+
+@node Per-Processor Activity Profile, Per-Thread Activity Profile, Overall Activity Profile, Activity Profiles
+@comment  node-name,  next,  previous,  up
+@subsection Per-processor Activity Profile
+
+The idea  of the  @emph{per-processor activity  profile}  is to show the
+most  important  pieces  of information  about   each  processor in  one
+graph. Therefore, it is easy  to compare the  behaviour of the different
+processors and to spot imbalances in the computation.
+
+This profile shows one strip for each of  the simulated processors. Each
+of these strips encodes three kinds of information:
+
+@itemize @bullet
+@item 
+Is the processor @emph{active} at a certain point? If it is active the
+strip appears in some shade of green (gray in the monochrome
+version). If it is idle it appears in red (white in the monochrome
+version). The area before starting the first thread and after
+terminating the last thread is left blank in both versions.
+
+@item
+How high is the  @emph{load} of the processor?  The load is  measured by
+the number of runnable threads on this processor. A high load is shown by
+a dark  shading of green (or  grey). A palette  at the top of  the graph
+shows the available shadings (two ticks indicate the  range that is used
+in  the graph).   It  is possible to   distinguish between  20 different
+values. Therefore, all processors with  more than 20 runnable threads are
+shown in the same (dark) colour.
+
+@item
+How many @emph{blocked threads} are on the processor? This information
+is shown by the thickness of blue (black) bar at to bottom of each
+strip. Without any blocked threads no bar is shown. If 20 or more
+threads are blocked the bar covers 80% of strip. Thus, the load
+information is always visible `in the background'.
+@end itemize
+
+This script also allows to produce variants of the same kind of graph that
+focus on different features of GranSim:
+
+@itemize @bullet
+@item
+@emph{Migration:} With the option @t{-M} this script produces a graph
+that draws arrows between processors indicating the migration of a
+thread from one processor to another. No load or blocking
+information is shown in this graph.
+@item
+@emph{Sparking:} With the option @t{-S} a spark graph is generated. It
+shows information about the number of sparks on a processor in the same
+way as the the number of runnable threads (i.e. by shading). This graph
+is useful to highlight processors that create a lot of work.
+@end itemize
+
+No more than about 32 processors should be shown in one graph
+otherwise the strips are getting too small. This profile can not be
+generated for a GranSim-Light profile.
+
+
+@iftex
+The graph below shows a per-processor activity profile for the same 
+parallel divide-and-conquer program as in the previous section. 
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=90,file=parbonzo-pe.ps,width=@hsize}}
+@sp 1
+@end iftex
+@ifhtml
+<p align=center>
+<img src="parbonzo-pe.ps" alt="Per-processor activity profile for parfib">
+</p>
+@end ifhtml
+
+The graph shows the activity of each of the 16 processors in this simulation.
+The dark green areas in the first third of the computation show that 
+processors 2, 4  and 14 have a significantly higher load of runnable
+threads than the rest. Also note the pattern that a decreasing number of
+blocked threads (thinner blue bar)  is accompanied by an increasing
+number of runnable threads (darker green area).
+
+@end iftex
+
+@node Per-Thread Activity Profile,  , Per-Processor Activity Profile, Activity Profiles
+@comment  node-name,  next,  previous,  up
+@subsection Per-Thread Activity Profile
+
+The @emph{per-thread activity profile} shows the activity of all
+generated threads. For each thread a horizontal line is shown. The
+line starts when the thread is created and ends when it is
+terminated. The thickness of the line indicates the state of the
+thread. The possible states correspond to the groups shown in the
+overall activity profile (@pxref{Overall Activity Profile}).
+
+The states are encoded in the following way:
+@itemize @bullet
+@item
+A @emph{running} thread is shown as a thick green (gray) line.
+@item
+A @emph{runnable} thread is shown as a medium red (black) line.
+@item 
+A @emph{fetching} (or @emph{migrating}) thread is shown as a thin blue (black) line.
+@item
+A @emph{blocked} thread is shown as a gap in the line.
+@end itemize
+
+This profile gives the most accurate kind of information and it often allows
+to `step through' the computation by relating events on different
+processors with each other. For example the typical pattern at the
+beginning of the computation is some short computation for starting the
+thread followed by fetching remote data. After that the thread may
+become runnable if another thread has been started in the meantime.
+
+@c example graph
+@iftex
+The picture below shows an example of a per-thread activity profile. 
+Note the short period of fetching immediately after starting a thread
+in order to get the data for the spark that has just been turned into
+a thread. The high degree of suspension is mainly due to the fact that
+migration is turned off in this example.
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=90,file=pm-ap.ps,width=@hsize}}
+@sp 1
+@end iftex
+@ifhtml
+<p align=center>
+<img src="pm-ap.ps" alt="Per-thread activity profile">
+</p>
+@end ifhtml
+
+@end iftex
+
+
+However, such a  detailed analysis is  only possible for programs with a
+rather  small  number of threads.  Usually,  GranSim  profiles of bigger
+executions have to be pre-processed to reduce the number of threads that
+are  shown on   one graph  (@pxref{Scripts}).  As  the level of   detail
+provided by  this  graph  is rarely  needed   for bigger executions   no
+automatic  splitting of    a   profile into  several graphs     has been
+implemented.
+
+@node Granularity Profiles, Scripts, Activity Profiles, Visualisation Tools
+@comment  node-name,  next,  previous,  up
+@section Granularity Profiles
+
+@c gr2gran, gran-extr; bucket & cumulative graphs; misc more
+
+The tools for generating @emph{granularity profiles} aim at showing the
+relative sizes of the generated threads. Especially the number of tiny
+threads, for which the overhead of thread creation is relatively high is
+of interest.
+
+All tools discussed in this section require Gnuplot to generate the
+granularity profiles. I am using version 3.5 but it should work with
+older versions, too.
+
+For showing granularity basically two kinds of graphs can be generated:
+@itemize @bullet
+@item
+A @emph{bucket graph} (@pxref{Bucket Graphs}), which collects threads
+with similar runtime in the same bucket and shows the number of threads
+in each bucket.
+@item
+A @emph{cumulative graph} (@pxref{Cumulative Graphs}), which shows how
+many threads have a runtime less than or equal a given number..
+@end itemize
+
+The main tools for generating such graphs are:
+@itemize @bullet
+@item
+@t{gr2gran} creates one bucket graph and one cumulative graph from a
+given GranSim profile. The information about the partitioning for the
+bucket statistics and other set-up information is usually provided in a
+@emph{template file} (@pxref{Template Files}), which is specified via
+the @t{-t} option (@t{-t ,} uses the global template file in @t{$GRANDIR/bin}).  
+
+This script works in three stages:
+@enumerate
+@item 
+First a @file{RTS} file is generated, which is only a sorted list of
+runtimes extracted out of the @t{END} events of a GranSim profile
+(@pxref{GranSim Profiles}). 
+@item 
+The main stage generates a @file{gnuplot} file by grouping the threads
+into buckets and computing cumulative values. 
+@item
+Finally, Gnuplot is used to generate @file{PostScript} files showing the
+graphs.
+@end enumerate
+
+@item
+@t{gran-extr} is based on the same idea as @t{gr2gran}, but it produces
+even more graphs, showing the communication percentage, determining a
+correlations coefficient between heap allocations and runtime etc.
+@c discuss all graphs
+
+@end itemize
+
+@menu
+* Bucket Graphs::               
+* Cumulative Graphs::           
+* Template Files::              
+* Statistics Package::          
+@end menu
+
+@node Bucket Graphs, Cumulative Graphs, Granularity Profiles, Granularity Profiles
+@comment  node-name,  next,  previous,  up
+@subsection Bucket Graphs
+@cindex Bucket statistics
+@cindex Histogram
+
+In a bucket  graph the x-axis indicating   execution times of  the threads is
+partitioned into intervals (dfn{buckets}). The graph shows a histogram of the
+number of threads in  each bucket (i.e. whose execution  time falls into this
+interval).  For  generating  this kind  of  graph  only a restricted  GranSim
+profile (containing only @t{END} events) is required.
+
+For example one of the files generated by running 
+
+@smallexample
+gr2gran -t , pf.gr
+@end smallexample
+
+is @t{g.ps}, which contains such a bucket statistics. The @t{-t} option
+of this tool selects the right template file (@t{,} is a shorthand for
+the global template in @t{$GRANDIR/bin}).
+
+@iftex
+Here is the bucket statistics of executing @t{parfib 22}:
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=270,file=pf-bp0-g.ps,width=@hsize}}
+@sp 1
+@end iftex
+@ifhtml
+<p align=center>
+<img src="pf-bp0-g.ps" alt="Bucket statistics">
+</p>
+@end ifhtml
+
+It shows that this program creates a huge number of tiny threads (note the
+log scale in the graph). Refining the intervals for these tiny threads
+further gives the following bucket statistics
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=270,file=pf-bp0-g1.ps,width=@hsize}}
+@sp 1
+@end iftex
+@ifhtml
+<p align=center>
+<img src="pf-bp0-g1.ps" alt="Bucket statistics">
+</p>
+@end ifhtml
+
+The necessary change in the template file for this bucket statistics is
+
+@smallexample
+-- Intervals for pure exec. times
+G: (100, 200, 500, 1000, 2000, 5000, 10000)
+@end smallexample
+
+@end iftex
+
+@node Cumulative Graphs, Template Files, Bucket Graphs, Granularity Profiles
+@comment  node-name,  next,  previous,  up
+@subsection Cumulative Graphs
+@cindex Cumulative statistics
+
+In a cumulative graph the x-axis again represents execution times of the
+individual threads. The value in the graph at the time @t{t} represents the
+number of threads whose execution time is smaller than @t{t}. Therefore, the
+values in the graph are monotonically increasing until the right end shows
+the total number of threads in the execution.
+
+Again, running
+
+@smallexample
+gr2gran -t , pf.gr
+@end smallexample
+
+generates cumulative graphs for the runtime in the files @t{cumu-rts.ps} and
+@t{cumu-rts0.ps} (one file shows absolute numbers of threads, the other the
+percentage of the threads on the y-axis).
+
+@iftex
+Here is the cumulative runtime statistics of executing @t{parfib 22}:
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=270,file=pf-bp0-cumu-rts0.ps,width=@hsize}}
+@sp 1
+@end iftex
+@ifhtml
+<p align=center>
+<img src="pf-bp0-cumu-rts0.ps" alt="Cumulative runtime statistics">
+</p>
+@end ifhtml
+
+@end iftex
+
+@node Template Files, Statistics Package, Cumulative Graphs, Granularity Profiles
+@comment  node-name,  next,  previous,  up
+@subsection Template Files
+
+@c Discussion of the syntax of template files
+
+The functions for reading template files can be found in
+@file{template.pl}. This file also contains documentation about the
+available fields.
+
+
+@node Statistics Package,  , Template Files, Granularity Profiles
+@comment  node-name,  next,  previous,  up
+@subsection Statistics Packages
+
+A set of statistics functions for computing mean value, standard
+deviation, correlation coefficient etc  can be found in 
+@file{stats.pl}.
+
+@c Perl packages used by the vis tools: template.pl stats.pl
+
+@node Scripts,  , Granularity Profiles, Visualisation Tools
+@comment  node-name,  next,  previous,  up
+@section Scripts
+
+@c tf
+
+The GranSim Toolbox contains not only visualisation tools but also a set
+of scripts that work on GranSim profiles and provide specific
+information.
+
+@itemize @bullet
+@item
+The @t{tf} script aims at showing the task flow (as well as node flow) in
+the execution of a program. 
+@c copy stuff from below.
+It is used in the GranSim Emacs mode to narrow a GranSim profile 
+(@pxref{The Emacs GranSim Profile Mode}).
+@item
+The @t{SN} script creates a summary of spark names that occur in a
+GranSim profile. This summary is shown as a impulses graph via Gnuplot.
+It allows to compare the relative number of threads generated by each
+static spark site.
+@item
+The @t{AVG} and @t{avg-RTS} scripts compute the average runtime from an
+@t{RTS} file, which is generated by @file{gr2RTS}.
+@end itemize
+
+@c etc... check if there are more
+
+@c ----------------------------------------------------------------------
+
+@node GranSim Profiles, Parallel NoFib Suite, Visualisation Tools, Top
+@comment  node-name,  next,  previous,  up
+@chapter GranSim Profiles
+
+This chapter   describes the  contents  of   a @dfn{GranSim  profile} (a
+@file{.gr}     file). In most cases    the    profiles generated by  the
+visualisation tools should provide sufficient information for tuning the
+performance of  the  program. However, it  is possible  to  extract more
+information out of the generated GranSim profile. This chapter provides
+information how to do that.
+
+@menu
+* Types of GranSim Profiles::   
+* Contents of a GranSim Profile::  
+* The Emacs GranSim Profile Mode::  
+@end menu
+
+@node Types of GranSim Profiles, Contents of a GranSim Profile, GranSim Profiles, GranSim Profiles
+@comment  node-name,  next,  previous,  up
+@section Types of GranSim Profiles
+
+Depending on some runtime-system options different kind of profiles are
+generated:
+
+@itemize @bullet
+@item
+A @emph{reduced} GranSim profile contains in the body component only
+@t{END} events. This is sufficient to extract granularity profiles,
+but it is not sufficient to generate activity profiles. This is the
+default setting for GranSim profiles.
+
+@item
+A @emph{full} GranSim profile contains one line for every major event in
+the system (@pxref{Contents of a Granularity Profile}). A generation of
+such a profile is enabled by the RTS option @t{-bP}.
+
+@item
+A @emph{spark} profile additionally contains events related to sparks
+(for creating, using, pruning, exporting, acquiring sparks). Such a
+profile is generated when using the RTS option @t{-bs}.
+@c More detailed discussion of SPARK events.
+
+@item 
+A @emph{heap} profile additionally contains events for allocating heap.
+Such a profile is generated when using the RTS option @t{-bh}.
+@c Is this useful at all?
+@end itemize
+
+@node Contents of a GranSim Profile, The Emacs GranSim Profile Mode, Types of GranSim Profiles, GranSim Profiles
+@comment  node-name,  next,  previous,  up
+@section Contents of a GranSim Profile
+
+This section describes the syntactic structure of a GranSim profile.
+
+@menu
+* Header::                      
+* Body::                        
+@end menu
+
+@node Header, Body, Contents of a GranSim Profile, Contents of a GranSim Profile
+@comment  node-name,  next,  previous,  up
+@subsection Header
+
+The header contains general information about the execution. It is split
+into several sections separated by lines only consisting of @t{-}
+symbols. The end of the header is indicated by a line only consisting of
+@t{+} symbols.
+
+The sections of the header are:
+
+@itemize @bullet
+@item 
+ Name of the program, arguments and start time.
+@item 
+ General parameters describing the parallel architecture. This
+ covers  the number of processors, flags for thread migration,
+ asynchronous communication etc. Finally, this section describes basic
+ costs of the parallel machine like thread creation time, context switch
+ time etc.
+@item 
+ Communication parameters describing basic costs for sending
+ messages like latency, message creation costs etc.
+@item 
+ Instruction costs describing the costs of different classes of
+ machine operations.
+@end itemize
+
+@c Default settings
+
+@node Body,  , Header, Contents of a GranSim Profile
+@comment  node-name,  next,  previous,  up
+@subsection Body
+@cindex Events
+
+The body of the GranSim profile contains events that are generated
+during the execution of the program. The following subsections first
+describe the general structure of the events and then go into details of
+several classes of events.
+
+@menu
+* General Structure::           
+* END Events::                  
+* Basic Thread Events::         
+* Communication Events::        
+* Thread Migration Events::     
+* Spark Events::                
+* Debugging Events::            
+@end menu
+
+@node General Structure, END Events, Body, Body
+@comment  node-name,  next,  previous,  up
+@subsubsection General Structure of an Event
+@cindex Time stamps
+@cindex Thread id
+@cindex Node
+
+Each line in the body of a GranSim profile represents one event during
+the execution of the program. The general structure of one such line is:
+
+@itemize @bullet
+@item
+The keyword @t{PE}.
+@item
+The @emph{processor number} where the event happened.
+@item
+The @emph{time stamp} of the event (in square brackets).
+@item
+The @emph{name of the event}.
+@item
+The @emph{thread id} of the affected thread (a hex number).
+@item 
+Optionally a @emph{node} as an additional argument to the
+event (e.g. the node to be reduced in case of a @t{START} event).
+This is either a hex number or the special string @t{______} indicating
+a Nil-closure.
+@item
+Additional information depending on the event. This can be the processor
+from which data is fetched or the length of the spark queue after
+starting a new thread.
+@end itemize
+
+The fields are separated by whitespace. A @t{:} symbol must follow the
+time stamp (which must be in sqare brackets).
+
+@node END Events, Basic Thread Events, General Structure, Body
+@comment  node-name,  next,  previous,  up
+@subsubsection END Events
+@cindex @t{END} event
+
+@t{END} events are an exception to this general structure. The reason
+for their special structure is that they summarise the most important
+information about the thread. Therefore, information about e.g. the
+granularity of the threads can be extracted out of @t{END} events alone
+without having to generate a full GranSim profile.
+
+The structure of an @t{END} event is:
+
+@itemize @bullet
+@item
+The keyword @t{PE}.
+@item
+The @emph{processor number} where the event happened.
+@item
+The @emph{time stamp} of the event (in square brackets).
+@item
+The @emph{name of the event} (@t{END} in this case).
+@item
+The keyword @t{SN} followed by the @emph{spark name} of the thread. This
+information allows to associate a thread with its static spark site in
+the program (@xref{Parallelism Annotations}, on how to give names to
+spark sites.) 
+@item
+The keyword @t{ST} followed by the @emph{start time} of the thread.
+@item
+The keyword @t{EXP} followed by a flag indicating whether this thread has
+been @emph{exported} to another processor or has been evaluated locally
+(possible values are @t{T} and @t{F}).
+@item
+The keyword @t{BB} followed by the number of @emph{basic blocks} that
+have been executed by this thread.
+@item
+The keyword @t{HA} followed by the number of @emph{heap allocations}.
+@item
+The keyword @t{RT} followed by the total @emph{runtime}. This is the
+most important information in an @t{END} event. It is used by the
+visualisation tools for generating granularity profiles.
+@item
+The keyword @t{BT} followed by the total @emph{block time} and a block count
+(i.e. how often the thread has been blocked).
+@item
+The keyword @t{FT} followed by the total @emph{fetch time} and a fetch count
+(i.e. how often the thread fetched remote data).
+@item
+The keyword @t{LS} followed by the @emph{number of local sparks}
+(sparks that have to be executed on the local processor) generated by the thread.
+@item
+The keyword @t{GS} followed by the @emph{number of global sparks}
+generated by the thread.
+@item
+The keyword @t{EXP} followed by a flag indicating whether this thread was
+@emph{mandatory} or only advisable (in the current version this flag is
+not used; it would be important in a combination of GranSim with a
+concurrent set-up).
+
+@end itemize
+
+@node Basic Thread Events, Communication Events, END Events, Body
+@comment  node-name,  next,  previous,  up
+@subsubsection Basic Thread Events
+@cindex @t{START} event
+@cindex @t{START(Q)} event
+@cindex @t{RESUME} event
+@cindex @t{RESUME(Q)} event
+@cindex @t{BLOCK} event
+@cindex @t{SCHEDULE} event
+@cindex @t{DESCHEDULE} event
+
+The main events directly related to threads are:
+
+@itemize @bullet
+@item
+@t{START}: Generated when starting a thread (after adding overhead for
+thread creation to the clock of the current processor). After the thread
+id it has two additional fields: one specifying the node to be evaluated
+(as a hex number) and the spark site that generated this thread (format:
+@t{[SN @var{n}]} where @var{n} is a dec number).
+
+@item
+@t{START(Q)}: Same as @t{START} but the new thread is put into the
+runnable queue rather than being executed (only if the current processor
+is busy at that point).
+
+@item 
+@t{BLOCK}: A thread is blocked on data that is under evaluation by another
+thread. It is descheduled and put into the blocking queue of that node. 
+Two additional fields contain the node on which the thread is blocked
+and the processor on which this node is lying (format: @t{(from
+@var{n})} where @var{n} is a processor (dec) number).
+
+@item
+@t{RESUME}: Continue to execute the thread after it has been blocked or
+has been waiting for remote data. This event does not contain additional
+fields.
+
+@item 
+@t{RESUME(Q)}: Same as @t{RESUME}  but the new thread is put into the
+runnable queue rather than being executed (only if the current processor
+is busy at that point).
+
+@item
+@t{SCHEDULE}: The thread is scheduled on the given processor (no
+additional fields). This event is usually emitted after terminating a
+thread on the processor. It may also occur after a @t{FETCH} (if
+asynchronous communication is turned on) or after a @t{BLOCK} event.
+
+@item
+@t{DESCHEDULE}: The thread is descheduled on the given processor (no
+additional fields). After this event the thread is in the runnable
+queue. This event is not used for implicit descheduling that is
+performed after  events like @t{BLOCK} or @t{FETCH}. @t{DESCHEDULE}
+events should only occur if fair scheduling is turned on.
+
+@end itemize
+
+@node Communication Events, Thread Migration Events, Basic Thread Events, Body
+@comment  node-name,  next,  previous,  up
+@subsubsection Communication Events
+@cindex @t{FETCH} event
+@cindex @t{REPLY} event
+
+Events that are issued when sending data between processors are:
+
+@itemize @bullet
+
+@item
+@t{FETCH}: Send a fetch request from the given thread (on the given
+processor) to another processor. This event has two
+additional fields: The first field is the node (hex number) that should
+be fetched. The last field is the processor where this node is lying and
+from which the data has to be fetched (format: @t{(from @var{n})} where
+@var{n} is a processor (dec) number).
+
+@item 
+@t{REPLY}: A reply for a fetch request of the given thread arrived at
+the given
+processor. The first additional field contains the node and the last
+field contains the processor from which it arrived (format: @t{(from
+@var{n})} where @var{n} is a processor (dec) number). Note: This event
+only marks the arrival of the data. It is usually followed by a
+@t{RESUME} or @t{RESUME(Q)} event for the thread that asked for the data.
+
+@end itemize
+
+@node Thread Migration Events, Spark Events, Communication Events, Body
+@comment  node-name,  next,  previous,  up
+@subsubsection Thread Migration Events
+@cindex @t{STEALING} event
+@cindex @t{STOLEN} event
+@cindex @t{STOLEN(Q)} event
+
+These events are only produced when thread migration is enabled
+(@t{-bM}):
+
+@itemize @bullet
+
+@item 
+@t{STEALING}: Indicates the stealing of a thread on the given
+processor. The thread which is being stolen appears in the thread
+field. One additional field (the last field) indicates which processor
+is stealing that thread (format: @t{(by @var{n})} where @var{n} is a
+processor (dec) number).
+
+@item 
+@t{STOLEN}: Indicates the arrival of a stolen thread on the given
+processor. Two additional fields show the node which will be evaluated
+by this thread next. The last field shows from which processor the
+thread has been stolen (format: @t{(from @var{n})} where @var{n} is a
+processor (dec) number). Note: This thread is immediately being executed
+by the given processor (no @t{RESUME} event follows).
+
+@item 
+@t{STOLEN(Q)}: Same as @t{STOLEN} but the new thread is put into the
+runnable queue rather than being executed (only if the current processor
+is busy at that point).
+
+@end itemize
+
+@node Spark Events, Debugging Events, Thread Migration Events, Body
+@comment  node-name,  next,  previous,  up
+@subsubsection Spark Events
+@cindex @t{SPARK} event
+@cindex @t{SPARKAT} event
+@cindex @t{PRUNED} event
+@cindex @t{EXPORTED} event
+@cindex @t{ACQUIRED} event
+
+When enabling spark profiling, events related to sparks will appear in
+the profile: 
+
+@itemize @bullet
+
+@item 
+@t{SPARK}: Indicates the generation of a spark on the given processor
+for the given node. At that point it is added to this processor's spark pool.
+Two additional
+fields show the node to which this spark is pointing and the current
+size of the spark pool (format: @t{[sparks @var{n}]} where @var{n} is a
+dec number).
+
+@item 
+@t{SPARKAT}: Same as @t{SPARK} but with explicit placement of the spark
+on this processor. This is usually achieved in the program by using a 
+@t{parLocal} or @t{parAt} rather than a @t{parGlobal} annotation
+(@pxref{Parallelism Annotations}).
+
+@item 
+@t{USED}: Indicates that this spark is turned into a thread on the given
+processor. A @t{START} or @t{START(Q)} event will follow soon afterwards. 
+
+@item 
+@t{PRUNED}: A spark is removed from the spark pool of the given
+processor. This might occur when the spark points to a normal form
+(there is no work to do for that spark). This is checked when
+creating a spark and when searching the spark pool for new work.
+ 
+@item 
+@t{EXPORTED}: A spark is exported from a given processor. Two additional
+fields show the node to which this spark is pointing and the current
+size of the spark pool (format: @t{[sparks @var{n}]} where @var{n} is a
+dec number).
+
+@item 
+@t{ACQUIRED}: A spark that has been exported by another proceessor is
+acquired by the given processor. Two additional fields have the same
+meaning as for @t{EXPORTED}.
+
+@end itemize
+
+@node Debugging Events,  , Spark Events, Body
+@comment  node-name,  next,  previous,  up
+@subsubsection Debugging Events
+@cindex @t{SYSTEM_START} event
+@cindex @t{SYSTEM_END} event
+
+Certain debug  options generate additional events  that allow to monitor
+the internal  behaviour of the  simulator. This information shouldn't be
+of interest for the friendly user but might come  in handy for those who
+dare hacking at the runtime-system:
+
+@itemize @bullet
+
+@item
+@t{SYSTEM_START}: Indicates that the simulator is executing a ``system''
+routine (a routine in the runtime-system that is not directly related to
+graph reduction). This allows to show when exactly rescheduling is done
+in the simulator. It may be useful in GranSim-Light to check that the
+costs during system operations are attached to the right thread.
+
+@item
+@t{SYSTEM_END}: See previous event. From this point on normal graph
+reduction is performed.
+
+@end itemize
+
+
+@node The Emacs GranSim Profile Mode,  , Contents of a GranSim Profile, GranSim Profiles
+@comment  node-name,  next,  previous,  up
+@section The Emacs GranSim Profile Mode
+@cindex GranSim profile mode
+@cindex Emacs support
+@cindex Emacs mode for GranSim profiles
+
+Looking up  information  directly in a GranSim  profile  is very tedious
+(believe me, I have done  it quite often). To  make this task easier the
+GranSim Toolbox  contains  a GNU Emacs   mode for GranSim profiles:  the
+@dfn{GranSim Profile Mode}.
+
+The most useful features (IMNSHO) are highlighting of parts of a GranSim
+profile and narrowing of the profile to specific PEs, threads, events etc.
+
+@menu
+* Installation::                
+* Customisation::               
+* Features::                    
+@end menu
+
+@node Installation, Customisation, The Emacs GranSim Profile Mode, The Emacs GranSim Profile Mode
+@comment  node-name,  next,  previous,  up
+@subsection Installation
+
+To use this mode  just put the file  @file{GrAnSim.el} somewhere on your
+Emacs @var{load-path} and load the file.  I don't have autoload support
+at the moment, but the file is very short anyway, so directly loading it
+is quite fast.  Currently,  the mode requires the  @var{hilit19} package
+for highlighting parts  of the profile.  It also requires  the @file{tf}
+script in the bin dir of your GranSim installation.
+
+I use Emacs  19.31 with the  default @file{hilit19.el} package,  but the
+GranSim  profile   mode   has  been  successfully    tested  with  Emacs
+19.27. However, if you have problems  with the mode  please report it to
+the address shown at the end of this document (@pxref{Bug Reports}).
+
+@node Customisation, Features, Installation, The Emacs GranSim Profile Mode
+@comment  node-name,  next,  previous,  up
+@subsection Customisation
+
+A few Emacs variables control the behaviour of the GranSim Profile mode:
+
+@defvar gransim-auto-hilit
+This variable indicates whether highlighting is turned on by default.
+Note that you can customise @file{hilit19} such that it does not
+automatically highlight buffers that are bigger than a given size.
+Since GranSim profiles tend to be extremely large you might want to 
+reduce the default value.
+@end defvar
+
+@defvar grandir
+The root of the GranSim installation. The mode searches for scripts of
+the GranSim Toolbox in the directory grandir/bin.
+By default this variable is set to the contents of the environment
+variable @code{GRANDIR}.
+@end defvar
+
+@defvar hwl-hi-node-face
+Face to be used for specific highlighting of a node.
+@end defvar
+
+@defvar hwl-hi-thread-face
+Face to be used for specific highlighting of a thread.
+@end defvar
+
+Here are the hilit19 variables that are of some interest for the GranSim
+Profile Mode: 
+
+@defvar hilit-auto-highlight
+T if we should highlight all buffers as we find 'em, nil to disable
+automatic highlighting by the find-file hook.
+Default value: @t{t}.
+@end defvar
+
+@defvar hilit-auto-highlight-maxout
+Auto-highlight is disabled in buffers larger than this.
+Default value: 60000.
+@end defvar
+
+@node Features,  , Customisation, The Emacs GranSim Profile Mode
+@comment  node-name,  next,  previous,  up
+@subsection Features
+@cindex Highlighting in GranSim profile mode
+@cindex Emacs support (highlighting)
+@cindex Narrowing in GranSim profile mode
+@cindex Emacs support (narrowing)
+
+The main features of the GranSim profile mode are:
+
+@itemize @bullet
+
+@item
+@emph{Highlighting} of parts of the profile. Colour coding is used to
+distinguish between events that start a reduction, finish a reduction
+and block a reduction. Within @t{END} events the total runtime is
+specially highlighted.
+
+@item
+@emph{Narrowing} of the profile. This should not be confused with the
+narrowing mode in Emacs. The narrowing in GranSim profile mode is done
+by running a script (@file{tf}) over the buffer and displaying the
+output in another buffer. Hence, narrowing can be further refined be
+improving the @file{tf} script, which is written in Perl.
+
+It is possible to narrow a GranSim profile to a specific
+
+@itemize @bullet
+
+@item 
+@emph{processor} (PE),
+
+@item 
+@emph{event},
+
+@item
+@emph{thread},
+
+@item
+@emph{node},
+
+@item 
+@emph{spark} (only possible for spark profiles)
+
+@end itemize
+
+This feature is particularly useful to e.g. follow a node, which has
+been moved between processors or to concentrate on the reductions on one
+specific processor. 
+
+Of course, for those pagans, who don't believe in Emacs it is also
+possible to run the @file{tf} script directly on a @file{.gr} file.
+
+@item
+A second form of @emph{highlighting}, specialised for nodes and threads
+is available, too. With the commands  @code{hwl-hi-thread} and
+@code{hwl-hi-node} every occurrence of the thread or node in the profile
+after the current point is highlighted. The function @code{hwl-hi-clear}
+undoes all such highlighting.
+
+@item
+There is a menu item for calling most of the functions described
+here. It automatically appears in any GranSim profile (i.e. any file
+that has a @file{.gr} extension).
+
+@end itemize
+
+Default key bindings in GranSim profile mode: 
+
+@defvr {} @kbd{C-c t},  @code{M-x hwl-truncate}
+Truncate event lines such that exactly one line is shown for one event
+in the body of a profile.
+@end defvr
+
+@defvr {} @kbd{C-c w},  @code{M-x hwl-wrap} 
+Wrap lines to show them in full length.
+@end defvr
+
+@defvr {} @kbd{C-c },  @code{M-x hwl-toggle-truncate-wrap} 
+Toggle between the above two modes.
+@end defvr
+
+@defvr {} @kbd{C-c h},  @code{M-x hilit-rehighlight-buffer} 
+Rehighlight the whole buffer.
+@end defvr
+
+@defvr {} @kbd{C-c p},  @code{M-x hwl-narrow-to-pe} 
+Narrow the profile to a PE. 
+@end defvr
+
+@defvr {} @kbd{C-c t},  @code{M-x hwl-narrow-to-thread} 
+Narrow the profile to a thread.
+@end defvr
+
+@defvr {} @kbd{C-c e},  @code{M-x hwl-narrow-to-event}
+Narrow the profile to an event. 
+@end defvr
+
+@defvr {} @kbd{C-c C-e}, @code{(lambda () (hwl-narrow-to-event "END"))}
+Narrow the profile to an @t{END} event.
+@end defvr
+
+@defvr {} @kbd{C-c }, @code{M-x hwl-toggle-truncate-wrap} 
+Toggle between the above two modes.
+@end defvr
+
+@defvr {} @kbd{C-c N},  @code{M-x hwl-hi-node} 
+Highlight a node in the profile. 
+@end defvr
+
+@defvr {} @kbd{C-c T},  @code{M-x hwl-hi-thread} 
+Highlight a thread in the profile. 
+@end defvr
+
+@defvr {} @kbd{C-c C-c},  @code{M-x hwl-hi-clear} 
+Remove highlightings of nodes and threads. 
+@end defvr
+
+@c ----------------------------------------------------------------------
+
+@node Parallel NoFib Suite, Internals of GranSim, GranSim Profiles, Top
+@comment  node-name,  next,  previous,  up
+@chapter The Parallel NoFib Suite
+@cindex Example
+@cindex Parallel nofib suite
+
+While developing GranSim (and GUM) we have started to collect a set of
+interesting and non-trivial parallel programs written in parallel
+Haskell. These programs are used as a test suite for GranSim and part of
+the NoFib Suite of GHC.
+
+@c In which directories are these programs?
+
+Currently this suite contains the following programs:
+
+@enumerate
+
+@item 
+Sieve of Erathostenes (@code{sieve}), which creates a
+bidirectional pipeline, where each processor filters the multiples of
+one prime number out of an input list.
+
+@item 
+Warshall's shortest path algorithm in a graph (@code{warshall}), which
+creates a cyclic pipeline of processors.
+
+@item 
+A function @code{matmult}, which performs a parallel matrix
+multiplication.
+
+@item 
+A function @code{determinant}, which computes for a given square
+matrix its determinant. 
+
+@item 
+A function @code{LinSolv}, which solves a given set of linear
+equations over integers by using  multiple homomorphic images, computing
+the result in each image via Cramer's Rule. The main part of this
+algorithm is the parallel determinant computation. 
+
+@item 
+A function @code{coins}, which computes the number of possibilities
+how to pay a given value with a given set of coins.
+
+@item 
+An award assignment program, that basically has to compute
+permutations of a given list (@code{pperms}).
+
+@item
+A parallel verion of Quicksort (@code{sort}).
+
+@item 
+A function word search program @code{soda7}, which searches a given grid
+of letters for a given set of words.
+
+@item 
+An RSA encryption program @code{rsa} (taken out of the sequential nofib suite).
+
+@item 
+An n-queens program @code{queens}.
+
+@item 
+The parallel database manager for GUM @code{dcbm}. It performs queries
+to a database in parallel.
+
+@item 
+The bill of materials program @code{bom} developed (under GranSim) by
+Phil Trinder as part of the Parallel Databases Project.
+
+@item 
+A ray-tracer @code{nray} based on a version taken from Kelly's thesis
+and ported to GRIP by Hammond.
+
+@item 
+A univariant resultant computation, using the SACLIB library for
+computer algebra. Mainly the basic polynomial arithmetic has been taken
+form that library.
+
+@item 
+One of the FLARE programs, solving a problem in the area of
+computational fluid dynamics @code{cfd}.
+
+@item 
+A function @code{minimax}, which computes for a given position in the
+game of tic-tac-toe the best next move using an Alpha-Beta pruning
+algorithm.
+
+@c The main experience I have about  parallelisation of lazy functional
+@c languages in the large comes from parallelising LOLITA. Actually, there are
+@c two aspects to mention:
+
+@item 
+Several NESL programs, including a numerical integration algorithm
+@code{integrate}, a quick hull algorithm @code{qhull} for computing the
+convex hull of a set of points in a plane, a matrix inversion based on
+gauss-jordan elimination @code{mi} and a fast fourier transformation
+@code{fft}.  All algorithms are based on the NESL versions published by
+Guy Blelloch in CACM 39(3) and translated to Haskell.
+
+@item
+A Newton-Raphson iteration for finding a root of a polynomial. This
+program has been taken from the Impala suite of implicitly parallel
+benchmark programs (written in Id).
+
+@end enumerate
+
+Despite its name the parallel nofib suite also contains some fib-ish
+programs. These programs should be of interest for getting a start with
+parallel functional programming using GranSim:
+
+@enumerate
+
+@item 
+A parallel factorial function (@code{parfact}), which computes the
+sum of all numbers from 1 up to a given value n by bisecting the
+interval and computing results of the intervals in parallel.
+
+@item 
+A parallel fib-like function (@code{parfib}), which performs an
+additional gcd computation and 2 additional multiplications in each
+recursive call.
+
+@end enumerate
+
+@c ----------------------------------------------------------------------
+  
+
+@node Internals of GranSim, GranSim vs GUM, Parallel NoFib Suite, Top
+@comment  node-name,  next,  previous,  up
+@chapter Internals
+
+This chapter discusses details of the implementation of GranSim.
+
+@sc{[This text is taken from a draft of a previous paper. It needs updates to cover the more recent changes like adding GranSim-Light. See also the HPFC'95 paper for the basics]}
+
+@c Talk about implementation; overall structure
+
+@menu
+* Global Structure::            
+* Accuracy::                    
+* Flexibility::                 
+* Visualisation::               
+* Efficiency::                  
+* Integration into GHC::        
+@end menu
+
+@node Global Structure, Accuracy, Internals of GranSim, Internals of GranSim
+@comment  node-name,  next,  previous,  up
+@section Global Structure
+
+@ifhtml
+The following picture depicts the global structure of GranSim
+
+<p align=center><img src="GranSim.eps" alt="[Picture: Global Structure]"></p>
+@end ifhtml
+@iftex
+The following picture depicts the global structure of GranSim
+
+@iftex
+@sp 1
+@centerline{@psfig{angle=270,file=GranSim.eps,width=@hsize}}
+@sp 1
+@c or width=@pagewidth?
+@end iftex
+@ifhtml
+<p align=center>
+<img src="GranSim.eps" alt="Global structure of GranSim">
+</p>
+@end ifhtml
+
+@end iftex
+
+GranSim performs an event driven simulation with a centralised event
+queue. Each of the simulated processors has its own spark queue and
+thread queue as well as its own clock. The synchronisation of the
+clocks is performed via accessing the event queue which is sorted by the
+time stamps of the events.
+
+@node Accuracy, Flexibility, Global Structure, Internals of GranSim
+@comment  node-name,  next,  previous,  up
+@section Accuracy
+
+GranSim is built on  top and therefore  makes  use of  a state-of-the-art
+compiler for Haskell including  a huge variety of possible  optimisations
+that can  be performed.  The instruction  count  function, which determines
+the number of instructions that are executed for  a given piece of abstract
+C code, has been carefully tuned  by analysing the assembler code generated
+by GHC and the results  have been compared  with the number of instructions
+executed in real Haskell programs.  These comparisons have shown that the
+instruction  count  of  the simulation  lies  within 10%  for arithmetic
+operations, within 2% for load, store operations, within 20% for branch
+instructions and  within 14% for  floating point instructions of the real
+values.
+
+To allow the modelling of different kinds of architectures the instructions
+have been  split  into five  classes,  with different  weights:  arithmetic
+operations,  floating  point   operations  (1  cycle  each),   load,  store
+operations  (4  cycles each)  and branch  instructions   (2 cycles).  These
+weights model   a SPARC processor  and  have  been verified  with Haskell
+programs in the nofib suite. The weights are tunable in order to simulate
+other kinds of processors.
+
+@node Flexibility, Visualisation, Accuracy, Internals of GranSim
+@comment  node-name,  next,  previous,  up
+@section Flexibility
+
+GranSim  has a big number  of tunable parameters (@pxref{RTS Options}).   One set of parameters
+allows  to  model  a broad  variety  of processors.  To  achieve  a similar
+accuracy  as for SPARC  processors  the same  kind  of measurements  can be
+performed.   Another   set of   parameters allows  to  tune the   costs for
+communication   latency, message  pack  time   etc.  Finally, the  overhead
+imposed by the runtime-system  can be captured  by adjusting the parameters
+for task creation time, context switch time etc.  This allows us to model
+architectures ranging from   shared memory to  distributed memory machines.
+And  we can quite easily  simulate the effect of some  small changes in the
+runtime system on the overall behaviour.
+
+Additionally, the GranSim-Light setup allows to study the parallelism
+inherent in a program rather than choosing a fixed architecture to run
+the program on.  Our experiences with parallelising rather big programs
+show that this is an important additional feature for tuning the
+performance of a parallel program.
+
+@node Visualisation, Efficiency, Flexibility, Internals of GranSim
+@comment  node-name,  next,  previous,  up
+@section Visualisation
+
+Especially  for analysing the  granularity  of the  created  tasks, we need
+visualisation tools. We have developed a set of tools  for that purpose and
+used  it on a quite wide range of example programs  to  analyse their
+performance (@pxref{Parallel NoFib Suite}). 
+With these  tools we were able to show a
+very high  correlation between execution time  and  the amount of allocated
+heap space. Apart from  these tools showing the granularity of the
+resulting tasks, we have also developed a set of tools for showing the 
+  activity of the simulated machine as a whole, of all processors and of
+all tasks  in  the system. These   tools have  proven  indispensable in the
+parallelisation and optimisation of a   linear system solver.
+Based on the   experience  from this  implementation,  such tools are
+essential when working  with a lazy  language, in which the order of evaluation
+is not at all obvious from the program source. @xref{Visualisation Tools}
+for a more detailed discussion of these tools.
+
+@node Efficiency, Integration into GHC, Visualisation, Internals of GranSim
+@comment  node-name,  next,  previous,  up
+@section Efficiency
+@cindex HBCPP
+
+The high accuracy  in the simulation  also implies a rather high overhead
+for the simulation as more bookkeeping has to be done. This is mainly due
+to the exact modelling of communication. Therefore, programs that perform
+a  lot  of   communication   will impose   a  higher   overhead   on  the
+simulation. Early measurements of some example programs on GranSim showed
+a factor between 14 and more than 100 between a GranSim simulation and an
+optimised sequential execution. In the meantime we have spent some effort
+in improving the  efficiency      of the simulator. The    most    recent
+measurements show  factors  between 10 and  15.  Regarding the amount  of
+information  we generate  out  of  a  simulation  we   think that  is  an
+acceptable  factor. Especially a  comparison  with another simulator  for
+annotated Haskell programs, HBCPP,  is of interest. Using  a set of small
+example programs GranSim  was between 1.5  and 2 times slower than HBCPP.
+In  some cases  the  GranSim-Light setup  was about   as fast  the  HBCPP
+version.
+
+We observed one potential problem  of the GranSim-Light setup, though. If
+the parallel  program creates a huge  number of parallel threads (several
+thousand) the bookkeeping  of all  these  running threads  slows down the
+simulation significantly. This might  make the GranSim-Light setup slower
+than the  plain GranSim  setup, which   has a limited  number of  running
+threads. In such  a setup it is advisable  to increase the time slice for
+each thread in the simulation (@t{-bw@var{N}} option).
+
+
+@node Integration into GHC,  , Efficiency, Internals of GranSim
+@comment  node-name,  next,  previous,  up
+@section Integration into GHC
+
+GranSim is part  of the overall GHC system.  Therefore, it is possible to
+use   all  the   features  of  a   compilation   via  GHC   for  GranSim,
+too. Especially, the @t{ccall} mechanism can be used  to call C functions
+in a parallel  program (indeed, we have   experimented with the use of  a
+computer algebra library in implementing a parallel resultant algorithm).
+Also the interaction between certain optimisations like deforestation and
+the parallel execution of a  program should be of interest (deforestation
+might eliminate  intermediate  lists that  are crucial   for the parallel
+execution of the program).
+
+Finally,  in parallelising the LOLITA  natural language processing system
+it was  crucial to have   an profiler for  the  sequential version of the
+program available.  This allowed us to determine   the important parts of
+the computation early on in the parallelisation process.
+
+
+@c ----------------------------------------------------------------------
+
+@node GranSim vs GUM, Future Extensions, Internals of GranSim, Top
+@comment  node-name,  next,  previous,  up
+@chapter GranSim vs GUM
+@cindex GUM
+@cindex FETCHME closures
+
+@c Discuss how close they are; what are the basic differences
+
+@sc{[Mainly a placeholder for a real comparison]}
+
+In a nutshell: The GUM runtime-system is very close to GranSim. To a
+fairly large degree the same code is used by both versions. The main
+source of inaccuracy is the modelling of stealing sparks and threads. 
+GUM uses a fishing mechanism: a fish message is sent from processor to
+processor, looking for sparks. In GranSim we use the global knowledge of
+the system and weigh the costs for stealing a spark with the inverse of
+the probability of hitting a processor with available
+sparks. Furthermore, there is no counterpart of GUM's FETCHME closures as
+pointers to remote data in GranSim.
+
+On the other hand, GranSim is also significantly more powerful than
+GUM. It supports thread migration, offers different strategies for
+packing a graph (based on the number of thunks), and it allows to choose
+between different fetching strategies, when deciding what to do while one
+thread fetches remote data. These features mainly deal with the aspect of
+data locality in the program.
+
+Another important aspect for the performance of the granularity of the
+parallel program. This can be tuned by choosing among three basic
+methods for granularity control (@pxref{Granularity Control Mechanisms}).
+
+@c ----------------------------------------------------------------------
+
+@node Future Extensions, Bug Reports, GranSim vs GUM, Top
+@comment  node-name,  next,  previous,  up
+@chapter Future Extensions
+
+This version of GranSim should be fairly stable. It has been stress
+tested on a number of non-trivial programs (including a program of 
+more than 100,000 lines of Haskell and wee bit of C). It contains most of
+the features I want to have in it. 
+
+One future extension of GranSim might be the implementation of a more
+accurate modelling of the spark/thread stealing mechanism (based on
+GUM's fishing model).
+
+@c ----------------------------------------------------------------------
+
+@node Bug Reports, Determinant (Example) , Future Extensions, Top
+@comment  node-name,  next,  previous,  up
+@chapter Bug Reports
+
+Send all bug reports, including the source of the failing program, the
+compile and RTS options and the error message to
+
+@quotation
+hwloidl@@dcs.gla.ac.uk
+@end quotation
+
+Be sure to add "GranSim Bug" in the subject line.
+
+Earlier versions  of   GranSim sometimes had   problems when  using  the
+generational garbage  collector  (default). If  you  meet problems  with
+GranSim you can try the following:
+
+@itemize @bullet
+@item
+Use the option @t{-Sstderr} to get garbage collection messages. This
+will tell you whether there is any garbage collection going on.
+
+@item
+Increase the heap size. This should give you a hint whether the problem is
+related to garbage collection at all.
+
+@item 
+Try  to   use  the  runtime-system options  @t{-F2s}   to force
+two-space garbage collection. This garbage collector uses more heap than
+the generational one. Whenever I had problems with a test program
+before it just went away with this garbage collector.
+
+@item 
+Perhaps also use @t{-Z} (this omits update frame
+squeezing; you  don't have to worry about  what that means, though). 
+@end itemize
+
+In any case, please report it as a bug to the above address.
+
+@c ----------------------------------------------------------------------
+
+@node Determinant (Example) , Options Index, Bug Reports, Top
+@comment  node-name,  next,  previous,  up
+@appendix Example Program: Determinant Computation
+@c @chapter Example Program
+@cindex Example
+@cindex Determinant computation (parallel)
+@cindex Parallel determinant computation
+
+@c A longer example program
+@c Perhaps strategic determinant computation
+
+The example program in this chapter is a parallel determinant
+computation. It uses the data type @t{SqMatrix a} to represent a matrix
+as  a list of list together with its bounds.
+
+@c @iftex
+@c Specification of @i{det}:
+
+@c @itemize
+@c @item Given: 
+@c a matrix 
+@c         @tex
+@c         $(A)_{1 \leq i,j \leq n}$
+@c         @end tex
+
+@c @item Compute
+@c  for some 
+@c         @tex
+@c         ${1 \leq i \leq n}$: 
+@c            $ \sum_{1 \leq j \leq n} (-1)^{i+j} A_{i,j} det(A') $ \\
+@c            where $ (A')_{i',j'} = 
+@c                   \left\{
+@c               \begin{array}{ll}
+@c                  A_{i',j'}     & if\ i'<i\ \wedge\ j'<j \\
+@c                  A_{i'+1,j'}   & if\ i'\geq i\ \wedge\ j'<j \\
+@c                  A_{i',j'+1}   & if\ i'<i\ \wedge\ j' \geq j \\
+@c                  A_{i'+1,j'+1} & if\ i' \geq i\ \wedge\ j' \geq j \\
+@c               \end{array}
+@c           \right.
+@c          $
+
+@c @end itemize
+@c @end iftex
+
+For getting a parallel version of the program strategies (@pxref{A Class
+of Strategies}) are used. Thus, much of the parallelism comes from
+applying the @t{parList} strategy. In order to demonstrate the use of
+strategies in a parallel functional program this example contains
+parallelism down to a very fine granularity.
+
+@c A discussion of how to compute a determinant is needed here
+
+@smallexample
+determinant :: (NFDataIntegral a) => SqMatrix a -> a
+
+determinant (SqMatrixC ((iLo,jLo),(iHi,jHi)) mat) 
+  | jHi-jLo+1 == 1 =  let 
+                        [[mat_1_1]] = mat 
+                      in 
+                        mat_1_1
+  | jHi-jLo+1 == 2 =  let  
+                        [[mat_1_1,mat_1_2],
+                         [mat_2_1,mat_2_2] ] = mat
+                        a = mat_1_1 * mat_2_2			       
+                        b = mat_1_2 * mat_2_1			      
+                        strategy r = a `par` b `par` ()
+                      in
+                        a - b `using` strategy
+  | otherwise      =  
+      sum (l_par `using` parList rnf)
+          where
+            newLine _ [] = []
+            newLine j line = pre ++ post `using` strategyN
+                             where				  
+                               pre  = [ line !! (k-1) | k <- [jLo..j-1] ]
+                               post = [ line !! (k-1) | k <- [j+1..jHi] ]
+                               strategyN r = pre `par` post `par` ()
+            determine1 j = (if pivot > 0 then
+                              sign*pivot*det' `using` strategyD1
+                            else
+                              0) `using` sPar sign 
+                            where
+                              sign = if (even (j-jLo)) then 1 else -1
+                              pivot = (head mat) !! (j-1)
+                              mat' = SqMatrixC ((iLo,jLo),(iHi-1,jHi-1))
+                                               (map (newLine j) (tail mat))
+                              det' = determinant mat'
+                              strategyD1 r = 
+                                parSqMatrix (parList rwhnf) mat' `seq`
+                                det' `par` ()
+          l_par = map determine1 [jLo..jHi]
+@end smallexample
+
+@c ----------------------------------------------------------------------
+
+@node    Options Index, Concept Index, Determinant (Example) , Top
+@comment node-name,    next,  previous,      up
+@unnumbered Runtime-System Options  Index
+
+@printindex op
+
+@node    Concept Index,  , Options Index, Top
+@comment node-name,    next,  previous,      up
+@unnumbered Concept Index
+
+@printindex cp
+
+@contents
+
+@shortcontents
+
+
+@bye

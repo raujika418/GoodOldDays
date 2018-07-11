@@ -1,0 +1,65 @@
+/*
+ * partain: from...
+ *
+ * $XConsortium: Jmakefile,v 1.7 89/12/12 12:37:28 jim Exp $
+ * 
+ * This is used to recreate jmake.  Makefile.BOOT is used to generate jmake
+ * if there is no Makefile in this directory (i.e., the first time).
+ */
+
+/* ------------------------- */
+
+SRCS_C = jmake.c ccjmake.c
+DEPLIBS = 
+HEADERS = jmakemdep.h 
+
+JCONFIGFILES = $(HEADERS) TEMPLATE.jm \
+		install-GEN.jm macros-GEN.jm \
+		site-DEF.jm suffixes-GEN.jm utils-GEN.jm
+
+/* There are per-platform; usually made by a "configure" script */
+PLATFORM_JCONFIGFILES = site.jm platform.h
+
+DEFINES = $(SIGNAL_DEFINES)
+
+all:: jmake jmkmf
+
+MsubNeededHere(jmkmf)
+
+/* override the usual rule */
+#undef JmakeNeededHere
+#define JmakeNeededHere(dummy) @@\
+Makefile::  jmake
+
+/* BUILDING =======================================================*/
+
+BuildPgmFromCFiles(jmake,jmake.o,,)
+
+/* modelled on X11R4's xmkmf (via DuBois) */
+MsubMakefileDependentProgramScriptTarget(PerlCmd,jmkmf,jmkmf.prl,/*no flags*/,/*Makefile*/)
+
+/* INSTALLATION ===================================================*/
+
+INSTDATADIR_MKWORLD = $(INSTDATADIR)/mkworld
+INSTLIBDIR_MKWORLD  = $(INSTDATADIR)/mkworld/$(HOSTPLATFORM)
+
+MakeDirectories(install,$(INSTBINDIR) $(INSTSCRIPTDIR) $(INSTDATADIR_MKWORLD) $(INSTLIBDIR_MKWORLD))
+InstallBinaryTarget(jmake,$(INSTBINDIR))
+
+InstallMsubbedScriptTarget(PerlCmd,jmkmf,jmkmf.prl,$(INSTBINDIR))
+
+InstallScriptTarget(jrestoredeps,$(INSTSCRIPTDIR))
+
+jconfigfiles : $(JCONFIGFILES) $(PLATFORM_JCONFIGFILES)
+InstallTarget(jconfigfiles)
+InstallMultNonExecTargets(jconfigfiles,$(JCONFIGFILES),$(INSTDATADIR_MKWORLD))
+InstallMultNonExecTargets(jconfigfiles,$(PLATFORM_JCONFIGFILES),$(INSTLIBDIR_MKWORLD))
+
+/* OTHER STUFF ===================================================*/
+ExtraStuffToClean(ccjmake)
+
+ExtraStuffToBeVeryClean( ccjmake $(STD_VERY_CLEAN) )
+
+EtagsNeededHere(tags) /* need this to do "make tags" */
+ClearTagsFile()
+CTagsTarget( $(SRCS_C) $(JCONFIGFILES) )

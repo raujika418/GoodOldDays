@@ -1,0 +1,64 @@
+A from-working-sources no-guarantees snapshot of the Glasgow Haskell
+compiler (GHC) for the i386-unknown-linux platform is now available
+from ftp://ftp.dcs.glasgow.ac.uk/pub/haskell/glasgow/ghc-0.28-<platform>.tar.gz.
+(The files ghc-0.26-docs-and-examples.tar.gz and
+ghc-0.26-ps-docs.tar.gz [PostScript] may also be of interest.)
+
+This is still the "old" GHC for Haskell 1.2.  The 0.28 pseudo-release
+is solely to provide a GHC system for Linux ELF machines.  We
+_believe_ that profiling and Concurrent Haskell work, as well as
+ordinary sequential execution.
+
+As 0.28 is a snapshot and not a "proper" release, it may have serious,
+show-stopping bugs in it.  Our commonly-reported-bugs Web page,
+http://www.dcs.gla.ac.uk/fp/software/ghc/ghc-bugs.html, might be
+one place to look...
+
+GCC 2.7.x is required; GCC 2.6.x will *not* work.
+
+A file ghc-0.28-src.tar.gz includes what should be buildable source;
+haven't actually tried it...
+
+A particular thanks to Peter Breuer <ptb@dit.upm.es>, who ELFified our
+Linux machine for us.
+
+Please report any bugs to glasgow-haskell-bugs@dcs.glasgow.ac.uk.
+
+Will Partain
+AQUA project (slave)
+
+Dated: 96/05/21
+
+=== INSTALLATION NOTES ==============================================
+
+Ignore the installation instructions in any documentation.  This is
+the stuff that applies for this distribution.
+
+Unpack the distribution.
+
+Move "ghc-0.28-<platform>" to wherever you like.
+
+Make a link to ghc-0.28-<platform>/ghc/driver/ghc, so that "ghc" will
+be in your PATH.
+
+Change the hardwired paths in ghc/driver/ghc and in
+ghc/utils/hscpp/hscpp to point to where things are on your system.
+(Also: ghc/utils/mkdependHS/mkdependHS, if you want to use it.)
+Notably: where "perl" is (first line of each script), where $TopPwd is
+(ghc script), where your gcc cpp ($OrigCpp) is (hscpp and mkdependHS
+scripts).  *Don't* set any environment variables to do this.
+
+GHC should then work.  Try "ghc -v" on something simple, to make sure
+it compiles and links a program correctly.
+
+If you don't want the profiling libraries (e.g., to save disk space), do:
+
+    cd ghc
+    rm runtime/*_p.a lib/*_p.a
+     (or gzip them, temporarily)
+
+If you don't want to concurrent-Haskell libraries (e.g., same reason), do:
+
+    cd ghc
+    rm runtime/*_mc.a lib/*_mc.a
+     (or gzip them, temporarily)

@@ -1,0 +1,1912 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ADD_DIRECT	st.c	133;"	d	file:
+ALLOC	ruby.h	244;"	d
+ALLOC_N	ruby.h	243;"	d
+ARY_DEFAULT_SIZE	array.c	20;"	d	file:
+ASSOC_KEY	dict.c	35;"	d	file:
+ASSOC_KEY	struct.c	102;"	d	file:
+ASSOC_VAL	dict.c	36;"	d	file:
+ASSOC_VAL	struct.c	103;"	d	file:
+AT_STRINGS_BEG	regex.c	2195;"	d	file:
+AT_STRINGS_END	regex.c	2196;"	d	file:
+AT_WORD_BOUNDARY	regex.c	2198;"	d	file:
+Argv	eval.c	/^VALUE Argv;$/;"	v
+BDIGITS	bignum.c	17;"	d	file:
+BEG	re.c	391;"	d	file:
+BIGDN	bignum.c	22;"	d	file:
+BIGLO	bignum.c	23;"	d	file:
+BIGRAD	bignum.c	19;"	d	file:
+BIGUP	bignum.c	21;"	d	file:
+BITSPERDIG	bignum.c	18;"	d	file:
+BLOCK	eval.c	/^struct BLOCK {$/;"	s	file:
+BUFPUSH	regex.c	353;"	d	file:
+BUILTIN_TYPE	ruby.h	111;"	d
+BYTEWIDTH	regex.h	31;"	d
+Bug	error.c	/^Bug(char *fmt, ...)$/;"	f
+CACHE_SIZE	methods.c	18;"	d	file:
+CC	Makefile	/^CC = gcc -L\/usr\/local\/lib -lgdbm -lgdbm_compat -lcrypt$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -g$/;"	m
+CHAR_BIT	ruby.h	48;"	d
+CHAR_CLASS_MAX_LENGTH	regex.c	323;"	d	file:
+CHECK	sprintf.c	42;"	d	file:
+CHECK	string.c	879;"	d	file:
+CLASS_OF	ruby.h	81;"	d
+CLONESETUP	ruby.h	124;"	d
+CONCAT	re.c	203;"	d	file:
+CONCAT	re.c	205;"	d	file:
+C_Array	array.c	/^VALUE C_Array;$/;"	v
+C_BasicSocket	socket.c	/^VALUE C_BasicSocket;$/;"	v
+C_Bignum	bignum.c	/^VALUE C_Bignum;$/;"	v
+C_Class	object.c	/^VALUE C_Class;$/;"	v
+C_DBM	dbm.c	/^VALUE C_DBM;$/;"	v
+C_Data	object.c	/^VALUE C_Data;$/;"	v
+C_Dict	dict.c	/^VALUE C_Dict, C_EnvDict;$/;"	v
+C_Dir	dir.c	/^static VALUE C_Dir;$/;"	v	file:
+C_EnvDict	dict.c	/^VALUE C_Dict, C_EnvDict;$/;"	v
+C_File	file.c	/^VALUE C_File;$/;"	v
+C_Fixnum	numeric.c	/^VALUE C_Fixnum;$/;"	v
+C_Float	numeric.c	/^VALUE C_Float;$/;"	v
+C_IO	io.c	/^VALUE C_IO;$/;"	v
+C_Integer	numeric.c	/^VALUE C_Integer;$/;"	v
+C_Kernel	object.c	/^VALUE C_Kernel;$/;"	v
+C_Method	object.c	/^VALUE C_Method;$/;"	v
+C_Module	object.c	/^VALUE C_Module;$/;"	v
+C_Nil	object.c	/^VALUE C_Nil;$/;"	v
+C_Numeric	numeric.c	/^VALUE C_Numeric;$/;"	v
+C_Object	object.c	/^VALUE C_Object;$/;"	v
+C_Range	range.c	/^VALUE C_Range;$/;"	v
+C_Regexp	re.c	/^VALUE C_Regexp;$/;"	v
+C_Socket	socket.c	/^VALUE C_Socket;$/;"	v
+C_String	string.c	/^VALUE C_String;$/;"	v
+C_Struct	struct.c	/^VALUE C_Struct;$/;"	v
+C_TCPserver	socket.c	/^VALUE C_TCPserver;$/;"	v
+C_TCPsocket	socket.c	/^VALUE C_TCPsocket;$/;"	v
+C_Time	time.c	/^static VALUE C_Time;$/;"	v	file:
+C_UNIXserver	socket.c	/^VALUE C_UNIXserver;$/;"	v
+C_UNIXsocket	socket.c	/^VALUE C_UNIXsocket;$/;"	v
+Calloc	st.c	17;"	d	file:
+Check_Type	ruby.h	113;"	d
+Const	sample/const.rb	/^module Const$/;"	m
+Const2	sample/const.rb	/^module Const2$/;"	m
+DATA_PTR	ruby.h	182;"	d
+DBM	Makefile	/^DBM = -fpcc-struct-return$/;"	m
+DEFAULT_MBCTYPE	regex.c	310;"	d	file:
+DEFAULT_MBCTYPE	regex.c	313;"	d	file:
+DEFAULT_MBCTYPE	regex.c	315;"	d	file:
+DEFINES_H	defines.h	11;"	d
+DEFS	Makefile	/^DEFS =  -DHAVE_UNISTD_H=1 -DHAVE_SYSCALL_H=1 -DHAVE_A_OUT_H=1 -DDIRENT=1 -DGETGROUPS_T=gid_t -DRETSIGTYPE=void -DHAVE_GETOPT_LONG=1 -DHAVE_MEMMOVE=1 -DHAVE_STRERROR=1 -DHAVE_STRTOUL=1 -DHAVE_STRDUP=1 -DHAVE_STRSTR=1 -DHAVE_SETENV=1 -DHAVE_KILLPG=1 -DHAVE_MKDIR=1 -DHAVE_STRFTIME=1 -DHAVE_SOCKET=1 -DHAVE_RANDOM=1 -DHAVE_WAIT4=1 -DHAVE_WAITPID=1 -DHAVE_ALLOCA_H=1 -DHAVE_ST_BLKSIZE=1 -DHAVE_ST_BLOCKS=1 -DHAVE_ST_RDEV=1$/;"	m
+DIGSPERLONG	bignum.c	20;"	d	file:
+DISTFILES	Makefile	/^DISTFILES = README NEWS TODO THANKS COPYING INSTALL \\$/;"	m
+DLN_DEFAULT_PATH	defines.h	23;"	d
+DLN_EBADLIB	dln.h	28;"	d
+DLN_ECONFL	dln.h	24;"	d
+DLN_EINIT	dln.h	29;"	d
+DLN_ENOENT	dln.h	22;"	d
+DLN_ENOEXEC	dln.h	23;"	d
+DLN_ENOINIT	dln.h	25;"	d
+DLN_ENOTLIB	dln.h	27;"	d
+DLN_EUNDEF	dln.h	26;"	d
+DLN_H	dln.h	12;"	d
+DOUBLE_STACK	regex.c	78;"	d	file:
+DOUBLE_STACK	regex.c	86;"	d	file:
+DURING_CALL	env.h	38;"	d
+DURING_ITERATE	env.h	36;"	d
+DURING_RESQUE	env.h	37;"	d
+END	re.c	392;"	d	file:
+ENVIRON	env.h	/^extern struct ENVIRON {$/;"	s
+ENV_H	env.h	12;"	d
+EQUAL	st.c	31;"	d	file:
+EXEC_TAG	eval.c	72;"	d	file:
+EXPR1	methods.c	22;"	d	file:
+EXTEND_BUFFER	regex.c	363;"	d	file:
+EXTRACT_MBC	regex.c	412;"	d	file:
+EXTRACT_MBC_AND_INCR	regex.c	414;"	d	file:
+EXTRACT_NUMBER	regex.c	278;"	d	file:
+EXTRACT_NUMBER_AND_INCR	regex.c	285;"	d	file:
+EXTRACT_UNSIGNED	regex.c	417;"	d	file:
+EXTRACT_UNSIGNED_AND_INCR	regex.c	419;"	d	file:
+Error	error.c	/^Error(char *fmt, ...)$/;"	f
+Eval	eval.c	/^Eval()$/;"	f	file:
+FALSE	ruby.h	74;"	d
+FIND_ENTRY	st.c	96;"	d	file:
+FIX2INT	ruby.h	62;"	d
+FIX2UINT	ruby.h	64;"	d
+FIXABLE	ruby.h	68;"	d
+FIXNUM_FLAG	ruby.h	54;"	d
+FIXNUM_MAX	ruby.h	51;"	d
+FIXNUM_MIN	ruby.h	52;"	d
+FIXNUM_P	ruby.h	65;"	d
+FL_ABLE	ruby.h	88;"	d
+FL_LITERAL	ruby.h	86;"	d
+FL_MARK	ruby.h	85;"	d
+FL_SET	ruby.h	90;"	d
+FL_SINGLE	ruby.h	84;"	d
+FL_TEST	ruby.h	89;"	d
+FL_UNSET	ruby.h	91;"	d
+FMINUS	sprintf.c	30;"	d	file:
+FMODE_READABLE	io.h	29;"	d
+FMODE_READWRITE	io.h	31;"	d
+FMODE_SYNC	io.h	32;"	d
+FMODE_WRITABLE	io.h	30;"	d
+FNONE	sprintf.c	28;"	d	file:
+FPLUS	sprintf.c	31;"	d	file:
+FPREC	sprintf.c	34;"	d	file:
+FREE_AND_RETURN	regex.c	77;"	d	file:
+FREE_AND_RETURN	regex.c	85;"	d	file:
+FREE_AND_RETURN_VOID	regex.c	76;"	d	file:
+FREE_AND_RETURN_VOID	regex.c	84;"	d	file:
+FS	io.c	/^VALUE FS, OFS;$/;"	v
+FSHARP	sprintf.c	29;"	d	file:
+FWIDTH	sprintf.c	33;"	d	file:
+FZERO	sprintf.c	32;"	d	file:
+F_exit	process.c	/^F_exit(obj, status)$/;"	f	file:
+Fail	error.c	/^Fail(char *fmt, ...)$/;"	f
+Fapply	eval.c	/^Fapply(recv, args)$/;"	f
+Fary_append	array.c	/^Fary_append(ary, item)$/;"	f	file:
+Fary_aref	array.c	/^Fary_aref(ary, args)$/;"	f	file:
+Fary_aset	array.c	/^Fary_aset(ary, args)$/;"	f	file:
+Fary_assoc	array.c	/^Fary_assoc(ary, key)$/;"	f
+Fary_clear	array.c	/^Fary_clear(ary)$/;"	f	file:
+Fary_clone	array.c	/^Fary_clone(ary)$/;"	f	file:
+Fary_delete	array.c	/^Fary_delete(ary, item)$/;"	f	file:
+Fary_delete_if	array.c	/^Fary_delete_if(ary)$/;"	f	file:
+Fary_each	array.c	/^Fary_each(ary)$/;"	f	file:
+Fary_fill	array.c	/^Fary_fill(ary, args)$/;"	f	file:
+Fary_inspect	array.c	/^Fary_inspect(ary)$/;"	f	file:
+Fary_join	array.c	/^Fary_join(ary, args)$/;"	f	file:
+Fary_length	array.c	/^Fary_length(ary)$/;"	f	file:
+Fary_new	array.c	/^Fary_new(class)$/;"	f	file:
+Fary_plus	array.c	/^Fary_plus(x, y)$/;"	f	file:
+Fary_pop	array.c	/^Fary_pop(ary)$/;"	f
+Fary_push	array.c	/^Fary_push(ary, item)$/;"	f
+Fary_rassoc	array.c	/^Fary_rassoc(ary, value)$/;"	f
+Fary_reverse	array.c	/^Fary_reverse(ary)$/;"	f	file:
+Fary_shift	array.c	/^Fary_shift(ary)$/;"	f
+Fary_sort	array.c	/^Fary_sort(ary)$/;"	f
+Fary_times	array.c	/^Fary_times(ary, times)$/;"	f	file:
+Fary_to_a	array.c	/^Fary_to_a(ary)$/;"	f	file:
+Fary_to_s	array.c	/^Fary_to_s(ary)$/;"	f
+Fary_unshift	array.c	/^Fary_unshift(ary, item)$/;"	f
+Fatal	error.c	/^Fatal(char *fmt,...)$/;"	f
+Fbig_abs	bignum.c	/^Fbig_abs(x)$/;"	f	file:
+Fbig_and	bignum.c	/^Fbig_and(x, y)$/;"	f
+Fbig_aref	bignum.c	/^Fbig_aref(x, y)$/;"	f	file:
+Fbig_clone	bignum.c	/^Fbig_clone(x)$/;"	f
+Fbig_cmp	bignum.c	/^Fbig_cmp(x, y)$/;"	f	file:
+Fbig_coerce	bignum.c	/^Fbig_coerce(x, y)$/;"	f	file:
+Fbig_div	bignum.c	/^Fbig_div(x, y)$/;"	f	file:
+Fbig_divmod	bignum.c	/^Fbig_divmod(x, y)$/;"	f	file:
+Fbig_hash	bignum.c	/^Fbig_hash(x)$/;"	f	file:
+Fbig_lshift	bignum.c	/^Fbig_lshift(x, y)$/;"	f
+Fbig_minus	bignum.c	/^Fbig_minus(x, y)$/;"	f
+Fbig_mod	bignum.c	/^Fbig_mod(x, y)$/;"	f	file:
+Fbig_mul	bignum.c	/^Fbig_mul(x, y)$/;"	f
+Fbig_neg	bignum.c	/^Fbig_neg(x)$/;"	f	file:
+Fbig_new	bignum.c	/^Fbig_new(class, y)$/;"	f	file:
+Fbig_or	bignum.c	/^Fbig_or(x, y)$/;"	f
+Fbig_plus	bignum.c	/^Fbig_plus(x, y)$/;"	f
+Fbig_pow	bignum.c	/^Fbig_pow(x, y)$/;"	f	file:
+Fbig_rshift	bignum.c	/^Fbig_rshift(x, y)$/;"	f	file:
+Fbig_to_f	bignum.c	/^Fbig_to_f(x)$/;"	f
+Fbig_to_i	bignum.c	/^Fbig_to_i(x)$/;"	f
+Fbig_to_s	bignum.c	/^Fbig_to_s(x)$/;"	f	file:
+Fbig_uminus	bignum.c	/^Fbig_uminus(x)$/;"	f	file:
+Fbig_xor	bignum.c	/^Fbig_xor(x, y)$/;"	f
+Fbsock_getopt	socket.c	/^Fbsock_getopt(sock, lev, optname)$/;"	f	file:
+Fbsock_getpeername	socket.c	/^Fbsock_getpeername(sock)$/;"	f	file:
+Fbsock_getsockname	socket.c	/^Fbsock_getsockname(sock)$/;"	f	file:
+Fbsock_setopt	socket.c	/^Fbsock_setopt(sock, lev, optname, val)$/;"	f	file:
+Fbsock_shutdown	socket.c	/^Fbsock_shutdown(sock, args)$/;"	f	file:
+Fcaller	eval.c	/^Fcaller(obj, args)$/;"	f
+Fcant_clone	object.c	/^Fcant_clone(obj)$/;"	f	file:
+Fcls_attr	object.c	/^Fcls_attr(class, args)$/;"	f	file:
+Fcls_new	object.c	/^Fcls_new(class, args)$/;"	f	file:
+Fcls_to_s	object.c	/^Fcls_to_s(class)$/;"	f	file:
+Fcmp_between	compar.c	/^Fcmp_between(this, min, max)$/;"	f	file:
+Fcmp_eq	compar.c	/^Fcmp_eq(this, other)$/;"	f	file:
+Fcmp_ge	compar.c	/^Fcmp_ge(this, other)$/;"	f	file:
+Fcmp_gt	compar.c	/^Fcmp_gt(this, other)$/;"	f	file:
+Fcmp_le	compar.c	/^Fcmp_le(this, other)$/;"	f	file:
+Fcmp_lt	compar.c	/^Fcmp_lt(this, other)$/;"	f	file:
+Fdata_class	object.c	/^Fdata_class(data)$/;"	f	file:
+Fdbm_clear	dbm.c	/^Fdbm_clear(obj)$/;"	f	file:
+Fdbm_close	dbm.c	/^Fdbm_close(obj)$/;"	f	file:
+Fdbm_delete	dbm.c	/^Fdbm_delete(obj, keystr)$/;"	f	file:
+Fdbm_delete_if	dbm.c	/^Fdbm_delete_if(obj)$/;"	f	file:
+Fdbm_each	dbm.c	/^Fdbm_each(obj)$/;"	f	file:
+Fdbm_each_key	dbm.c	/^Fdbm_each_key(obj)$/;"	f	file:
+Fdbm_each_pair	dbm.c	/^Fdbm_each_pair(obj)$/;"	f	file:
+Fdbm_fetch	dbm.c	/^Fdbm_fetch(obj, keystr)$/;"	f	file:
+Fdbm_has_key	dbm.c	/^Fdbm_has_key(obj, keystr)$/;"	f	file:
+Fdbm_has_value	dbm.c	/^Fdbm_has_value(obj, valstr)$/;"	f	file:
+Fdbm_keys	dbm.c	/^Fdbm_keys(obj)$/;"	f	file:
+Fdbm_length	dbm.c	/^Fdbm_length(obj)$/;"	f	file:
+Fdbm_open	dbm.c	/^Fdbm_open(class, args)$/;"	f	file:
+Fdbm_store	dbm.c	/^Fdbm_store(obj, keystr, valstr)$/;"	f	file:
+Fdbm_to_a	dbm.c	/^Fdbm_to_a(obj)$/;"	f	file:
+Fdbm_values	dbm.c	/^Fdbm_values(obj)$/;"	f	file:
+Fdefined	variable.c	/^Fdefined(obj, name)$/;"	f
+Fdic_aref	dict.c	/^Fdic_aref(dic, key)$/;"	f	file:
+Fdic_aset	dict.c	/^Fdic_aset(dic, key, val)$/;"	f
+Fdic_clear	dict.c	/^Fdic_clear(dic)$/;"	f	file:
+Fdic_clone	dict.c	/^Fdic_clone(dic)$/;"	f	file:
+Fdic_delete	dict.c	/^Fdic_delete(dic, key)$/;"	f	file:
+Fdic_delete_if	dict.c	/^Fdic_delete_if(dic)$/;"	f	file:
+Fdic_each	dict.c	/^Fdic_each(dic)$/;"	f	file:
+Fdic_each_key	dict.c	/^Fdic_each_key(dic)$/;"	f	file:
+Fdic_each_pair	dict.c	/^Fdic_each_pair(dic)$/;"	f	file:
+Fdic_has_key	dict.c	/^Fdic_has_key(dic, key)$/;"	f	file:
+Fdic_has_value	dict.c	/^Fdic_has_value(dic, val)$/;"	f	file:
+Fdic_inspect	dict.c	/^Fdic_inspect(dic)$/;"	f	file:
+Fdic_keys	dict.c	/^Fdic_keys(dic)$/;"	f	file:
+Fdic_length	dict.c	/^Fdic_length(dic)$/;"	f	file:
+Fdic_new	dict.c	/^Fdic_new(class)$/;"	f
+Fdic_to_a	dict.c	/^Fdic_to_a(dic)$/;"	f	file:
+Fdic_to_s	dict.c	/^Fdic_to_s(dic)$/;"	f	file:
+Fdic_values	dict.c	/^Fdic_values(dic)$/;"	f	file:
+Fdir_chdir	dir.c	/^Fdir_chdir(obj, args)$/;"	f	file:
+Fdir_chroot	dir.c	/^Fdir_chroot(dir, path)$/;"	f	file:
+Fdir_close	dir.c	/^Fdir_close(dir)$/;"	f	file:
+Fdir_each	dir.c	/^Fdir_each(dir)$/;"	f	file:
+Fdir_getwd	dir.c	/^Fdir_getwd(dir)$/;"	f	file:
+Fdir_mkdir	dir.c	/^Fdir_mkdir(obj, args)$/;"	f	file:
+Fdir_open	dir.c	/^Fdir_open(dir_class, dirname)$/;"	f	file:
+Fdir_rewind	dir.c	/^Fdir_rewind(dir)$/;"	f	file:
+Fdir_rmdir	dir.c	/^Fdir_rmdir(obj, dir)$/;"	f	file:
+Fdir_seek	dir.c	/^Fdir_seek(dir, pos)$/;"	f	file:
+Fdir_tell	dir.c	/^Fdir_tell(dir)$/;"	f	file:
+Fenum_collect	enum.c	/^Fenum_collect(obj)$/;"	f	file:
+Fenum_find	enum.c	/^Fenum_find(obj)$/;"	f	file:
+Fenum_find_all	enum.c	/^Fenum_find_all(obj)$/;"	f	file:
+Fenum_grep	enum.c	/^Fenum_grep(obj, pat)$/;"	f	file:
+Fenum_includes	enum.c	/^Fenum_includes(obj, val)$/;"	f	file:
+Fenum_index	enum.c	/^Fenum_index(obj, val)$/;"	f	file:
+Fenum_max	enum.c	/^Fenum_max(obj)$/;"	f	file:
+Fenum_min	enum.c	/^Fenum_min(obj)$/;"	f	file:
+Fenum_reverse	enum.c	/^Fenum_reverse(obj)$/;"	f	file:
+Fenum_sort	enum.c	/^Fenum_sort(obj)$/;"	f	file:
+Fenum_to_a	enum.c	/^Fenum_to_a(obj)$/;"	f	file:
+Fenv_delete	dict.c	/^Fenv_delete(obj, name)$/;"	f	file:
+Fenv_each	dict.c	/^Fenv_each(dic)$/;"	f	file:
+Feof	io.c	/^Feof(obj)$/;"	f	file:
+Fetc_getgrgid	etc.c	/^Fetc_getgrgid(obj, id)$/;"	f	file:
+Fetc_getgrnam	etc.c	/^Fetc_getgrnam(obj, nam)$/;"	f	file:
+Fetc_getlogin	etc.c	/^Fetc_getlogin(obj)$/;"	f	file:
+Fetc_getpwnam	etc.c	/^Fetc_getpwnam(obj, nam)$/;"	f	file:
+Fetc_getpwuid	etc.c	/^Fetc_getpwuid(obj, args)$/;"	f	file:
+Fetc_group	etc.c	/^Fetc_group(obj)$/;"	f	file:
+Fetc_passwd	etc.c	/^Fetc_passwd(obj)$/;"	f	file:
+Feval	eval.c	/^Feval(obj, src)$/;"	f
+Fexec	process.c	/^Fexec(obj, str)$/;"	f	file:
+Fexit	eval.c	/^Fexit(obj, args)$/;"	f
+Ffail	eval.c	/^Ffail(self, args)$/;"	f
+Ffile_R	file.c	/^Ffile_R(obj, fname)$/;"	f	file:
+Ffile_S	file.c	/^Ffile_S(obj, fname)$/;"	f
+Ffile_W	file.c	/^Ffile_W(obj, fname)$/;"	f	file:
+Ffile_X	file.c	/^Ffile_X(obj, fname)$/;"	f	file:
+Ffile_atime	file.c	/^Ffile_atime(obj, fname)$/;"	f	file:
+Ffile_atime2	file.c	/^Ffile_atime2(obj)$/;"	f	file:
+Ffile_b	file.c	/^Ffile_b(obj, fname)$/;"	f	file:
+Ffile_c	file.c	/^Ffile_c(obj, fname)$/;"	f	file:
+Ffile_chmod	file.c	/^Ffile_chmod(obj, args)$/;"	f	file:
+Ffile_chmod2	file.c	/^Ffile_chmod2(obj, vmode)$/;"	f	file:
+Ffile_chown	file.c	/^Ffile_chown(obj, args)$/;"	f	file:
+Ffile_chown2	file.c	/^Ffile_chown2(obj, owner, group)$/;"	f
+Ffile_ctime	file.c	/^Ffile_ctime(obj, fname)$/;"	f	file:
+Ffile_ctime2	file.c	/^Ffile_ctime2(obj)$/;"	f	file:
+Ffile_d	file.c	/^Ffile_d(obj, fname)$/;"	f	file:
+Ffile_e	file.c	/^Ffile_e(obj, fname)$/;"	f	file:
+Ffile_eof	file.c	/^Ffile_eof(obj)$/;"	f	file:
+Ffile_f	file.c	/^Ffile_f(obj, fname)$/;"	f	file:
+Ffile_fcntl	file.c	/^Ffile_fcntl(obj, req, arg)$/;"	f	file:
+Ffile_grpowned	file.c	/^Ffile_grpowned(obj, fname)$/;"	f	file:
+Ffile_isatty	file.c	/^Ffile_isatty(obj)$/;"	f	file:
+Ffile_l	file.c	/^Ffile_l(obj, fname)$/;"	f	file:
+Ffile_link	file.c	/^Ffile_link(obj, from, to)$/;"	f	file:
+Ffile_lstat	file.c	/^Ffile_lstat(obj, fname)$/;"	f	file:
+Ffile_lstat2	file.c	/^Ffile_lstat2(obj)$/;"	f	file:
+Ffile_mtime	file.c	/^Ffile_mtime(obj, fname)$/;"	f	file:
+Ffile_mtime2	file.c	/^Ffile_mtime2(obj)$/;"	f	file:
+Ffile_owned	file.c	/^Ffile_owned(obj, fname)$/;"	f	file:
+Ffile_p	file.c	/^Ffile_p(obj, fname)$/;"	f	file:
+Ffile_path	file.c	/^Ffile_path(obj)$/;"	f	file:
+Ffile_r	file.c	/^Ffile_r(obj, fname)$/;"	f	file:
+Ffile_readlink	file.c	/^Ffile_readlink(obj, path)$/;"	f
+Ffile_rename	file.c	/^Ffile_rename(obj, from, to)$/;"	f	file:
+Ffile_rewind	file.c	/^Ffile_rewind(obj)$/;"	f	file:
+Ffile_s	file.c	/^Ffile_s(obj, fname)$/;"	f	file:
+Ffile_seek	file.c	/^Ffile_seek(obj, offset, ptrname)$/;"	f	file:
+Ffile_sgid	file.c	/^Ffile_sgid(obj, fname)$/;"	f	file:
+Ffile_stat	file.c	/^Ffile_stat(obj, fname)$/;"	f	file:
+Ffile_stat2	file.c	/^Ffile_stat2(obj)$/;"	f	file:
+Ffile_sticky	file.c	/^Ffile_sticky(obj, fname)$/;"	f	file:
+Ffile_suid	file.c	/^Ffile_suid(obj, fname)$/;"	f	file:
+Ffile_symlink	file.c	/^Ffile_symlink(obj, from, to)$/;"	f	file:
+Ffile_tell	file.c	/^Ffile_tell(obj)$/;"	f	file:
+Ffile_truncate	file.c	/^Ffile_truncate(obj, path, len)$/;"	f	file:
+Ffile_truncate2	file.c	/^Ffile_truncate2(obj, len)$/;"	f	file:
+Ffile_umask	file.c	/^Ffile_umask(argc, argv)$/;"	f	file:
+Ffile_unlink	file.c	/^Ffile_unlink(obj, args)$/;"	f	file:
+Ffile_utime	file.c	/^Ffile_utime(obj, args)$/;"	f	file:
+Ffile_w	file.c	/^Ffile_w(obj, fname)$/;"	f	file:
+Ffile_x	file.c	/^Ffile_x(obj, fname)$/;"	f	file:
+Ffile_z	file.c	/^Ffile_z(obj, fname)$/;"	f	file:
+Ffix_abs	numeric.c	/^static Ffix_abs(fix)$/;"	f	file:
+Ffix_and	numeric.c	/^Ffix_and(x, y)$/;"	f	file:
+Ffix_aref	numeric.c	/^Ffix_aref(fix, idx)$/;"	f	file:
+Ffix_class	numeric.c	/^Ffix_class(fix)$/;"	f	file:
+Ffix_clone	numeric.c	/^Ffix_clone(num)$/;"	f
+Ffix_cmp	numeric.c	/^Ffix_cmp(x, y)$/;"	f	file:
+Ffix_div	numeric.c	/^Ffix_div(x, y)$/;"	f	file:
+Ffix_dot2	numeric.c	/^Ffix_dot2(left, right)$/;"	f	file:
+Ffix_equal	numeric.c	/^Ffix_equal(x, y)$/;"	f	file:
+Ffix_id2name	numeric.c	/^Ffix_id2name(fix)$/;"	f	file:
+Ffix_lshift	numeric.c	/^Ffix_lshift(x, y)$/;"	f	file:
+Ffix_minus	numeric.c	/^Ffix_minus(x, y)$/;"	f	file:
+Ffix_mod	numeric.c	/^Ffix_mod(x, y)$/;"	f	file:
+Ffix_mul	numeric.c	/^Ffix_mul(x, y)$/;"	f	file:
+Ffix_or	numeric.c	/^Ffix_or(x, y)$/;"	f	file:
+Ffix_plus	numeric.c	/^Ffix_plus(x, y)$/;"	f	file:
+Ffix_pow	numeric.c	/^Ffix_pow(x, y)$/;"	f	file:
+Ffix_rev	numeric.c	/^Ffix_rev(num)$/;"	f	file:
+Ffix_rshift	numeric.c	/^Ffix_rshift(x, y)$/;"	f	file:
+Ffix_to_f	numeric.c	/^Ffix_to_f(num)$/;"	f	file:
+Ffix_to_i	numeric.c	/^Ffix_to_i(num)$/;"	f	file:
+Ffix_to_s	numeric.c	/^Ffix_to_s(in)$/;"	f
+Ffix_uminus	numeric.c	/^Ffix_uminus(num)$/;"	f	file:
+Ffix_xor	numeric.c	/^Ffix_xor(x, y)$/;"	f	file:
+Fflo_abs	numeric.c	/^Fflo_abs(flt)$/;"	f	file:
+Fflo_clone	numeric.c	/^Fflo_clone(flt)$/;"	f	file:
+Fflo_cmp	numeric.c	/^Fflo_cmp(x, y)$/;"	f	file:
+Fflo_coerce	numeric.c	/^Fflo_coerce(this, other)$/;"	f	file:
+Fflo_div	numeric.c	/^Fflo_div(x, y)$/;"	f	file:
+Fflo_eq	numeric.c	/^Fflo_eq(x, y)$/;"	f	file:
+Fflo_hash	numeric.c	/^Fflo_hash(num)$/;"	f	file:
+Fflo_minus	numeric.c	/^Fflo_minus(x, y)$/;"	f	file:
+Fflo_mod	numeric.c	/^Fflo_mod(x, y)$/;"	f	file:
+Fflo_mul	numeric.c	/^Fflo_mul(x, y)$/;"	f	file:
+Fflo_new	numeric.c	/^Fflo_new(flo)$/;"	f	file:
+Fflo_plus	numeric.c	/^Fflo_plus(x, y)$/;"	f	file:
+Fflo_pow	numeric.c	/^Fflo_pow(x, y)$/;"	f
+Fflo_to_f	numeric.c	/^Fflo_to_f(num)$/;"	f	file:
+Fflo_to_i	numeric.c	/^Fflo_to_i(num)$/;"	f	file:
+Fflo_to_s	numeric.c	/^Fflo_to_s(flt)$/;"	f	file:
+Fflo_uminus	numeric.c	/^Fflo_uminus(flt)$/;"	f	file:
+Ffork	process.c	/^Ffork(obj)$/;"	f	file:
+Fgc_begin	gc.c	/^static Fgc_begin()$/;"	f	file:
+Fgc_disable	gc.c	/^Fgc_disable()$/;"	f
+Fgc_enable	gc.c	/^Fgc_enable()$/;"	f
+Fgc_end	gc.c	/^static Fgc_end()$/;"	f	file:
+Fgc_set_threshold	gc.c	/^Fgc_set_threshold(obj, val)$/;"	f
+Fgc_threshold	gc.c	/^Fgc_threshold(obj)$/;"	f
+Fgetc	io.c	/^Fgetc(obj)$/;"	f	file:
+Fgetenv	dict.c	/^Fgetenv(obj, name)$/;"	f
+Fgets	io.c	/^Fgets(obj)$/;"	f	file:
+Fgsub	string.c	/^Fgsub(obj, pat, val)$/;"	f	file:
+Fib	sample/tt.rb	/^class Fib:Object$/;"	c
+Fint_chr	numeric.c	/^Fint_chr(num)$/;"	f	file:
+Fint_is_int	numeric.c	/^Fint_is_int(num)$/;"	f	file:
+Fio_binmode	io.c	/^Fio_binmode(obj)$/;"	f	file:
+Fio_close	io.c	/^Fio_close(obj)$/;"	f	file:
+Fio_defget	io.c	/^Fio_defget(obj)$/;"	f	file:
+Fio_defset	io.c	/^Fio_defset(obj, val)$/;"	f	file:
+Fio_each	io.c	/^Fio_each(obj)$/;"	f	file:
+Fio_each_byte	io.c	/^Fio_each_byte(obj)$/;"	f	file:
+Fio_eof	io.c	/^Fio_eof(obj)$/;"	f	file:
+Fio_fileno	io.c	/^Fio_fileno(obj)$/;"	f	file:
+Fio_flush	io.c	/^Fio_flush(obj)$/;"	f	file:
+Fio_getc	io.c	/^Fio_getc(obj)$/;"	f	file:
+Fio_gets	io.c	/^Fio_gets(obj)$/;"	f	file:
+Fio_ioctl	io.c	/^Fio_ioctl(obj, req, arg)$/;"	f	file:
+Fio_isatty	io.c	/^Fio_isatty(obj)$/;"	f	file:
+Fio_puts	io.c	/^Fio_puts(obj, str)$/;"	f	file:
+Fio_read	io.c	/^Fio_read(obj, args)$/;"	f	file:
+Fio_set_sync	io.c	/^Fio_set_sync(obj, mode)$/;"	f	file:
+Fio_sync	io.c	/^Fio_sync(obj)$/;"	f	file:
+Fio_sysread	io.c	/^Fio_sysread(obj, len)$/;"	f	file:
+Fio_syswrite	io.c	/^Fio_syswrite(obj, str)$/;"	f	file:
+Fio_write	io.c	/^Fio_write(obj, str)$/;"	f	file:
+Fiterator_p	object.c	/^Fiterator_p()$/;"	f	file:
+Fkill	process.c	/^Fkill(argc, argv)$/;"	f	file:
+Fkrn_class	object.c	/^Fkrn_class(obj)$/;"	f	file:
+Fkrn_equal	object.c	/^Fkrn_equal(obj, other)$/;"	f	file:
+Fkrn_hash	object.c	/^Fkrn_hash(obj)$/;"	f	file:
+Fkrn_id	object.c	/^Fkrn_id(obj)$/;"	f	file:
+Fkrn_inspect	object.c	/^Fkrn_inspect(obj)$/;"	f
+Fkrn_nmatch	object.c	/^Fkrn_nmatch(obj, other)$/;"	f	file:
+Fkrn_noteq	object.c	/^Fkrn_noteq(obj, other)$/;"	f	file:
+Fkrn_to_a	object.c	/^Fkrn_to_a(obj)$/;"	f	file:
+Fkrn_to_s	object.c	/^Fkrn_to_s(obj)$/;"	f
+Fload	eval.c	/^Fload(obj, fname)$/;"	f
+Fmain_to_s	object.c	/^Fmain_to_s(obj)$/;"	f	file:
+Fmath_atan2	math.c	/^Fmath_atan2(obj, x, y)$/;"	f	file:
+Fmath_cos	math.c	/^Fmath_cos(obj, x)$/;"	f	file:
+Fmath_exp	math.c	/^Fmath_exp(obj, x)$/;"	f	file:
+Fmath_log	math.c	/^Fmath_log(obj, x)$/;"	f	file:
+Fmath_log10	math.c	/^Fmath_log10(obj, x)$/;"	f	file:
+Fmath_sin	math.c	/^Fmath_sin(obj, x)$/;"	f	file:
+Fmath_sqrt	math.c	/^Fmath_sqrt(obj, x)$/;"	f	file:
+Fmath_tan	math.c	/^Fmath_tan(obj, x)$/;"	f	file:
+Fnil_class	object.c	/^Fnil_class(nil)$/;"	f	file:
+Fnil_plus	object.c	/^Fnil_plus(x, y)$/;"	f	file:
+Fnil_to_s	object.c	/^Fnil_to_s(obj)$/;"	f	file:
+Fnum_divmod	numeric.c	/^Fnum_divmod(x, y)$/;"	f	file:
+Fnum_dot2	numeric.c	/^Fnum_dot2(left, right)$/;"	f	file:
+Fnum_dotimes	numeric.c	/^Fnum_dotimes(num)$/;"	f	file:
+Fnum_downto	numeric.c	/^Fnum_downto(from, to)$/;"	f	file:
+Fnum_is_int	numeric.c	/^Fnum_is_int(num)$/;"	f	file:
+Fnum_step	numeric.c	/^Fnum_step(from, to, step)$/;"	f	file:
+Fnum_uminus	numeric.c	/^Fnum_uminus(num)$/;"	f	file:
+Fnum_uplus	numeric.c	/^Fnum_uplus(num)$/;"	f	file:
+Fnum_upto	numeric.c	/^Fnum_upto(from, to)$/;"	f	file:
+Fobj_clone	object.c	/^Fobj_clone(obj)$/;"	f	file:
+Fobj_inspect	object.c	/^Fobj_inspect(obj)$/;"	f	file:
+Foo	sample/attr.rb	/^class Foo$/;"	c
+Fopen	io.c	/^Fopen(self, args)$/;"	f	file:
+Fpck_pack	pack.c	/^Fpck_pack(ary, fmt)$/;"	f	file:
+Fpck_unpack	pack.c	/^Fpck_unpack(str, fmt)$/;"	f	file:
+Fprint	io.c	/^Fprint(argc, argv)$/;"	f	file:
+Fprintf	io.c	/^Fprintf(argc, argv)$/;"	f	file:
+Fproc_geteuid	process.c	/^Fproc_geteuid(obj)$/;"	f	file:
+Fproc_getpgrp	process.c	/^Fproc_getpgrp(obj, args)$/;"	f	file:
+Fproc_getpriority	process.c	/^Fproc_getpriority(obj, which, who)$/;"	f	file:
+Fproc_getuid	process.c	/^Fproc_getuid(obj)$/;"	f	file:
+Fproc_seteuid	process.c	/^Fproc_seteuid(obj, euid)$/;"	f	file:
+Fproc_setpgrp	process.c	/^Fproc_setpgrp(obj, pid, pgrp)$/;"	f	file:
+Fproc_setpriority	process.c	/^Fproc_setpriority(obj, which, who, prio)$/;"	f	file:
+Fproc_setuid	process.c	/^Fproc_setuid(obj, id)$/;"	f	file:
+Frand	random.c	/^Frand(obj, max)$/;"	f	file:
+Freadlines	io.c	/^Freadlines(obj)$/;"	f	file:
+Freg_clone	re.c	/^Freg_clone(re)$/;"	f	file:
+Freg_compile	re.c	/^Freg_compile(re, str)$/;"	f	file:
+Freg_match	re.c	/^Freg_match(re, str)$/;"	f
+Freg_match2	re.c	/^Freg_match2(re)$/;"	f
+Freg_new	re.c	/^Freg_new(re, src)$/;"	f	file:
+Frequire	eval.c	/^Frequire(obj, fname)$/;"	f
+Frng_each	range.c	/^Frng_each(obj)$/;"	f	file:
+Frng_end	range.c	/^Frng_end(obj)$/;"	f	file:
+Frng_match	range.c	/^Frng_match(rng, obj)$/;"	f	file:
+Frng_start	range.c	/^Frng_start(obj)$/;"	f	file:
+Frng_to_s	range.c	/^Frng_to_s(obj)$/;"	f	file:
+Fselect	io.c	/^Fselect(obj, args)$/;"	f	file:
+Fsetenv	dict.c	/^Fsetenv(obj, name, value)$/;"	f
+Fsleep	process.c	/^Fsleep(argc, argv)$/;"	f
+Fsock_accept	socket.c	/^Fsock_accept(sock)$/;"	f	file:
+Fsock_bind	socket.c	/^Fsock_bind(sock, addr)$/;"	f	file:
+Fsock_connect	socket.c	/^Fsock_connect(sock, addr)$/;"	f	file:
+Fsock_listen	socket.c	/^Fsock_listen(sock, log)$/;"	f	file:
+Fsock_open	socket.c	/^Fsock_open(class, domain, type, protocol)$/;"	f	file:
+Fsock_recv	socket.c	/^Fsock_recv(sock, len, flags)$/;"	f	file:
+Fsock_send	socket.c	/^Fsock_send(sock, args)$/;"	f	file:
+Fsock_socketpair	socket.c	/^Fsock_socketpair(class, domain, type, protocol)$/;"	f	file:
+Fsprintf	sprintf.c	/^Fsprintf(argc, argv)$/;"	f
+Fsrand	random.c	/^Fsrand(obj, args)$/;"	f	file:
+Fstr_aref	string.c	/^Fstr_aref(str, args)$/;"	f	file:
+Fstr_aref_internal	string.c	/^Fstr_aref_internal(str, indx)$/;"	f	file:
+Fstr_aset	string.c	/^Fstr_aset(str, args)$/;"	f	file:
+Fstr_aset_internal	string.c	/^Fstr_aset_internal(str, indx, val)$/;"	f	file:
+Fstr_chop	string.c	/^Fstr_chop(str)$/;"	f	file:
+Fstr_clone	string.c	/^Fstr_clone(str)$/;"	f
+Fstr_cmp	string.c	/^Fstr_cmp(str1, str2)$/;"	f	file:
+Fstr_concat	string.c	/^Fstr_concat(str1, str2)$/;"	f	file:
+Fstr_crypt	string.c	/^Fstr_crypt(str, salt)$/;"	f	file:
+Fstr_delete	string.c	/^Fstr_delete(str1, str2)$/;"	f	file:
+Fstr_dot2	string.c	/^Fstr_dot2(left, right)$/;"	f	file:
+Fstr_each	string.c	/^Fstr_each(str)$/;"	f	file:
+Fstr_each_byte	string.c	/^Fstr_each_byte(str)$/;"	f	file:
+Fstr_equal	string.c	/^Fstr_equal(str1, str2)$/;"	f	file:
+Fstr_gsub	string.c	/^Fstr_gsub(str, pat, val)$/;"	f	file:
+Fstr_hash	string.c	/^Fstr_hash(str)$/;"	f	file:
+Fstr_hex	string.c	/^Fstr_hex(str)$/;"	f	file:
+Fstr_index	string.c	/^Fstr_index(str, args)$/;"	f	file:
+Fstr_inspect	string.c	/^Fstr_inspect(str)$/;"	f	file:
+Fstr_intern	string.c	/^Fstr_intern(str)$/;"	f	file:
+Fstr_lcfirst	string.c	/^Fstr_lcfirst(str)$/;"	f	file:
+Fstr_length	string.c	/^Fstr_length(str)$/;"	f	file:
+Fstr_match	string.c	/^Fstr_match(this, other)$/;"	f	file:
+Fstr_match2	string.c	/^Fstr_match2(str)$/;"	f	file:
+Fstr_new	string.c	/^Fstr_new(class, str)$/;"	f	file:
+Fstr_next	string.c	/^Fstr_next(orig)$/;"	f	file:
+Fstr_oct	string.c	/^Fstr_oct(str)$/;"	f	file:
+Fstr_plus	string.c	/^Fstr_plus(str1, str2)$/;"	f
+Fstr_reverse	string.c	/^Fstr_reverse(str)$/;"	f	file:
+Fstr_rindex	string.c	/^Fstr_rindex(str, args)$/;"	f	file:
+Fstr_split	string.c	/^Fstr_split(str, args)$/;"	f	file:
+Fstr_squeeze	string.c	/^Fstr_squeeze(str1, args)$/;"	f	file:
+Fstr_strip	string.c	/^Fstr_strip(str)$/;"	f	file:
+Fstr_sub	string.c	/^Fstr_sub(str, pat, val)$/;"	f	file:
+Fstr_sub_internal	string.c	/^Fstr_sub_internal(str, pat, val, once)$/;"	f	file:
+Fstr_times	string.c	/^Fstr_times(str, times)$/;"	f
+Fstr_to_f	string.c	/^Fstr_to_f(str)$/;"	f	file:
+Fstr_to_i	string.c	/^Fstr_to_i(str)$/;"	f	file:
+Fstr_to_s	string.c	/^Fstr_to_s(str)$/;"	f	file:
+Fstr_tolower	string.c	/^Fstr_tolower(str)$/;"	f	file:
+Fstr_toupper	string.c	/^Fstr_toupper(str)$/;"	f	file:
+Fstr_tr	string.c	/^Fstr_tr(str, src, repl)$/;"	f	file:
+Fstr_tr_s	string.c	/^Fstr_tr_s(str, src, repl)$/;"	f	file:
+Fstr_ucfirst	string.c	/^Fstr_ucfirst(str)$/;"	f	file:
+Fstruct_access	struct.c	/^Fstruct_access(s)$/;"	f	file:
+Fstruct_aref	struct.c	/^Fstruct_aref(s, idx)$/;"	f	file:
+Fstruct_clone	struct.c	/^Fstruct_clone(s)$/;"	f	file:
+Fstruct_each	struct.c	/^Fstruct_each(s)$/;"	f	file:
+Fstruct_inspect	struct.c	/^Fstruct_inspect(s)$/;"	f	file:
+Fstruct_new	struct.c	/^Fstruct_new(class, args)$/;"	f	file:
+Fstruct_to_a	struct.c	/^Fstruct_to_a(s)$/;"	f	file:
+Fstruct_to_s	struct.c	/^Fstruct_to_s(s)$/;"	f	file:
+Fstruct_values	struct.c	/^Fstruct_values(s)$/;"	f	file:
+Fsub	string.c	/^Fsub(obj, pat, val)$/;"	f	file:
+Fsystem	process.c	/^Fsystem(obj, str)$/;"	f	file:
+Fsystem2	io.c	/^Fsystem2(obj, str)$/;"	f	file:
+Ftcp_accept	socket.c	/^Ftcp_accept(sock)$/;"	f	file:
+Ftcp_addr	socket.c	/^Ftcp_addr(sock)$/;"	f	file:
+Ftcp_peeraddr	socket.c	/^Ftcp_peeraddr(sock)$/;"	f	file:
+Ftcp_sock_open	socket.c	/^Ftcp_sock_open(class, host, serv)$/;"	f	file:
+Ftcp_svr_open	socket.c	/^Ftcp_svr_open(class, args)$/;"	f	file:
+Ftime_asctime	time.c	/^Ftime_asctime(time)$/;"	f	file:
+Ftime_at	time.c	/^Ftime_at(class, time)$/;"	f	file:
+Ftime_cmp	time.c	/^Ftime_cmp(time1, time2)$/;"	f	file:
+Ftime_coerce	time.c	/^Ftime_coerce(time1, time2)$/;"	f	file:
+Ftime_gmtime	time.c	/^Ftime_gmtime(time)$/;"	f	file:
+Ftime_hash	time.c	/^Ftime_hash(time)$/;"	f	file:
+Ftime_hour	time.c	/^Ftime_hour(time)$/;"	f	file:
+Ftime_isdst	time.c	/^Ftime_isdst(time)$/;"	f	file:
+Ftime_localtime	time.c	/^Ftime_localtime(time)$/;"	f	file:
+Ftime_mday	time.c	/^Ftime_mday(time)$/;"	f	file:
+Ftime_min	time.c	/^Ftime_min(time)$/;"	f	file:
+Ftime_minus	time.c	/^Ftime_minus(time1, time2)$/;"	f	file:
+Ftime_mon	time.c	/^Ftime_mon(time)$/;"	f	file:
+Ftime_now	time.c	/^Ftime_now(class)$/;"	f	file:
+Ftime_plus	time.c	/^Ftime_plus(time1, time2)$/;"	f	file:
+Ftime_sec	time.c	/^Ftime_sec(time)$/;"	f	file:
+Ftime_strftime	time.c	/^Ftime_strftime(time, format)$/;"	f	file:
+Ftime_times	time.c	/^Ftime_times(obj)$/;"	f	file:
+Ftime_to_a	time.c	/^Ftime_to_a(time)$/;"	f	file:
+Ftime_to_i	time.c	/^Ftime_to_i(time)$/;"	f	file:
+Ftime_usec	time.c	/^Ftime_usec(time)$/;"	f	file:
+Ftime_wday	time.c	/^Ftime_wday(time)$/;"	f	file:
+Ftime_yday	time.c	/^Ftime_yday(time)$/;"	f	file:
+Ftime_year	time.c	/^Ftime_year(time)$/;"	f	file:
+Ftime_zone	time.c	/^Ftime_zone(time)$/;"	f	file:
+Ftrap	process.c	/^Ftrap(argc, argv)$/;"	f	file:
+Funix_accept	socket.c	/^Funix_accept(sock)$/;"	f	file:
+Funix_addr	socket.c	/^Funix_addr(sock)$/;"	f	file:
+Funix_path	socket.c	/^Funix_path(sock)$/;"	f	file:
+Funix_peeraddr	socket.c	/^Funix_peeraddr(sock)$/;"	f	file:
+Funix_sock_open	socket.c	/^Funix_sock_open(sock, path)$/;"	f	file:
+Funix_svr_open	socket.c	/^Funix_svr_open(class, path)$/;"	f	file:
+Fwait	process.c	/^Fwait(obj)$/;"	f	file:
+Fwaitpid	process.c	/^Fwaitpid(obj, vpid, vflags)$/;"	f	file:
+GC_LINK	ruby.h	253;"	d
+GC_List	gc.c	/^struct gc_list *GC_List = Qnil;$/;"	v	typeref:struct:gc_list
+GC_PRO	ruby.h	255;"	d
+GC_PRO2	ruby.h	262;"	d
+GC_PRO3	ruby.h	263;"	d
+GC_PRO4	ruby.h	267;"	d
+GC_UNLINK	ruby.h	272;"	d
+GETARG	sprintf.c	55;"	d	file:
+GETOPT_COMPAT	missing/getopt.c	43;"	d	file:
+GET_BUFFER_SPACE	regex.c	346;"	d	file:
+GET_MATCH	re.c	208;"	d	file:
+GET_MATCH_FUNC	re.c	209;"	d	file:
+GET_UNSIGNED_NUMBER	regex.c	387;"	d	file:
+GLOBAL_UNDEF	variable.c	/^    enum { GLOBAL_VAL, GLOBAL_VAR, GLOBAL_UNDEF } mode;$/;"	e	enum:global_entry::__anon8	file:
+GLOBAL_VAL	variable.c	/^    enum { GLOBAL_VAL, GLOBAL_VAR, GLOBAL_UNDEF } mode;$/;"	e	enum:global_entry::__anon8	file:
+GLOBAL_VAR	variable.c	/^    enum { GLOBAL_VAL, GLOBAL_VAR, GLOBAL_UNDEF } mode;$/;"	e	enum:global_entry::__anon8	file:
+GetDBM	dbm.c	31;"	d	file:
+GetDIR	dir.c	77;"	d	file:
+GetOpenFile	io.h	34;"	d
+GetTimeval	time.c	31;"	d	file:
+Get_Data_Struct	ruby.h	184;"	d
+Global_List	gc.c	/^static struct gc_list *Global_List = Qnil;$/;"	v	typeref:struct:gc_list	file:
+HAS_GETGROUPS	file.c	256;"	d	file:
+HDR	struct.c	186;"	d	file:
+HDRS	Makefile	/^HDRS          = defines.h \\$/;"	m
+ID	ruby.h	/^typedef UINT ID;$/;"	t
+IDENT_H	ident.h	15;"	d
+ID_ATTRSET	ident.h	19;"	d
+ID_CONST	ident.h	22;"	d
+ID_GLOBAL	ident.h	21;"	d
+ID_INSTANCE	ident.h	20;"	d
+ID_LOCAL	ident.h	18;"	d
+ID_SCOPE_MASK	ident.h	17;"	d
+ID_VARMASK	ident.h	23;"	d
+INIT_BUF_SIZE	regex.c	343;"	d	file:
+INSTALL	Makefile	/^INSTALL = \/usr\/bin\/install -c$/;"	m
+INSTALL_DATA	Makefile	/^INSTALL_DATA = $(INSTALL) -m 644$/;"	m
+INSTALL_PROGRAM	Makefile	/^INSTALL_PROGRAM = $(INSTALL)$/;"	m
+INT2FIX	ruby.h	55;"	d
+INVALID_OBJECT	dln.c	176;"	d	file:
+IN_BLOCK	eval.c	87;"	d	file:
+IOCPARM_LEN	io.c	1096;"	d	file:
+IO_H	io.h	15;"	d
+IS_ACTIVE	regex.c	2073;"	d	file:
+IS_A_LETTER	regex.c	2207;"	d	file:
+IS_IN_FIRST_STRING	regex.c	2159;"	d	file:
+ITERATOR_P	env.h	32;"	d
+Init_Array	array.c	/^Init_Array()$/;"	f
+Init_Bignum	bignum.c	/^Init_Bignum()$/;"	f
+Init_Comparable	compar.c	/^Init_Comparable()$/;"	f
+Init_DBM	dbm.c	/^Init_DBM()$/;"	f
+Init_Dict	dict.c	/^Init_Dict()$/;"	f
+Init_Dir	dir.c	/^Init_Dir()$/;"	f
+Init_Enumerable	enum.c	/^Init_Enumerable()$/;"	f
+Init_Etc	etc.c	/^Init_Etc()$/;"	f
+Init_File	file.c	/^Init_File()$/;"	f
+Init_GC	gc.c	/^Init_GC()$/;"	f
+Init_IO	io.c	/^Init_IO()$/;"	f
+Init_Math	math.c	/^Init_Math()$/;"	f
+Init_Numeric	numeric.c	/^Init_Numeric()$/;"	f
+Init_Object	object.c	/^Init_Object()$/;"	f
+Init_Random	random.c	/^Init_Random()$/;"	f
+Init_Range	range.c	/^Init_Range()$/;"	f
+Init_Regexp	re.c	/^Init_Regexp()$/;"	f
+Init_Socket	socket.c	/^Init_Socket ()$/;"	f
+Init_String	string.c	/^Init_String()$/;"	f
+Init_Struct	struct.c	/^Init_Struct()$/;"	f
+Init_Time	time.c	/^Init_Time()$/;"	f
+Init_load	eval.c	/^Init_load()$/;"	f
+Init_pack	pack.c	/^Init_pack()$/;"	f
+Init_process	process.c	/^Init_process()$/;"	f
+Init_var_tables	variable.c	/^Init_var_tables()$/;"	f
+Init_version	version.c	/^Init_version()$/;"	f
+JUMP_TAG	eval.c	73;"	d	file:
+LDFLAGS	Makefile	/^LDFLAGS =  $(CFLAGS)$/;"	m
+LIBC_NAME	defines.h	22;"	d
+LIBS	Makefile	/^LIBS =  -lm$/;"	m
+LMATCH	string.c	1313;"	d	file:
+LONG_MAX	ruby.h	36;"	d
+LONG_MIN	ruby.h	40;"	d
+LONG_MIN	ruby.h	42;"	d
+MAKEINFO	Makefile	/^MAKEINFO = makeinfo$/;"	m
+MALLOC_ARG_T	regex.c	51;"	d	file:
+MALLOC_ARG_T	regex.c	54;"	d	file:
+MATCHED_SOMETHING	regex.c	2074;"	d	file:
+MATCHING_IN_FIRST_STRING	regex.c	2154;"	d	file:
+MAX	bignum.c	25;"	d	file:
+MAXTIME	missing/strftime.c	704;"	d	file:
+MAX_NUM_FAILURE_ITEMS	regex.c	2088;"	d	file:
+MIN	bignum.c	26;"	d	file:
+MIN	sprintf.c	184;"	d	file:
+MTH_FUNC	ruby.h	/^    enum mth_scope { MTH_METHOD, MTH_FUNC, MTH_UNDEF } scope;$/;"	e	enum:RMethod::mth_scope
+MTH_METHOD	ruby.h	/^    enum mth_scope { MTH_METHOD, MTH_FUNC, MTH_UNDEF } scope;$/;"	e	enum:RMethod::mth_scope
+MTH_UNDEF	ruby.h	/^    enum mth_scope { MTH_METHOD, MTH_FUNC, MTH_UNDEF } scope;$/;"	e	enum:RMethod::mth_scope
+M_Comparable	compar.c	/^VALUE M_Comparable;$/;"	v
+M_Comparable	range.c	/^VALUE M_Comparable;$/;"	v
+M_Enumerable	enum.c	/^VALUE M_Enumerable;$/;"	v
+M_Etc	etc.c	/^VALUE M_Etc;$/;"	v
+M_GC	gc.c	/^VALUE M_GC;$/;"	v
+M_Math	math.c	/^VALUE M_Math;$/;"	v
+M_Process	process.c	/^VALUE M_Process;$/;"	v
+MakeDBM	dbm.c	45;"	d	file:
+MakeOpenFile	io.h	38;"	d
+MakeTimeval	time.c	33;"	d	file:
+Make_Data_Struct	ruby.h	191;"	d
+MyElem	sample/list.rb	/^class MyElem$/;"	c
+MyList	sample/list.rb	/^class MyList$/;"	c
+NEGFIXABLE	ruby.h	67;"	d
+NEWOBJ	ruby.h	119;"	d
+NEW_ALIAS	node.h	202;"	d
+NEW_AND	node.h	183;"	d
+NEW_ARGS	node.h	201;"	d
+NEW_ARRAY	node.h	180;"	d
+NEW_ATTRSET	node.h	208;"	d
+NEW_BLOCK	node.h	163;"	d
+NEW_BREAK	node.h	174;"	d
+NEW_CALL	node.h	197;"	d
+NEW_CALL2	node.h	198;"	d
+NEW_CASE	node.h	166;"	d
+NEW_CASGN	node.h	189;"	d
+NEW_CFUNC	node.h	160;"	d
+NEW_CLASS	node.h	204;"	d
+NEW_CONT	node.h	175;"	d
+NEW_CVAR	node.h	194;"	d
+NEW_DEFN	node.h	158;"	d
+NEW_DEFS	node.h	159;"	d
+NEW_DO	node.h	171;"	d
+NEW_DOT3	node.h	207;"	d
+NEW_FOR	node.h	170;"	d
+NEW_GASGN	node.h	186;"	d
+NEW_GVAR	node.h	190;"	d
+NEW_HASH	node.h	182;"	d
+NEW_IASGN	node.h	188;"	d
+NEW_IF	node.h	164;"	d
+NEW_INC	node.h	206;"	d
+NEW_IVAR	node.h	192;"	d
+NEW_LASGN	node.h	187;"	d
+NEW_LIST	node.h	179;"	d
+NEW_LIT	node.h	195;"	d
+NEW_LVAR	node.h	191;"	d
+NEW_MASGN	node.h	185;"	d
+NEW_MODULE	node.h	205;"	d
+NEW_MVAR	node.h	193;"	d
+NEW_NIL	node.h	210;"	d
+NEW_OR	node.h	184;"	d
+NEW_PROT	node.h	172;"	d
+NEW_REDO	node.h	173;"	d
+NEW_RET	node.h	177;"	d
+NEW_RETRY	node.h	176;"	d
+NEW_RFUNC	node.h	161;"	d
+NEW_SCOPE	node.h	162;"	d
+NEW_SELF	node.h	209;"	d
+NEW_STR	node.h	196;"	d
+NEW_SUPER	node.h	199;"	d
+NEW_UNDEF	node.h	203;"	d
+NEW_UNLESS	node.h	165;"	d
+NEW_UNTIL	node.h	169;"	d
+NEW_WHEN	node.h	167;"	d
+NEW_WHILE	node.h	168;"	d
+NEW_YIELD	node.h	178;"	d
+NEW_ZARRAY	node.h	181;"	d
+NEW_ZSUPER	node.h	200;"	d
+NEXTFROM	pack.c	75;"	d	file:
+NFAILURES	regex.c	252;"	d	file:
+NGROUPS	file.c	269;"	d	file:
+NIL_P	ruby.h	71;"	d
+NLENGTH	dir.c	24;"	d	file:
+NLENGTH	dir.c	27;"	d	file:
+NODE	node.h	/^} NODE;$/;"	t	typeref:struct:node
+NODE_ALIAS	node.h	/^    NODE_ALIAS,$/;"	e	enum:node_type
+NODE_AND	node.h	/^    NODE_AND,$/;"	e	enum:node_type
+NODE_ARGS	node.h	/^    NODE_ARGS,$/;"	e	enum:node_type
+NODE_ARRAY	node.h	/^    NODE_ARRAY,$/;"	e	enum:node_type
+NODE_ATTRSET	node.h	/^    NODE_ATTRSET,$/;"	e	enum:node_type
+NODE_BLOCK	node.h	/^    NODE_BLOCK,$/;"	e	enum:node_type
+NODE_BREAK	node.h	/^    NODE_BREAK,$/;"	e	enum:node_type
+NODE_CALL	node.h	/^    NODE_CALL,$/;"	e	enum:node_type
+NODE_CALL2	node.h	/^    NODE_CALL2,$/;"	e	enum:node_type
+NODE_CASE	node.h	/^    NODE_CASE,$/;"	e	enum:node_type
+NODE_CASGN	node.h	/^    NODE_CASGN,$/;"	e	enum:node_type
+NODE_CFUNC	node.h	/^    NODE_CFUNC,$/;"	e	enum:node_type
+NODE_CLASS	node.h	/^    NODE_CLASS,$/;"	e	enum:node_type
+NODE_CONST	node.h	/^    NODE_CONST,$/;"	e	enum:node_type
+NODE_CONTINUE	node.h	/^    NODE_CONTINUE,$/;"	e	enum:node_type
+NODE_CVAR	node.h	/^    NODE_CVAR,$/;"	e	enum:node_type
+NODE_DEFN	node.h	/^    NODE_DEFN,$/;"	e	enum:node_type
+NODE_DEFS	node.h	/^    NODE_DEFS,$/;"	e	enum:node_type
+NODE_DO	node.h	/^    NODE_DO,$/;"	e	enum:node_type
+NODE_DOT3	node.h	/^    NODE_DOT3,$/;"	e	enum:node_type
+NODE_FOR	node.h	/^    NODE_FOR,$/;"	e	enum:node_type
+NODE_GASGN	node.h	/^    NODE_GASGN,$/;"	e	enum:node_type
+NODE_GVAR	node.h	/^    NODE_GVAR,$/;"	e	enum:node_type
+NODE_H	node.h	14;"	d
+NODE_HASH	node.h	/^    NODE_HASH,$/;"	e	enum:node_type
+NODE_IASGN	node.h	/^    NODE_IASGN,$/;"	e	enum:node_type
+NODE_IF	node.h	/^    NODE_IF,$/;"	e	enum:node_type
+NODE_INC	node.h	/^    NODE_INC,$/;"	e	enum:node_type
+NODE_IVAR	node.h	/^    NODE_IVAR,$/;"	e	enum:node_type
+NODE_LASGN	node.h	/^    NODE_LASGN,$/;"	e	enum:node_type
+NODE_LIT	node.h	/^    NODE_LIT,$/;"	e	enum:node_type
+NODE_LVAR	node.h	/^    NODE_LVAR,$/;"	e	enum:node_type
+NODE_MASGN	node.h	/^    NODE_MASGN,$/;"	e	enum:node_type
+NODE_MODULE	node.h	/^    NODE_MODULE,$/;"	e	enum:node_type
+NODE_MVAR	node.h	/^    NODE_MVAR,$/;"	e	enum:node_type
+NODE_NIL	node.h	/^    NODE_NIL,$/;"	e	enum:node_type
+NODE_OR	node.h	/^    NODE_OR,$/;"	e	enum:node_type
+NODE_PROT	node.h	/^    NODE_PROT,$/;"	e	enum:node_type
+NODE_REDO	node.h	/^    NODE_REDO,$/;"	e	enum:node_type
+NODE_RETRY	node.h	/^    NODE_RETRY,$/;"	e	enum:node_type
+NODE_RETURN	node.h	/^    NODE_RETURN,$/;"	e	enum:node_type
+NODE_SCOPE	node.h	/^    NODE_SCOPE,$/;"	e	enum:node_type
+NODE_SELF	node.h	/^    NODE_SELF,$/;"	e	enum:node_type
+NODE_STR	node.h	/^    NODE_STR,$/;"	e	enum:node_type
+NODE_SUPER	node.h	/^    NODE_SUPER,$/;"	e	enum:node_type
+NODE_UNDEF	node.h	/^    NODE_UNDEF,$/;"	e	enum:node_type
+NODE_UNLESS	node.h	/^    NODE_UNLESS,$/;"	e	enum:node_type
+NODE_UNTIL	node.h	/^    NODE_UNTIL,$/;"	e	enum:node_type
+NODE_WHEN	node.h	/^    NODE_WHEN,$/;"	e	enum:node_type
+NODE_WHILE	node.h	/^    NODE_WHILE,$/;"	e	enum:node_type
+NODE_YIELD	node.h	/^    NODE_YIELD,$/;"	e	enum:node_type
+NODE_ZARRAY	node.h	/^    NODE_ZARRAY,$/;"	e	enum:node_type
+NODE_ZSUPER	node.h	/^    NODE_ZSUPER,$/;"	e	enum:node_type
+NULL	missing/getopt1.c	40;"	d	file:
+NUM2INT	ruby.h	115;"	d
+NUM_FAILURE_ITEMS	regex.c	2093;"	d	file:
+NUM_REG_ITEMS	regex.c	2082;"	d	file:
+N_COMM	dln.c	173;"	d	file:
+Need_Fixnum	ruby.h	114;"	d
+Need_Float	math.c	19;"	d	file:
+Need_Float2	math.c	26;"	d	file:
+OBJS	Makefile	/^OBJS	      = array.o \\$/;"	m
+OBJSETUP	ruby.h	120;"	d
+OFS	io.c	/^VALUE FS, OFS;$/;"	v
+ORS	io.c	/^VALUE RS, ORS;$/;"	v
+OpenFile	io.h	/^} OpenFile;$/;"	t	typeref:struct:__anon2
+P	regex.c	150;"	d	file:
+P	regex.c	50;"	d	file:
+P	regex.c	53;"	d	file:
+PATFETCH	regex.c	327;"	d	file:
+PATFETCH_RAW	regex.c	335;"	d	file:
+PATUNFETCH	regex.c	339;"	d	file:
+PERMUTE	missing/getopt.c	/^  REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER$/;"	e	enum:__anon3	file:
+POINTER	ruby.h	70;"	d
+POP_ENV	eval.c	37;"	d	file:
+POP_FAILURE_POINT	regex.c	2144;"	d	file:
+POP_TAG	eval.c	67;"	d	file:
+POSFIXABLE	ruby.h	66;"	d
+POSIX2_DATE	missing/strftime.c	52;"	d	file:
+POSIX_SEMANTICS	missing/strftime.c	55;"	d	file:
+PREFETCH	regex.c	2165;"	d	file:
+PROGRAM	Makefile	/^PROGRAM	      = ruby$/;"	m
+PTR_NOT_EQUAL	st.c	93;"	d	file:
+PUSH	sprintf.c	49;"	d	file:
+PUSH_ENV	eval.c	30;"	d	file:
+PUSH_FAILURE_POINT	regex.c	2099;"	d	file:
+PUSH_TAG	eval.c	58;"	d	file:
+P_false	object.c	/^P_false(obj)$/;"	f	file:
+P_true	object.c	/^P_true(obj)$/;"	f	file:
+Point	sample/list.rb	/^class Point$/;"	c
+Point	sample/list2.rb	/^class Point$/;"	c
+Print	sample/tt.rb	/^module Print$/;"	m
+Print2	sample/tt.rb	/^module Print2$/;"	m
+Print3	sample/tt.rb	/^module Print3$/;"	m
+Progname	eval.c	/^VALUE Progname;$/;"	v
+Qnil	ruby.h	241;"	d
+Qself	env.h	33;"	d
+RARRAY	ruby.h	234;"	d
+RArray	ruby.h	/^struct RArray {$/;"	s
+RBASIC	ruby.h	228;"	d
+RBIGNUM	ruby.h	239;"	d
+RBasic	ruby.h	/^struct RBasic {$/;"	s
+RBignum	ruby.h	/^struct RBignum {$/;"	s
+RCLASS	ruby.h	230;"	d
+RClass	ruby.h	/^struct RClass {$/;"	s
+RDATA	ruby.h	236;"	d
+RDICT	ruby.h	235;"	d
+RData	ruby.h	/^struct RData {$/;"	s
+RDict	ruby.h	/^struct RDict {$/;"	s
+READ_PENDING	io.c	930;"	d	file:
+READ_PENDING	io.c	933;"	d	file:
+READ_PENDING	io.c	935;"	d	file:
+REALLOC_N	ruby.h	245;"	d
+REQUIRE_ORDER	missing/getopt.c	/^  REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER$/;"	e	enum:__anon3	file:
+RETURN_IN_ORDER	missing/getopt.c	/^  REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER$/;"	e	enum:__anon3	file:
+RE_AWK_CLASS_HACK	regex.h	85;"	d
+RE_BK_PLUS_QM	regex.h	61;"	d
+RE_CHAR_CLASSES	regex.h	101;"	d
+RE_CONTEXTUAL_INVALID_OPS	regex.h	129;"	d
+RE_CONTEXT_INDEP_OPS	regex.h	79;"	d
+RE_DOT_NOT_NULL	regex.h	105;"	d
+RE_DUP_MAX	regex.h	36;"	d
+RE_EXACTN_VALUE	regex.h	211;"	d
+RE_H	re.h	15;"	d
+RE_HAT_NOT_NEWLINE	regex.h	109;"	d
+RE_INTERVALS	regex.h	89;"	d
+RE_LIMITED_OPS	regex.h	133;"	d
+RE_MBCTYPE_EUC	regex.h	168;"	d
+RE_MBCTYPE_MASK	regex.h	170;"	d
+RE_MBCTYPE_SJIS	regex.h	169;"	d
+RE_NEWLINE_OR	regex.h	69;"	d
+RE_NO_BK_CURLY_BRACES	regex.h	95;"	d
+RE_NO_BK_PARENS	regex.h	51;"	d
+RE_NO_BK_REFS	regex.h	113;"	d
+RE_NO_BK_VBAR	regex.h	56;"	d
+RE_NO_EMPTY_BK_REF	regex.h	118;"	d
+RE_NO_EMPTY_BRACKETS	regex.h	122;"	d
+RE_NO_EMPTY_RANGES	regex.h	139;"	d
+RE_NO_HYPHEN_RANGE_END	regex.h	143;"	d
+RE_NREGS	regex.h	28;"	d
+RE_SYNTAX_AWK	regex.h	149;"	d
+RE_SYNTAX_EGREP	regex.h	150;"	d
+RE_SYNTAX_EMACS	regex.h	153;"	d
+RE_SYNTAX_GREP	regex.h	152;"	d
+RE_SYNTAX_POSIX_AWK	regex.h	147;"	d
+RE_SYNTAX_POSIX_BASIC	regex.h	154;"	d
+RE_SYNTAX_POSIX_EXTENDED	regex.h	160;"	d
+RE_TIGHT_VBAR	regex.h	65;"	d
+RFLOAT	ruby.h	231;"	d
+RFloat	ruby.h	/^struct RFloat {$/;"	s
+RMATCH	string.c	1314;"	d	file:
+RMETHOD	ruby.h	237;"	d
+RMethod	ruby.h	/^struct RMethod {$/;"	s
+ROBJECT	ruby.h	229;"	d
+RObject	ruby.h	/^struct RObject {$/;"	s
+RREGEXP	ruby.h	233;"	d
+RRegexp	ruby.h	/^struct RRegexp {$/;"	s
+RS	io.c	/^VALUE RS, ORS;$/;"	v
+RSHIFT	ruby.h	58;"	d
+RSHIFT	ruby.h	60;"	d
+RSTRING	ruby.h	232;"	d
+RSTRUCT	ruby.h	238;"	d
+RString	ruby.h	/^struct RString {$/;"	s
+RStruct	ruby.h	/^struct RStruct {$/;"	s
+RUBY	defines.h	13;"	d
+RUBY	regex.c	46;"	d	file:
+RUBY_H	ruby.h	14;"	d
+RUBY_LIB	eval.c	1814;"	d	file:
+RUBY_LIB_SEP	eval.c	1817;"	d	file:
+RUBY_VERSION	version.h	1;"	d
+R_BITSIZE	dln.c	207;"	d	file:
+R_CAST	ruby.h	227;"	d
+R_LENGTH	dln.c	208;"	d	file:
+R_LENGTH	dln.c	222;"	d	file:
+R_PCREL	dln.c	218;"	d	file:
+R_PCREL	dln.c	223;"	d	file:
+R_RIGHTSHIFT	dln.c	206;"	d	file:
+R_SYMBOL	dln.c	220;"	d	file:
+R_SYMBOL	dln.c	224;"	d	file:
+Regexp	re.h	/^typedef struct Regexp {$/;"	s
+Regexp	re.h	/^} Regexp;$/;"	t	typeref:struct:Regexp
+SAFE_SIGHANDLE	defines.h	33;"	d
+SETUP_ARGS	eval.c	278;"	d	file:
+SET_BLOCK	eval.c	46;"	d	file:
+SET_LIST_BIT	regex.c	382;"	d	file:
+SET_REGS_MATCHED	regex.c	2180;"	d	file:
+SHELL	Makefile	/^SHELL = \/bin\/sh$/;"	m
+SIGN_EXTEND_CHAR	regex.c	256;"	d	file:
+SIGN_EXTEND_CHAR	regex.c	259;"	d	file:
+SRCS	Makefile	/^SRCS          = array.c \\$/;"	m
+STORE_MBC	regex.c	407;"	d	file:
+STORE_MBC_AND_INCR	regex.c	409;"	d	file:
+STORE_NUMBER	regex.c	264;"	d	file:
+STORE_NUMBER_AND_INCR	regex.c	271;"	d	file:
+STRLEN	string.c	21;"	d	file:
+ST_CONTINUE	st.h	/^enum st_retval {ST_CONTINUE, ST_STOP, ST_DELETE};$/;"	e	enum:st_retval
+ST_DEFAULT_GROW_FACTOR	st.h	52;"	d
+ST_DEFAULT_INIT_TABLE_SIZE	st.h	51;"	d
+ST_DEFAULT_MAX_DENSITY	st.h	50;"	d
+ST_DEFAULT_REORDER_FLAG	st.h	53;"	d
+ST_DELETE	st.h	/^enum st_retval {ST_CONTINUE, ST_STOP, ST_DELETE};$/;"	e	enum:st_retval
+ST_INCLUDED	st.h	7;"	d
+ST_NUMCMP	st.h	39;"	d
+ST_NUMHASH	st.h	40;"	d
+ST_PTRCMP	st.h	42;"	d
+ST_PTRHASH	st.h	43;"	d
+ST_STOP	st.h	/^enum st_retval {ST_CONTINUE, ST_STOP, ST_DELETE};$/;"	e	enum:st_retval
+SUNOS_EXT	missing/strftime.c	51;"	d	file:
+SUNOS_EXT	missing/strftime.c	63;"	d	file:
+SYNTAX	regex.c	107;"	d	file:
+SYSV_EXT	missing/strftime.c	50;"	d	file:
+SYSV_EXT	missing/strftime.c	60;"	d	file:
+S_ISBLK	file.c	427;"	d	file:
+S_ISCHR	file.c	448;"	d	file:
+S_ISDIR	file.c	330;"	d	file:
+S_ISFIFO	file.c	348;"	d	file:
+S_ISLNK	file.c	368;"	d	file:
+S_ISSOCK	file.c	397;"	d	file:
+S_IXUGO	file.c	285;"	d	file:
+Sword	regex.c	104;"	d	file:
+TAG_BREAK	eval.c	80;"	d	file:
+TAG_CONTINUE	eval.c	81;"	d	file:
+TAG_EXIT	eval.c	85;"	d	file:
+TAG_FAIL	eval.c	84;"	d	file:
+TAG_REDO	eval.c	83;"	d	file:
+TAG_RETRY	eval.c	82;"	d	file:
+TAG_RETURN	eval.c	79;"	d	file:
+TRIAL	methods.c	25;"	d	file:
+TRUE	ruby.h	73;"	d
+TYPE	ruby.h	112;"	d
+T_ARRAY	ruby.h	101;"	d
+T_BIGNUM	ruby.h	107;"	d
+T_CLASS	ruby.h	95;"	d
+T_DATA	ruby.h	104;"	d
+T_DICT	ruby.h	103;"	d
+T_FIXNUM	ruby.h	102;"	d
+T_FLOAT	ruby.h	98;"	d
+T_ICLASS	ruby.h	96;"	d
+T_MASK	ruby.h	109;"	d
+T_METHOD	ruby.h	105;"	d
+T_MODULE	ruby.h	97;"	d
+T_NIL	ruby.h	93;"	d
+T_OBJECT	ruby.h	94;"	d
+T_REGEXP	ruby.h	100;"	d
+T_STRING	ruby.h	99;"	d
+T_STRUCT	ruby.h	106;"	d
+TopLevel	eval.c	/^TopLevel(script, argc, argv)$/;"	f
+TopSelf	object.c	/^VALUE TopSelf;$/;"	v
+UINT	ruby.h	/^typedef unsigned int UINT;$/;"	t
+USE_DBM	defines.h	29;"	d
+USE_DLN	defines.h	20;"	d
+USHORT	ruby.h	/^typedef unsigned short USHORT;$/;"	t
+VALUE	ruby.h	/^typedef UINT VALUE;$/;"	t
+VMS_EXT	missing/strftime.c	53;"	d	file:
+VPATH	Makefile	/^VPATH = .$/;"	m
+WAIT_CALL	process.c	40;"	d	file:
+Warning	error.c	/^Warning(char *fmt,...)$/;"	f
+WrongType	error.c	/^WrongType(x, t)$/;"	f
+YACC	Makefile	/^YACC = bison -y$/;"	m
+_GETOPT_H	missing/getopt.h	19;"	d
+__REGEXP_LIBRARY	regex.h	23;"	d
+_argtype	missing/getopt.h	/^enum _argtype$/;"	g
+_getopt_internal	missing/getopt.c	/^_getopt_internal (argc, argv, optstring, longopts, longind, long_only)$/;"	f
+_stksize	regex.c	/^long _stksize = 2L;  \/* reserve memory for stack *\/$/;"	v
+add_to_list	sample/list.rb	/^  def add_to_list(obj)$/;"	f	class:MyList
+adddecl	missing/strftime.c	68;"	d	file:
+adddecl	missing/strftime.c	70;"	d	file:
+addpath	eval.c	/^addpath(path)$/;"	f	file:
+addr	dln.c	/^    char *addr;$/;"	m	struct:undef	file:
+after_dot	regex.c	/^    after_dot,	 \/* Succeeds if after point.  *\/$/;"	e	enum:regexpcode	file:
+alloc	st.c	16;"	d	file:
+alloca	regex.c	65;"	d	file:
+allocated	regex.h	/^    long allocated;	\/* Size of space that `buffer' points to. *\/$/;"	m	struct:re_pattern_buffer
+anychar	regex.c	/^    anychar,	 \/* Matches any (more or less) one character.  *\/$/;"	e	enum:regexpcode	file:
+argc	env.h	/^    int argc;$/;"	m	struct:ENVIRON
+argc	node.h	/^	int argc;$/;"	m	union:node::__anon5
+args	parse.y	/^args 		: expr2$/;"	l
+argv	env.h	/^    VALUE *argv;$/;"	m	struct:ENVIRON
+array	missing/strftime.c	/^static char *array[] =$/;"	v	file:
+ary_entry	array.c	/^ary_entry(ary, offset)$/;"	f
+ary_join	array.c	/^ary_join(ary, sep)$/;"	f
+ary_new	array.c	/^ary_new()$/;"	f
+ary_new2	array.c	/^ary_new2(len)$/;"	f
+ary_new3	array.c	/^ary_new3(int n, ...)$/;"	f
+ary_new4	array.c	/^ary_new4(n, elts)$/;"	f
+ary_subseq	array.c	/^ary_subseq(ary, beg, len)$/;"	f	file:
+as_str	string.c	62;"	d	file:
+asign	eval.c	/^asign(lhs, val)$/;"	f	file:
+assoc	parse.y	/^assoc		: expr2 ASSOC expr2$/;"	l
+assoc_list	parse.y	/^assoc_list	: \/* none *\/$/;"	l
+assoc_new	array.c	/^assoc_new(elm1, elm2)$/;"	f
+assocs	parse.y	/^assocs		: assoc$/;"	l
+astore	array.c	/^astore(ary, idx, val)$/;"	f	file:
+at_dot	regex.c	/^    at_dot,	 \/* Succeeds if at point.  *\/$/;"	e	enum:regexpcode	file:
+bar	sample/evaldef.rb	/^  def bar$/;"	f	class:foo.bar
+bar	sample/evaldef.rb	/^class bar:foo$/;"	c	class:foo
+base	dln.c	/^    long base;$/;"	m	struct:undef	file:
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RArray	typeref:struct:RArray::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RBignum	typeref:struct:RBignum::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RClass	typeref:struct:RClass::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RData	typeref:struct:RData::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RDict	typeref:struct:RDict::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RFloat	typeref:struct:RFloat::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RMethod	typeref:struct:RMethod::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RObject	typeref:struct:RObject::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RRegexp	typeref:struct:RRegexp::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RString	typeref:struct:RString::RBasic
+basic	ruby.h	/^    struct RBasic basic;$/;"	m	struct:RStruct	typeref:struct:RStruct::RBasic
+basic_test	regex.c	/^typedef enum { extended_test, basic_test } test_type;$/;"	e	enum:__anon7	file:
+baz	sample/evaldef.rb	/^def baz$/;"	f	class:foo.foo
+bcalc	sample/biorhythm.rb	/^def bcalc(t, m, j)$/;"	f
+before_dot	regex.c	/^    before_dot,	 \/* Succeeds if before point.  *\/$/;"	e	enum:regexpcode	file:
+begbuf	regex.c	/^    begbuf,      \/* Succeeds if at beginning of buffer.  *\/$/;"	e	enum:regexpcode	file:
+begline	regex.c	/^    begline,  \/* Fail unless at beginning of line.  *\/$/;"	e	enum:regexpcode	file:
+big2dbl	bignum.c	/^big2dbl(x)$/;"	f
+big2int	bignum.c	/^big2int(x)$/;"	f
+big2str	bignum.c	/^big2str(x, base)$/;"	f
+big_2comp	bignum.c	/^big_2comp(x)			\/* get 2's complement *\/$/;"	f
+bigadd	bignum.c	/^bigadd(x, y, sign)$/;"	f	file:
+bigdivmod	bignum.c	/^bigdivmod(x, y, div, mod)$/;"	f	file:
+bignew	bignum.c	43;"	d	file:
+bignew_1	bignum.c	/^bignew_1(class, len, sign)$/;"	f	file:
+bignorm	bignum.c	/^bignorm(x)$/;"	f
+bindir	Makefile	/^bindir = $(exec_prefix)\/bin$/;"	m
+binprefix	Makefile	/^binprefix = $/;"	m
+bins	st.h	/^    st_table_entry **bins;$/;"	m	struct:st_table
+block	env.h	/^    struct BLOCK *block;$/;"	m	struct:ENVIRON	typeref:struct:ENVIRON::BLOCK
+body	eval.c	/^    NODE *body;$/;"	m	struct:BLOCK	file:
+boot_defclass	object.c	/^static VALUE boot_defclass(name, super)$/;"	f	file:
+buf	eval.c	/^    jmp_buf buf;$/;"	m	struct:tag	file:
+buffer	regex.h	/^    char *buffer;	\/* Space holding the compiled pattern commands.  *\/$/;"	m	struct:re_pattern_buffer
+builtin_types	error.c	/^static char *builtin_types[] = {$/;"	v	file:
+bytes_alloc	gc.c	/^static unsigned long bytes_alloc = 0, gc_threshold = 1000000;$/;"	v	file:
+c	dln.c	/^	char c;$/;"	m	union:undef::__anon1	file:
+c_tbl	ruby.h	/^    struct st_table *c_tbl;$/;"	m	struct:RClass	typeref:struct:RClass::st_table
+cache	methods.c	/^static struct hash_entry cache[CACHE_SIZE];$/;"	v	typeref:struct:hash_entry	file:
+cache_stat	file.c	/^cache_stat(path, st)$/;"	f
+call_args	parse.y	/^call_args	: \/* none *\/$/;"	l
+can_be_null	regex.h	/^    char can_be_null;   \/* Set to one by compiling fastmap$/;"	m	struct:re_pattern_buffer
+capa	ruby.h	/^    UINT len, capa;$/;"	m	struct:RArray
+car	sample/gctest.rb	/^def car(x)$/;"	f
+cases	parse.y	/^cases		: opt_else$/;"	l
+casetable	re.c	/^static char casetable[] = {$/;"	v	file:
+cbreak	sample/cbreak.rb	/^def cbreak ()$/;"	f
+cdr	sample/gctest.rb	/^def cdr(x)$/;"	f
+cfunc	node.h	/^	VALUE (*cfunc)();$/;"	m	union:node::__anon4
+charset	regex.c	/^    charset,     \/* Matches any one char belonging to specified set.$/;"	e	enum:regexpcode	file:
+charset_not	regex.c	/^    charset_not, \/* Same parameters as charset, but match any character$/;"	e	enum:regexpcode	file:
+check3rdbyte	file.c	/^check3rdbyte(file, mode)$/;"	f	file:
+class	methods.c	/^    struct RClass *class;	\/* receiver's class *\/$/;"	m	struct:hash_entry	typeref:struct:hash_entry::RClass	file:
+class_new	class.c	/^class_new(super)$/;"	f
+class_tbl	variable.c	20;"	d	file:
+closeddbm	dbm.c	/^closeddbm()$/;"	f	file:
+closeddir	dir.c	/^closeddir()$/;"	f	file:
+cmp	array.c	/^static ID cmp;$/;"	v	file:
+cmp	compar.c	/^static ID cmp;$/;"	v	file:
+cnt	node.h	/^	int cnt;$/;"	m	union:node::__anon6
+coerce	numeric.c	/^static ID coerce;$/;"	v	file:
+comma	parse.y	/^comma		: ',' 		{ yyerrok; }$/;"	l
+compare	st.h	/^    int (*compare)();$/;"	m	struct:st_table
+compexpr	parse.y	/^compexpr	: exprs opt_term$/;"	l
+cons	sample/gctest.rb	/^def cons(car, cdr)$/;"	f
+const	missing.c	15;"	d	file:
+const	missing/getopt.c	37;"	d	file:
+const	missing/getopt1.c	30;"	d	file:
+const	missing/strftime.c	76;"	d	file:
+const	regex.c	56;"	d	file:
+const	ruby.h	21;"	d
+const_bound	variable.c	/^const_bound(id)$/;"	f	file:
+cooked	sample/cbreak.rb	/^def cooked ()$/;"	f
+current_module	env.h	/^    struct RClass *current_module;$/;"	m	struct:ENVIRON	typeref:struct:ENVIRON::RClass
+cvtIn	missing/strtoul.c	/^static char cvtIn[] = {$/;"	v	file:
+data	ruby.h	/^    VALUE data[1];$/;"	m	struct:RData
+data	sample/list.rb	/^  def data$/;"	f	class:MyElem
+dbl2big	bignum.c	/^dbl2big(d)$/;"	f
+debug	ruby.c	/^int debug = 0;$/;"	v
+dfree	ruby.h	/^    void (*dfree)();$/;"	m	struct:RData
+dic_clear	dict.c	/^dic_clear(key, value)$/;"	f	file:
+dic_delete_if	dict.c	/^dic_delete_if(key, value)$/;"	f	file:
+dic_each	dict.c	/^dic_each(key, value)$/;"	f	file:
+dic_each_key	dict.c	/^dic_each_key(key, value)$/;"	f	file:
+dic_each_pair	dict.c	/^dic_each_pair(key, value)$/;"	f	file:
+dic_inspect	dict.c	/^dic_inspect(key, value, str)$/;"	f	file:
+dic_keys	dict.c	/^dic_keys(key, value, ary)$/;"	f	file:
+dic_search_value	dict.c	/^dic_search_value(key, value, arg)$/;"	f	file:
+dic_to_a	dict.c	/^dic_to_a(key, value, ary)$/;"	f	file:
+dic_values	dict.c	/^dic_values(key, value, ary)$/;"	f	file:
+digits	ruby.h	/^    USHORT *digits;$/;"	m	struct:RBignum
+dirent	dir.c	26;"	d	file:
+dln_errno	dln.c	/^int dln_errno;$/;"	v
+dln_find_1	dln.c	/^dln_find_1(fname, path, exe_flag)$/;"	f	file:
+dln_find_exe	dln.c	/^dln_find_exe(fname, path)$/;"	f
+dln_find_file	dln.c	/^dln_find_file(fname, path)$/;"	f
+dln_get_sym	dln.c	/^dln_get_sym(name)$/;"	f
+dln_init	dln.c	/^dln_init(file)$/;"	f
+dln_init	dln.c	/^dln_init(prog)$/;"	f
+dln_init_p	dln.c	/^static int dln_init_p = 0;$/;"	v	file:
+dln_library_path	dln.c	/^char *dln_library_path = DLN_DEFAULT_PATH;$/;"	v
+dln_load	dln.c	/^dln_load(file)$/;"	f
+dln_load_1	dln.c	/^static int dln_load_1(fd, disp, need_init)$/;"	f	file:
+dln_load_header	dln.c	/^dln_load_header(fd, hdrp, disp)$/;"	f	file:
+dln_load_lib	dln.c	/^dln_load_lib(file)$/;"	f
+dln_load_lib	dln.c	/^dln_load_lib(lib)$/;"	f
+dln_load_reloc	dln.c	/^dln_load_reloc(fd, hdrp, disp)$/;"	f	file:
+dln_load_sym	dln.c	/^dln_load_sym(fd, hdrp, disp)$/;"	f	file:
+dln_load_text_data	dln.c	/^dln_load_text_data(fd, hdrp, bss, disp)$/;"	f
+dln_perror	dln.c	/^dln_perror(str)$/;"	f
+dln_strerror	dln.c	/^dln_strerror()$/;"	f
+dln_sym_hash	dln.c	/^dln_sym_hash(hdrp, syms)$/;"	f	file:
+dln_undefined	dln.c	/^dln_undefined()$/;"	f	file:
+dmark	ruby.h	/^    void (*dmark)();$/;"	m	struct:RData
+do_check	ruby.c	/^static int do_check = FALSE, do_line = FALSE;$/;"	v	file:
+do_hash	st.c	36;"	d	file:
+do_line	ruby.c	/^static int do_check = FALSE, do_line = FALSE;$/;"	v	file:
+do_loop	ruby.c	/^static int do_loop = FALSE, do_print = FALSE;$/;"	v	file:
+do_print	ruby.c	/^static int do_loop = FALSE, do_print = FALSE;$/;"	v	file:
+do_split	ruby.c	/^static int do_split = FALSE;$/;"	v	file:
+dont_gc	gc.c	/^static int dont_gc;$/;"	v	file:
+dummy_failure_jump	regex.c	/^    dummy_failure_jump,  \/* Jump, and push a dummy failure point. This $/;"	e	enum:regexpcode	file:
+duplicate	regex.c	/^    duplicate,   \/* Match a duplicate of something remembered.$/;"	e	enum:regexpcode	file:
+eaccess	file.c	/^eaccess(path, mode)$/;"	f
+each	eval.c	/^static ID match, each;$/;"	v	file:
+each	sample/list.rb	/^  def each$/;"	f	class:MyList
+encodes	pack.c	/^encodes(str, s, len)$/;"	f	file:
+end	regex.h	/^    int end[RE_NREGS];$/;"	m	struct:re_registers
+end_hook	gc.c	/^static ID start_hook, end_hook;$/;"	v	file:
+end_mark	parse.y	/^end_mark	: CLASS		{ $$ = CLASS; }$/;"	l
+endbuf	regex.c	/^    endbuf,      \/* Succeeds if at end of buffer.  *\/$/;"	e	enum:regexpcode	file:
+endline	regex.c	/^    endline,  \/* Fail unless at end of line.  *\/$/;"	e	enum:regexpcode	file:
+ensure	parse.y	/^ensure		: \/* none *\/$/;"	l
+entry	node.h	/^	struct global_entry *entry;$/;"	m	union:node::__anon6	typeref:struct:node::__anon6::global_entry
+enum_all	enum.c	/^enum_all(i, ary)$/;"	f	file:
+enum_collect	enum.c	/^enum_collect(i, tmp)$/;"	f	file:
+enum_find	enum.c	/^enum_find(i, foundp)$/;"	f	file:
+enum_find_all	enum.c	/^enum_find_all(i, tmp)$/;"	f	file:
+enum_grep	enum.c	/^enum_grep(i, arg)$/;"	f	file:
+enum_grep2	enum.c	/^enum_grep2(i, pat)$/;"	f	file:
+enum_includes	enum.c	/^enum_includes(item, iv)$/;"	f	file:
+enum_index	enum.c	/^enum_index(item, iv)$/;"	f	file:
+enum_max	enum.c	/^enum_max(i, max)$/;"	f	file:
+enum_min	enum.c	/^enum_min(i, min)$/;"	f	file:
+enum_reverse	enum.c	/^enum_reverse(i, tmp)$/;"	f	file:
+env	eval.c	/^    struct ENVIRON *env;$/;"	m	struct:tag	typeref:struct:tag::ENVIRON	file:
+env	eval.c	/^    struct ENVIRON env;$/;"	m	struct:BLOCK	typeref:struct:BLOCK::ENVIRON	file:
+eq	array.c	/^static ID eq;$/;"	v	file:
+eq	dict.c	/^static ID hash, eq;$/;"	v	file:
+eq	object.c	/^static ID eq, match;$/;"	v	file:
+eq	range.c	/^static ID next, eq;$/;"	v	file:
+err_print	error.c	/^err_print(fmt, args)$/;"	f	file:
+err_sprintf	error.c	/^err_sprintf(buf, fmt, args)$/;"	f	file:
+errat	eval.c	/^VALUE errstr, errat;$/;"	v
+error	regex.c	/^error (string)$/;"	f
+error_print	eval.c	/^error_print()$/;"	f	file:
+errstr	eval.c	/^VALUE errstr, errat;$/;"	v
+exactn	regex.c	/^    exactn=1, \/* Followed by one byte giving n, then by n literal bytes.  *\/$/;"	e	enum:regexpcode	file:
+exchange	missing/getopt.c	/^exchange (argv)$/;"	f	file:
+exec_prefix	Makefile	/^exec_prefix = $(prefix)$/;"	m
+expr	parse.y	/^expr		: CLASS IDENTIFIER superclass$/;"	l
+expr2	parse.y	/^expr2		: IF expr2 then$/;"	l
+exprs	parse.y	/^exprs		: \/* none *\/$/;"	l
+extended_test	regex.c	/^typedef enum { extended_test, basic_test } test_type;$/;"	e	enum:__anon7	file:
+f	io.h	/^    FILE *f;			\/* stdio ptr for read\/write *\/$/;"	m	struct:__anon2
+f2	io.h	/^    FILE *f2;			\/* additional ptr for rw pipes *\/$/;"	m	struct:__anon2
+f_arg	parse.y	/^f_arg		: IDENTIFIER$/;"	l
+f_arglist	parse.y	/^f_arglist	: '(' f_args rparen$/;"	l
+f_args	parse.y	/^f_args		: \/* no arg *\/$/;"	l
+fail_to_fixnum	numeric.c	/^fail_to_fixnum(val)$/;"	f	file:
+fastmap	regex.h	/^    char *fastmap;	\/* Pointer to fastmap, if any, or zero if none.  *\/$/;"	m	struct:re_pattern_buffer
+fastmap_accurate	regex.h	/^    char fastmap_accurate;$/;"	m	struct:re_pattern_buffer
+fbuf	dln.c	/^static char fbuf[MAXPATHLEN];$/;"	v	file:
+fib	sample/fib.pl	/^   sub fib {$/;"	s
+fib	sample/fib.rb	/^def fib (n)$/;"	f
+fib	sample/tt.rb	/^  def fib(n)$/;"	f	class:Fib
+file	env.h	/^    char *file;$/;"	m	struct:ENVIRON
+file	io.c	/^static VALUE filename = Qnil, file = Qnil;$/;"	v	file:
+file_open	file.c	/^file_open(fname, mode)$/;"	f
+filename	io.c	/^static VALUE filename = Qnil, file = Qnil;$/;"	v	file:
+finalize_jump	regex.c	/^    finalize_jump,	 \/* Throw away latest failure point and then jump to $/;"	e	enum:regexpcode	file:
+find_file	eval.c	/^find_file(file)$/;"	f	file:
+first	random.c	/^static int first = 1;$/;"	v	file:
+first_nonopt	missing/getopt.c	/^static int first_nonopt;$/;"	v	file:
+fix2str	numeric.c	/^fix2str(x, base)$/;"	f
+fl_current	gc.c	/^static unsigned long fl_current = FL_MARK;$/;"	v	file:
+fl_old	gc.c	/^static unsigned long fl_old = 0L;$/;"	v	file:
+flag	missing/getopt.h	/^  int *flag;$/;"	m	struct:option
+flags	env.h	/^    int flags;$/;"	m	struct:ENVIRON
+flags	ruby.h	/^    UINT flags;$/;"	m	struct:RBasic
+float_new	numeric.c	/^float_new(flt)$/;"	f
+fmt_setup	sprintf.c	/^fmt_setup(buf, c, flags, width, prec)$/;"	f	file:
+fname	parse.y	/^fname		: fname0$/;"	l
+fname0	parse.y	/^fname0		: IDENTIFIER$/;"	l
+foo	sample/evaldef.rb	/^  def foo$/;"	f	class:foo
+foo	sample/evaldef.rb	/^class foo$/;"	c
+found	enum.c	/^    int found;$/;"	m	struct:i_v_pair	file:
+free_dbm	dbm.c	/^free_dbm(dbmp)$/;"	f	file:
+free_dir	dir.c	/^free_dir(dir)$/;"	f	file:
+free_match	re.c	/^free_match(data)$/;"	f	file:
+freemethod	gc.c	/^freemethod(key, body)$/;"	f	file:
+gc	gc.c	/^gc()$/;"	f
+gc_list	ruby.h	/^extern struct gc_list {$/;"	s
+gc_threshold	gc.c	/^static unsigned long bytes_alloc = 0, gc_threshold = 1000000;$/;"	v	file:
+gclist	eval.c	/^    struct gc_list *gclist;$/;"	m	struct:tag	typeref:struct:tag::gc_list	file:
+getPosition	sample/biorhythm.rb	/^def getPosition(z)$/;"	f
+get_hook	variable.c	/^    VALUE (*get_hook)();$/;"	m	struct:global_entry	file:
+get_pid	process.c	/^get_pid()$/;"	f	file:
+get_ppid	process.c	/^get_ppid()$/;"	f	file:
+getopt	missing/getopt.c	/^getopt (argc, argv, optstring)$/;"	f
+getopt_long	missing/getopt1.c	/^getopt_long (argc, argv, options, long_options, opt_index)$/;"	f
+getopt_long_only	missing/getopt1.c	/^getopt_long_only (argc, argv, options, long_options, opt_index)$/;"	f
+getopts	sample/getopts.rb	/^def getopts(single_opts, *opts)$/;"	f
+gets_lineno	io.c	/^static int gets_lineno;$/;"	v	file:
+global_entry	variable.c	/^struct global_entry {$/;"	s	file:
+global_tbl	variable.c	19;"	d	file:
+gmt	time.c	/^    int gmt;$/;"	m	struct:time_object	file:
+group_member	file.c	/^group_member(gid)$/;"	f	file:
+grow_factor	st.h	/^    double grow_factor;$/;"	m	struct:st_table
+has_arg	missing/getopt.h	/^  int has_arg;$/;"	m	struct:option
+hash	dict.c	/^static ID hash, eq;$/;"	v	file:
+hash	st.h	/^    int (*hash)();$/;"	m	struct:st_table
+hash_entry	methods.c	/^struct hash_entry {		\/* method hash table. *\/$/;"	s	file:
+hexmap	bignum.c	/^static char hexmap[] = "0123456789abcdef";$/;"	v	file:
+htonl	pack.c	26;"	d	file:
+htonl	pack.c	35;"	d	file:
+htons	pack.c	25;"	d	file:
+htons	pack.c	34;"	d	file:
+htovl	pack.c	28;"	d	file:
+htovl	pack.c	37;"	d	file:
+htovs	pack.c	27;"	d	file:
+htovs	pack.c	36;"	d	file:
+i	enum.c	/^    int i;$/;"	m	struct:i_v_pair	file:
+i_v_pair	enum.c	/^struct i_v_pair {$/;"	s	file:
+id	node.h	/^	ID id;$/;"	m	union:node::__anon4
+id	node.h	/^	ID id;$/;"	m	union:node::__anon5
+id	node.h	/^	ID id;$/;"	m	union:node::__anon6
+id	ruby.h	/^    ID id;$/;"	m	struct:RMethod
+id	variable.c	/^    ID id;$/;"	m	struct:global_entry	file:
+id_cmp	enum.c	/^static ID id_each, id_match, id_equal, id_cmp;$/;"	v	file:
+id_each	enum.c	/^static ID id_each, id_match, id_equal, id_cmp;$/;"	v	file:
+id_equal	enum.c	/^static ID id_each, id_match, id_equal, id_cmp;$/;"	v	file:
+id_match	enum.c	/^static ID id_each, id_match, id_equal, id_cmp;$/;"	v	file:
+id_write	io.c	/^ID id_write;$/;"	v
+if_tail	parse.y	/^if_tail		: opt_else$/;"	l
+ignorecase	re.c	/^VALUE ignorecase;$/;"	v
+in_eval	env.h	/^    int in_eval;$/;"	m	struct:ENVIRON
+in_eval	eval.c	/^int in_eval = 0;$/;"	v
+inc_list	parse.y	/^inc_list	: IDENTIFIER$/;"	l
+include_class_new	class.c	/^include_class_new(module, super)$/;"	f	file:
+infodir	Makefile	/^infodir = $(prefix)\/info$/;"	m
+init	sample/list.rb	/^  def init(item)$/;"	f	class:MyElem
+init	sample/list.rb	/^  def init(x, y)$/;"	f	class:Point
+init	sample/list2.rb	/^  def init(x, y)$/;"	f	class:Point
+init	sample/tt.rb	/^  def init$/;"	f	class:Fib
+init_p	io.c	/^static int init_p = 0, next_p = 0;$/;"	v	file:
+init_syntax_once	regex.c	/^init_syntax_once ()$/;"	f	file:
+inline	missing/strftime.c	95;"	d	file:
+inplace	ruby.c	/^char *inplace = Qnil;$/;"	v
+insert_jump	regex.c	/^insert_jump (op, from, to, current_end)$/;"	f	file:
+insert_jump_n	regex.c	/^insert_jump_n (op, from, to, current_end, n)$/;"	f	file:
+insert_op_2	regex.c	/^insert_op_2 (op, there, current_end, num_1, num_2)$/;"	f	file:
+instance_tbl	variable.c	21;"	d	file:
+int2big	bignum.c	/^int2big(n)$/;"	f
+int2inum	bignum.c	/^int2inum(n)$/;"	f
+ints	sample/gctest.rb	/^def ints(low, up)$/;"	f
+io_ctl	io.c	/^io_ctl(obj, req, arg, io_p)$/;"	f
+io_free_OpenFile	io.c	/^io_free_OpenFile(fptr)$/;"	f
+io_gets	io.c	/^io_gets(str)$/;"	f	file:
+io_mode_flags	io.c	/^io_mode_flags(mode)$/;"	f
+is_active	regex.c	/^  unsigned is_active : 1;$/;"	m	struct:register_info	file:
+is_in_list	regex.c	/^is_in_list (unsigned short c, const unsigned char *b)$/;"	f	file:
+isgraph	regex.c	156;"	d	file:
+isleap	missing/strftime.c	/^isleap(year)$/;"	f	file:
+ismbchar	regex.h	172;"	d
+ismbchar	regex.h	173;"	d
+iso8601wknum	missing/strftime.c	/^iso8601wknum(timeptr)$/;"	f	file:
+iterator	env.h	/^    int iterator;$/;"	m	struct:ENVIRON
+iterator_p	eval.c	/^iterator_p()$/;"	f
+iv_tbl	ruby.h	/^    struct st_table *iv_tbl;$/;"	m	struct:RBasic	typeref:struct:RBasic::st_table
+jump	regex.c	/^    jump,     \/* Followed by two bytes giving relative address to jump to.  *\/$/;"	e	enum:regexpcode	file:
+jump_n	regex.c	/^    jump_n,	 \/* Similar to jump, but jump n times only; also the relative$/;"	e	enum:regexpcode	file:
+key	ruby.h	/^	ID key;$/;"	m	struct:RStruct::kv_pair
+key	st.h	/^    char *key;$/;"	m	struct:st_table_entry
+kv_pair	ruby.h	/^    struct kv_pair {$/;"	s	struct:RStruct
+l	dln.c	/^	long l;$/;"	m	union:undef::__anon1	file:
+last	string.c	/^    int last, max;$/;"	m	struct:tr	file:
+last_class	env.h	/^    struct RClass *last_class;$/;"	m	struct:ENVIRON	typeref:struct:ENVIRON::RClass
+last_func	env.h	/^    ID last_func;$/;"	m	struct:ENVIRON
+last_func	eval.c	/^static ID last_func;$/;"	v	file:
+last_match_data	re.c	/^VALUE last_match_data;$/;"	v
+last_nonopt	missing/getopt.c	/^static int last_nonopt;$/;"	v	file:
+last_val	eval.c	/^static VALUE last_val;$/;"	v	file:
+lastpath	file.c	/^static char lastpath[MAXPATHLEN];$/;"	v	file:
+laststat	file.c	/^static struct stat laststat;$/;"	v	typeref:struct:stat	file:
+lbrace	parse.y	/^lbrace		: '{'		{ yyerrok; }$/;"	l
+leapyear	sample/biorhythm.rb	/^def leapyear(y)$/;"	f
+len	re.c	/^    UINT len;$/;"	m	struct:match	file:
+len	ruby.h	/^    UINT len, capa;$/;"	m	struct:RArray
+len	ruby.h	/^    UINT len;$/;"	m	struct:RBignum
+len	ruby.h	/^    UINT len;$/;"	m	struct:RRegexp
+len	ruby.h	/^    UINT len;$/;"	m	struct:RString
+len	ruby.h	/^    UINT len;$/;"	m	struct:RStruct
+level	eval.c	/^    int level;$/;"	m	struct:BLOCK	file:
+level	eval.c	/^    int level;$/;"	m	struct:tag	file:
+lhs	parse.y	/^lhs		: variable$/;"	l
+lib_offset	dln.c	/^    int lib_offset;$/;"	m	struct:symdef	file:
+line	env.h	/^    int line;$/;"	m	struct:ENVIRON
+line	node.h	/^    unsigned int line;$/;"	m	struct:node
+lineno	io.c	/^static VALUE lineno;$/;"	v	file:
+lineno	io.h	/^    int lineno;			\/* number of lines read *\/$/;"	m	struct:__anon2
+link_undef	dln.c	/^link_undef(name, base, reloc)$/;"	f	file:
+literal	parse.y	/^literal		: numeric$/;"	l
+literal_list	gc.c	/^static struct RBasic *literal_list = Qnil;$/;"	v	typeref:struct:RBasic	file:
+literalize	gc.c	/^literalize(obj)$/;"	f
+load_stdin	ruby.c	/^load_stdin()$/;"	f	file:
+local_tbl	env.h	/^    ID *local_tbl;$/;"	m	struct:ENVIRON
+local_vars	env.h	/^    VALUE *local_vars;$/;"	m	struct:ENVIRON
+long_options	ruby.c	/^static struct option long_options[] =$/;"	v	typeref:struct:option	file:
+m_tbl	ruby.h	/^    struct st_table *m_tbl;$/;"	m	struct:RClass	typeref:struct:RClass::st_table
+main	dln.c	/^main(argc, argv)$/;"	f
+main	eval.c	/^main(argc, argv)$/;"	f
+main	missing/getopt.c	/^main (argc, argv)$/;"	f
+main	missing/getopt1.c	/^main (argc, argv)$/;"	f
+main	missing/strftime.c	/^main(argc, argv)$/;"	f
+main	regex.c	/^main ()$/;"	f
+main	regex.c	/^main (argc, argv)$/;"	f
+make_regexp	re.c	/^make_regexp(s, len)$/;"	f
+mark	gc.c	/^mark(obj)$/;"	f
+mark_dicentry	gc.c	/^mark_dicentry(key, value)$/;"	f	file:
+mark_dict	gc.c	/^mark_dict(tbl)$/;"	f	file:
+mark_entry	gc.c	/^mark_entry(key, value)$/;"	f	file:
+mark_global_entry	variable.c	/^static mark_global_entry(key, entry)$/;"	f	file:
+mark_global_tbl	variable.c	/^mark_global_tbl()$/;"	f
+mark_tbl	gc.c	/^mark_tbl(tbl)$/;"	f	file:
+mark_trap_list	process.c	/^mark_trap_list()$/;"	f
+match	eval.c	/^static ID match, each;$/;"	v	file:
+match	object.c	/^static ID eq, match;$/;"	v	file:
+match	re.c	/^struct match {$/;"	s	file:
+matched_something	regex.c	/^  unsigned matched_something : 1;$/;"	m	struct:register_info	file:
+max	missing/strftime.c	/^max(a, b)$/;"	f	file:
+max	st.c	14;"	d	file:
+max	string.c	/^    int last, max;$/;"	m	struct:tr	file:
+max_density	st.h	/^    int max_density;$/;"	m	struct:st_table
+maybe_finalize_jump	regex.c	/^    maybe_finalize_jump, \/* Like jump but finalize if safe to do so.$/;"	e	enum:regexpcode	file:
+memcmp_translate	regex.c	/^memcmp_translate (s1, s2, len, translate)$/;"	f	file:
+memmove	missing/memmove.c	/^memmove (dst, src, n)$/;"	f
+method	methods.c	/^    struct RMethod *method;$/;"	m	struct:hash_entry	typeref:struct:hash_entry::RMethod	file:
+mid	methods.c	/^    ID mid;			\/* method's id *\/$/;"	m	struct:hash_entry	file:
+min	missing/strftime.c	/^min(a, b)$/;"	f	file:
+min	re.c	68;"	d	file:
+min	string.c	376;"	d	file:
+mkdir	missing/mkdir.c	/^mkdir (dpath, dmode)$/;"	f
+mlhs	parse.y	/^mlhs		: mlhs_head$/;"	l
+mlhs_head	parse.y	/^mlhs_head	: variable comma$/;"	l
+mlhs_tail	parse.y	/^mlhs_tail	: lhs$/;"	l
+mode	io.h	/^    int mode;			\/* mode flags *\/$/;"	m	struct:__anon2
+mode	variable.c	/^    enum { GLOBAL_VAL, GLOBAL_VAR, GLOBAL_UNDEF } mode;$/;"	m	struct:global_entry	typeref:enum:global_entry::__anon8	file:
+module_new	class.c	/^module_new()$/;"	f
+msg	missing/strerror.c	/^static char msg[50];$/;"	v	file:
+mth_scope	ruby.h	/^    enum mth_scope { MTH_METHOD, MTH_FUNC, MTH_UNDEF } scope;$/;"	g	struct:RMethod
+my_bcopy	missing/getopt.c	/^my_bcopy (from, to, size)$/;"	f	file:
+my_bcopy	missing/getopt.c	134;"	d	file:
+my_index	missing/getopt.c	/^my_index (string, chr)$/;"	f	file:
+my_index	missing/getopt.c	133;"	d	file:
+n	ruby.h	/^    int n;$/;"	m	struct:gc_list
+name	dln.c	/^    char *name;$/;"	m	struct:reloc_arg	file:
+name	dln.c	/^    char *name;$/;"	m	struct:undef	file:
+name	missing/getopt.h	/^  const char *name;$/;"	m	struct:option
+name	ruby.h	/^    char *name;$/;"	m	struct:RStruct
+nd_1st	node.h	110;"	d
+nd_2nd	node.h	111;"	d
+nd_argc	node.h	145;"	d
+nd_args	node.h	136;"	d
+nd_beg	node.h	152;"	d
+nd_body	node.h	103;"	d
+nd_break	node.h	105;"	d
+nd_cflag	node.h	117;"	d
+nd_cfnc	node.h	144;"	d
+nd_cname	node.h	147;"	d
+nd_cnt	node.h	120;"	d
+nd_cond	node.h	102;"	d
+nd_cval	node.h	118;"	d
+nd_defn	node.h	139;"	d
+nd_else	node.h	104;"	d
+nd_end	node.h	153;"	d
+nd_ensr	node.h	108;"	d
+nd_entry	node.h	115;"	d
+nd_frml	node.h	131;"	d
+nd_head	node.h	98;"	d
+nd_ibdy	node.h	124;"	d
+nd_iter	node.h	125;"	d
+nd_last	node.h	99;"	d
+nd_lit	node.h	129;"	d
+nd_mid	node.h	135;"	d
+nd_modl	node.h	150;"	d
+nd_new	node.h	141;"	d
+nd_next	node.h	100;"	d
+nd_old	node.h	142;"	d
+nd_recv	node.h	134;"	d
+nd_resq	node.h	107;"	d
+nd_rest	node.h	132;"	d
+nd_rval	node.h	156;"	d
+nd_scope	node.h	138;"	d
+nd_state	node.h	154;"	d
+nd_stts	node.h	113;"	d
+nd_super	node.h	148;"	d
+nd_tbl	node.h	121;"	d
+nd_value	node.h	127;"	d
+nd_var	node.h	123;"	d
+nd_vid	node.h	116;"	d
+nerrs	error.c	/^int nerrs;$/;"	v
+new	sample/list.rb	/^  def MyElem.new(item)$/;"	F	class:MyElem
+new	sample/list.rb	/^  def Point.new(x, y)$/;"	F	class:Point
+new	sample/list2.rb	/^  def Point.new(x, y)$/;"	F	class:Point
+new_idhash	variable.c	/^st_table *new_idhash()$/;"	f
+newobj	gc.c	/^newobj(size)$/;"	f
+next	range.c	/^static ID next, eq;$/;"	v	file:
+next	ruby.h	/^    struct RBasic *next;$/;"	m	struct:RBasic	typeref:struct:RBasic::RBasic
+next	ruby.h	/^    struct gc_list *next;$/;"	m	struct:gc_list	typeref:struct:gc_list::gc_list
+next	sample/list.rb	/^  def next$/;"	f	class:MyElem
+next	st.h	/^    st_table_entry *next;$/;"	m	struct:st_table_entry
+next=	sample/list.rb	/^  def next=(new)$/;"	f	class:MyElem
+next_argv	io.c	/^next_argv()$/;"	f	file:
+next_p	io.c	/^static int init_p = 0, next_p = 0;$/;"	v	file:
+nextchar	missing/getopt.c	/^static char *nextchar;$/;"	v	file:
+nil	st.c	15;"	d	file:
+nl	parse.y	/^nl		: '\\n'		{ yyerrok; }$/;"	l
+no_argument	missing/getopt.h	/^  no_argument,$/;"	e	enum:_argtype
+node	node.h	/^	struct node *node;$/;"	m	union:node::__anon4	typeref:struct:node::__anon4::node
+node	node.h	/^	struct node *node;$/;"	m	union:node::__anon5	typeref:struct:node::__anon5::node
+node	node.h	/^	struct node *node;$/;"	m	union:node::__anon6	typeref:struct:node::__anon6::node
+node	node.h	/^typedef struct node {$/;"	s
+node	ruby.h	/^    struct node *node;$/;"	m	struct:RMethod	typeref:struct:RMethod::node
+node_type	node.h	/^enum node_type {$/;"	g
+notsyntaxspec	regex.c	/^    notsyntaxspec \/* Matches any character whose syntax differs from$/;"	e	enum:regexpcode	file:
+notwordbound	regex.c	/^    notwordbound,\/* Succeeds if not at a word boundary.  *\/$/;"	e	enum:regexpcode	file:
+notwordchar	regex.c	/^    notwordchar, \/* Matches any char that is not a word-constituent.  *\/$/;"	e	enum:regexpcode	file:
+nth_match	re.c	/^nth_match(nth)$/;"	f	file:
+ntohl	pack.c	24;"	d	file:
+ntohl	pack.c	33;"	d	file:
+ntohs	pack.c	23;"	d	file:
+ntohs	pack.c	32;"	d	file:
+num2fix	numeric.c	/^num2fix(val)$/;"	f
+num2int	numeric.c	/^num2int(val)$/;"	f
+num_bins	st.h	/^    int num_bins;$/;"	m	struct:st_table
+num_coerce_bin	numeric.c	/^num_coerce_bin(this, other)$/;"	f	file:
+num_entries	st.h	/^    int num_entries;$/;"	m	struct:st_table
+numeric	parse.y	/^numeric		: INTEGER$/;"	l
+obj_alloc	object.c	/^obj_alloc(class)$/;"	f
+obj_as_string	string.c	/^obj_as_string(obj)$/;"	f
+obj_free	gc.c	/^obj_free(obj)$/;"	f
+obj_inspect	object.c	/^obj_inspect(id, value, str)$/;"	f	file:
+obj_is_kind_of	object.c	/^obj_is_kind_of(obj, c)$/;"	f
+obj_is_member_of	object.c	/^obj_is_member_of(obj, c)$/;"	f
+obj_print	io.c	/^obj_print(obj)$/;"	f	file:
+obj_responds_to	eval.c	/^obj_responds_to(obj, msg)$/;"	f
+object_list	gc.c	/^static struct RBasic *object_list = Qnil;$/;"	v	typeref:struct:RBasic	file:
+obscure_syntax	regex.c	/^long obscure_syntax = DEFAULT_MBCTYPE;$/;"	v
+on_failure_jump	regex.c	/^    on_failure_jump,	 \/* Followed by two bytes giving relative address of $/;"	e	enum:regexpcode	file:
+op	parse.y	/^op		: COLON2	{ $$ = COLON2; }$/;"	l
+open_inet	socket.c	/^open_inet(class, h, serv, server)$/;"	f	file:
+open_unix	socket.c	/^open_unix(class, path, server)$/;"	f	file:
+opt_args	parse.y	/^opt_args	: \/* none *\/$/;"	l
+opt_else	parse.y	/^opt_else	: \/* none *\/$/;"	l
+opt_term	parse.y	/^opt_term	: \/* none *\/$/;"	l
+opt_using	parse.y	/^opt_using	: term$/;"	l
+optarg	missing/getopt.c	/^char *optarg = 0;$/;"	v
+opterr	missing/getopt.c	/^int opterr = 1;$/;"	v
+optind	missing/getopt.c	/^int optind = 0;$/;"	v
+option	missing/getopt.h	/^struct option$/;"	s
+optional_argument	missing/getopt.h	/^  optional_argument$/;"	e	enum:_argtype
+ordering	missing/getopt.c	/^} ordering;$/;"	v	typeref:enum:__anon3	file:
+orig	ruby.h	/^    struct RString *orig;$/;"	m	struct:RString	typeref:struct:RString::RString
+origin	methods.c	/^    struct RClass *origin;	\/* where method defined  *\/$/;"	m	struct:hash_entry	typeref:struct:hash_entry::RClass	file:
+origin	ruby.h	/^    struct RClass *origin;$/;"	m	struct:RMethod	typeref:struct:RMethod::RClass
+p	string.c	/^    char *p, *pend;$/;"	m	struct:tr	file:
+parseArgs	sample/parsearg.rb	/^def parseArgs(argc, nopt, single_opts, *opts)$/;"	f
+pat	re.h	/^        struct re_pattern_buffer pat;$/;"	m	struct:Regexp	typeref:struct:Regexp::re_pattern_buffer
+path	io.h	/^    char *path;			\/* pathname for file *\/$/;"	m	struct:__anon2
+pend	string.c	/^    char *p, *pend;$/;"	m	struct:tr	file:
+pid	io.h	/^    int pid;			\/* child's pid (for pipes) *\/$/;"	m	struct:__anon2
+pid_tbl	process.c	/^static st_table *pid_tbl;$/;"	v	file:
+pipe_open	io.c	/^pipe_open(pname, mode)$/;"	f	file:
+pr_str	string.c	/^static ID pr_str = Qnil;$/;"	v	file:
+prefix	Makefile	/^prefix = \/usr\/local$/;"	m
+prep_stdio	io.c	/^prep_stdio(f, mode)$/;"	f	file:
+prev	env.h	/^    struct ENVIRON *prev;$/;"	m	struct:ENVIRON	typeref:struct:ENVIRON::ENVIRON
+primary	parse.y	/^primary		: var_ref$/;"	l
+printHeader	sample/biorhythm.rb	/^def printHeader(tg, mg, jg, gtag, tage)$/;"	f
+printUsage	sample/io.rb	/^def printUsage()$/;"	f
+printUsageAndExit	sample/parsearg.rb	/^def printUsageAndExit()$/;"	f
+print_buf	regex.c	/^print_buf (bufp)$/;"	f
+print_int_list	sample/gctest.rb	/^def print_int_list(x)$/;"	f
+printchar	regex.c	/^printchar (c)$/;"	f
+println	sample/t2.rb	/^def println(*args)$/;"	f
+println	sample/tt.rb	/^  def println(*args)$/;"	f	class:Print
+println	sample/tt.rb	/^  def println(*args)$/;"	f	class:Print2
+println	sample/tt.rb	/^  def println(*args)$/;"	f	class:Print3
+println2	sample/tt.rb	/^  def println2(*args)$/;"	f	class:Print
+proc_options	ruby.c	/^proc_options(argcp, argvp)$/;"	f	file:
+program	parse.y	/^program		:  {$/;"	l
+prot_tag	eval.c	/^} *prot_tag;$/;"	v	typeref:struct:tag	file:
+ptr	re.c	/^    char *ptr;$/;"	m	struct:match	file:
+ptr	ruby.h	/^    VALUE *ptr;$/;"	m	struct:RArray
+ptr	ruby.h	/^    char *ptr;$/;"	m	struct:RString
+ptr	ruby.h	/^    struct Regexp *ptr;$/;"	m	struct:RRegexp	typeref:struct:RRegexp::Regexp
+range	missing/strftime.c	100;"	d	file:
+range_beg_end	array.c	/^range_beg_end(range, begp, lenp, len)$/;"	f	file:
+range_new	range.c	/^range_new(class, start, end)$/;"	f
+rb_add_method	class.c	/^rb_add_method(class, mid, node, scope)$/;"	f
+rb_alias	methods.c	/^rb_alias(class, name, def)$/;"	f
+rb_apply	eval.c	/^rb_apply(recv, mid, args)$/;"	f
+rb_break	eval.c	/^rb_break()$/;"	f
+rb_call	eval.c	/^rb_call(class, recv, mid, argc, argv, scope)$/;"	f	file:
+rb_call_inits	inits.c	/^rb_call_inits()$/;"	f
+rb_check_str	io.c	/^rb_check_str(val, id)$/;"	f
+rb_class_tbl	variable.c	/^st_table *rb_class_tbl;$/;"	v
+rb_clear_cache	methods.c	/^rb_clear_cache(body)$/;"	f
+rb_clear_cache2	methods.c	/^rb_clear_cache2(class)$/;"	f
+rb_cmp	dict.c	/^rb_cmp(a, b)$/;"	f	file:
+rb_const_get	variable.c	/^rb_const_get(id)$/;"	f
+rb_const_set	variable.c	/^rb_const_set(id, val)$/;"	f
+rb_const_set_1	variable.c	/^rb_const_set_1(class, id, val)$/;"	f	file:
+rb_define_alias	class.c	/^rb_define_alias(class, name1, name2)$/;"	f
+rb_define_attr	class.c	/^rb_define_attr(class, name, pub)$/;"	f
+rb_define_class	class.c	/^rb_define_class(name, super)$/;"	f
+rb_define_class_id	class.c	/^rb_define_class_id(id, super)$/;"	f
+rb_define_const	variable.c	/^rb_define_const(class, name, val)$/;"	f
+rb_define_func	class.c	/^rb_define_func(class, name, func, argc)$/;"	f
+rb_define_method	class.c	/^rb_define_method(class, name, func, argc)$/;"	f
+rb_define_mfunc	class.c	/^rb_define_mfunc(class, name, func, argc)$/;"	f
+rb_define_module	class.c	/^rb_define_module(name)$/;"	f
+rb_define_module_id	class.c	/^rb_define_module_id(id)$/;"	f
+rb_define_single_attr	class.c	/^rb_define_single_attr(obj, name, pub)$/;"	f
+rb_define_single_method	class.c	/^rb_define_single_method(obj, name, func, argc)$/;"	f
+rb_define_varhook	variable.c	/^rb_define_varhook(name, get_hook, set_hook)$/;"	f
+rb_define_variable	variable.c	/^rb_define_variable(name, var, get_hook, set_hook)$/;"	f
+rb_defout	io.c	/^VALUE rb_stdin, rb_stdout, rb_stderr, rb_defout;$/;"	v
+rb_dln_argv0	ruby.c	/^char *rb_dln_argv0;$/;"	v
+rb_each	enum.c	/^rb_each(obj)$/;"	f
+rb_ensure	eval.c	/^rb_ensure(b_proc, data1, e_proc, data2)$/;"	f
+rb_eval	eval.c	/^rb_eval(node)$/;"	f	file:
+rb_exit	eval.c	/^rb_exit(status)$/;"	f
+rb_fail	eval.c	/^rb_fail(mesg)$/;"	f
+rb_fdopen	io.c	/^rb_fdopen(fd, mode)$/;"	f
+rb_funcall	eval.c	/^rb_funcall(VALUE recv,ID mid,int n,...)$/;"	f
+rb_get_method_body	methods.c	/^rb_get_method_body(class, id, envset, scope)$/;"	f
+rb_global_entry	variable.c	/^rb_global_entry(id)$/;"	f
+rb_global_tbl	variable.c	/^st_table *rb_global_tbl;$/;"	v
+rb_global_variable	gc.c	/^rb_global_variable(var)$/;"	f
+rb_gvar_get	variable.c	/^rb_gvar_get(entry)$/;"	f
+rb_gvar_set	variable.c	/^rb_gvar_set(entry, val)$/;"	f
+rb_gvar_set2	variable.c	/^rb_gvar_set2(name, val)$/;"	f
+rb_hash	dict.c	/^rb_hash(a, mod)$/;"	f	file:
+rb_id2class	variable.c	/^rb_id2class(id)$/;"	f
+rb_include_module	class.c	/^rb_include_module(class, module)$/;"	f
+rb_iterate	eval.c	/^rb_iterate(it_proc, data1, bl_proc, data2)$/;"	f
+rb_iv_get	variable.c	/^rb_iv_get(obj, name)$/;"	f
+rb_iv_set	variable.c	/^rb_iv_set(obj, name, val)$/;"	f
+rb_ivar_get	variable.c	/^rb_ivar_get(id)$/;"	f
+rb_ivar_get_1	variable.c	/^rb_ivar_get_1(obj, id)$/;"	f
+rb_ivar_set	variable.c	/^rb_ivar_set(id, val)$/;"	f
+rb_ivar_set_1	variable.c	/^rb_ivar_set_1(obj, id, val)$/;"	f
+rb_lastline	io.c	/^VALUE rb_lastline;$/;"	v
+rb_load_file	ruby.c	/^rb_load_file(fname)$/;"	f
+rb_load_path	eval.c	/^VALUE rb_load_path;$/;"	v
+rb_loadfiles	eval.c	/^static VALUE rb_loadfiles;$/;"	v	file:
+rb_main	ruby.c	/^rb_main(argc, argv)		\/* real main() is in eval.c *\/$/;"	f
+rb_mvar_get	variable.c	/^rb_mvar_get(id)$/;"	f
+rb_name_class	variable.c	/^rb_name_class(class, id)$/;"	f
+rb_proc_exec	process.c	/^rb_proc_exec(str)$/;"	f
+rb_readonly_hook	variable.c	/^rb_readonly_hook(val, id)$/;"	f
+rb_redo	eval.c	/^rb_redo()$/;"	f
+rb_resque	eval.c	/^rb_resque(b_proc, data1, r_proc, data2)$/;"	f
+rb_retry	eval.c	/^rb_retry()$/;"	f
+rb_scan_args	class.c	/^rb_scan_args(VALUE args, char *fmt, ...)$/;"	f
+rb_single_class	class.c	/^rb_single_class(obj)$/;"	f
+rb_stderr	io.c	/^VALUE rb_stdin, rb_stdout, rb_stderr, rb_defout;$/;"	v
+rb_stdin	io.c	/^VALUE rb_stdin, rb_stdout, rb_stderr, rb_defout;$/;"	v
+rb_stdout	io.c	/^VALUE rb_stdin, rb_stdout, rb_stderr, rb_defout;$/;"	v
+rb_sys_fail	error.c	/^rb_sys_fail(mesg)$/;"	f
+rb_syswait	process.c	/^rb_syswait(pid)$/;"	f
+rb_trap_eval	eval.c	/^rb_trap_eval(cmd)$/;"	f
+rb_trap_exec	process.c	/^rb_trap_exec()$/;"	f
+rb_trap_exit	process.c	/^rb_trap_exit()$/;"	f
+rb_undef_method	class.c	/^rb_undef_method(class, name)$/;"	f
+rb_undefined	eval.c	/^rb_undefined(obj, id)$/;"	f	file:
+rb_version	version.c	/^static VALUE rb_version;$/;"	v	file:
+rb_waitpid	process.c	/^rb_waitpid(pid, flags)$/;"	f
+rb_yield	eval.c	/^rb_yield(val)$/;"	f
+rbrace	parse.y	/^rbrace		: '}'		{ yyerrok; }$/;"	l
+rbracket	parse.y	/^rbracket	: ']'		{ yyerrok; }$/;"	l
+rcsid	missing/strstr.c	/^static char rcsid[] = "$Header: \/work\/cvsroot\/ruby\/missing\/strstr.c,v 1.1 1994\/06\/27 15:49:21 matz Exp $ SPRITE (Berkeley)";$/;"	v	file:
+rcsid	st.c	/^static char *rcsid = "$Header: \/work\/cvsroot\/ruby\/st.c,v 1.2 1994\/06\/27 15:48:41 matz Exp $";$/;"	v	file:
+re_comp	regex.c	/^re_comp (s)$/;"	f
+re_comp_buf	regex.c	/^static struct re_pattern_buffer re_comp_buf;$/;"	v	typeref:struct:re_pattern_buffer	file:
+re_compile_fastmap	regex.c	/^re_compile_fastmap (bufp)$/;"	f
+re_compile_pattern	regex.c	/^re_compile_pattern (pattern, size, bufp)$/;"	f
+re_exec	regex.c	/^re_exec (s)$/;"	f
+re_last_match	re.c	/^re_last_match(id)$/;"	f
+re_match	regex.c	/^re_match (pbufp, string, size, pos, regs)$/;"	f
+re_match_2	regex.c	/^re_match_2 (pbufp, string1_arg, size1, string2_arg, size2, pos, regs, mstop)$/;"	f
+re_max_failures	regex.c	/^int re_max_failures = 2000;$/;"	v
+re_pattern_buffer	regex.h	/^struct re_pattern_buffer$/;"	s
+re_regcomp	re.c	/^re_regcomp(str)$/;"	f
+re_registers	regex.h	/^struct re_registers$/;"	s
+re_regsub	re.c	/^re_regsub(str)$/;"	f
+re_search	regex.c	/^re_search (pbufp, string, size, startpos, range, regs)$/;"	f
+re_search_2	regex.c	/^re_search_2 (pbufp, string1, size1, string2, size2, startpos, range,$/;"	f
+re_set_syntax	regex.c	/^re_set_syntax (syntax)$/;"	f
+re_syntax_table	regex.c	/^char *re_syntax_table;$/;"	v
+re_syntax_table	regex.c	/^static char re_syntax_table[256];$/;"	v	file:
+read	process.c	/^read(fd, buf, nbytes)$/;"	f
+read_all	io.c	/^read_all(port)$/;"	f	file:
+readin	ruby.c	/^readin(fd, fname)$/;"	f	file:
+record	st.h	/^    char *record;$/;"	m	struct:st_table_entry
+reg_cache	re.c	/^static VALUE str_cache, reg_cache;$/;"	v	file:
+reg_error	re.c	/^reg_error(s)$/;"	f
+reg_free	re.c	/^reg_free(rp)$/;"	f
+reg_syntax	re.c	/^long reg_syntax = RE_SYNTAX_POSIX_EXTENDED;$/;"	v
+regexp_new	re.c	/^regexp_new(s, len)$/;"	f
+regexp_new_1	re.c	/^regexp_new_1(class, s, len)$/;"	f	file:
+regexpcode	regex.c	/^enum regexpcode$/;"	g	file:
+register_info	regex.c	/^struct register_info$/;"	s	file:
+regs	re.c	/^    struct re_registers regs;$/;"	m	struct:match	typeref:struct:match::re_registers	file:
+regs	re.h	/^        struct re_registers regs;$/;"	m	struct:Regexp	typeref:struct:Regexp::re_registers
+rehash	st.c	/^static rehash(table)$/;"	f	file:
+reloc	dln.c	/^    struct relocation_info reloc;$/;"	m	struct:undef	typeref:struct:undef::relocation_info	file:
+reloc_arg	dln.c	/^struct reloc_arg {$/;"	s	file:
+reloc_r_bitsize	dln.c	/^static int reloc_r_bitsize[] = {$/;"	v	file:
+reloc_r_length	dln.c	/^static int reloc_r_length[] = {$/;"	v	file:
+reloc_r_rightshift	dln.c	/^static int reloc_r_rightshift[] = {$/;"	v	file:
+reloc_tbl	dln.c	/^static st_table *reloc_tbl = NULL;$/;"	v	file:
+reloc_undef	dln.c	/^reloc_undef(no, undef, arg)$/;"	f	file:
+relocation_info	dln.c	204;"	d	file:
+relocation_info	dln.c	205;"	d	file:
+reorder_flag	st.h	/^    int reorder_flag;$/;"	m	struct:st_table
+required_argument	missing/getopt.h	/^  required_argument,$/;"	e	enum:_argtype
+research	re.c	/^research(reg, str, start, ignorecase)$/;"	f
+resque	parse.y	/^resque		: \/* none *\/$/;"	l
+rest_arg	parse.y	/^rest_arg	: '*' IDENTIFIER$/;"	l
+retry	parse.y	/^retry:$/;"	l
+reverse	sample/gctest.rb	/^def reverse(x)$/;"	f
+reverse1	sample/gctest.rb	/^def reverse1(x, y)$/;"	f
+rmdir	missing/mkdir.c	/^rmdir (dpath)$/;"	f
+rparen	parse.y	/^rparen		: ')' 		{ yyerrok; }$/;"	l
+s	dln.c	/^	short s;$/;"	m	union:undef::__anon1	file:
+sc	parse.y	/^sc		: ';'		{ yyerrok; }$/;"	l
+sccsid	st.c	/^static	char	sccsid[] = "@(#) st.c 5.1 89\/12\/14 Crucible";$/;"	v	file:
+scope	methods.c	/^    enum mth_scope scope;$/;"	m	struct:hash_entry	typeref:enum:hash_entry::mth_scope	file:
+scope	node.h	/^	enum mth_scope scope;$/;"	m	union:node::__anon4	typeref:enum:node::__anon4::mth_scope
+scope	ruby.h	/^    enum mth_scope { MTH_METHOD, MTH_FUNC, MTH_UNDEF } scope;$/;"	m	struct:RMethod	typeref:enum:RMethod::mth_scope
+search_method	methods.c	/^search_method(class, id, origin)$/;"	f	file:
+search_undef	dln.c	/^search_undef(key, value, lib_tbl)$/;"	f	file:
+select	process.c	/^select(nfds, readfds, writefds, exceptfds, timeout)$/;"	f
+self	env.h	/^    VALUE self;$/;"	m	struct:ENVIRON
+set_cbreak	sample/cbreak.rb	/^def set_cbreak (on)$/;"	f
+set_hook	variable.c	/^    VALUE (*set_hook)();$/;"	m	struct:global_entry	file:
+set_list_bits	regex.c	/^set_list_bits (unsigned short c1, unsigned short c2,$/;"	f	file:
+set_number_at	regex.c	/^    set_number_at,	\/* Set the following relative location to the$/;"	e	enum:regexpcode	file:
+setup_arg_1	eval.c	/^setup_arg_1(node, args)$/;"	f	file:
+setup_arg_2	eval.c	/^setup_arg_2(node, args, argc, argv)$/;"	f	file:
+setup_domain_and_type	socket.c	/^setup_domain_and_type(domain, dv, type, tv)$/;"	f	file:
+setup_group	etc.c	/^setup_group(grp)$/;"	f	file:
+setup_passwd	etc.c	/^setup_passwd(pwd)$/;"	f	file:
+sflag	ruby.c	/^static int sflag = FALSE;$/;"	v	file:
+show_version	version.c	/^show_version()$/;"	f
+sighandle	process.c	/^sighandle(sig)$/;"	f	file:
+siglist	process.c	/^} siglist [] = {$/;"	v	typeref:struct:signals	file:
+sign	ruby.h	/^    char sign;$/;"	m	struct:RBignum
+signals	process.c	/^static struct signals {$/;"	s	file:
+signm	process.c	/^    char *signm;$/;"	m	struct:signals	file:
+signm2signo	process.c	/^signm2signo(nm)$/;"	f	file:
+signo	process.c	/^    int  signo;$/;"	m	struct:signals	file:
+sigpause	process.c	/^sigpause(mask)$/;"	f
+single_class_clone	class.c	/^single_class_clone(class)$/;"	f
+single_class_new	class.c	/^single_class_new(super)$/;"	f
+singleton	parse.y	/^singleton	: var_ref$/;"	l
+sock_accept	socket.c	/^sock_accept(class, fd, sockaddr, len)$/;"	f	file:
+sock_new	socket.c	/^sock_new(class, fd)$/;"	f	file:
+sort_1	array.c	/^sort_1(a, b)$/;"	f	file:
+sort_2	array.c	/^sort_2(a, b)$/;"	f	file:
+src	node.h	/^    char *src;$/;"	m	struct:node
+srcdir	Makefile	/^srcdir = .$/;"	m
+st_add_direct	st.c	/^st_add_direct(table, key, value)$/;"	f
+st_copy	st.c	/^st_table *st_copy(old_table)$/;"	f
+st_delete	st.c	/^st_delete(table, key, value)$/;"	f
+st_find_or_add	st.c	/^st_find_or_add(table, key, slot)$/;"	f
+st_foreach	st.c	/^st_foreach(table, func, arg)$/;"	f
+st_free_table	st.c	/^st_free_table(table)$/;"	f
+st_init_table	st.c	/^st_table *st_init_table(compare, hash)$/;"	f
+st_init_table_with_params	st.c	/^st_table *st_init_table_with_params(compare, hash, size, density, grow_factor,$/;"	f
+st_insert	st.c	/^st_insert(table, key, value)$/;"	f
+st_is_member	st.h	30;"	d
+st_lookup	st.c	/^st_lookup(table, key, value)$/;"	f
+st_numcmp	st.h	45;"	d
+st_numhash	st.h	46;"	d
+st_ptrcmp	st.h	47;"	d
+st_ptrhash	st.h	48;"	d
+st_retval	st.h	/^enum st_retval {ST_CONTINUE, ST_STOP, ST_DELETE};$/;"	g
+st_strhash	st.c	/^st_strhash(string, modulus)$/;"	f
+st_table	st.h	/^struct st_table {$/;"	s
+st_table	st.h	/^typedef struct st_table st_table;$/;"	t	typeref:struct:st_table
+st_table_entry	st.h	/^struct st_table_entry {$/;"	s
+st_table_entry	st.h	/^typedef struct st_table_entry st_table_entry;$/;"	t	typeref:struct:st_table_entry
+start	regex.h	/^    int start[RE_NREGS];$/;"	m	struct:re_registers
+start_hook	gc.c	/^static ID start_hook, end_hook;$/;"	v	file:
+start_memory	regex.c	/^    start_memory, \/* Start remembering the text that is matched, for$/;"	e	enum:regexpcode	file:
+stat_new	file.c	/^stat_new(st)$/;"	f	file:
+state	node.h	/^	int state;$/;"	m	union:node::__anon6
+state	random.c	/^static char state[256];$/;"	v	file:
+status	process.c	/^static VALUE status;$/;"	v	file:
+stop_memory	regex.c	/^    stop_memory, \/* Stop remembering the text that is matched$/;"	e	enum:regexpcode	file:
+store_jump	regex.c	/^store_jump (from, opcode, to)$/;"	f	file:
+store_jump_n	regex.c	/^store_jump_n (from, opcode, to, n)$/;"	f	file:
+store_match_data	re.c	/^store_match_data(val)$/;"	f	file:
+str	ruby.h	/^    char *str;$/;"	m	struct:RRegexp
+str2inum	bignum.c	/^str2inum(str, base)$/;"	f
+str_cache	re.c	/^static VALUE str_cache, reg_cache;$/;"	v	file:
+str_cat	string.c	/^str_cat(str, ptr, len)$/;"	f
+str_cicmp	re.c	/^str_cicmp(str1, str2)$/;"	f
+str_cmp	string.c	/^str_cmp(str1, str2)$/;"	f
+str_grow	string.c	/^str_grow(str, len)$/;"	f
+str_hash	string.c	/^str_hash(str)$/;"	f	file:
+str_index	dln.c	/^    int str_index;$/;"	m	struct:symdef	file:
+str_index	string.c	/^str_index(str, sub, offset)$/;"	f	file:
+str_modify	string.c	/^str_modify(str)$/;"	f
+str_new	string.c	/^str_new(ptr, len)$/;"	f
+str_new2	string.c	/^str_new2(ptr)$/;"	f
+str_new3	string.c	/^str_new3(str)$/;"	f
+str_next	string.c	/^str_next(s)$/;"	f	file:
+str_replace	string.c	/^str_replace(str, beg, len, val)$/;"	f	file:
+str_replace2	string.c	/^str_replace2(str, beg, end, val)$/;"	f	file:
+str_sub	string.c	/^str_sub(str, pat, val, once)$/;"	f	file:
+str_subseq	string.c	/^str_subseq(str, beg, end)$/;"	f
+str_substr	string.c	/^str_substr(str, start, len)$/;"	f
+strchr	missing/strftime.c	73;"	d	file:
+strdup	missing.c	/^strdup(str)$/;"	f
+strerror	missing/strerror.c	/^strerror(error)$/;"	f
+strftime	missing/strftime.c	/^strftime(s, maxsize, format, timeptr)$/;"	f
+strstr	missing/strstr.c	/^strstr(string, substring)$/;"	f
+strtol	missing/strtol.c	/^strtol(string, endPtr, base)$/;"	f
+strtoul	missing/strtoul.c	/^strtoul(string, endPtr, base)$/;"	f
+struct_add	struct.c	/^struct_add(s, mem, val)$/;"	f	file:
+struct_alloc	struct.c	/^struct_alloc(class, name)$/;"	f	file:
+struct_find	struct.c	/^struct_find(s, id)$/;"	f	file:
+struct_new	struct.c	/^struct_new(char *name, ...)$/;"	f
+succeed_n	regex.c	/^    succeed_n,	 \/* Used like on_failure_jump except has to succeed n times;$/;"	e	enum:regexpcode	file:
+super	ruby.h	/^    struct RClass *super;$/;"	m	struct:RClass	typeref:struct:RClass::RClass
+superclass	parse.y	/^superclass	: \/* none *\/$/;"	l
+swapl	pack.c	18;"	d	file:
+swaps	pack.c	17;"	d	file:
+sweep	gc.c	/^sweep()$/;"	f
+sym_tbl	dln.c	/^static st_table *sym_tbl;$/;"	v	file:
+symbol	parse.y	/^symbol		: fname0$/;"	l
+symdef	dln.c	/^struct symdef {$/;"	s	file:
+syntaxspec	regex.c	/^    syntaxspec,  \/* Matches any character whose syntax is specified.$/;"	e	enum:regexpcode	file:
+t2	sample/t2.rb	/^def t2() end$/;"	f
+tag	eval.c	/^static struct tag {$/;"	s	file:
+tag_level	eval.c	/^static int tag_level, target_level;$/;"	v	file:
+target_level	eval.c	/^static int tag_level, target_level;$/;"	v	file:
+target_offset	dln.c	/^static int target_offset;$/;"	v	file:
+tbl	node.h	/^	ID *tbl;$/;"	m	union:node::__anon4
+tbl	ruby.h	/^    struct st_table *tbl;$/;"	m	struct:RDict	typeref:struct:RDict::st_table
+tbl	ruby.h	/^    } *tbl;$/;"	m	struct:RStruct	typeref:struct:RStruct::kv_pair
+tcp_addr	socket.c	/^tcp_addr(sockaddr)$/;"	f	file:
+term	parse.y	/^term		: sc$/;"	l
+test	sample/caller.rb	/^def test$/;"	f
+test	sample/clone.rb	/^def foo.test$/;"	F
+test	sample/t1.rb	/^def test(a1, *a2)$/;"	f
+test	sample/trap.pl	/^sub test { print "C-c handled\\n"; }$/;"	s
+test	sample/tt.rb	/^  def Fib.test(*args)$/;"	F	class:Fib
+test	sample/tt.rb	/^def Object.test(*args)$/;"	F
+test2	sample/caller.rb	/^def test2$/;"	f
+test2	sample/clone.rb	/^def bar.test2$/;"	F
+test_type	regex.c	/^typedef enum { extended_test, basic_test } test_type;$/;"	t	typeref:enum:__anon7	file:
+the_class	env.h	34;"	d
+the_env	eval.c	/^struct ENVIRON *the_env, *top_env;$/;"	v	typeref:struct:ENVIRON
+then	parse.y	/^then		: term$/;"	l
+time_new	time.c	/^time_new(sec, usec)$/;"	f
+time_new_internal	time.c	/^time_new_internal(class, sec, usec)$/;"	f	file:
+time_object	time.c	/^struct time_object {$/;"	s	file:
+time_timeval	time.c	/^time_timeval(time)$/;"	f
+tm	time.c	/^    struct tm tm;$/;"	m	struct:time_object	typeref:struct:time_object::tm	file:
+tm_got	time.c	/^    int tm_got;$/;"	m	struct:time_object	file:
+to_fixnum	numeric.c	/^to_fixnum(val)$/;"	f	file:
+to_i	numeric.c	/^static ID to_i;$/;"	v	file:
+to_s	sample/list.rb	/^  def to_s$/;"	f	class:MyList
+to_s	sample/list.rb	/^  def to_s$/;"	f	class:Point
+to_s	sample/list2.rb	/^  def to_s$/;"	f	class:Point
+toofew	pack.c	/^static char *toofew = "too few arguments";$/;"	v	file:
+top_env	eval.c	/^struct ENVIRON *the_env, *top_env;$/;"	v	typeref:struct:
+tr	string.c	/^struct tr {$/;"	s	file:
+tr_setup_table	string.c	/^tr_setup_table(str, table)$/;"	f	file:
+tr_squeeze	string.c	/^tr_squeeze(str1, str2)$/;"	f	file:
+translate	regex.h	/^    char *translate;	\/* Translate table to apply to all characters before $/;"	m	struct:re_pattern_buffer
+trap_immediate	process.c	/^static int trap_immediate;$/;"	v	file:
+trap_list	process.c	/^static VALUE trap_list[NSIG];$/;"	v	file:
+trap_pending	process.c	/^int trap_pending;$/;"	v
+trap_pending_list	process.c	/^static int trap_pending_list[NSIG];$/;"	v	file:
+trnext	string.c	/^trnext(t)$/;"	f	file:
+trrepl	string.c	/^} trsrc, trrepl;$/;"	v	typeref:struct:tr
+trsrc	string.c	/^} trsrc, trrepl;$/;"	v	typeref:struct:tr
+tt	sample/t2.rb	/^def tt$/;"	f
+tt	sample/tt.rb	/^def tt$/;"	f
+tv	time.c	/^    struct timeval tv;$/;"	m	struct:time_object	typeref:struct:time_object::timeval	file:
+type	node.h	/^    enum node_type type;$/;"	m	struct:node	typeref:enum:node::node_type
+u	dln.c	/^    } u;$/;"	m	struct:undef	typeref:union:undef::__anon1	file:
+u1	node.h	/^    } u1;$/;"	m	struct:node	typeref:union:node::__anon4
+u2	node.h	/^    } u2;$/;"	m	struct:node	typeref:union:node::__anon5
+u3	node.h	/^    } u3;$/;"	m	struct:node	typeref:union:node::__anon6
+uint2big	bignum.c	/^uint2big(n)$/;"	f
+uint2inum	bignum.c	/^uint2inum(n)$/;"	f
+undef	dln.c	/^struct undef {$/;"	s	file:
+undef_print	dln.c	/^undef_print(key, value, arg)$/;"	f	file:
+undef_tbl	dln.c	/^static st_table *undef_tbl;$/;"	v	file:
+unix_addr	socket.c	/^unix_addr(sockaddr)$/;"	f	file:
+unlink_undef	dln.c	/^unlink_undef(name, value)$/;"	f	file:
+unliteralize	gc.c	/^unliteralize(obj)$/;"	f
+unused	regex.c	/^    unused=0,$/;"	e	enum:regexpcode	file:
+upcase	regex.c	/^char upcase[0400] = $/;"	v
+usage	sample/biorhythm.rb	/^def usage()$/;"	f
+usage	sample/getopts.test	/^def usage()$/;"	f
+used	regex.h	/^    long used;		\/* Length of portion of buffer actually occupied  *\/$/;"	m	struct:re_pattern_buffer
+v	enum.c	/^    VALUE v;$/;"	m	struct:i_v_pair	file:
+v	variable.c	/^    } v;$/;"	m	struct:global_entry	typeref:union:global_entry::__anon9	file:
+val	missing/getopt.h	/^  int val;$/;"	m	struct:option
+val	variable.c	/^	VALUE val;$/;"	m	union:global_entry::__anon9	file:
+value	dln.c	/^    long value;$/;"	m	struct:reloc_arg	file:
+value	node.h	/^	VALUE value;$/;"	m	union:node::__anon4
+value	node.h	/^	VALUE value;$/;"	m	union:node::__anon6
+value	ruby.h	/^	VALUE value;$/;"	m	struct:RStruct::kv_pair
+value	ruby.h	/^    double value;$/;"	m	struct:RFloat
+value_found	dict.c	/^static VALUE value_found;$/;"	v	file:
+var	eval.c	/^    NODE *var;$/;"	m	struct:BLOCK	file:
+var	variable.c	/^	VALUE *var;$/;"	m	union:global_entry::__anon9	file:
+var_ref	parse.y	/^var_ref		: variable$/;"	l
+variable	parse.y	/^variable	: IDENTIFIER$/;"	l
+varptr	ruby.h	/^    VALUE *varptr;$/;"	m	struct:gc_list
+verbose	ruby.c	/^int verbose = 0;$/;"	v
+volatile	regex.c	55;"	d	file:
+volatile	ruby.h	20;"	d
+vtohl	pack.c	30;"	d	file:
+vtohl	pack.c	39;"	d	file:
+vtohs	pack.c	29;"	d	file:
+vtohs	pack.c	38;"	d	file:
+wait	process.c	/^wait(status)$/;"	f
+wait_each	process.c	/^static wait_each(key, value)$/;"	f	file:
+wait_pid	process.c	/^static int wait_pid;$/;"	v	file:
+wait_status	process.c	/^static int wait_status;$/;"	v	file:
+weeknumber	missing/strftime.c	/^weeknumber(timeptr, firstweekday)$/;"	f	file:
+wordbeg	regex.c	/^    wordbeg,	 \/* Succeeds if at word beginning.  *\/$/;"	e	enum:regexpcode	file:
+wordbound	regex.c	/^    wordbound,   \/* Succeeds if at a word boundary.  *\/$/;"	e	enum:regexpcode	file:
+wordchar	regex.c	/^    wordchar,    \/* Matches any word-constituent character.  *\/$/;"	e	enum:regexpcode	file:
+wordend	regex.c	/^    wordend,	 \/* Succeeds if at word end.  *\/$/;"	e	enum:regexpcode	file:
+xcalloc	dln.c	/^xcalloc(size, n)$/;"	f
+xcalloc	gc.c	/^xcalloc(n, size)$/;"	f
+xflag	ruby.c	/^int xflag = FALSE;$/;"	v
+xmalloc	dln.c	/^xmalloc(size)$/;"	f
+xmalloc	gc.c	/^xmalloc(size)$/;"	f
+xrealloc	gc.c	/^xrealloc(ptr, size)$/;"	f
+yyerror	error.c	/^yyerror(msg)$/;"	f

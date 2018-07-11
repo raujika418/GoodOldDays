@@ -1,0 +1,98 @@
+<html>
+<head>
+<title>Haskell 1.3 System Interaction: LibSystem</title>
+</head>
+<body>
+
+[<a href="LibDirectory.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibTime.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>System Interaction "LibSystem"</h2>
+
+<hr>
+<p>
+
+<pre>
+> interface LibSystem where
+</pre>
+<p>
+
+<a name="ExitCode">
+The <code>ExitCode</code> type defines the exit codes that a program
+can return.  <code>ExitSuccess</code> indicates successful termination;
+and <code>ExitFailure</code> <var>code</var> indicates program failure
+with value <var>code</var>.  The exact interpretation of <var>code</var>
+is operating-system dependent.  In particular, some values of 
+<var>code</var> may be prohibited (e.g. 0 on a POSIX-compliant system).
+<br>
+<a href="Rationale.html#ExitCodes">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<pre>
+> data ExitCode =  ExitSuccess | ExitFailure Int
+> getArgs       :: IO [String] 
+> getProgName   :: IO String
+> getEnv        :: String -> IO String
+> system        :: String -> IO ExitCode
+> exitWith      :: ExitCode -> IO a
+</pre>
+<p>
+
+Computation <code>getArgs</code> returns a list of the program's command
+line arguments (not including the program name).<p>
+
+Computation <code>getProgName</code> returns the name of the program
+as it was invoked.<p>
+
+Computation <code>getEnv</code> <var>var</var> returns the value
+of the environment variable <var>var</var>.  
+<p>
+This computation may fail with
+<ul>
+<li><code>NoSuchThing</code><br>
+The environment variable does not exist.
+</ul>
+ <a href="Rationale.html#getEnv">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+
+<p>
+
+Computation <code>system</code> <var>cmd</var> returns the exit code
+produced when the operating system processes the command <var>cmd</var>.
+<p>
+This computation may fail with
+<ul>
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.  
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support system calls.
+</ul>
+<p>
+
+Computation <code>exitWith</code> <var>code</var> terminates the
+program, returning <var>code</var> to the program's caller.
+Before it terminates, any open or semi-closed handles are first closed.
+<p>
+
+<hr><p>
+
+[<a href="LibDirectory.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibTime.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>

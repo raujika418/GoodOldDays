@@ -1,0 +1,58 @@
+{-# GHC_PRAGMA INTERFACE VERSION 6 #-}
+interface SpecMonad where
+import CmdLineOpts(GlobalSwitch)
+import CoreSyn(CoreAtom)
+import Id(Id)
+import IdInfo(SpecInfo)
+import Maybes(Labda)
+import SplitUniq(SplitUniqSupply)
+import TyVar(TyVar)
+import UniType(UniType)
+import UniqFM(UniqFM)
+infixr 9 `thenSM`
+data CloneInfo   = NoLift (CoreAtom Id) | Lifted Id Id
+type SpecIdEnv = UniqFM CloneInfo
+type SpecM a = (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a
+bindId :: Id -> CloneInfo -> ((GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a) -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a
+	{-# GHC_PRAGMA _A_ 7 _U_ 1212222 _N_ _S_ "LLSLLLL" _N_ _N_ #-}
+bindIds :: [Id] -> [CloneInfo] -> ((GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a) -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a
+	{-# GHC_PRAGMA _A_ 7 _U_ 1112222 _N_ _S_ "LLSLLLL" _N_ _N_ #-}
+bindSpecIds :: [Id] -> [CloneInfo] -> [[Labda SpecInfo]] -> ((GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a) -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a
+	{-# GHC_PRAGMA _A_ 8 _U_ 11212222 _N_ _S_ "LLLSLLLL" _N_ _N_ #-}
+bindTyVar :: TyVar -> UniType -> ((GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a) -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a
+	{-# GHC_PRAGMA _A_ 7 _U_ 2212222 _N_ _S_ "LLSLLLL" _N_ _N_ #-}
+cloneLambdaOrCaseBinders :: [Id] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> ([Id], [CloneInfo])
+	{-# GHC_PRAGMA _A_ 5 _U_ 20202 _N_ _S_ "SALAL" {_A_ 3 _U_ 222 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+cloneLetBinders :: Bool -> Bool -> [Id] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> ([Id], [CloneInfo])
+	{-# GHC_PRAGMA _A_ 7 _U_ 2220202 _N_ _S_ "LLSALAL" {_A_ 5 _U_ 22222 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+cloneTyVarSM :: TyVar -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> TyVar
+	{-# GHC_PRAGMA _A_ 5 _U_ 10001 _N_ _S_ "SAAAL" {_A_ 2 _U_ 11 _N_ _N_ _N_ _N_} _F_ _IF_ARGS_ 0 5 XXXXC 8 \ (u0 :: TyVar) (u1 :: GlobalSwitch -> Bool) (u2 :: UniqFM UniType) (u3 :: UniqFM CloneInfo) (u4 :: SplitUniqSupply) -> let {(u9 :: Unique) = case u4 of { _ALG_ _ORIG_ SplitUniq MkSplitUniqSupply (u5 :: Int) (u6 :: SplitUniqSupply) (u7 :: SplitUniqSupply) -> case u5 of { _ALG_ I# (u8 :: Int#) -> _!_ _ORIG_ Unique MkUnique [] [u8]; _NO_DEFLT_ }; _NO_DEFLT_ }} in _APP_  _ORIG_ TyVar cloneTyVar [ u0, u9 ] _N_ #-}
+fixSM :: (a -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a) -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a
+	{-# GHC_PRAGMA _A_ 5 _U_ 22222 _N_ _S_ "SLLLL" _F_ _IF_ARGS_ 1 5 XXXXX 8 _/\_ u0 -> \ (u1 :: u0 -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> u0) (u2 :: GlobalSwitch -> Bool) (u3 :: UniqFM UniType) (u4 :: UniqFM CloneInfo) (u5 :: SplitUniqSupply) -> _LETREC_ {(u6 :: u0) = _APP_  u1 [ u6, u2, u3, u4, u5 ]} in u6 _N_ #-}
+getSwitchCheckerSM :: d -> a -> b -> c -> d
+	{-# GHC_PRAGMA _A_ 4 _U_ 1000 _N_ _S_ "SAAA" {_A_ 1 _U_ 1 _N_ _N_ _F_ _IF_ARGS_ 4 1 X 1 _/\_ u0 u1 u2 u3 -> \ (u4 :: u3) -> u4 _N_} _F_ _IF_ARGS_ 4 4 XXXX 1 _/\_ u0 u1 u2 u3 -> \ (u4 :: u3) (u5 :: u0) (u6 :: u1) (u7 :: u2) -> u4 _N_ #-}
+initSM :: (c -> UniqFM a -> UniqFM b -> d -> e) -> c -> d -> e
+	{-# GHC_PRAGMA _A_ 3 _U_ 122 _N_ _N_ _N_ _N_ #-}
+liftId :: Id -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> (Id, Id)
+	{-# GHC_PRAGMA _A_ 5 _U_ 20001 _N_ _S_ "LAAAL" {_A_ 2 _U_ 21 _N_ _N_ _N_ _N_} _F_ _IF_ARGS_ 0 5 XXXXC 8 \ (u0 :: Id) (u1 :: GlobalSwitch -> Bool) (u2 :: UniqFM UniType) (u3 :: UniqFM CloneInfo) (u4 :: SplitUniqSupply) -> let {(u9 :: Unique) = case u4 of { _ALG_ _ORIG_ SplitUniq MkSplitUniqSupply (u5 :: Int) (u6 :: SplitUniqSupply) (u7 :: SplitUniqSupply) -> case u5 of { _ALG_ I# (u8 :: Int#) -> _!_ _ORIG_ Unique MkUnique [] [u8]; _NO_DEFLT_ }; _NO_DEFLT_ }} in _APP_  _ORIG_ CoreLift mkLiftedId [ u0, u9 ] _N_ #-}
+lookupId :: Id -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> CloneInfo
+	{-# GHC_PRAGMA _A_ 5 _U_ 10020 _N_ _S_ "U(U(P)LLL)AASA" {_A_ 5 _U_ 22222 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+mapAndUnzip3SM :: (a -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> (b, c, d)) -> [a] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> ([b], [c], [d])
+	{-# GHC_PRAGMA _A_ 2 _U_ 212222 _N_ _S_ "LS" _N_ _N_ #-}
+mapAndUnzip4SM :: (a -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> (b, c, d, e)) -> [a] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> ([b], [c], [d], [e])
+	{-# GHC_PRAGMA _A_ 2 _U_ 212222 _N_ _S_ "LS" _N_ _N_ #-}
+mapAndUnzipSM :: (a -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> (b, c)) -> [a] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> ([b], [c])
+	{-# GHC_PRAGMA _A_ 2 _U_ 212222 _N_ _S_ "LS" _N_ _N_ #-}
+mapSM :: (a -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> b) -> [a] -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> [b]
+	{-# GHC_PRAGMA _A_ 2 _U_ 212222 _N_ _S_ "LS" _N_ _N_ #-}
+newSpecIds :: [Id] -> [Labda UniType] -> Int -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> [Id]
+	{-# GHC_PRAGMA _A_ 7 _U_ 2220002 _N_ _S_ "SLLAAAL" {_A_ 4 _U_ 2222 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+newTyVars :: Int -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> [TyVar]
+	{-# GHC_PRAGMA _A_ 5 _U_ 10002 _N_ _S_ "U(P)AAAL" {_A_ 2 _U_ 22 _N_ _N_ _N_ _N_} _N_ _N_ #-}
+returnSM :: a -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a
+	{-# GHC_PRAGMA _A_ 5 _U_ 10000 _N_ _S_ "SAAAA" {_A_ 1 _U_ 1 _N_ _N_ _F_ _IF_ARGS_ 1 1 X 1 _/\_ u0 -> \ (u1 :: u0) -> u1 _N_} _F_ _IF_ARGS_ 1 5 XXXXX 1 _/\_ u0 -> \ (u1 :: u0) (u2 :: GlobalSwitch -> Bool) (u3 :: UniqFM UniType) (u4 :: UniqFM CloneInfo) (u5 :: SplitUniqSupply) -> u1 _N_ #-}
+specTy :: UniType -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> UniType
+	{-# GHC_PRAGMA _A_ 5 _U_ 10200 _N_ _S_ "SALAA" {_A_ 2 _U_ 12 _N_ _N_ _F_ _IF_ARGS_ 0 2 XX 3 \ (u0 :: UniType) (u1 :: UniqFM UniType) -> _APP_  _ORIG_ UniTyFuns applyTypeEnvToTy [ u1, u0 ] _N_} _F_ _IF_ARGS_ 0 5 XXXXX 3 \ (u0 :: UniType) (u1 :: GlobalSwitch -> Bool) (u2 :: UniqFM UniType) (u3 :: UniqFM CloneInfo) (u4 :: SplitUniqSupply) -> _APP_  _ORIG_ UniTyFuns applyTypeEnvToTy [ u2, u0 ] _N_ #-}
+thenSM :: ((GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> a) -> (a -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> b) -> (GlobalSwitch -> Bool) -> UniqFM UniType -> UniqFM CloneInfo -> SplitUniqSupply -> b
+	{-# GHC_PRAGMA _A_ 6 _U_ 112221 _N_ _S_ "LSLLLU(ALL)" _N_ _N_ #-}
+

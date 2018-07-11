@@ -1,0 +1,40 @@
+@setfilename default-nodes-example.info
+@node Top
+@chapter Introduction
+@menu
+* foo::  the foo node
+* bar::  the bar node
+* baz::  the baz node
+* yan::  Yet Another Node
+@end menu
+
+@node foo
+@section foo
+this is the foo node.
+
+@node bar
+@section Bar
+This is the Bar node.
+
+@menu
+* subzero::	A subsection of bar.
+* subone::	You thought I meant temperature?
+@end menu
+
+@node subzero
+@subsection subzero
+This is subsection subzero
+
+@node subone
+@subsection subone
+This is subsection subone
+
+@node baz
+@section Baz
+This is the Baz node.
+
+@node yan
+@section Yet Another Node
+
+Yes, this is yet another node.
+@bye

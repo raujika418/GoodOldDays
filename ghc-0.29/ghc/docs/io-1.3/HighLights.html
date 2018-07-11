@@ -1,0 +1,66 @@
+<html>
+<head>
+<title>Haskell 1.3 Highlights</title>
+</head>
+<body>
+
+[<a href="Credits.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Notation.html">Next</a>]
+<p>
+<hr><p>
+
+
+<h2>Highlights</h2>
+
+Here are the highlights of the 1.3 I/O definition.
+<ul>
+<li>
+We define a <em>monadic programming model</em>
+(see <A href="Biblio.html#cupitt89">Cupitt 89</a>,
+<a href="Biblio.html#wadler-essence">Wadler 92</a>,
+<a href="Biblio.html#gordon92">Gordon 92</a>,
+<A href="Biblio.html#peytonjones93">Peyton Jones 93</a>,
+<a href="Biblio.html#launchbury94">Launchbury 94</a>,
+and the bibliographies of
+these papers). Expressions of type
+<code>IO</code> <var>a</var> denote computations that may engage in I/O before
+returning an answer of type <var>a</var>.
+<li>
+The <code>IO</code> monad admits computations that fail and recovery from
+such failures.
+<li>
+We propose a new type of <em>handles</em>, to mediate character I/O on
+both files and channels.
+<li>
+We propose input polling and input of characters.  Haskell 1.2
+represented character input as a single <code>String</code> (that is, a lazy
+list of characters), containing all the characters available for input
+throughout the program run.
+<li>
+Our proposal supports the majority of Haskell 1.2 I/O operations.
+We judged it too complex to support them all.
+<li>
+We provide an extensible framework for future Haskell implementations, built on
+existing I/O standards and common operating system practice.
+</ul>
+
+Monadic programming models have proved to be more general and in many
+respects simpler than the stream-based I/O system used in Haskell 1.2.
+Several implementations exist.  This document is intended to be a
+relatively conservative standard to allow programs to be ported
+between the various Haskell systems.  <p>
+
+[<a href="Credits.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Notation.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>

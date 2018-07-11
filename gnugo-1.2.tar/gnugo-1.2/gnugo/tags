@@ -1,0 +1,90 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BLACK	gnugo.h	36;"	d
+BSIZE	endgame.c	37;"	d	file:
+CFLAGS	Makefile	/^CFLAGS = -O$/;"	m
+EMPTY	gnugo.h	34;"	d
+ENDLIST	endgame.c	39;"	d	file:
+GREY	endgame.c	41;"	d	file:
+MAXPC	patterns.h	33;"	d
+MAXTRY	genmove.c	36;"	d	file:
+NODES	endgame.c	38;"	d	file:
+OBJ	Makefile	/^OBJ = $(SRC:.c=.o)$/;"	m
+OBJECTS	gnugo.mak	/^OBJECTS = $(SOURCES:.c=.obj)$/;"	m
+PATNO	patterns.h	32;"	d
+PRG	Makefile	/^PRG = gnugo$/;"	m
+QSIZE	endgame.c	40;"	d	file:
+SOURCES	gnugo.mak	/^SOURCES = count.c \\$/;"	m
+SRC	Makefile	/^SRC = count.c \\$/;"	m
+WHITE	gnugo.h	35;"	d
+abs	matchpat.c	35;"	d	file:
+att	patterns.h	/^struct patval {int x, y, att;};$/;"	m	struct:patval
+bfslist	endgame.c	/^int  bfslist(int i,$/;"	f
+color	endgame.c	/^int que[QSIZE],color[BSIZE*BSIZE],listpt[BSIZE*BSIZE];$/;"	v
+count	count.c	/^void count(int i,     \/* row number 0 to 18 *\/$/;"	f
+countlib	countlib.c	/^void countlib(int m,     \/* row number 0 to 18 *\/$/;"	f
+createlist	endgame.c	/^void createlist(int color,$/;"	f
+dequeue	endgame.c	/^void dequeue(void)$/;"	f
+endgame	endgame.c	/^void endgame(void)$/;"	f
+endq	endgame.c	/^int endq=0;$/;"	v
+enqueue	endgame.c	/^void enqueue(int *v)$/;"	f
+eval	eval.c	/^void eval(int color)  \/* BLACK or WHITE *\/$/;"	f
+examboard	exambord.c	/^void examboard(int color) \/* BLACK or WHITE *\/$/;"	f
+findcolor	findcolr.c	/^unsigned int findcolor(int i,   \/* row number 0 to 18 *\/$/;"	f
+findnextmove	findnext.c	/^int findnextmove(int m,       \/* current stone row number *\/$/;"	f
+findopen	findopen.c	/^int findopen(int m,      \/* current row number 0 to 18 *\/$/;"	f
+findpatn	findpatn.c	/^int findpatn(int *i,    \/* row number of next move *\/$/;"	f
+findsaver	findsavr.c	/^int findsaver(int *i,    \/* row number of next move *\/$/;"	f
+findwinner	findwinr.c	/^int findwinner(int *i,    \/* row number of next move *\/$/;"	f
+fioe	fioe.c	/^int fioe(int i,   \/* stone row number 0 to 18 *\/$/;"	f
+fval	findnext.c	/^int fval(int newlib,   \/* new liberty *\/$/;"	f
+genmove	genmove.c	/^void genmove(int *i,$/;"	f
+getij	getij.c	/^int getij(char move[],   \/* move string *\/$/;"	f
+getmove	getmove.c	/^void getmove(char move[],  \/* move string *\/$/;"	f
+initmark	initmark.c	/^void initmark(void)$/;"	f
+l	main.c	/^unsigned char l[19][19];  \/* liberty of current color *\/$/;"	v
+lib	main.c	/^int lib;                  \/* current stone liberty *\/$/;"	v
+line	matchpat.c	36;"	d	file:
+listpt	endgame.c	/^int que[QSIZE],color[BSIZE*BSIZE],listpt[BSIZE*BSIZE];$/;"	v
+ma	main.c	/^unsigned char ma[19][19]; \/* working matrix for marking *\/$/;"	v
+main	main.c	/^int main(int argc,$/;"	f
+matchpat	matchpat.c	/^int matchpat(int m,     \/* row origin *\/$/;"	f
+mik	main.c	/^int mik, mjk;             \/* location of computer stone captured *\/$/;"	v
+mjk	main.c	/^int mik, mjk;             \/* location of computer stone captured *\/$/;"	v
+mk	main.c	/^int mk, uk;               \/* no. of stones captured by computer and oppoent *\/$/;"	v
+ml	main.c	/^unsigned char ml[19][19]; \/* working matrix for marking *\/$/;"	v
+mymove	main.c	/^int mymove, umove;        \/* computer color, opponent color *\/$/;"	v
+node	endgame.c	/^int node(int i,$/;"	f
+node2ij	endgame.c	/^void node2ij(int node,$/;"	f
+opening	opening.c	/^int opening(int *i,$/;"	f
+openregion	openregn.c	/^int openregion(int i1,$/;"	f
+opn	main.c	/^int opn[9];               \/* opening pattern flag *\/$/;"	v
+p	main.c	/^unsigned char p[19][19];  \/* go board *\/$/;"	v
+pass	main.c	/^int pass;                 \/* pass indicator *\/$/;"	v
+pat	patterns.h	/^static struct pattern pat[PATNO] = {$/;"	v	typeref:struct:pattern
+patlen	patterns.h	/^                int patlen;   \/* number of pieces in pattern *\/$/;"	m	struct:pattern
+patn	patterns.h	/^                struct patval patn[MAXPC];   \/* pattern *\/$/;"	m	struct:pattern	typeref:struct:pattern::patval
+pattern	patterns.h	/^struct pattern {$/;"	s
+patval	patterns.h	/^struct patval {int x, y, att;};$/;"	s
+patwt	patterns.h	/^                int patwt;    \/* pattern value *\/$/;"	m	struct:pattern
+pe	endgame.c	/^int *pe, *pstart;$/;"	v
+play	main.c	/^int play;                 \/* game state *\/$/;"	v
+pstart	endgame.c	/^int *pe, *pstart;$/;"	v
+que	endgame.c	/^int que[QSIZE],color[BSIZE*BSIZE],listpt[BSIZE*BSIZE];$/;"	v
+queinit	endgame.c	/^int queinit=0;$/;"	v
+sethand	sethand.c	/^void sethand(int i)$/;"	f
+showboard	showbord.c	/^void showboard(void)$/;"	f
+showinst	showinst.c	/^void showinst(void)$/;"	f
+size	endgame.c	/^int size=0;$/;"	v
+suicide	suicide.c	/^int suicide(int i,$/;"	f
+trfno	patterns.h	/^                int trfno;    \/* no. of transformation *\/$/;"	m	struct:pattern
+uik	main.c	/^int uik, ujk;             \/* location of opponent stone captured *\/$/;"	v
+ujk	main.c	/^int uik, ujk;             \/* location of opponent stone captured *\/$/;"	v
+uk	main.c	/^int mk, uk;               \/* no. of stones captured by computer and oppoent *\/$/;"	v
+umove	main.c	/^int mymove, umove;        \/* computer color, opponent color *\/$/;"	v
+x	patterns.h	/^struct patval {int x, y, att;};$/;"	m	struct:patval
+y	patterns.h	/^struct patval {int x, y, att;};$/;"	m	struct:patval

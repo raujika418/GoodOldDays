@@ -1,0 +1,328 @@
+#% \section[lit2latex_only]{Code for generating \LaTeX{} files}
+#% 
+#% \begin{code}
+# I'm putting these two routines first,
+# I think because perl has a bug in it
+sub add_latex_literals {
+    local($_) = @_;
+
+    s/\001lateXLitbackslash\003/\{\\char'134\}/g;
+    s/\001lateXLitlbrace\003/\{\\char'173\}/g;
+    s/\001lateXLitrbrace\003/\{\\char'175\}/g;
+    s/\001lateXLithash\003/\{\\char'43\}/g;
+
+    $_;
+}
+
+sub verb2latex { # takes a blob of text and produces a bunch of \mbox{$font...}'s
+    # if you ensure no newlines, then no \\mbox stuff will come out
+    # assumes \tt really; if you're doing something else, you may have to
+    # fiddle; see verb2rm, for example.
+    local($font, $_) = @_;
+
+    study($_);
+
+    s/\\/\001lateXLitbackslash\003/g;
+    s/\{/\001lateXLitlbrace\003/g;
+    s/\}/\001lateXLitrbrace\003/g;
+
+    s/\n/\}\\\\\n\\mbox\{$font\{\}/g;
+
+    s/\#/\\\#/g;
+    s/\&/\\\&/g;
+    s/ /\\ /g;
+    s/\!/\{\\char'41\}/g;
+    s/\"/\{\\char'42\}/g;
+    s/\$/\{\\char'44\}/g;
+    s/\%/\{\\char'45\}/g;
+    s/\*/\{\\char'52\}/g;
+    s/\</\{\\char'74\}/g;
+    s/\>/\{\\char'76\}/g;
+    s/\@/\{\\char'100\}/g;
+    s/\^/\{\\char'136\}/g;
+    s/\_/\{\\char'137\}/g;
+    s/\|/\{\\char'174\}/g;
+    s/\~/\{\\char'176\}/g;
+
+    &add_latex_literals($_);
+}
+
+sub verb2verbcode { # to go with Olin Shivers's (verb)code.sty
+		    # need to escape: \ { }
+    local($_) = @_;
+
+    s/\\/\\\\/g;
+    s/\{/\\\{/g;
+    s/\}/\\\}/g;
+    
+    $_;
+}
+
+sub verb2rm {
+    local($_) = @_;
+    $_ = &verb2latex("\\ShouldNotBeUsed", $_);
+    # now undo some of it (because ain't no such chars in CMR roman font)
+
+    s/\{\\char'74\}/\$\\langle\$/g; # <
+    s/\{\\char'76\}/\$\\rangle\$/g; # >
+    s/\{\\char'134\}/\$\\backslash\$/g; # \
+    s/\{\\char'137\}/\\_/g; # _
+    s/\{\\char'173\}/\\{/g; # {
+    s/\{\\char'174\}/\$\|\$/g; # |
+    s/\{\\char'175\}/\\}/g; # }
+    s/\{\\char'42\}/\{\\char'175\}/g; # " -- a nicer glyph
+
+    $_;
+}
+
+sub latexize_text {
+    # is given deatified text
+    # returns text and index entries
+    #
+    local($srcfilename,$srclineno,$_) = @_;
+    local($idx_real)  = '';
+    local($idx_maybe) = '';
+
+    # do \MathMode, \tr, and \codeInText first because they might be
+    # inside other things
+
+    s/\\MathMode\{([^\}]*)\}/\$$1\$/g;
+
+    while (/\\(pl|tr)\{([^\}]*)\}/) {
+	local($plain_or_typing) = $1;
+	local($guts)		= &deatified2verb($2);
+
+	$guts = "\\mbox\{" . &verb2rm($guts). "\}"
+	    if $plain_or_typing eq 'pl';
+	$guts = "\\mbox\{\\tt\{\}" . &verb2latex("\\tt",$guts). "\}"
+	    if $plain_or_typing eq 'tr';
+
+	s/\\(pl|tr)\{[^\}]*\}/$guts/;
+    }
+
+
+    while (/\\codeInText\{([^\}]*)\}/) {
+	local($raw_code) = &deatified2verb($1);
+	local($indexing) = 1;
+	
+	$raw_code =~ s/\\@/@/g;		# the one escaped thing
+
+	if ($raw_code =~ /\001noindex\003/) {
+	    $indexing = 0;
+	    $raw_code =~ s/\001noindex\003//;
+	}
+
+	local($munged_code) = &mk_code_frag($raw_code);
+
+	if ($indexing) {
+	    local($cdefs, $cuses) = &add_code_interests(-1,-1,$raw_code);
+	    local($c);
+	    # index all defs and uses
+	    foreach $c (split(/\001/, $cdefs )) {
+		if ($c) {
+		    # internally known indexing command
+		    $idx_real .= "\\index\{".&mk_latex_index_entry('tt',$c)."\|underline\}\%\n";
+		}
+	    }
+	    # uses are only indexed if the defined thing is known
+	    # can't be done until link time
+	    foreach $c (split(/\001/, $cuses)) {
+		if ($c) {
+		    $idx_maybe .= "\001index_uses\003$c\n";
+		}
+	    }
+	}
+	s/\\codeInText\{[^\}]*\}/$munged_code$index_call/;
+    }
+
+#    $_ .= $idx_real        if $idx_real;
+#    $_ .= "\%\n$idx_maybe" if $idx_maybe;
+
+    while (/\\index\{([^\}]+)\}/) {
+	local($guts) = &deatified2verb($1);
+	
+	$guts =~ s/\\@/\@/g;	# de-escape them
+	$guts =~ s/\\!/\!/g;
+	$guts =  &mk_latex_index_entry('rm',$guts);
+
+	s/\\index\{([^\}]+)\}/\\index!_\{$guts\}/; #temp two
+    }
+    s/\\index!_\{/\\index\{/g; # fix temp two
+
+    s/\\item\s*\n/\\item\{\}\n/g;
+
+    s/(\\begin\{comment\})/\{\\small $1/g;
+    s/(\\end\{comment\})/$1\}/g;
+
+    s/\\begin\{itemise\}/\\begin\{itemize\}/g;
+    s/\\end\{itemise\}/\\end\{itemize\}/g;
+
+    s/\\@/\@/g;
+
+    # the automagically supplied \makeindex...
+    s/(\\begin\{document\})/\\makeindex\n$1/;
+
+    # check for unknown environments (only at beginning of lines; easier)
+    #  mark good ones as \begin!_/\end!_
+    #        bad ones as \begin!!/\end!!
+    while (/^\\(begin|end)\{([A-Za-z]+)\}/) {
+	if ( $KNOWN_ENV{$2} ) { # good
+	    s/\\(begin|end)\{([A-Za-z]+)\}/\\$1!_\{$2\}/;
+	} else { # bad
+	    print STDERR "warning: unrecognised environment: $2\n";
+	    s/\\(begin|end)\{([A-Za-z]+)\}/\\$1!!\{$2\}/;
+	}
+    }
+    # unmark both good and bad ones
+    # (they were presumably put in for a reason)
+    s/\\(begin|end)!_\{([A-Za-z]+)\}/\\$1\{$2\}/g;
+    s/\\(begin|end)!!\{([A-Za-z]+)\}/\\$1\{$2\}/g;
+
+    ( &deatified2verb_nl(&fiddle_sectiontypes($_)),
+      $idx_real . $idx_maybe
+    );
+}
+
+sub mk_latex_index_entry { # also used in linker
+    local($font, $raw_text) = @_;
+    local(@sub_entries) = split(/\001idxsubitem\003/, $raw_text);
+    local($sube,$sortstuff,$printstuff);
+
+    foreach $sube (@sub_entries) {
+	if ($sube =~ /(.*[^\\])\001idxsort\003(.*)/) {
+	    $sortstuff  = $1;
+	    $printstuff = $2;
+	} else {
+	    $sortstuff  = $sube;
+	    $printstuff = $sube;
+	}
+	$sortstuff =~ s/"/""/g;
+	$sortstuff =~ s/!/"!/g;
+	$sortstuff =~ s/\\/"\\/g;
+	$sortstuff =~ s/\{/"\{/g;
+	$sortstuff =~ s/\}/"\}/g;
+	$sortstuff =~ s/\@/"\@/g;
+	$sortstuff =~ s/\|/"\|/g;
+
+	if ($font eq 'tt') {
+	    $sube = "$sortstuff\@\\protect\{\\tt\{\}" . &verb2latex("\\tt",$printstuff) . "\}";
+	} elsif ($font eq 'rm') {
+	    $sube = "$sortstuff\@\\protect\{" . &verb2rm($printstuff) . "\}";
+	} else {
+	    die "unknown font code: $font\n";
+	}
+    }
+
+    # stick it back together for makeindex
+    join('!',@sub_entries);
+}
+
+sub print_latex_labels_for_code_blk_defs {
+    # see also print_index_entries_for_code_blk
+    local($b) = @_;
+    
+    # print a label for each definition in this code blk
+    local($d);
+    foreach $d (split(/\001/, $Blk_codethings_defd[$b])) {
+    	# fiddling must match that in lit-linker
+	$d =~ s/\%/<percent>/g; # and other funny chars?
+	$d =~ s/\$/<dollar>/g;
+	$d =~ s/\\/<slash>/g;
+	print "\\label\{def::$d\}\%\n" if $d;
+    }
+    # see what is done with \001xref_uses\003 in linker
+}
+
+sub mk_line_directive {
+    local($filename,$lineno) = @_;
+
+    ( (! $filename) ? '' : "\%\% LINE $lineno \"$filename\"\n");
+}
+
+sub std_print_code_blk { # straight verbatim for those who want it
+    local($codetxt) = @_;
+
+    # language specific
+    local($newtxt,$idx_list) = &rm_embedded_stuff($codetxt);
+
+#new
+    print "\\begin\{verbcode\}\n";
+    print "\\hrule\{\}" if $Lang_typeset =~ /ruled/;
+
+    local($mangled_code) = &verb2verbcode($newtxt);
+    if (($mangled_code =~ s/\n/\n/g) >= 5) { # a terrible way to count lines
+    	print "\\codeallowbreaks\{\}";
+    }
+    $mangled_code =~ s/\n$//; # don't want newline before \end{verbcode}
+    print $mangled_code;
+
+    print "\n\\hrule" if $Lang_typeset =~ /ruled/;
+    print "\\end\{verbcode\}%\n";
+
+#old
+#   print "\\BeginLitCodeNoIndent\n";
+#   print "\\hrule\n" if $Lang_typeset =~ /ruled/;
+#
+#   local($mangled_code) = "\\mbox\{\\tt\{\}" .
+#			   &verb2latex("\\tt",$newtxt) .
+#			   "\}";
+#   # chop junk off the end (nobody said life was easy)
+#   $mangled_code =~ s/\\\\\n\\mbox\{\\tt\{\}\}$//;
+#   print $mangled_code;
+#
+#   print "\\hrule\n" if $Lang_typeset =~ /ruled/;
+#
+#   print "\\EndLitCode\n";
+
+    if ($Lang_xref !~ /noindex/) {
+	local($i);
+	foreach $i (split(/\002/, $idx_list )) {
+	    print "\\index\{".&mk_latex_index_entry('tt',$i)."\}\%\n"  if $i;
+	}
+    }
+}
+
+sub std_tgrind_code_blk { # push it through tgrind
+    local($lang, $codetxt) = @_;
+
+    # language specific
+    local($newtxt,$idx_list) = &rm_embedded_stuff($codetxt);
+
+    print "\\par\\addvspace\{0.1in\}\n";
+
+    print "\\hrule\n\\vskip .5\\baselineskip\n" if $Lang_typeset !~ /unruled/;
+
+#   print "\\begin\{small\}\n\\begin\{tgrind\}\n";
+    print "\\begin\{tgrind\}\n";
+    local($mangled_code) = &filter_string("unexpand -a | $Tgrind_pgm -f -l $lang -", $newtxt);
+
+    print $mangled_code;
+    print "\\end\{tgrind\}\n";
+#   print "\\end\{tgrind\}\n\\end\{small\}\n";
+
+    print "\\vskip .5\\baselineskip\n\\hrule\n" if $Lang_typeset !~ /unruled/;
+
+    print "\\addvspace\{0.1in\}\n";
+
+    if ($Lang_xref !~ /noindex/) {
+	local($i);
+	foreach $i (split(/\002/, $idx_list )) {
+	    print "\\index\{".&mk_latex_index_entry('tt',$i)."\}\%\n"  if $i;
+	}
+    }
+}
+
+sub std_mk_code_frag { # straight verbatim for those who want it
+    local($codetxt) = @_;
+
+    local($mangled_code) = "\\mbox\{\\tt\{\}" .
+			   &verb2latex("\\tt",$codetxt) .
+			   "\}";
+    # chop junk off the end (nobody said life was easy)
+    $mangled_code =~ s/\\\\\n\\mbox\{\\tt\{\}\}$//;
+    $mangled_code;
+}
+
+# a trailing 1 seems to be the habit for inc'd perl files
+1;
+#% \end{code}

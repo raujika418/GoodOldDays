@@ -1,0 +1,354 @@
+\section[Highlights]{Literate programming, Glasgow style}
+
+Literate programming is a style that tries to maximise humans'
+understanding of programs by full-scale use the tools of the
+description trade (typesetting, indexing, etc.) to say what a program
+does and how it works.  The power of literate programming is in the
+synergy between writing code and documentation in a unified
+framework.
+
+So, for example, in Knuth's original WEB
+system [ToDo: add reference(s)] ``code'' and ``text'' may be
+intermingled as much as you like, the pieces of ``code'' may appear in
+any order (even though it's only glorified Pascal), and quite
+substantial cross-referencing and indexing (not to mention
+\TeX{}-based typesetting) is built in.  Programs are just documents
+for people to read and enjoy which happen to have
+machine-manipulable code ``buried'' in them.
+
+% An essential feature of a literate program is that the
+% compilable/executable program and the document describing that program
+% come from {\em the same source}.  A most desirable feature of a
+% literate-programming system is that the painful-by-hand parts of
+% documents, such as indexing and cross-referencing, are provided
+% automatically.\footnote{This characterization of literate programming
+% follows Van Wyk's column in CACM, May 1990.}
+% 
+% This system for literate programming meets the criteria above.  The
+% first \sectiontype{Highlights} lists some of its features; the second
+% \sectiontype{notation-tut} describes the \LaTeX{}-looking markup
+% language and document structure; the third
+% \sectiontype{Programs} says how to run these programs for literate
+% programming.
+
+\subsection[Glasgow-objectives]{Objectives of our Glasgow system}
+
+With our Glasgow system, your ``program'' is a \LaTeX{}-like document, with
+the compilable/executable code marked off by a \tr{\begin{code}}
+... \tr{\end{code}} pair (or equivalent shortcut notation).  From
+there, your ``program'' may be (a)~compiled/interpreted [by extracting
+the embedded code and feeding it to a ``normal'' compiler/interpreter];
+(b)~turned into a beautiful typeset document to be smeared onto dead
+trees, or (c)~turned into an on-line viewable/jump-aroundable
+document.
+
+Here are the specific (distinctive?) objectives of the Glasgow system.
+
+\subsubsection[on-line-form]{Programs/documents in an on-line form}
+
+The people-oriented documents produced by literate-programming systems
+are usually on paper (this system provides those, too).  For working
+programmers, their good properties are largely overshadowed by one
+fact: paper documents go stale quickly.  Also, large programs turn
+into not-so-navigable large piles of dead trees.  Surely we can do
+better!
+
+Note our emphasis on presenting work-in-progress, as opposed to a
+system that emphasises the presentation of the final perfect
+programming gem.
+
+Our goal is that these on-line documents should be the medium of
+choice for programmers' daily reference.  (APRIL91: See the note about
+``literate Para mode'' in \sectionref{literate-para-mode}.)
+
+Our choice for an on-line format is the GNU Info format, a primitive
+ASCII-only sort-of hypertext system.  The main reason for this choice
+is to let the GNU people do as much of our programming for us as
+possible!  The program \tr{info} can display Info files on just about
+any kind of terminal; \tr{xinfo} works with the X~Window System; the
+ubiquitous GNU~Emacs has an ever-improving Info mode.
+
+\subsubsection[medium-scale]{Programming on a medium scale}
+
+We aren't really interested in programming-in-the-small (one person, a
+few hundred lines of code), and we don't know about programming in the
+large (hundreds of programmers, millions of lines of code); our target
+audience is five-person projects working on programs the size of, say,
+a \Haskell{} compiler :-)
+
+\subsubsection[language-independence]{Programming language independence}
+
+The system may be used for literate programming with any programming
+language.  However, the quality of the indexing, typesetting, etc.,
+support will vary, depending on whether that language is ``supported''
+or not.  Fortunately, the current implementation, while clunky (see
+\sectionref{clunky-implementation}, makes it easy to add better
+support for a given programming language.
+
+See \sectionref{reordering-unemphasis} for a related comment about
+code re-ordering.
+
+\subsubsection[code-verissimilitude]{Program code written exactly as in illiterate programs}
+
+You put executable/compilable code into your literate programs by
+inserting it in a \tr{\begin{code}/\end{code}} environment (or the
+``Bird-track'' equivalent); for example:
+\begin{verbatim}
+\begin{code}
+main _ = [ AppendChan stdout "Hello, world!\n" ]
+\end{code}
+\end{verbatim}
+The principle is: you can write code inside a
+\tr{\begin{code}/\end{code}} environment {\em exactly} as you would in
+an illiterate program in the same language.
+
+This brings up a dichotomy that pervades literate programs: everything
+in the program is either {\em code}\index{code (vs text)} (stuff in a
+code environment, or equivalent) or {\em text}\index{text (vs code)}
+(everything else).
+
+\subsubsection[ASCII-declarative-markup]{Use of ASCII-based files, ``declarative'' markup}
+
+ASCII-based files (as opposed to some weird binary ``internal
+format''): so you can read the files directly and e-mail them to your
+friends.
+
+Insisting on ASCII files means some kind of markup commands buried
+in the text.
+
+We want the markup to be ``declarative,'' that is, to say ``what you
+want'' rather than ``how to produce what you want.''  Section
+numbering, generation of a table of contents, much indexing work,
+cross referencing, creating of the Info ``node'' structure, etc.,
+etc., is done automagically.
+
+Our starting-point choice for a ``declarative'' markup notation was
+\LaTeX{}, because that's what we know (and so do a lot of other
+people).  You could make the case that GNU's Texinfo format would've
+been better, esp.~given some of our other objectives.  Or: you could
+argue that we should've chosen a completely different notation,
+because some people look at our literate files and think they {\em
+are} \LaTeX{}, which they are not.
+
+The most important parts of our \LaTeX{}-like notation are introduced
+in \sectionref{notation-tut}, and the whole mess is exhaustively
+described in \sectionref{Command_reference}.
+
+\subsubsection[hierarchical-structure]{Use of hierarchical structure}
+
+That is: programs/documents divided into sections, subsections within
+sections, subsubsections...
+
+Hierarchy is a very powerful structuring tool, but its utility for
+wading around a large sea of code is not apparent.  APRIL91: See the
+comments about a ``literate Para mode'' in
+\sectionref{literate-para-mode}.
+
+See also \sectionref{sectioning-large-documents}.
+
+\subsubsection[separate-compilation]{``Separate compilation'' for large programs/documents}
+
+This really follows from the size of project we're trying to support;
+it's just {\em too slow} to have to slurp in the {\em whole} program
+text and do anything...  (It's pretty slow as it is :-)
+
+Separate compilation of the embedded code:  Use the normal mechanisms
+of your programming language.  For example, if you have a literate C
+file, \tr{foo.lc}, then you would extract the code into \tr{foo.c}
+(command: \tr{lit2pgm foo.lc}) and compile as normal (\tr{gcc -c foo.c}).
+
+``Separate compilation'' of the (\LaTeX{} and (Tex)info)
+document-generating tasks: this is harder and quite a lot of work {\em
+has} to be done at ``link time''.  What happens: the initial
+``separate compilations'' of all the individual files in a
+program/document (e.g., \tr{lit2texi -c foo.lc} or
+\tr{lit2latex -c foo.lc}) produce intermediate files (\tr{*.itxi} and
+\tr{*.itex} files, respectively).  These are then consulted when
+a ``link'' is done (e.g., \tr{lit2latex root.lit}, where \tr{root.lit}
+\tr{\inputs} the other files).
+
+(It's complicated: use Makefiles!)
+
+\subsubsection[one-file-many-purposes]{Using one file in several ways}
+
+Say you're writing a \Haskell{} compiler :-), which includes the
+source code for a typechecker.  On the one hand, you want this to be
+included in ``the book'' (document) that is the whole compiler.
+However, you may also want to have a ``typechecker document'' that is
+itself self-contained (if only because the ``book'' is so big).  Going
+further: perhaps one module of your typechecker is so amazing that you
+want to publish it as a paper.
+
+You could make copies of files, edit them, etc., but that's tacky, and
+against a most deeply-held principle of literate programming: that you are
+looking at {\em the} source code for the program being described.
+
+As it stands, this system lets you put \tr{\begin{onlystandalone}} and
+\tr{\end{onlystandalone}} around pieces of your files that only apply
+in the ``do this as a standalone document'' case; similarly,
+\tr{\begin{onlypartofdoc}} and \tr{\end{onlypartofdoc}} for stuff that
+only applies in the ``the glorious whole'' case.
+
+APRIL91: I am fairly convinced I got this {\em wrong} and believe that
+this stuff would be much better handled with a pseudo-``C
+pre-preprocessor'' (one that does not look inside code blocks [see
+deeply-held principle above; \sectionref{code-verissimilitude}]); see
+\sectionref{pseudo-C-preprocessor}. 
+
+\subsection[Glasgow-NON-objectives]{NON-Objectives of our system}
+
+\subsubsection[not-reinvent-LaTeX]{Not to reinvent \LaTeX{} (or any other extensible notation)}
+
+Just as with Texinfo, our markup notation has a {\em fixed} set of
+commands.  We don't have a \tr{\define} command that let's you define
+new macros in terms of old ones.  This is for simplicity, I suppose.
+
+APRIL91: see the note about fake ``C pre-processing'' in
+\sectionref{pseudo-C-preprocessor}. 
+
+\subsubsection[reordering-unemphasis]{An un-emphasis on code-reordering}
+
+Some programming languages have a narrow-minded idea about what order
+the pieces of a program must be presented (e.g., COBOL: identification
+division, then file division, then data division [how many of you knew
+this :-]), and some literate-programming systems provide lots of
+machinery to get around this orderly intransigence.
+
+We write in \Haskell{}, which is relatively open-minded about the
+order in which functions, etc., are presented.  Re-splicing together
+code from dispersed program fragments doesn't buy you much---and we
+think the same is true for most modern or semi-modern programming
+languages.  Therefore, this system has only primitive support for
+reordering code.
+
+\subsection[Other-Glasgow-features]{Other features of our Glasgow system}
+
+\subsubsection[sectioning-large-documents]{Sectioning support for large documents}
+
+The main thing we've done here is {\em change} the sectioning commands
+(vs \LaTeX{}) so it's easy to re-arrange chunks of the hierarchy.
+Also, a default Info ``node'' structure is worked out, based on the
+sectioning information.  (Veteran Texinfo hackers will appreciate the
+joys of not typing error-prone \tr{@menu}s.)
+
+Sectioning in an individual file should {\em always} begins at
+\tr{\section}; such files should then glued together in a ``root
+file'' with \tr{\input} commands interspersed with \tr{\upsection} and
+\tr{\downsection} commands.  \tr{lit2latex}/\tr{lit2texi} combine your
+files, putting appropriate real-\LaTeX{}/Texinfo sectioning commands
+(\tr{\part}, \tr{\chapter}, etc.) in the right places.
+
+A side-effect of diverging from \LaTeX{} sectioning is that we can
+support deeper nesting of sectioning commands.
+
+It's also neat to be able to change your mind about whether you want
+to start with (\LaTeX{}-speak...) parts, chapters, sections, or
+whatever...
+
+Please see \sectionref{Sectioning} for further details about this
+whole mess.
+
+\subsubsection[automatic-indexing]{Automatic indexing of your code}
+
+An attempt is made to index all the ``interesting things'' in the code
+parts of your program.  The success of this enterprise depends on the
+degree to which the language you are using is supported.
+
+In a paper manifestation, you'll get nice neat indexes, like we're
+used to.  In an on-line
+manifestation, you would like to use the information to ``point and
+jump'' (our Info-based implementation does this, perhaps clumsily).
+
+APRIL91: See \sectionref{multiple-indexes} for latest thoughts about
+indexing.  Also, I've put some comment about free-text retrieval in
+\sectionref{free-text-index}.
+
+\subsubsection[manual-indexing]{Indexing by hand}
+
+Indexing your text (vs your code) is not automatic.  You do it by hand
+with \tr{\index{<stuff>}} commands.  The format of the \tr{\index}
+commands is a simplified (?) form of \tr{makeindex} commands.
+\Sectionref{Indexing} gives the details.
+
+\subsubsection[automatic-cross-referencing]{Automatic cross-referencing of your code}
+
+Your code may also be automatically cross-referenced; again, it's
+based on finding ``interesting things'' in your code; furthermore, it
+depends on distinguishing between ``definitions'' and ``uses'',
+because the main purpose of cross-referencing is to let you move quickly
+from a ``use'' (e.g., of a function) to its ``definition''.
+
+APRIL91: Sometimes you would really like to be able to go from a
+definition to all of its uses.  Perhaps this should be an option.
+
+Cross-referencing is automatically OFF when producing \LaTeX{}
+documents (we found it mainly cluttered) and ON when producing Info
+files (which lets you jump to the definitions through a node's menu).
+
+\subsubsection[shortcut-notations]{Shortcut notations}
+
+Within non-code parts of documents, code snippets may be included
+between `at' signs; e.g., \tr{@f x y = y@}---appropriate formatting,
+indexing, etc., will be done.
+
+APRIL91 COMMENT: I need to clarify the proper use of these \tr{@}s.  I
+also need to figure what to do when \tr{@}s are not the right thing!
+(I think Texinfo has an over-proliferation of commands for marking off
+this and that in the text.)  See \sectionref{code-in-text-formatting}.
+
+For the ordinary text to be shown in a typewriter font (much used in
+user's guides, for example), you may use the \tr{\tr{<text>}} command;
+the only restriction on \tr{<text>} is that braces must be balanced.
+The same trick for ``plain'' (roman) font is \tr{\pl{<text>}}.
+[APRIL91: See \sectionref{diff-fonts-in-text} for further thoughts
+about fonts in your text.]
+
+APRIL91: See also: \sectionref{BNF-grammars}.
+
+\subsubsection[TeX-to-ASCII]{The great ``\LaTeX{} to ASCII'' problem solved!}
+
+(Well, not quite...)  A literate program looks an awful lot like a
+\LaTeX{} document.  If you convert the program to an Info file, then
+run the \tr{info2ascii} script [which I haven't written yet :-] over
+it, you'll have a quite-reasonable all-ASCII nicely-formatted version
+of your \LaTeX{}-ish input.
+
+\subsection[Glasgow-NON-features]{Shortcomings of our system}
+
+\subsubsection[texinfo-limits]{Limits because of the Texinfo intermediate representation}
+
+We produce our on-line viewable GNU Info files by going through their
+Texinfo format.  If something cannot be represented easily in Texinfo
+(which doesn't do things not easily representable in character-only
+ASCII), it ain't in our system.  This leads to the following {\em very
+notable} shortcomings:
+\begin{enumerate}
+\item
+No graphics, pictures, or sound.
+\item
+No fancy mathematical stuff of the sort \TeX{}/\LaTeX{} is so good at.
+Note: we would like to provide enough {\em basic} mathematical stuff
+so you aren't hamstrung by this restriction.
+\end{enumerate}
+
+\subsubsection[clumsy-node-namespace]{Node namespace is not ``neat''}
+
+For all practical purposes, it's {\em your problem} to make sure that
+you don't get nodename clashes.  This is really uncool.
+
+APRIL91: Some ideas for partial alleviation of making-up-nodenames
+weariness, see \sectionref{revised-sectioning}.
+
+Barring that, a good discipline for making up unique nodenames would
+be helpful (I haven't found one yet).
+
+\subsubsection[clunky-implementation]{A clunky implementation}
+
+The principle has been: do as little work as possible.  (What do you
+expect from the proponents of lazy functional programming?)
+
+The implementation is the Perl Script From Hell, with a supporting
+cast of the Flex Program From Hell, and a whole bunch of exceedingly
+useful programs written by other people, mainly the GNU
+Info/Texinfo-related programs and \tr{tgrind} (by Van Jacobsen).  [We
+can pass along the source to all of these programs.]

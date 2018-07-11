@@ -1,0 +1,143 @@
+sub rm_embedded_stuff { # return clean code + index entries (\002 separated)
+    local($_) = @_;
+    local($entries) = '';
+
+    $* = 1;
+    while (/^\s*\(\*idx::(.*)\*\)$/) {
+	$entries .= "$1\002";
+	s/^\s*\(\*idx::(.*)\*\)$//;
+    }
+
+    s/^\s*\(\*\s*hide::.*\*\)$//g; # hidden comments
+
+    $* = 0;
+    
+    chop($entries) if $entries ne '';
+
+    ($_, $entries);
+}
+
+sub add_code_interests {
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $_) = @_;
+    local($defs_to_return) = '';
+
+    &setup_sml_keywords();
+
+    $* = 1; # multi-line searches
+    s/^>//g;		# de-Bird-ize
+    s/\(\*.*\*\)$//g;		# de-commentize (simple ones only)
+    s/^\s*#.*\n//g;	# de-CPPize
+    s/\"[^\"\n]*\"//g;	# de-stringize
+    s/\'[^\'\n]+\'//g;	# de-characterize
+    s/\`[^\`\n]+\`//g;  # de-antiquotize
+
+    # OK, the "interesting" DEFS are easy:
+    #	fun definitions
+    #   structure and signature definitions definitions
+    #   datatype <thing> =
+    #   datatype ... = <thing> (NB: hack required)
+    #   | <constructor>
+    #   type <thing> = ...
+    #
+    # CAN YOU SAY "HEURISTIC"???
+
+    while (/^(\s*fun\s+)([A-Za-z0-9_']+)(\s*)/ ||
+	   /^(\s*val\s+)([A-Za-z0-9_']+)(\s*)/ ||
+	   /^(\s*signature\s+)([A-Za-z0-9_']+)(\s*)/ ||
+           /^(\s*structure\s+)([A-Za-z0-9_']+)(\s*)/ ||
+    	   /^(\s*datatype\s+)([A-Z][A-Za-z0-9_']+)(\s*)=/ ||
+	   /^(\s*datatype\s*=\s*)([A-Z][A-Za-z0-9_']+)(\s*)/ ||
+	   /^(\s*exception\s+)([A-Z][A-Za-z0-9_']+)(\s*)/ ||
+    	   /^(\s*type\s*)([^=]+)(\s*=)/ ||
+    	   /^(\s*\|\s*)([A-Z][A-Za-z0-9_']+)(\s*)/) {
+    	local($before) = $1;
+	local($interesting_thing) = $2;
+	local($after) = $3;
+	$before =~ s/\|/\\\|/g; # oh dear
+
+	local($really_interesting_thing) = (defined($IGNORE_WD{$interesting_thing})) ? '' : $interesting_thing;
+	if ($really_interesting_thing) {
+	    if ($s != -1) {
+		$Blk_codethings_defd[$b] .= "$really_interesting_thing\001";
+		$Sec_codethings_defd[$s] .= "$really_interesting_thing\001";
+	    } else {
+		$defs_to_return .= "$really_interesting_thing\001";
+	    }
+	}
+	s/$before$interesting_thing$after//;
+    }
+    $* = 0;
+
+    ($defs_to_return, &std_codething_uses_check($s, $b, $_));
+}
+
+sub setup_sml_keywords {
+   $IGNORE_WD{'floor'} = 1;
+   $IGNORE_WD{'real'} = 1;
+   $IGNORE_WD{'div'} = 1;
+   $IGNORE_WD{'mod'} = 1;
+   $IGNORE_WD{'int'} = 1;
+   $IGNORE_WD{'real'} = 1;
+   $IGNORE_WD{'bool'} = 1;
+   $IGNORE_WD{'string'} = 1;
+   $IGNORE_WD{'fn'} = 1;
+   $IGNORE_WD{'fun'} = 1;
+   $IGNORE_WD{'abs'} = 1;
+   $IGNORE_WD{'true'} = 1;
+   $IGNORE_WD{'false'} = 1;
+   $IGNORE_WD{'not'} = 1;
+   $IGNORE_WD{'sin'} = 1;
+   $IGNORE_WD{'cos'} = 1;
+   $IGNORE_WD{'arctan'} = 1;
+   $IGNORE_WD{'exp'} = 1;
+   $IGNORE_WD{'ln'} = 1;
+   $IGNORE_WD{'exception'} = 1;
+   $IGNORE_WD{'Neg'} = 1;
+   $IGNORE_WD{'Sum'} = 1;
+   $IGNORE_WD{'Diff'} = 1;
+   $IGNORE_WD{'Prod'} = 1;
+   $IGNORE_WD{'Quot'} = 1;
+   $IGNORE_WD{'Abs'} = 1;
+   $IGNORE_WD{'Div'} = 1;
+   $IGNORE_WD{'Mod'} = 1;
+   $IGNORE_WD{'Floor'} = 1;
+   $IGNORE_WD{'Sqrt'} = 1;
+   $IGNORE_WD{'Exp'} = 1;
+   $IGNORE_WD{'Ln'} = 1;
+   $IGNORE_WD{'size'} = 1;
+   $IGNORE_WD{'chr'} = 1;
+   $IGNORE_WD{'ord'} = 1;
+   $IGNORE_WD{'explode'} = 1;
+   $IGNORE_WD{'implode'} = 1;
+   $IGNORE_WD{'Ord'} = 1;
+   $IGNORE_WD{'Chr'} = 1;
+   $IGNORE_WD{'list'} = 1;
+   $IGNORE_WD{'nil'} = 1;
+   $IGNORE_WD{'rev'} = 1;
+   $IGNORE_WD{'map'} = 1;
+   $IGNORE_WD{'o'} = 1;
+   $IGNORE_WD{'unit'} = 1;
+   $IGNORE_WD{'ref'} = 1;
+   $IGNORE_WD{'instream'} = 1;
+   $IGNORE_WD{'outstream'} = 1;
+   $IGNORE_WD{'std_in'} = 1;
+   $IGNORE_WD{'std_out'} = 1;
+   $IGNORE_WD{'std_err'} = 1;
+   $IGNORE_WD{'open_in'} = 1;
+   $IGNORE_WD{'open_out'} = 1;
+   $IGNORE_WD{'close_in'} = 1;
+   $IGNORE_WD{'close_out'} = 1;
+   $IGNORE_WD{'input'} = 1;
+   $IGNORE_WD{'output'} = 1;
+   $IGNORE_WD{'lookahead'} = 1;
+   $IGNORE_WD{'end_of_stream'} = 1;
+   $IGNORE_WD{'Io'} = 1;
+   $IGNORE_WD{'Match'} = 1;
+   $IGNORE_WD{'Bind'} = 1;
+   $IGNORE_WD{'Interrupt'} = 1;
+#   $IGNORE_WD{''} = 1;
+}
+
+# this keeps 'do'ing happy
+1;

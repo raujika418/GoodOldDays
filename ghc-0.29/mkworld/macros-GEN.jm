@@ -1,0 +1,1210 @@
+#if 0
+%************************************************************************
+%*									*
+\section[mkworld-macros-GEN]{Mkworld CPP macros for the masses}
+%*									*
+%************************************************************************
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-depend]{Macros related to \tr{depend} std target}
+%*									*
+%************************************************************************
+
+These \tr{*DependTarget} rules assume the relevant programs are in
+their proper places.  They won't reach out and build them for you.
+
+@CDependTarget@: generate rules to compute dependencies for all C files
+in @deps@.
+\begin{code}
+#endif /* 0 */
+#ifndef CDependTarget
+#define CDependTarget(deps)					@@\
+MkDependCNeededHere(depend)					@@\
+								@@\
+depend:: deps							@@\
+	$(MKDEPENDC) $(MKDEPENDCFLAGS) -- $(CFLAGS) -- deps
+#endif /* CDependTarget */
+#if 0
+\end{code}
+
+@HaskellDependTarget@: generate rules to compute dependencies for all
+Haskell files in @deps@.
+\begin{code}
+#endif /* 0 */
+#ifndef HaskellDependTarget
+#define HaskellDependTarget(deps)				@@\
+MkDependHSNeededHere(depend)					@@\
+								@@\
+depend:: deps							@@\
+	$(MKDEPENDHS) $(MKDEPENDHSFLAGS) -- $(HCFLAGS) -- deps	@@\
+	@chmod 444 Makefile
+#endif /* HaskellDependTarget */
+#if 0
+\end{code}
+
+@LitDependTarget@: generate rules to compute dependencies for the
+specified ``literate root file''.
+\begin{code}
+#endif /* 0 */
+#ifndef LitDependTarget
+#define LitDependTarget(root,rootext)				@@\
+								@@\
+depend::							@@\
+	$(MKDEPENDLIT) $(MKDEPENDLITFLAGS) root.rootext
+#endif /* LitDependTarget */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-all]{Macros related to \tr{all} std target}
+%*									*
+%************************************************************************
+
+First, so easy ones.  @AllTarget()@ should be a part of most of these
+to automatically add the target to the \tr{all} rule.
+
+\begin{code}
+#endif /* 0 */
+#ifndef AllTarget
+#define AllTarget(depends)				@@\
+all$(TARGET_TAG) :: depends
+#endif
+#if 0
+\end{code}
+
+Make a link to a target.  Used when several targets use
+the same object under different names.
+
+\begin{code}
+#endif /* 0 */
+#ifndef LinkTarget
+#define LinkTarget(target,linkto)			@@\
+AllTarget(target)					@@\
+ExtraStuffToClean(target)				@@\
+target:: linkto						@@\
+	RemoveTarget(target)				@@\
+	${LN} linkto target
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-macros-bld-pgms]{Compiling modules/files and linking programs}
+%*									*
+%************************************************************************
+
+%************************************************************************
+%*									*
+\subsubsubsection{General macros}
+%*									*
+%************************************************************************
+
+@BuildPgm@: generate rules to compile and link the
+indicated program; since it does not use any default object files, it
+may be used for multiple programs in the same @Jmakefile@.
+
+This target is the general interface for building a single program
+(perhaps one of many in the @Makefile@).
+
+\begin{code}
+#endif /* 0 */
+#ifndef BuildPgm
+#define BuildPgm(program,compiler,compileropts,objs,libs,deplibs)	@@\
+AllTarget(program)							@@\
+ExtraStuffToClean(program)						@@\
+program:: objs deplibs							@@\
+	RemoveTarget($@)						@@\
+	compiler -o $@ compileropts $(LDOPTIONS) objs deplibs libs
+#endif /* BuildPgm */
+#if 0
+\end{code}
+ToDo: not sure all ``compilers'' will like that -o above...
+
+%************************************************************************
+%*									*
+\subsubsubsection{Compile C files, build C programs}
+%*									*
+%************************************************************************
+
+These depend on suitable suffix rules existing.
+
+\begin{code}
+#endif /* 0 */
+#ifndef BuildPgmFromCFiles
+#define BuildPgmFromCFiles(program,objs,libs,deplibs)		@@\
+BuildPgm(program,$(CC),$(CFLAGS),objs,libs,deplibs)
+#endif
+
+#ifndef BuildPgmFromOneCFile
+#define BuildPgmFromOneCFile(program)				@@\
+SRCS_C = program.c						@@\
+OBJS_C = program.o						@@\
+BuildPgm(program,$(CC),$(CFLAGS),$(OBJS_C),,)
+#endif
+#if 0
+\end{code}
+
+This rule is formulated, esp \tr{*.tab.h} part, in case you have more
+than one @YaccRunWithExpectMsg@ in a given directory.
+\begin{code}
+#endif /* 0 */
+/*ToDo: cmp => $(CMP)*/
+
+#ifndef YaccRunWithExpectMsg
+#define YaccRunWithExpectMsg(srcfile,ss,rs)			@@\
+srcfile.tab.c : srcfile.y					@@\
+	$(RM) srcfile.tab.c srcfile.tab.h-SAVE y.tab.c y.tab.h y.output		@@\
+	@if [ -f srcfile.tab.h ] ; then $(MV) -f srcfile.tab.h srcfile.tab.h-SAVE ; else exit 0 ; fi @@\
+	@echo expect ss shift/reduce conflicts and rs reduce/reduce conflicts @@\
+	$(YACC) $(YFLAGS) srcfile.y				@@\
+	@if cmp -s srcfile.tab.h-SAVE y.tab.h ; then \		@@\
+	    $(MV) -f srcfile.tab.h-SAVE srcfile.tab.h ; \	@@\
+	else \							@@\
+	    echo $(MV) -f y.tab.h srcfile.tab.h ; \		@@\
+	    $(MV) -f y.tab.h srcfile.tab.h ; \			@@\
+	    chmod 444 srcfile.tab.h ; \				@@\
+	fi							@@\
+	@$(RM) y.tab.h						@@\
+	$(MV) y.tab.c srcfile.tab.c				@@\
+	@chmod 444 srcfile.tab.c				@@\
+								@@\
+srcfile.tab.h : srcfile.tab.c					@@\
+	@: /* no-op */
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsubsection{Compile Haskell modules, build Haskell programs}
+%*									*
+%************************************************************************
+
+Defined here...
+\begin{description}
+\item[@BuildPgmFromHaskellModules@:]
+
+\item[@BuildPgmFromOneHaskellModule@:]
+
+\item[@HaskellCompileWithSpecifiedFlags@:]
+\item[@HaskellCompileWithExtraFlags@:]
+\item[@HaskellCompile@:]
+
+\item[@HaskellCompileWithSpecifiedFlags_Recursive@:]
+\item[@HaskellCompileWithExtraFlags_Recursive@:]
+\item[@HaskellCompile_Recursive@:]
+\end{description}
+
+\begin{code}
+#endif /* 0 */
+#ifndef BuildPgmFromHaskellModules
+#define BuildPgmFromHaskellModules(program,objs,libs,deplibs)	@@\
+BuildPgm(program,$(HC),$(HCFLAGS),objs,libs,deplibs)
+#endif
+
+#ifndef BuildPgmFromOneHaskellModule
+#define BuildPgmFromOneHaskellModule(program,module,isuf)	@@\
+SRCS_HS = module.isuf						@@\
+OBJS_HS = module.o						@@\
+BuildPgm(program,$(HC),$(HCFLAGS),$(OBJS_HS),,)
+#endif
+#if 0
+\end{code}
+
+First, we define just the body of a hs-to-o rule...
+\begin{code}
+#endif /* 0 */
+#if HaskellCompilerType == HC_CHALMERS_HBC || HaskellCompilerType == HC_ROJEMO_NHC
+
+#define _body_HaskellCompileWithSpecifiedFlags(module_isuf,module_osuf,module,isuf,flags) @@\
+	@echo $(RM) $@; \					@@\
+	$(RM) $@; \						\
+	HaskellCompilePreProcessing(module_isuf,module,isuf)	@@\
+	iface=`basename module_isuf .isuf`.hi ; \		@@\
+	if [ -f $(@D)/$$iface ] ; then \			@@\
+	    $(RM) $(@D)/$$iface-SAVE ; \			@@\
+	    $(MV) -f $(@D)/$$iface $(@D)/$$iface-SAVE ; \	@@\
+	fi ; \							@@\
+	set +e; \						@@\
+	echo $(HC) flags module_isuf -o module_osuf; \		@@\
+	$(HC) flags module_isuf -o module_osuf; \		@@\
+	if [ $$? -ne 0 ] ; then \				@@\
+	    $(MV) -f $(@D)/$$iface-SAVE $(@D)/$$iface ; \	@@\
+	    exit 1; \						@@\
+	fi ; \							@@\
+	if cmp -s $(@D)/$$iface-SAVE $(@D)/$$iface ; then \	@@\
+	    $(MV) -f $(@D)/$$iface-SAVE $(@D)/$$iface ;  \	@@\
+	else \							@@\
+	    if [ -f $(@D)/$$iface-SAVE ] ; then \		@@\
+		diff -c1 $(@D)/$$iface-SAVE $(@D)/$$iface ;  \	@@\
+		$(RM) $(@D)/$$iface-SAVE ;  \			@@\
+	    fi ; \						@@\
+	fi							\
+	HaskellCompilePostProcessing(module_isuf,module,isuf)
+	
+#else /* assume something GHC-ish */
+
+#define _body_HaskellCompileWithSpecifiedFlags(module_isuf,module_osuf,module,isuf,flags) @@\
+	$(RM) $@						\
+	HaskellCompilePreProcessing(module_isuf,module,isuf)	@@\
+	$(HC) flags -o module_osuf module_isuf 			\
+	HaskellCompilePostProcessing(module_isuf,module,isuf)
+
+#endif /* not HBC */
+#if 0
+\end{code}
+
+The default for the ``pre-'' and/or ``post-processing'' part (possibly
+swizzling around profiling/statistics files) is, of course, to do no
+such thing.
+\begin{code}
+#endif /* 0 */
+#ifndef HaskellCompilePreProcessing
+#define HaskellCompilePreProcessing(module_isuf,module,isuf) /* nothing */
+#endif /* ! HaskellCompilePreProcessing */
+
+#ifndef HaskellCompilePostProcessing
+#define HaskellCompilePostProcessing(module_isuf,module,isuf) /* nothing */
+#endif /* ! HaskellCompilePostProcessing */
+#if 0
+\end{code}
+
+Now we just use the \tr{_body_*} thing above...  For the \tr{_Recursive} ones
+(to avoid make dependencies), we leave out the .hi.osuf dependency.
+\begin{code}
+#endif /* 0 */
+#ifndef HaskellCompileWithSpecifiedFlags
+#define HaskellCompileWithSpecifiedFlags(module,isuf,osuf,flags)	@@\
+module.hi : module.osuf							@@\
+	@\: /* nothing */						@@\
+module.osuf : module.isuf						\
+_body_HaskellCompileWithSpecifiedFlags(module.isuf,module.osuf,module,isuf,flags)
+#endif /* HaskellCompileWithSpecifiedFlags */
+
+#ifndef HaskellCompileWithSpecifiedFlags_Recursive
+#define HaskellCompileWithSpecifiedFlags_Recursive(module,isuf,osuf,flags) @@\
+module.osuf : module.isuf						\
+_body_HaskellCompileWithSpecifiedFlags(module.isuf,module.osuf,module,isuf,flags)
+#endif /* HaskellCompileWithSpecifiedFlags_Recursive */
+#if 0
+\end{code}
+
+\begin{code}
+#endif /* 0 */
+#ifndef HaskellCompileWithExtraFlags
+#define HaskellCompileWithExtraFlags(module,isuf,osuf,todo,flags) @@\
+HaskellCompileWithSpecifiedFlags(module,isuf,osuf,todo $(HCFLAGS) flags)
+#endif /* HaskellCompileWithExtraFlags */
+
+#ifndef HaskellCompileWithExtraFlags_Recursive
+#define HaskellCompileWithExtraFlags_Recursive(module,isuf,osuf,todo,flags) @@\
+HaskellCompileWithSpecifiedFlags_Recursive(module,isuf,osuf,todo $(HCFLAGS) flags)
+#endif /* HaskellCompileWithExtraFlags_Recursive */
+#if 0
+\end{code}
+
+\begin{code}
+#endif /* 0 */
+#ifndef HaskellCompile
+#define HaskellCompile(module,isuf,osuf,todo)			@@\
+HaskellCompileWithSpecifiedFlags(module,isuf,osuf,todo $(HCFLAGS))
+#endif /* HaskellCompile */
+
+#ifndef HaskellCompile_Recursive
+#define HaskellCompile_Recursive(module,isuf,osuf,todo)		@@\
+HaskellCompileWithSpecifiedFlags_Recursive(module,isuf,osuf,todo $(HCFLAGS))
+#endif /* HaskellCompile_Recursive */
+#if 0
+\end{code}
+
+We need those per-compiler HeapSize/StkSize/RunCpp macros...
+\begin{code}
+#endif /* 0 */
+#define HaskellCompilerHeapSize(size) CAT2(-H,size)
+
+#if HaskellCompilerType == HC_GLASGOW_GHC
+#define HaskellCompilerStkSize(size)  -Rmax-stksize size
+#define HaskellCompilerRunCpp()	-cpp
+#define HaskellEndRTSFlags()	/*none*/
+
+#else
+#if HaskellCompilerType == HC_CHALMERS_HBC
+#define HaskellCompilerStkSize(size)  CAT2(-V,size)
+#define HaskellCompilerRunCpp()	-M
+#define HaskellEndRTSFlags()	-
+
+#else
+#if HaskellCompilerType == HC_ROJEMO_NHC
+#define HaskellCompilerStkSize(size)  CAT2(-V,size)
+#define HaskellCompilerRunCpp()	-cpp
+#define HaskellEndRTSFlags()	/*none*/
+
+#else /* not GHC or HBC; guess wildly */
+#define HaskellCompilerStkSize(size)  /*cant set stksize*/
+#define HaskellCompilerRunCpp()	-cpp
+#define HaskellEndRTSFlags()	/*none*/
+
+#endif
+#endif
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-macros-scripts]{Processing scripts into ``executables''}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#ifndef ProgramScriptTarget
+#define ProgramScriptTarget(prog,dst,src,deplist)	@@\
+AllTarget(dst)						@@\
+ExtraStuffToClean(dst)					@@\
+dst::  src deplist					@@\
+	$(RM) $@					@@\
+	echo "#!"prog > $@				@@\
+	cat src >> $@					@@\
+	chmod a+x $@
+#endif /* ProgramScriptTarget */
+#if 0
+\end{code}
+
+Create a target by running it through @msub@:
+\begin{code}
+#endif /* 0 */
+#ifndef MsubTarget
+#define MsubTarget(dst,src,flags,deplist)		@@\
+AllTarget(dst)						@@\
+ExtraStuffToClean(dst)					@@\
+dst:: src deplist					@@\
+	$(RM) dst					@@\
+	$(MSUB) flags src > dst || ( $(RM) dst && exit 1 )
+#endif
+#if 0
+\end{code}
+
+@MsubProgramScriptTarget@: generate rules to create a script for an
+arbitrary program by running the input through @msub@.  If
+@HasExecableScripts@ isn't @YES@, then make sure that the first line
+begins with a colon and write the script into a temp file, have the
+program execute that, and remove the temp file when done.  Ugly ugly
+ugly...  @prog@ must be a full pathname...
+\begin{code}
+#endif /* 0 */
+#ifndef MsubProgramScriptTarget
+#define MsubProgramScriptTarget(prog,dst,src,flags,deplist)	@@\
+AllTarget(dst)							@@\
+ExtraStuffToClean(dst)						@@\
+dst::  src deplist						@@\
+	$(RM) $@						@@\
+	echo "#!"prog > $@					@@\
+	${MSUB} flags src >> $@ || ( $(RM) $@ && exit 1 )	@@\
+	chmod a+x $@
+#endif /* MsubProgramScriptTarget */
+#if 0
+\end{code}
+
+For an @msub@ target that really slurps things out of the
+\tr{Makefile}, we delete it as part of \tr{make Makefile(s)}, so that
+it will be re-made.
+\begin{code}
+#endif /* 0 */
+#ifndef MsubMakefileDependentProgramScriptTarget
+#define MsubMakefileDependentProgramScriptTarget(prog,dst,src,flags,deplist)	@@\
+MsubProgramScriptTarget(prog,dst,src,flags,deplist)			@@\
+									@@\
+Makefile::								@@\
+	$(RM) dst
+#endif
+
+#ifndef MsubScriptTarget
+#define MsubScriptTarget(dst,src,flags,deplist)				@@\
+MsubProgramScriptTarget(${SHELL},dst,src,flags,deplist)
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-macros-bld-libs]{Linking modules/files into libraries}
+%*									*
+%************************************************************************
+
+@NormalLibraryTarget@: generate rules to create a library.
+
+\begin{code}
+#endif /* 0 */
+#ifndef NormalLibraryTarget
+#define NormalLibraryTarget(libname,objlist)	@@\
+AllTarget(CAT2(lib,libname.a))			@@\
+ExtraStuffToClean(CAT2(lib,libname.a))		@@\
+CAT2(lib,libname.a) :: objlist			@@\
+	$(RM) $@				@@\
+	$(AR) $@ objlist			@@\
+	$(RANLIB) $@
+#endif /* NormalLibraryTarget */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-runtests]{Macros related to \tr{runtests} std target}
+%*									*
+%************************************************************************
+
+Rules to do with standard @runtests@ target.
+
+\begin{code}
+#endif /* 0 */
+#ifndef RuntestsTarget
+#define RuntestsTarget(depends)			@@\
+runtests$(TARGET_TAG) :: CAT2(runtest_,depends)
+#endif
+
+#ifndef RunStdTestTimeCmd
+#define RunStdTestTimeCmd /*none*/
+#endif
+
+#ifndef RunStdTest
+#define RunStdTest(name,prog,teststuff)		@@\
+RuntestsTarget(name)				@@\
+CAT2(runtest_,name)::				@@\
+	@RunStdTestTimeCmd $(RUNSTDTEST) prog $(RUNSTDTEST_FLAGS) teststuff
+#endif /* RunStdTest */
+
+#ifndef AsPartOfTest
+#define AsPartOfTest(test,cmdline)		@@\
+RuntestsTarget(test)				@@\
+CAT2(runtest_,test)::				@@\
+	cmdline
+#endif /* AsPartOfTest */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-install]{Macros related to \tr{install} std target}
+%*									*
+%************************************************************************
+
+Run script through @msub@ with \tr{INSTALLING=1},
+putting result in a tmp file (don't mess w/ the @dst@ file here);
+install that tmp file in the right place.
+\begin{code}
+#endif /* 0 */
+#ifndef InstallMsubbedScriptTarget
+#define InstallMsubbedScriptTarget(prog,dst,src,installdir)	@@\
+CAT2(dst,_tmp):  src						@@\
+	$(RM) $@						@@\
+	echo "#!"prog > $@					@@\
+	${MSUB} INSTALLING=1 src >> $@ || ( $(RM) $@ && exit 1)	@@\
+	chmod a+x $@						@@\
+								@@\
+InstallTargetWithNameAndFlags(CAT2(dst,_tmp),installdir,dst,)	@@\
+install::							@@\
+	$(RM) CAT2(dst,_tmp)
+#endif /* InstallMsubbedScriptTarget */
+#if 0
+\end{code}
+
+
+INSTALLATION RULES.  \tr{InstallTarget()} should be a part of nearly
+all of these, to add the target to the `install' rule.
+
+\begin{code}
+#endif /* 0 */
+#ifndef InstallTarget
+#define InstallTarget(depends)					@@\
+install:: CAT2(install_,depends)
+#endif
+
+#ifndef InstallDocTarget
+#define InstallDocTarget(depends)				@@\
+install_docs:: CAT2(install_doc_,depends)
+#endif
+#if 0
+\end{code}
+
+Install a target specifying the flags to use.  Many of the following
+installation rules are instantiated as a particular expansion of this.
+
+\begin{code}
+#endif /* 0 */
+#ifndef InstallTargetWithNameAndFlags
+#define InstallTargetWithNameAndFlags(target,destdir,new_name,flags)	@@\
+InstallTarget(new_name)							@@\
+CAT2(install_,new_name):: target					@@\
+	$(INSTALL) flags target destdir/new_name
+#endif
+
+#ifndef InstallTargetWithFlags
+#define InstallTargetWithFlags(target,dest,flags)			@@\
+InstallTargetWithNameAndFlags(target,dest,target,flags)
+#endif
+
+#ifndef InstallDocTargetWithFlags
+#define InstallDocTargetWithFlags(src,presuff,target,postsuff,dest,flags) @@\
+InstallDocTarget(CAT3(target,_,postsuff))				@@\
+CAT4(install_doc_,target,_,postsuff):: src.presuff			@@\
+	$(INSTALL) flags src.presuff dest/target.postsuff
+#endif
+
+/*
+	Install a program
+*/
+
+#ifndef InstallBinaryTarget
+#define InstallBinaryTarget(program,dest)				@@\
+InstallTargetWithFlags(program,dest,$(INSTBINFLAGS))
+#endif
+
+/*	Install a setuid/setgid/etc program -- DELETED (partain)
+*/
+
+/*
+	Install an executable script
+*/
+
+#ifndef InstallScriptTarget
+#define InstallScriptTarget(script,dest)				@@\
+InstallTargetWithFlags(script,dest,$(INSTSCRIPTFLAGS))
+#endif
+
+/*
+	Install a library (platform-dependent)
+*/
+
+#ifndef InstallLibraryTarget
+#define InstallLibraryTarget(libname,dest)				@@\
+InstallTargetWithFlags(CAT2(lib,libname).a,dest,$(INSTLIBFLAGS))	@@\
+	${RANLIB} dest/CAT2(lib,libname).a
+#endif
+
+/*
+	Install an include file
+*/
+
+#ifndef InstallIncludeTarget
+#define InstallIncludeTarget(file,dest)					@@\
+InstallTargetWithFlags(file,dest,$(INSTINCFLAGS))
+#endif
+
+/*
+	Install a non-executable or data file (these are equivalent)
+*/
+
+#ifndef InstallDataTarget
+#define InstallDataTarget(file,dest)					@@\
+InstallTargetWithFlags(file,dest,$(INSTDATAFLAGS))
+#endif
+
+/*
+	Install a set of non-executable files
+
+	DUMP THIS SOMETIME.
+*/
+
+#ifndef InstallMultNonExecTargets
+#define InstallMultNonExecTargets(rule,targets,dest)		@@\
+CAT2(install_,rule):: rule					@@\
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \		@@\
+	for i in targets ;\					@@\
+	do \							@@\
+		echo $(INSTALL) $(INSTDATAFLAGS) $$i dest ; \ 	@@\
+		$(INSTALL) $(INSTDATAFLAGS) $$i dest ; \	@@\
+	done
+#endif
+
+/*
+	Install a man page.
+
+	THIS IS WRONG - rules in Jmakefiles don't have suffix!
+
+	file srcsuffix destdir dstsuffix ???
+*/
+
+#ifndef InstallManPageTarget
+#define InstallManPageTarget(file,destdir,suffix)			@@\
+InstallDocTargetWithFlags(file,man,file,suffix,destdir,$(INSTMANFLAGS))
+#endif
+
+#ifndef InstallInfoFileTarget
+#define InstallInfoFileTarget(src,target,destdir)			@@\
+InstallDocTargetWithFlags(src,info,target,info,destdir,$(INSTMANFLAGS))
+#endif
+
+#ifndef InstallLinkTarget
+#define InstallLinkTarget(target, linkto, dir)				@@\
+InstallTarget(target)							@@\
+CAT2(install_,target):: CAT2(install_,linkto)				@@\
+	RemoveTarget(dir/target)					@@\
+	${LN} dir/linkto dir/target
+#endif
+
+/*
+	Fake install rules for things not installed anywhere
+*/
+
+#ifndef FakeInstallTarget
+#define FakeInstallTarget(target)					@@\
+InstallTarget(target)							@@\
+CAT2(install_,target):: target						@@\
+	@echo target is not installed anywhere.
+#endif
+
+#ifndef FakeInstallLibrary
+#define FakeInstallLibrary(libname)					@@\
+InstallTarget(CAT2(lib,libname).a)					@@\
+CAT2(install_lib,libname).a:: CAT2(lib,libname).a			@@\
+	@echo CAT2(lib,libname).a is not installed anywhere.
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-docs]{Macros related to \tr{docs} std target}
+%*									*
+%************************************************************************
+
+Need rules just to make a man page or info file.
+
+\begin{code}
+#endif /* 0 */
+#ifndef DocsTarget
+#define DocsTarget(depends)						@@\
+docs:: depends
+#endif
+
+/* putting the InfoStuffNeededHere in semi-presumes that
+   LitDocRootTarget is only used once per directory (?)
+*/
+#ifndef LitDocRootTargetWithNamedOutput
+#define LitDocRootTargetWithNamedOutput(rootroot,rootext,rootout)	@@\
+DocsTarget(rootroot.info rootroot.dvi)					@@\
+ExtraStuffToClean(rootroot.info rootroot.dvi rootroot.texi rootroot.tex) @@\
+LitDependTarget(rootroot,rootext)					@@\
+									@@\
+rootroot.info:: rootroot.texi						@@\
+	RemoveTarget($@)						@@\
+	$(MAKEINFO) $(MAKEINFOFLAGS) rootroot.texi \			@@\
+	&& $(POSTMAKEINFO) rootroot.info				@@\
+									@@\
+rootroot.dvi:: rootroot.tex						@@\
+	RemoveTarget($@)						@@\
+	$(LTX) rootroot.tex						@@\
+									@@\
+rootroot.texi: rootout.itxi						@@\
+	RemoveTarget($@)						@@\
+	$(LIT2TEXI) -S $(LIT2TEXIFLAGS) -N rootroot.info -o rootroot.texi rootout.itxi	@@\
+									@@\
+rootout.itxi: rootroot.rootext						@@\
+	RemoveTarget($@)						@@\
+	$(LIT2TEXI) -S -c $(LIT2TEXIFLAGS) -o rootout.itxi rootroot.rootext @@\
+									@@\
+rootroot.tex: rootout.itex						@@\
+	RemoveTarget($@)						@@\
+	$(LIT2LATEX) -S $(LIT2LATEXFLAGS) -o rootroot.tex rootout.itex	@@\
+									@@\
+rootout.itex: rootroot.rootext						@@\
+	RemoveTarget($@)						@@\
+	$(LIT2LATEX) -S -c $(LIT2LATEXFLAGS) -o rootout.itex rootroot.rootext @@\
+									@@\
+rootroot.html: rootout.ihtml						@@\
+	RemoveTarget($@)						@@\
+	$(LIT2HTML) -S $(LIT2HTMLFLAGS) -o rootroot.html rootout.ihtml	@@\
+									@@\
+rootout.ihtml: rootroot.rootext						@@\
+	RemoveTarget($@)						@@\
+	$(LIT2HTML) -S -c $(LIT2HTMLFLAGS) -o rootout.ihtml rootroot.rootext
+#endif /* LitDocRootTargetWithNamedOutput */
+
+#ifndef LitDocRootTarget
+#define LitDocRootTarget(rootroot,rootext) \
+LitDocRootTargetWithNamedOutput(rootroot,rootext,rootroot)
+#endif /* LitDocRootTarget */
+
+#ifndef VerbatimAndTibTarget
+#define VerbatimAndTibTarget(root)					@@\
+VerbatimNeededHere(docs root.tex)					@@\
+DocsTarget(root.dvi)							@@\
+ExtraStuffToClean(root.dvi root.tex)
+#endif /* VerbatimAndTibTarget */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-install-docs]{Macros related to \tr{install_docs} std target}
+%*									*
+%************************************************************************
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-cleaning]{Macros related to \tr{clean} (and \tr{veryclean}) std targets}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#ifndef ExtraStuffToClean
+#define ExtraStuffToClean(extra)					@@\
+clean::									@@\
+	$(RM) extra
+#endif /* ExtraStuffToClean */
+
+#ifndef ExtraStuffToBeVeryClean
+#define ExtraStuffToBeVeryClean(extra)					@@\
+veryclean::								@@\
+	$(RM) extra
+#endif /* ExtraStuffToBeVeryClean */
+
+#ifndef RemoveTarget
+#if RemoveTargetByMoving
+#define RemoveTarget(program) \
+$(RM) program; if [ -f program ]; then $(MV) program CAT2(program,~); fi
+#else
+#define RemoveTarget(program) $(RM) program
+#endif /* ! RemoveTargetByMoving */
+#endif /* RemoveTarget */
+/*
+ * CleanTarget - generate rules to remove any garbage files; the #* is here
+ * instead of in the definition of CLEAN_CMD because System V would treat a
+ * pound sign in the CLEAN_CMD variable as a comment.
+ */
+#ifndef CleanTarget
+#define CleanTarget()							@@\
+clean::									@@\
+	$(CLEAN_CMD) \#*
+#endif /* CleanTarget */
+
+/*
+ * VeryCleanTarget - generate rules for "make veryclean"; the idea is
+ * that "make clean" does what "you almost always want" and "make
+ * veryclean" removes ALL generated files.
+ */
+#ifndef VeryCleanTarget
+#define VeryCleanTarget()						@@\
+veryclean::								@@\
+	$(CLEAN_CMD) \#*
+#endif /* VeryCleanTarget */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-tags]{Macros related to \tr{tags} std target}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+/* this should normally precede <>TagsTarget commands */
+/* those commands *append* to the TAGS file */
+#ifndef ClearTagsFile
+#define ClearTagsFile()							@@\
+tags::									@@\
+	$(RM) TAGS; touch TAGS
+#endif
+
+/*
+ * CTagsTarget - generate rules to compute tags files for C source code.
+ *	(specified as an arg)
+ *	partain: we really expect "etags" to be used...
+ */
+#ifndef CTagsTarget
+#define CTagsTarget(srcs)						@@\
+tags::									@@\
+	$(CTAGS) -a $(CTAGSFLAGS) srcs
+#endif /* CTagsTarget */
+
+/* Similarly for Perl and Haskell */
+#ifndef PerlTagsTarget
+#define PerlTagsTarget(srcs)						@@\
+tags::									@@\
+	$(PERLTAGS) $(PERLTAGSFLAGS) srcs
+#endif /* PerlTagsTarget */
+
+#ifndef HsTagsTarget
+#define HsTagsTarget(srcs)						@@\
+tags::									@@\
+	$(HSTAGS) $(HSTAGSFLAGS) srcs
+#endif /* HsTagsTarget */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-Makefile]{Macros related to \tr{make Makefile}}
+%*									*
+%************************************************************************
+
+@BuildMakefileTarget@: generate rules to build a \tr{Makefile} from a
+\tr{Jmakefile} (and, in the past, any special jmake flags). This is
+generally done automatically by the template or by any special
+Jmakefiles.
+
+\begin{code}
+#endif /* 0 */
+#ifndef BuildMakefileTarget
+#define BuildMakefileTarget()						@@\
+JmakeNeededHere(Makefile)						@@\
+									@@\
+Makefile:: $(MYJCONFIGFILES)						@@\
+									@@\
+Makefile::								@@\
+	-@if [ -f Makefile ]; then					  \
+		$(RM) Makefile.bak; $(MV) Makefile Makefile.bak;	  \
+	else exit 0; fi							@@\
+	$(JMAKE_CMD) -DTopDirPwd=$(TOP_PWD) -DTopDir=$(TOP) -DCurDir=$(CURRENT_DIR) @@\
+	$(JRESTOREDEPS)							@@\
+	@if cmp -s Makefile Makefile.bak; then $(RM) Makefile.bak ; else exit 0 ; fi  @@\
+	@chmod 444 Makefile						@@\
+									@@\
+whoami::								@@\
+	@echo $(PROJECTNAME), version $(PROJECTVERSION) $(PROJECTPATCHLEVEL) @@\
+	@echo project\: $(PROJECTLABEL)\; setup\: $(SETUPLABEL)		@@\
+	@echo now building on a \`$(BUILDPLATFORM)\' host		@@\
+	@echo hoping to run on a \`$(HOSTPLATFORM)\' host
+#endif /* BuildMakefileTarget */
+#if 0
+\end{code}
+
+@MakefileTarget@: generate rules to build a normal \tr{Makefile}.
+\begin{code}
+#endif /* 0 */
+#ifndef MakefileTarget
+#define MakefileTarget()						@@\
+BuildMakefileTarget()
+#endif /* MakefileTarget */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-MISC]{MISCELLANEOUS macros}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#ifndef GenerateOptionsMakeVars
+#define GenerateOptionsMakeVars(PGM,THINGS,AllProjectsPgmThings,PlatformPgmThings,ProjectPgmThings,SetupPgmThings) @@\
+CAT4(GLUED_,PGM,_,THINGS) = AllProjectsPgmThings PlatformPgmThings ProjectPgmThings SetupPgmThings $(CAT3(PGM,_,THINGS)) $(CAT4(EXTRA_,PGM,_,THINGS))
+#endif
+#if 0
+\end{code}
+
+
+%************************************************************************
+%*									*
+\subsection[mkworld-macros-subdir]{Sub-directories: things for std targets...}
+%*									*
+%************************************************************************
+
+\subsubsection{@NamedTargetSubdirs@}
+
+Recursively make a series of steps.
+
+\begin{code}
+#endif /* 0 */
+#ifndef NamedTargetSubdirs
+#define NamedTargetSubdirs(name,dirs,verb,flags,subname)		@@\
+name::									@@\
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \			@@\
+	for i in dirs ;\						@@\
+	do \								@@\
+		(cd $$i && echo verb "in $(CURRENT_DIR)/$$i..." && \	@@\
+			$(MAKE) $(MFLAGS) flags subname); \		@@\
+	done
+#endif
+#if 0
+\end{code}
+
+\subsubsection{@NamedMakeSubdirs@}
+
+Generate rules to do makes in the given subdirectories.  If you want
+@CDEBUGFLAGS@ passed along to subdirectories, provide a line like the
+following in the appropriate @Jmakefile@:
+
+\begin{verbatim}
+#define PassCDebugFlags 'CDEBUGFLAGS=$(CDEBUGFLAGS)'
+\end{verbatim}
+
+\begin{code}
+#endif /* 0 */
+#ifndef NamedMakeSubdirs
+#define NamedMakeSubdirs(name,dirs) \
+NamedTargetSubdirs(name,dirs,"making" name,PassCDebugFlags,all)
+#endif /* NamedMakeSubdirs */
+#if 0
+\end{code}
+
+\subsubsection{@DependSubdirs@}
+
+Generate rules to recursively compute dependencies as
+part of the make depend step.
+
+\begin{code}
+#endif /* 0 */
+#ifndef DependSubdirs
+#define DependSubdirs(dirs) \
+NamedTargetSubdirs(depend,dirs,"making dependencies",,depend)
+#endif /* DependSubdirs */
+#if 0
+\end{code}
+
+
+
+\subsubsection{@DoAllinSubdirs@}
+
+Generate rules to recursively \tr{make all}.  The
+\tr{...MakeVarsForAll...} things can be set to have certain
+make-variable setting passed downwards.
+
+\begin{code}
+#endif /* 0 */
+#ifndef ProjectMakeVarsForAllinSubdirs
+#define ProjectMakeVarsForAllinSubdirs /*none*/
+#endif
+
+#ifndef SetupMakeVarsForAllinSubdirs
+#define SetupMakeVarsForAllinSubdirs /*none*/
+#endif
+
+#ifndef DoAllinSubdirs
+#define DoAllinSubdirs(dirs) \
+NamedTargetSubdirs(all$(TARGET_TAG),dirs,"making all$(TARGET_TAG)",ProjectMakeVarsForAllinSubdirs SetupMakeVarsForAllinSubdirs TARGET_TAG="$(TARGET_TAG)",all$(TARGET_TAG))
+#endif /* DoAllinSubdirs */
+#if 0
+\end{code}
+
+\subsubsection{@DoDocsinSubdirs@}
+Generate rules to recursively \tr{make docs}.
+\begin{code}
+#endif /* 0 */
+#ifndef DoDocsinSubdirs
+#define DoDocsinSubdirs(dirs) \
+NamedTargetSubdirs(docs,dirs,"making docs",/*no make flags*/,docs)
+#endif /* DoDocsinSubdirs */
+#if 0
+\end{code}
+
+\subsubsection{@RunTestsSubdirs@}
+
+Generate rules to recursively \tr{make runtests}.
+
+\begin{code}
+#endif /* 0 */
+#ifndef ProjectMakeVarsForRunTestsinSubdirs
+#define ProjectMakeVarsForRunTestsinSubdirs /*none*/
+#endif
+
+#ifndef SetupMakeVarsForRunTestsinSubdirs
+#define SetupMakeVarsForRunTestsinSubdirs /*none*/
+#endif
+
+#ifndef RunTestsSubdirs
+#define RunTestsSubdirs(dirs) \
+NamedTargetSubdirs(runtests$(TARGET_TAG),dirs,"running tests",ProjectMakeVarsForRunTestsinSubdirs SetupMakeVarsForRunTestsinSubdirs TARGET_TAG="$(TARGET_TAG)",runtests$(TARGET_TAG))
+#endif /* RunTestsSubdirs */
+#if 0
+\end{code}
+
+\subsubsection{@InstallSubdirs@}
+Generate rules to recursively \tr{make install}.
+\begin{code}
+#endif /* 0 */
+#ifndef InstallSubdirs
+#define InstallSubdirs(dirs) \
+NamedTargetSubdirs(install,dirs,"installing",prefix='$(prefix)',install)
+#endif /* InstallSubdirs */
+#if 0
+\end{code}
+
+\subsubsection{@InstallDocsSubdirs@}
+Generate rules to recursively \tr{make install_docs}.
+\begin{code}
+#endif /* 0 */
+#ifndef InstallDocsSubdirs
+#define InstallDocsSubdirs(dirs) \
+NamedTargetSubdirs(install_docs,dirs,"installing documentation",prefix='$(prefix)',install_docs)
+#endif /* InstallDocsSubdirs */
+#if 0
+\end{code}
+
+\subsubsection{@CleanSubdirs@}
+Generate rules to recursively \tr{make clean}.
+\begin{code}
+#endif /* 0 */
+#ifndef NamedCleanSubdirs
+#define NamedCleanSubdirs(name,dirs) \
+NamedTargetSubdirs(name,dirs,"cleaning",RM='$(RM)',clean)
+#endif /* NamedCleanSubdirs */
+
+#ifndef CleanSubdirs
+#define CleanSubdirs(dirs) \
+NamedCleanSubdirs(clean,dirs)
+#endif
+#if 0
+\end{code}
+
+\subsubsection{@VeryCleanSubdirs@}
+Generate rules to recursively \tr{make veryclean}.
+\begin{code}
+#endif /* 0 */
+#ifndef NamedVeryCleanSubdirs
+#define NamedVeryCleanSubdirs(name,dirs) \
+NamedTargetSubdirs(name,dirs,"being veryclean",RM='$(RM)',veryclean)
+#endif /* NamedCleanSubdirs */
+
+#ifndef VeryCleanSubdirs
+#define VeryCleanSubdirs(dirs) \
+NamedVeryCleanSubdirs(veryclean,dirs)
+#endif
+#if 0
+\end{code}
+
+\subsubsection{@TagSubdirs@}
+Generate rules to recursively \tr{make tags} (create TAGS files).
+\begin{code}
+#endif /* 0 */
+#ifndef NamedTagSubdirs
+#define NamedTagSubdirs(name,dirs) \
+NamedTargetSubdirs(name,dirs,"making tags",,tags)
+#endif /* TagSubdirs */
+
+#ifndef TagSubdirs
+#define TagSubdirs(dirs) \
+NamedTagSubdirs(tags,dirs)
+#endif
+#if 0
+\end{code}
+
+\subsubsection{@MakeMakeSubdirs@}
+
+Generate rules to recursively recreate Makefiles as part of the
+specified step in the build.	If @$(TOP)@ is set to an absolute
+path, don't prepend the @../@ prefix.  This makes running things
+outside of the source tree much easier.
+
+\begin{code}
+#endif /* 0 */
+#ifndef MakeMakeSubdirs
+#define MakeMakeSubdirs(dirs,target)					@@\
+target::								@@\
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \			@@\
+	for i in dirs ;\						@@\
+	do \								@@\
+		echo "making Makefiles in $(CURRENT_DIR)/$$i..."; \	@@\
+		case "$$i" in \						@@\
+		./?*/?*/?*/?*) newtop=../../../../ sub=subsubsubsub;; \ @@\
+		./?*/?*/?*) newtop=../../../ sub=subsubsub;; \		@@\
+		./?*/?*)    newtop=../../ sub=subsub;; \		@@\
+		./?*)	    newtop=../ sub=sub;; \			@@\
+		*/?*/?*/?*)    newtop=../../../../ sub=subsubsubsub;; \ @@\
+		*/?*/?*)    newtop=../../../ sub=subsubsub;; \		@@\
+		*/?*)	    newtop=../../ sub=subsub;; \		@@\
+		*)	    newtop=../ sub=sub;; \			@@\
+		esac; \							@@\
+		case "$(TOP)" in \					@@\
+		/?*) newtop=  upprefix=	 ;; \				@@\
+		*) upprefix=../ ;; \					@@\
+		esac; \							@@\
+		$(MAKE) $${sub}dirMakefiles UPPREFIX=$$upprefix NEWTOP=$$newtop \		@@\
+		MAKEFILE_SUBDIR=$$i NEW_CURRENT_DIR=$(CURRENT_DIR)/$$i;\ @@\
+	done
+#endif /* MakeMakeSubdirs */
+#if 0
+\end{code}
+
+\subsubsection{@MakeNsubdirMakefiles@}
+
+Generate rules to create sub Makefiles.
+
+\begin{code}
+#endif /* 0 */
+#ifndef MakeNsubdirMakefiles
+#define MakeNsubdirMakefiles()						@@\
+subdirMakefiles:							@@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
+	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	else exit 0; fi							@@\
+	cd $(MAKEFILE_SUBDIR) && \					@@\
+	$(JMAKE_CMD) -DTopDirPwd=$(TOP_PWD) -DTopDir=$(UPPREFIX)$(TOP) -DCurDir=$(NEW_CURRENT_DIR) && \ @@\
+	$(NEWTOP)$(JRESTOREDEPS) && \					@@\
+	$(MAKE) $(MFLAGS) NEWTOP= Makefile Makefiles			@@\
+									@@\
+subsubdirMakefiles:							@@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
+	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	else exit 0; fi							@@\
+	cd $(MAKEFILE_SUBDIR) && \					@@\
+	$(JMAKE_CMD) -DTopDirPwd=$(TOP_PWD) -DTopDir=$(UPPREFIX)$(UPPREFIX)$(TOP) -DCurDir=$(NEW_CURRENT_DIR) && \ @@\
+	$(NEWTOP)$(JRESTOREDEPS) && \					@@\
+	$(MAKE) $(MFLAGS) NEWTOP= Makefile Makefiles			@@\
+									@@\
+subsubsubdirMakefiles:							@@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
+	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	else exit 0; fi @@\
+	cd $(MAKEFILE_SUBDIR) && \					@@\
+	$(JMAKE_CMD) -DTopDirPwd=$(TOP_PWD) -DTopDir=$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(TOP) -DCurDir=$(NEW_CURRENT_DIR) && \ @@\
+	$(NEWTOP)$(JRESTOREDEPS) && \					@@\
+	$(MAKE) $(MFLAGS) NEWTOP= Makefile Makefiles			@@\
+									@@\
+subsubsubsubdirMakefiles:						@@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
+	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	else exit 0; fi							@@\
+	cd $(MAKEFILE_SUBDIR) && \					@@\
+	$(JMAKE_CMD) -DTopDirPwd=$(TOP_PWD) -DTopDir=$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(TOP) -DCurDir=$(NEW_CURRENT_DIR) && \ @@\
+	$(NEWTOP)$(JRESTOREDEPS) && \					@@\
+	$(MAKE) $(MFLAGS) NEWTOP= Makefile Makefiles
+#endif /* MakeNsubdirMakefiles */
+#if 0
+\end{code}
+
+\subsubsection{@MakefileSubdirs@}
+
+Generate rules to create \tr{Makefiles}.
+
+\begin{code}
+#endif /* 0 */
+#ifndef MakefileSubdirs
+#define MakefileSubdirs(dirs)						@@\
+MakeMakeSubdirs(dirs,Makefiles)						@@\
+									@@\
+MakeNsubdirMakefiles()
+#endif /* MakefileSubdirs */
+
+#ifndef MakeDirectories
+#define MakeDirectories(step,dirs)					@@\
+step::									@@\
+	$(MKDIRHIER) dirs
+#endif
+
+#ifndef LinkDirectories
+#define LinkDirectories(step,dirs,todir)				@@\
+step::									@@\
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \			@@\
+	for i in dirs ; \						@@\
+	do \								@@\
+		echo "linking $$i to" todir; \				@@\
+		$(LNDIR) todir $$i; \					@@\
+	done
+#endif
+

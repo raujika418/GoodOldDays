@@ -1,0 +1,167 @@
+<html>
+<head>
+<title>Haskell 1.3 Monadic I/O Primitives: PreludeMonadicIO</title>
+</head>
+<body>
+
+[<a href="PreludeIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeIOError.html">Next</a>]
+<p>
+<hr><p>
+
+
+<h2>Monadic I/O Primitives "PreludeMonadicIO"</h2>
+
+This module defines the basic monadic framework for Haskell 1.3 I/O.
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeMonadicIO where
+
+> import PreludeIOError
+</pre>
+<p>
+
+<pre>
+> infixr 1 >>, >>=
+</pre><p>
+
+<h3><a name="IO-Monad">The <code>IO</code> Monad</h3>
+
+I/O operations may need to indicate errors, and implementations may need
+to handle these errors.  The <code>IO</code> monad extends existing practice
+by making this functionality primitive.  The exact errors which may
+occur are defined in <a href="PreludeMonadicIO.html"><code>PreludeIOError</code>.</a><p>
+
+<pre>
+> type IO a
+> data Either a b =  Left a | Right b
+</pre><p>
+
+An expression of type <code>IO</code>
+<var>a</var>, for some type <var>a</var>, denotes a computation whose answer
+is either a result of type <var>a</var> or an
+<em>error</em> of type <code>IOError</code>.  The computation succeeds
+with result <var>succ</var> if its answer is <code>Right</code> <var>succ</var>,
+and fails with result <var>fail</var> if its answer is <code>Left</code>
+<var>fail</var>.  Note that the type system delimits the
+possibility of failure: only expressions of some type <code>IO</code>
+<var>a</var> can <em>fail</em> in the sense defined here.<p>
+
+<pre>
+> return        ::  a       -> IO a
+> failWith      ::  IOError -> IO a
+</pre><p>
+
+There are two primitives to create trivial computations, one for
+each of the two possibilities, success or failure.
+<br>
+<code>return</code> <var>result</var> is a computation that succeeds
+with result <var>result</var>.
+<br>
+<code>failWith</code> <var>fail</var> is a computation that fails
+with the error <var>fail</var>.<p>
+
+<pre>
+> (>>=)         ::  IO a    -> (a -> IO b)       -> IO b 
+</pre><p>
+
+The <code>>>=</code> operation is used to sequence two computations,
+where the second computation is parameterised on the result of the first.<p>
+
+<pre>
+> (>>)          ::  IO a    -> IO b              -> IO b
+> p >> q        = p >>= const q
+</pre><p>
+
+The restricted form of <code>>>=</code>, <code>>></code>, is used when
+the result of the first computation is uninteresting.<p>
+
+<h3><a name="Error-Handling">Error Handling</h3>
+
+<a name ="handle"><pre>
+> handle           ::  IO a    -> (IOError -> IO a) -> IO a 
+</pre></a><p>
+
+The construct <code>handle</code> <var>comp handler</var> can be used to
+handle a simple error during a computation <var>comp</var>.  Its
+usefulness is limited in that the replacement value must be of the
+same type as the result of <var>comp</var>.<p>
+
+<a name = "try"><pre>
+> try        ::  IO a    -> IO (Either IOError a) 
+> try p      =   (p >>= (return . Right)) `handle` (return . Left)
+</pre></a><p>
+
+The construct <code>try</code> <var>comp</var> exposes errors which
+occur within a computation, and which are not fully handled.  It
+always succeeds.<p>
+
+<h3><a name="User-Errors">User-Defined Errors</h3>
+
+<pre>
+> fail :: String -> IO a 
+> fail = failwith . UserError
+</pre><p>
+
+As a convention for user-generated errors, to return an error message
+<var>msg</var> <code>:: String</code>, return the error value
+<code>UserError</code> <var>msg</var> via the computation
+<code>fail</code> <var>msg</var>.<p>
+
+This construct should be used instead of Haskell's <code>error
+:: String -> a</code> operation wherever convenient<a href="Rationale.html#error">
+<img src="Rationale.gif" alt="(Rationale)"></a>.<p>
+
+<h3><a name="HOFs">Higher-Order Utility Functions</h3>
+
+<pre>
+> either        ::  (a -> c) -> (b -> c) -> (Either a b) -> c
+> either f g (Left x)  = f x
+> either f g (Right x) = g x
+</pre><p>
+
+The construct <code>either</code> <var>a b</var> can be used to generate
+functions on types of the form <code>Either</code> <var>a b</var>.<p>
+
+<pre>
+> accumulate    :: [IO a] -> IO [a] 
+> accumulate  =
+>   foldr mcons (return [])
+>     where
+>	mcons :: IO a -> IO [a] -> IO [a]
+>	mcons p q = p >>= \x -> q >>= \y -> return (x : y)
+</pre><p>
+
+The <code>accumulate</code> computation is used to process
+a list of computations of the same type, and to return
+a list of their results when executed in sequence.<p>
+
+<pre>
+> sequence      :: [IO a] -> IO () 
+> sequence = foldr (>>) (return ())
+</pre><p>
+
+The <code>sequence</code> computation is used for the simpler
+case when the computations are executed entirely for their
+external effect, and the results are therefore uninteresting.<p>
+
+<hr><p>
+
+
+[<a href="PreludeIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeIOError.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</hmtl>

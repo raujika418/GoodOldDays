@@ -1,0 +1,54 @@
+sub collect_dependencies {
+    local($file_seen) = @_;
+
+    # assuming we're checking dependencies for Input_file "foo.lit"
+    # and we've just seen file "bar.lprl" (for example), we want a
+    # dependencies of the form:
+    #	foo.texi: bar.itxi
+    #	foo.html: bar.ihtml
+    #   foo.tex : bar.itex
+
+    local($file_seen_root,$file_seen_suff) = &root_and_suffix($file_seen);
+
+    if ($Inputfile_root ne $file_seen_root) {
+	push(@Depend_lines, "$Inputfile_root.texi : $file_seen_root.itxi\n");
+	push(@Depend_lines, "$Inputfile_root.html : $file_seen_root.ihtml\n");
+	push(@Depend_lines, "$Inputfile_root.tex  : $file_seen_root.itex\n");
+    }
+}
+
+sub mangle_Makefile { # insert dependencies into Makefile
+    # this really should be made to work just like other mkdepend scripts
+    local($Makefile) = 'Makefile';
+    local($begin_magic_str) = "# DO NOT DELETE: Beginning of literate-docs dependencies\n";
+    local($end_magic_str)   = "# DO NOT DELETE: End of literate-docs dependencies\n";
+
+    unlink("$Makefile.bak");
+    rename($Makefile,"$Makefile.bak");
+    # now copy Makefile.bak into Makefile, rm'ing old dependencies
+    # and adding the new
+    open(OMKF,"< $Makefile.bak") || die "$Pgm: can't open $Makefile.bak: $!\n";
+    open(NMKF,"> $Makefile") || die "$Pgm: can't open $Makefile: $!\n";
+    select(NMKF);
+    $_ = <OMKF>;
+    while ($_ && $_ ne $begin_magic_str) { # copy through, 'til begin_magic_str
+	print $_;
+	$_ = <OMKF>;
+    }
+    while ($_ && $_ ne $end_magic_str) { # delete 'til end_magic_str
+	$_ = <OMKF>;
+    }
+    # insert dependencies
+    print $begin_magic_str;
+    print @Depend_lines;
+    print $end_magic_str;
+    while (<OMKF>) { # copy the rest through
+	print $_;
+    }
+    close(NMKF);
+    close(OMKF);
+    chmod 0444, 'Makefile';
+}
+
+# this keeps 'do'ing happy
+1;

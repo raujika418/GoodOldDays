@@ -1,0 +1,300 @@
+<html>
+<head>
+<title>Haskell 1.3 Summary of I/O Operations</title>
+</head>
+
+<body>
+
+[<a href="Notation.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Programs.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Summary of I/O Operations</h2>
+
+This is an unstructured list of the types, instances, values and
+operations supported by Core Haskell 1.3 I/O.
+<p>
+
+<em>This summary is provided for information only, and does not form
+part of the I/O definition proper.  In case of inconsistency, 
+definitions given in the main body of the I/O definition take precedence
+over those given here.</em>
+<p>
+
+<hr>
+<p>
+
+<h3>Fixities</h3>
+
+Only two infix entities are defined.
+<p>
+
+<pre>
+> infixr 1 >>, >>=                         -- PreludeMonadicIO
+</pre>
+<p>
+
+<h3>Types and Instances</h3>
+
+This is a list of the types and instances required by the
+Core I/O definition.
+<p>
+
+<pre>
+> data IOError = AlreadyExists String           -- PreludeIOError
+>              | Deadlock String
+>              | HardwareFault String
+>              | IllegalOperation String
+>              | InappropriateType String
+>              | InvalidArgument String
+>              | NoSuchThing String
+>              | OperationInterrupted String
+>              | OtherError String
+>              | PermissionDenied String
+>              | ProtocolError String
+>              | ResourceBusy String
+>              | ResourceExhausted String
+>              | ResourceVanished String
+>              | SystemError String
+>              | TimeExpired String
+>              | UnsatisfiedConstraints String
+>              | UnsupportedOperation String
+>              | UserError String
+
+> type IO a                                     -- PreludeMonadicIO
+> data Either a b =  Left a | Right b           -- PreludeMonadicIO
+
+> type Handle                                   -- PreludeStdIO
+> type FilePath = String                        -- PreludeStdIO
+
+> data IOMode     = ReadMode                    -- PreludeStdIO
+>                 | WriteMode
+>                 | AppendMode 
+>                 | ReadWriteMode
+
+> data BufferMode = NoBuffering                 -- PreludeStdIO
+>                 | LineBuffering
+>                 | BlockBuffering (Maybe Int)
+
+> data HandlePosn                               -- PreludeStdIO
+> data SeekMode   = AbsoluteSeek                -- PreludeStdIO
+>                 | RelativeSeek
+>                 | SeekFromEnd 
+
+> data ExitCode   = ExitSuccess                 -- LibSystem
+>                 | ExitFailure Int
+
+> data ClockTime                                -- LibTime
+> instance Ord ClockTime                        -- LibTime
+> instance Eq  ClockTime                        -- LibTime
+> instance Text ClockTime                       -- LibTime
+> data CalendarTime =                           -- LibTime
+>      CalendarTime  Int  Int  Int  Int  
+>                    Int  Int  Integer 
+>                    Int  Int  String 
+>                    Int Bool
+
+> data TimeDiff    =                            -- LibTime
+>      TimeDiff Int  Int  
+>               Int  Int  Int  Int  Integer
+>      deriving (Eq,Ord)
+</pre>
+<p>
+
+<h3>Values</h3>
+
+There are three predefined handles.
+<p>
+
+<pre>
+> stdin, stdout, stderr :: Handle          -- PreludeStdIO
+</pre>
+<p>
+
+<h3>Operations</h3>
+
+The set of I/O operations is sorted alphabetically, subdivided by Prelude
+and Library operations.
+<p>
+
+<h4>Prelude Operations</h4>
+
+<pre>
+> (>>=)                :: IO a     -> (a -> IO b)           -> IO b 
+> (>>)                 :: IO a     -> IO b                  -> IO b
+> accumulate           :: [IO a]                            -> IO [a] 
+> appendFile           :: FilePath -> String                -> IO ()
+> either               :: (a -> c) -> (b -> c) -> (Either a b) -> c
+> fail                 :: String                            -> IO a 
+> failWith             :: IOError                           -> IO a
+> getChar              ::                                      IO Char
+> handle               :: IO a     -> (IOError -> IO a)     -> IO a 
+> hClose               :: Handle                            -> IO ()
+> hFileSize            :: Handle                            -> IO Integer
+> hFlush               :: Handle                            -> IO ()
+> hGetChar             :: Handle                            -> IO Char
+> hGetContents         :: Handle                            -> IO String
+> hGetPosn             :: Handle                            -> IO HandlePosn
+> hIsBlockBuffered     :: Handle                      -> IO (Bool,Maybe Int)
+> hIsClosed            :: Handle                            -> IO Bool
+> hIsEOF               :: Handle                            -> IO Bool
+> hIsLineBuffered      :: Handle                            -> IO Bool
+> hIsNotBuffered       :: Handle                            -> IO Bool
+> hIsOpen              :: Handle                            -> IO Bool
+> hIsReadable          :: Handle                            -> IO Bool
+> hIsSeekable          :: Handle                            -> IO Bool
+> hIsWritable          :: Handle                            -> IO Bool
+> hLookAhead           :: Handle                            -> IO Char
+> hPutChar             :: Handle   -> Char                  -> IO ()
+> hPutStr              :: Handle   -> String                -> IO ()
+> hPutText             :: Text a   => Handle     -> a       -> IO ()
+> hReady               :: Handle                            -> IO Bool
+> hSeek                :: Handle   -> SeekMode   -> Integer -> IO ()
+> hSetBuffering        :: Handle   -> BufferMode            -> IO ()
+> hSetPosn             :: HandlePosn                        -> IO ()
+> interact             :: (String -> String)                -> IO ()
+> isEOF                ::                                      IO Bool
+> openFile             :: FilePath -> IOMode                -> IO Handle
+> print                :: Text a =>                 a       -> IO ()
+> putChar              :: Char                              -> IO () 
+> putStr               :: String                            -> IO () 
+> putText              :: Text a   => a                     -> IO () 
+> readFile             :: FilePath                          -> IO String
+> return               ::  a                                -> IO a
+> sequence             :: [IO a]                            -> IO () 
+> try                  ::  IO a                     -> IO (Either IOError a)
+> writeFile            :: FilePath -> String               -> IO ()
+</pre>
+<p>
+
+<h4>Library Operations</h4>
+
+<pre>
+> addToClockTime       :: TimeDiff  -> ClockTime           -> ClockTime
+> diffClockTimes       :: ClockTime -> ClockTime           -> TimeDiff
+> createDirectory      :: FilePath                         -> IO ()
+> exitWith             :: ExitCode                         -> IO a
+> getArgs              ::                                     IO [String]
+> getClockTime         ::                                     IO ClockTime
+> getCPUTime           ::                                     IO Integer
+> getCurrentDirectory  ::                                     IO FilePath
+> getDirectoryContents :: FilePath                         -> IO [FilePath]
+> getEnv               :: String                           -> IO String
+> getProgName          ::                                     IO String
+> removeDirectory      :: FilePath                         -> IO ()
+> removeFile           :: FilePath                         -> IO ()
+> renameDirectory      :: FilePath -> FilePath             -> IO ()
+> renameFile           :: FilePath -> FilePath             -> IO ()
+> setCurrentDirectory  :: FilePath                         -> IO ()
+> setUserInterrupt     :: Maybe (IO ())                -> IO (Maybe (IO ()))
+> system               :: String                           -> IO ExitCode
+> toCalendarTime       :: ClockTime                        -> CalendarTime
+> toUTCTime            :: ClockTime                        -> CalendarTime
+> toClockTime          :: CalendarTime                     -> ClockTime
+</pre>
+<p>
+
+<h3>"Derived" Operations</h3>
+
+Some operations could notionally be defined in terms of other
+operations (though efficiency issues will probably mandate direct
+implementation).  Previous versions of the I/O proposal distinguished
+"primitive" and "derived" operations, leading to some confusion,
+especially where definitions could be circular (and either could
+therefore be "primitive").
+<p>
+
+This proposal does not generally distinguish operations in this way,
+though definitions in terms of other operations are given where
+possible in order to simplify the semantics, aid comprehension, and
+speed implementation.
+<p>
+
+The following operations are currently defined in terms of other
+operations, and could therefore be considered "derived" in the sense
+used above.  For the sake of completeness, the relevant definitions
+are repeated here.
+<p>
+
+<h4>"Derived" Prelude Operations</h4>
+
+<pre>
+> (>>)                 :: IO a     -> IO b                  -> IO b
+> p >> q               =  p >>= const q
+
+> accumulate           :: [IO a]                            -> IO [a] 
+> accumulate  =
+>   foldr mcons (return [])
+>     where
+>       mcons :: IO a -> IO [a] -> IO [a]
+>       mcons p q = p >>= \x -> q >>= \y -> return (x : y)
+
+> appendFile           :: FilePath -> String                -> IO ()
+> appendFile name str =
+>   openFile AppendMode name >>= \hdl -> hPutStr hdl str >> close hdl
+
+> either               :: (a -> c) -> (b -> c) -> (Either a b) -> c
+> either f g (Left x)  =  f x
+> either f g (Right x) =  g x
+
+> fail                 :: String                            -> IO a 
+> fail                 =  failwith . UserError
+
+> getChar              ::                                      IO Char
+> getChar              =  hGetChar stdin
+
+> hPutStr              :: Handle   -> String                -> IO ()
+> hPutText             :: Text a   => Handle     -> a       -> IO ()
+> hPutStr hdl          =  foldr (>>) (return ()) . map (hPutChar hdl)
+> hPutText hdl         =  hPutStr hdl . show
+
+> interact             :: (String -> String)                -> IO ()
+> interact f           =  hGetContents stdin >>= (putStr . f)
+
+> isEOF                ::                                      IO Bool
+> isEOF                =  hIsEOF stdin
+
+> print                :: Text a =>                 a       -> IO ()
+> print x              =  putText x >> putChar '\n'
+
+> putChar              :: Char                              -> IO () 
+> putStr               :: String                            -> IO () 
+> putText              :: Text a   => a                     -> IO () 
+> putChar              =  hPutChar stdout
+> putStr               =  hPutStr  stdout
+> putText              =  hPutText stdout
+
+> readFile             :: FilePath                          -> IO String
+> readFile name        =  openFile ReadMode name >>= hGetContents
+
+> sequence             :: [IO a]                            -> IO () 
+> sequence             =  foldr (>>) (return ())
+
+> try                  ::  IO a                     -> IO (Either IOError a)
+> try p                =  handle (p >>= (return . Right)) Left
+
+> writeFile            :: FilePath -> String               -> IO ()
+> writeFile name str =
+>   openFile WriteMode name >>= \hdl -> hPutStr hdl str >> close hdl
+</pre>
+<p>
+
+<hr><p>
+
+[<a href="Notation.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Programs.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+
+</html>

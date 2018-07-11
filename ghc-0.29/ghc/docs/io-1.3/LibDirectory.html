@@ -1,0 +1,314 @@
+<html>
+<head>
+<title>Haskell 1.3 Standard I/O: LibDirectory</title>
+</head>
+<body>
+
+[<a href="PreludeWriteTextIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibSystem.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Directory Operations</h2>
+
+A directory contains a series of entries, each of which is a named
+reference to a file system object (file, directory etc.).  Some
+entries may be hidden, inaccessible, or have some administrative
+function (e.g. "." or ".." under POSIX), but in this standard all such
+entries are considered to form part of the directory contents.
+Entries in sub-directories are not, however, considered to form part
+of the directory contents.<p>
+
+Each file system object is referenced by a <dfn>path</dfn>.  There is
+normally at least one absolute path to each file system object.  In
+some operating systems, it may also be possible to have paths which
+are relative to the current directory.
+<p>
+<hr>
+
+<pre>> interface LibDirectory where
+
+> createDirectory :: FilePath -> IO ()</pre><p>
+
+<code>createDirectory</code> <var>dir</var> creates a new directory
+<var>dir</var> which is initially empty, or as near to empty as the
+operating system allows.<p>
+
+The operation may fail with:
+<ul>
+<li><code>AlreadyExists</code><br>
+The operand refers to a directory that already exists.  
+[<code>EEXIST</code>]
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+There is no path to the directory. 
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources (virtual memory, process file descriptors,
+physical disk space, etc.) are available to perform the operation.
+[<code>EDQUOT</code>, <code>ENOSPC</code>, <code>ENOMEM</code>, 
+<code>EMLINK</code>] 
+<li><code>InappropriateType</code><br>
+The path refers to an existing non-directory object.
+[<code>EEXIST</code>]
+</ul>
+<p>
+
+<pre>> removeDirectory :: FilePath -> IO ()</pre><p>
+
+<code>removeDirectory</code> <var>dir</var> removes an existing
+directory <var>dir</var>.  The implementation may specify additional
+constraints which must be satisfied before a directory can be removed
+(e.g. the directory has to be empty, or may not be in use by other
+processes).  It is not legal for an implementation to partially remove
+a directory unless the entire directory is removed. A conformant
+implementation need not support directory removal in all situations
+(e.g. removal of the root directory). <p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The directory does not exist. 
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>, <code>EPERM</code>]
+<li><code>UnsatisfiedConstraints</code><br>
+Implementation-dependent constraints are not satisfied.  
+[<code>EBUSY</code>, <code>ENOTEMPTY</code>, <code>EEXIST</code>]
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support removal in this situation.
+[<code>EINVAL</code>]
+<li><code>InappropriateType</code><br>
+The operand refers to an existing non-directory object.
+[<code>ENOTDIR</code>]
+</ul>
+<p>
+
+<pre>> removeFile :: FilePath -> IO ()</pre><p>
+
+<code>removeFile</code> <var>file</var> removes the directory entry
+for an existing file <var>file</var>, where <var>file</var> is not
+itself a directory. The implementation may specify additional
+constraints which must be satisfied before a file can be removed
+(e.g. the file may not be in use by other processes).<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid file name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The file does not exist. 
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>, <code>EPERM</code>]
+<li><code>UnsatisfiedConstraints</code><br>
+Implementation-dependent constraints are not satisfied.  
+[<code>EBUSY</code>]
+<li><code>InappropriateType</code><br>
+The operand refers to an existing directory.
+[<code>EPERM</code>, <code>EINVAL</code>]
+</ul>
+<p>
+
+<pre>> renameDirectory :: FilePath -> FilePath -> IO ()</pre><p>
+
+<code>renameDirectory</code> <var>old</var> <var>new</var> changes the
+name of an existing directory from <var>old</var> to <var>new</var>.
+If the <var>new</var> directory already exists, it is atomically
+replaced by the <var>old</var> directory.  If the <var>new</var> directory
+is neither the <var>old</var> directory nor an alias of the
+<var>old</var> directory, it is removed as if by
+<code>removeDirectory</code>.  A conformant implementation need not
+support renaming directories in all situations (e.g. renaming to an
+existing directory, or across different physical devices), but the
+constraints must be documented.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+Either operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The original directory does not exist, or there is no path to the target.
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>, <code>EPERM</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.  
+[<code>EDQUOT</code>, <code>ENOSPC</code>, <code>ENOMEM</code>, 
+<code>EMLINK</code>]
+<li><code>UnsatisfiedConstraints</code><br>
+Implementation-dependent constraints are not satisfied.
+[<code>EBUSY</code>, <code>ENOTEMPTY</code>, <code>EEXIST</code>]
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support renaming in this situation.
+[<code>EINVAL</code>, <code>EXDEV</code>]
+<li><code>InappropriateType</code><br>
+Either path refers to an existing non-directory object.
+[<code>ENOTDIR</code>, <code>EISDIR</code>]
+</ul>
+<p>
+
+<pre>> renameFile :: FilePath -> FilePath -> IO ()</pre><p>
+
+<code>renameFile</code> <var>old</var> <var>new</var> changes the name
+of an existing file system object from <var>old</var> to <var>new</var>. 
+If the <var>new</var> object already exists, it is
+atomically replaced by the <var>old</var> object.  Neither path may
+refer to an existing directory.  A conformant implementation need not
+support renaming files in all situations (e.g. renaming across
+different physical devices), but the constraints must be
+documented.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+Either operand is not a valid file name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The original file does not exist, or there is no path to the target.
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>, <code>EPERM</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.  
+[<code>EDQUOT</code>, <code>ENOSPC</code>, <code>ENOMEM</code>, 
+<code>EMLINK</code>]
+<li><code>UnsatisfiedConstraints</code><br>
+Implementation-dependent constraints are not satisfied.
+[<code>EBUSY</code>]
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support renaming in this situation.
+[<code>EXDEV</code>]
+<li><code>InappropriateType</code><br>
+Either path refers to an existing directory.
+[<code>ENOTDIR</code>, <code>EISDIR</code>, <code>EINVAL</code>, 
+<code>EEXIST</code>, <code>ENOTEMPTY</code>]
+</ul>
+<p>
+
+<pre>> getDirectoryContents :: FilePath -> IO [FilePath]</pre><p>
+
+<code>getDirectoryContents</code> <var>dir</var> returns a list of
+<i>all</i> entries in <var>dir</var>.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The directory does not exist.
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EACCES</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>EMFILE</code>, <code>ENFILE</code>]
+<li><code>InappropriateType</code><br>
+The path refers to an existing non-directory object.
+[<code>ENOTDIR</code>]
+</ul>
+<p>
+
+<pre>> getCurrentDirectory :: IO FilePath</pre><p>
+
+If the operating system has a notion of current directories,
+<code>getCurrentDirectory</code> returns an absolute path to the
+current directory of the calling process.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>NoSuchThing</code><br>
+There is no path referring to the current directory.
+[<code>EPERM</code>, <code>ENOENT</code>, <code>ESTALE</code>...]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EACCES</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+<li><code>UnsupportedOperation</code><br>
+The operating system has no notion of current directory.
+</ul>
+<p>
+
+<pre>> setCurrentDirectory :: FilePath -> IO ()</pre><p>
+
+If the operating system has a notion of current directories,
+<code>setCurrentDirectory</code> <var>dir</var> changes the current
+directory of the calling process to <var>dir</var>.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The directory does not exist.
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EACCES</code>]
+<li><code>UnsupportedOperation</code><br>
+The operating system has no notion of current directory, or the
+current directory cannot be dynamically changed.
+<li><code>InappropriateType</code><br>
+The path refers to an existing non-directory object.
+[<code>ENOTDIR</code>]
+</ul>
+<p>
+
+<hr><p>
+
+
+[<a href="PreludeWriteTextIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibSystem.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>

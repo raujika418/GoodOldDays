@@ -1,0 +1,1408 @@
+This is Info file installing.info, produced by Makeinfo-1.47 from the
+input file installing.texi.
+
+
+File: installing.info,  Node: Top,  Up: (dir)
+
+          Installing the Glasgow Functional Programming Tools
+
+                             Version 0.26
+
+                 The AQUA Team (scribe: Will Partain)
+
+                    Department of Computing Science
+
+                         University of Glasgow
+
+                           Glasgow, Scotland
+
+                                G12 8QQ
+
+                                   
+     Email: glasgow-haskell-{users,bugs}-request@dcs.glasgow.ac.uk
+
+* Menu:
+
+* install-intro::           Introduction.
+* installing-bin-distrib::  Installing from binary distributions (the most common case).
+* checklist::               Building Glasgow tools from source: a checklist.
+* building-GHC::            Building the Glasgow Haskell Compiler (GHC).
+* building-Haggis::         Building Haggis (Haskell GUI toolkit).
+* building-Happy::          Building Happy (Haskell parser generator).
+* building-NoFib::          Building NoFib (Haskell benchmark suite).
+* Configuring::             Running `configure'.
+* STARTUP::                 Running `STARTUP'.
+* utils_install::           Installing the support software (optional).
+* arrangement-of-sources::  Arrangement of the sources.
+* Index::                   Index.
+
+
+File: installing.info,  Node: install-intro,  Next: installing-bin-distrib,  Prev: Top,  Up: Top
+
+Introduction
+============
+
+For most people, it should be easy to install one or more of the
+Glasgow functional-programming tools (the `Glasgow tools'), most often
+just the Glasgow Haskell compiler (GHC).  This document will guide you
+through the installation process, and point out the known pitfalls.
+
+Note: As of version 0.26, this document describes how to build *all* of
+the Glasgow tools, not just the Haskell compiler.  The `configure'
+script, etc., has changed to cope with this wider mandate; something to
+bear in mind...
+
+* Menu:
+
+* install-strategy::  What to install?  Starting from what?.
+* port-info::         What machines the Glasgow tools, version 0.26, run on.
+* installing_1.3::    Things to check before you start typing.
+
+
+File: installing.info,  Node: install-strategy,  Next: port-info,  Prev: install-intro,  Up: install-intro
+
+What to install?  Starting from what?
+-------------------------------------
+
+Building the Glasgow tools *can* be complicated, mostly because there
+are so many permutations of what/why/how, e.g., "Build Happy with HBC,
+everything else with GHC, leave out profiling, and test it all on the
+`real' NoFib programs."  Yeeps!
+
+Happily, such complications don't apply to most people.  A few common
+"strategies" serve most purposes.  Pick one and proceed as suggested:
+Install from binary "bundles":
+     You have one of the supported platforms (e.g., Sun4 or DEC Alpha),
+     and you just want a Haskell compiler, and you don't want to do
+     anything fancy...  This choice is for you.  Proceed to section
+     *Note installing-bin-distrib::.  HIGHLY RECOMMENDED!
+
+Build some Glasgow tools using GHC itself:
+     You have a supported platform, but (a) you like the warm fuzzy
+     feeling of compiling things yourself; (b) you want to build
+     something "extra" -- e.g., a set of libraries with
+     strictness-analysis turned off; or (c) you want to hack on GHC
+     yourself.
+
+     In this case, you should install a binary distribution (as
+     described in section *Note installing-bin-distrib::), then build
+     GHC with it (as described in section *Note building-GHC::).
+
+Build GHC from intermediate C `.hc' files:
+     You cannot get a pre-built GHC, so you have no choice but to
+     "bootstrap" up from the intermediate C (`.hc') files that we
+     provide. Building GHC on an unsupported platform falls into this
+     category. Please see section *Note booting-from-C::.
+
+     Once you have built GHC, you can build the other Glasgow tools with
+     it.
+
+Build GHC with another Haskell compiler (e.g., HBC):
+     Not recommended, but see section *Note building-with-HBC::.
+
+
+File: installing.info,  Node: port-info,  Next: installing_1.3,  Prev: install-strategy,  Up: install-intro
+
+What machines the Glasgow tools, version 0.26, run on
+-----------------------------------------------------
+
+The main question is whether or not the Haskell compiler (GHC) runs on
+your machine.
+
+Bear in mind that certain "bundles", e.g. parallel Haskell, may not
+work on all machines for which basic Haskell compiling is supported.
+
+Some libraries may only work on a limited number of platforms; for
+example, a sockets library is of no use unless the operating system
+supports the underlying BSDisms.
+
+* Menu:
+
+* installing_1.2.1::  What machines the Haskell compiler (GHC) runs on.
+* installing_1.2.2::  What machines the other tools run on.
+
+
+File: installing.info,  Node: installing_1.2.1,  Next: installing_1.2.2,  Prev: port-info,  Up: port-info
+
+What machines the Haskell compiler (GHC) runs on
+................................................
+
+The GHC hierarchy of Porting Goodness: (a) Best is a native-code
+generator; (b) next best is a "registerised" port; (c) the bare minimum
+is an "unregisterised" port. "Unregisterised" Haskell programs are much
+bigger and slower, but the port is much easier to get going.
+
+With GHC 0.26, we add "registerised" support for some HP-PA, iX86, and
+MIPS platforms.
+
+We use Sun4s running SunOS 4.1.3 and DEC Alphas running OSF/1 V2.0, so
+those are the "fully-supported" platforms, unsurprisingly.  Both have
+native-code generators, for quicker compilations.
+
+Here's everything that's known about GHC ports, as of 0.26. We identify
+platforms by their "canonical GNU-style" names.  We identify
+
+Note that some ports are fussy about which GCC version you use; or
+require GAS; or ...
+
+`alpha-dec-osf1':
+     (We have OSF/1 V2.0.) Fully supported, including native-code
+     generator. We recommend GCC 2.6.x or later.
+
+`sparc-sun-sunos4':
+     Fully supported, including native-code generator.
+
+`sparc-sun-solaris2':
+     Fully supported, including native-code generator.  A couple of
+     quirks, though: (a) the profiling libraries are bizarrely huge;
+     (b) the default `xargs' program is atrociously bad for building GHC
+     libraries (see section *Note Pre-supposed:: for details).
+
+HP-PA box running HP/UX 9.x:
+     GHC 0.26 works registerised.  No native-code generator. For GCC,
+     you're best off with one of the Utah releases of GCC 2.6.3 (`u3'
+     or later), from `jaguar.cs.utah.edu'. We don't know if straight
+     GCC 2.7.x works or not.
+
+     Concurrent/Parallel Haskell probably don't work (yet).
+
+`i386-*-linuxaout' (PCs running Linux -- `a.out' format):
+     GHC 0.26 works registerised (no native-code generator). You *must*
+     have GCC 2.7.x or later.
+
+     Concurrent/Parallel Haskell probably don't work (yet).
+
+     Profiling might work, but it is untested.
+
+`mips-sgi-irix5':
+     GHC 0.26 works registerised (no native-code generator). I suspect
+     any GCC 2.6.x (or later) is OK.  The GCC that I used was built
+     with `--with-gnu-as'.
+
+     Concurrent/Parallel Haskell probably don't work (yet). Profiling
+     might work, but it is untested.
+
+`m68k-apple-macos7' (Mac, using MPW):
+     Once upon a time, David Wright in Tasmania has actually gotten GHC
+     to run on a Macintosh.  Ditto James Thomson here at Glasgow. You
+     may be able to get Thomson's from here.  (Not sure that it will
+     excite you to death, but...)
+
+     No particularly recent GHC is known to work on a Mac.
+
+`m68k-next-nextstep3':
+     Carsten Schultz succeeded with a "registerised" port of GHC 0.19.
+     There's probably a little bit-rot since then, but otherwise it
+     should still be fine.  Had a report that things were basically OK
+     at 0.22.
+
+     Concurrent/Parallel Haskell probably won't work (yet).
+
+`m68k-sun-sunos4' (Sun3):
+     GHC 0.26 works registerised.  No native-code generator.
+
+     Concurrent/Parallel Haskell probably don't work (yet).
+
+
+File: installing.info,  Node: installing_1.2.2,  Prev: installing_1.2.1,  Up: port-info
+
+What machines the other tools run on
+....................................
+
+Unless you hear otherwise, the other tools work if GHC works.
+
+Haggis requires Concurrent Haskell to work.
+
+
+File: installing.info,  Node: installing_1.3,  Prev: port-info,  Up: install-intro
+
+Things to check before you start typing
+---------------------------------------
+
+  1. Disk space needed: About 30MB (five hamburgers' worth) of disk
+     space for the most basic binary distribution of GHC; more for some
+     platforms, e.g., Alphas.  An extra "bundle" (e.g., concurrent
+     Haskell libraries) might take you to 8--10 hamburgers.
+
+     You'll need over 100MB (say, 20 hamburgers' worth) if you need to
+     build the basic stuff from scratch.
+
+     I don't yet know the disk requirements for the non-GHC tools.
+
+     All of the above are *estimates* of disk-space needs.
+
+  2. Use an appropriate machine, compilers, and things.
+
+     SPARC boxes and DEC Alphas running OSF/1 are fully supported.
+     Section *Note port-info:: gives the full run-down on ports or lack
+     thereof.
+
+  3. Be sure that the "pre-supposed" utilities are installed.
+
+     For GHC, you must have `perl' to get anywhere at all.  If you're
+     going for Parallel Haskell, you'll need PVM, version 3.  You will
+     probably need a reasonably up-to-date GCC (GNU C compiler), too --
+     section *Note port-info:: lists any specific requirements in this
+     regard.
+
+     If you are going to be making documents [unlikely], you'll need
+     `makeindex' as well, and maybe `tgrind' [unlikely].  If you edit
+     the one or two `flex' files in GHC, you'll need `flex', too
+     [unlikely].
+
+     If you end up yacc'ing the Haskell parser [unlikely], Sun's
+     standard `/bin/yacc' won't cut it.  Either the unbundled
+     `/usr/lang/yacc' or `bison' will do fine.  Berkeley yacc (`byacc')
+     won't do.
+
+  4. If you have any problem when building or installing the Glasgow
+     tools, please check the "known pitfalls" (section *Note
+     build-pitfalls::).  If you feel there is still some shortcoming in
+     our procedure or instructions, please report it.
+
+     For GHC, please see the bug-reporting section of the User's guide
+     (separate document), to maximise the usefulness of your report.
+
+     If in doubt, please send a message to
+     `glasgow-haskell-bugs@dcs.glasgow.ac.uk'.
+
+
+File: installing.info,  Node: installing-bin-distrib,  Next: checklist,  Prev: install-intro,  Up: Top
+
+Installing from binary distributions (the most common case)
+===========================================================
+
+Installing from binary distributions is easiest, and recommended!
+
+* Menu:
+
+* GHC-bin-distrib::      GHC from binary distributions.
+* non-GHC-bin-distrib::  Other tools from binary distributions.
+
+
+File: installing.info,  Node: GHC-bin-distrib,  Next: non-GHC-bin-distrib,  Prev: installing-bin-distrib,  Up: installing-bin-distrib
+
+GHC from binary distributions
+-----------------------------
+
+(Why binaries?  Because GHC is a Haskell compiler written in Haskell,
+so you've got to "bootstrap" it, somehow.  We provide machine-generated
+C-files-from-Haskell for this purpose, but it's really quite a pain to
+use them.  If you must build GHC from its sources, using a
+binary-distributed GHC to do so is a sensible way to proceed.)
+
+Binary distributions come in "bundles," one bundle per `.tar.gz' file.
+
+A basic GHC "bundle" gives you the compiler and the standard,
+sequential libraries.  The files are called
+`ghc-0.26-<platform>.tar.gz', where `<platform>' is one of:
+alpha-dec-osf2, hppa1.1-hp-hpux9, i386-unknown-linuxaout,
+
+m68k-sun-sunos4, mips-sgi-irix5, sparc-sun-sunos4, sparc-sun-solaris2.
+
+There are plenty of "non-basic" GHC bundles.  The files for them are
+called `ghc-0.26-<bundle>-<platform>.tar.gz', where the `<platform>' is
+as above, and `<bundle>' is one of these:
+`prof':
+     Profiling with cost-centres.  You probably want this.
+
+`conc':
+     Concurrent Haskell features.  You may want this.
+
+`par':
+     Parallel Haskell features (sits on top of PVM). You'll want this
+     if you're into that kind of thing.
+
+`gran':
+     The "GranSim" parallel-Haskell simulator (hmm... mainly for
+     implementors).
+
+`ticky':
+     "Ticky-ticky" profiling; very detailed information about "what
+     happened when I ran this program" -- really for implementors.
+
+`prof-conc':
+     Cost-centre profiling for Concurrent Haskell.
+
+`prof-ticky':
+     Ticky-ticky profiling for Concurrent Haskell.
+
+One likely scenario is that you will grab *three* binary bundles --
+basic, profiling, and concurrent.  Once you have them, unpack them all
+together in the same place, thusly:
+
+     cd /put/them/in/here
+     gunzip < ghc-0.26-sparc-sun-sunos4.tar.gz      | tar xf -
+     gunzip < ghc-0.26-prof-sparc-sun-sunos4.tar.gz | tar xf -
+     gunzip < ghc-0.26-conc-sparc-sun-sunos4.tar.gz | tar xf -
+
+If you unpacked the files in a way that does *not* preserve
+modification times (e.g., used the `m' option to `tar' -- why on earth
+you might do this, I cannot imagine), then please unpack them again :-)
+ The timestamps on the files are (regrettably) important.
+
+Here's what to do with the stuff in each directory, once unpacked.
+
+`bin/<platform>' (sometimes just `bin/'):
+     Copy these executables so that they will be in users' PATHs.
+
+`lib':
+     Move this directory, in toto, to wherever you want it to live. It
+     should still be called `lib'.
+
+`docs':
+     This is the full `docs' tree.  Just follow the normal instructions,
+     in section *Note make-docs::.
+
+Things you need to fiddle so the tools will spring to life:
+  1. `rehash' (csh users), so your shell will see the new stuff in your
+     bin directory.
+
+  2. CHOICE #1 (BETTER): Edit your `ghc', `mkdependHS', and `hstags'
+     scripts: (a) Create a correct `#!...perl' first line in each one.
+     (Ask a Unix-friendly person to help you, if you don't know what a
+     `#!'-line is.)  (b)  Find the line that looks something like:
+          # $ENV{'GLASGOW_HASKELL_ROOT'} = '/some/absolute/path/name';
+     Remote the comment symbol (`#') on the front, and change the path
+     name to be the right thing.
+
+     So, if your "lib" files are now in `/home/myself/lib/ghc/...',
+     then you should set `GLASGOW_HASKELL_ROOT' to `/home/myself'.
+
+  3. CHOICE #2: Set your `GLASGOW_HASKELL_ROOT' environment variable,
+     and don't edit the `ghc', `mkdependHS', and `hstags' scripts at
+     all.
+
+     It's better to edit the scripts; that way, it's once for all.
+
+  4. You *may* need to re-`ranlib' your libraries (on Sun4s).
+          % cd <wherever-the-lib-files-are-now>/ghc/0.26/sparc-sun-sunos4
+          % foreach i ( `find . -name '*.a' -print` ) # or other-shell equiv...
+          ?    ranlib $i
+          ?    # or, on some machines: ar s $i
+          ? end
+
+  5. Once done, test your "installation" as suggested in section *Note
+     GHC_test::.  Be sure to use a `-v' option, so you can see exactly
+     what pathnames it's using.
+
+     If things don't work, double-check your hand-edited path names. 
+     Things will go catastrophically wrong as long as they are
+     incorrect.
+
+
+File: installing.info,  Node: non-GHC-bin-distrib,  Prev: GHC-bin-distrib,  Up: installing-bin-distrib
+
+Other tools from binary distributions
+-------------------------------------
+
+NOT DONE YET.
+
+All of the above is for GHC bundles.  For other tools, the same
+principles apply: get the binary bundles you want, then unpack them all
+together in the same place.
+
+
+File: installing.info,  Node: checklist,  Next: building-GHC,  Prev: installing-bin-distrib,  Up: Top
+
+Building Glasgow tools from source: a checklist
+===============================================
+
+  1. Install any pre-supposed utility programs that you do not have at
+     your site.  You have to do this "by hand."  It's not hard, and
+     these are things you want to have anyway.  Please see section
+     *Note Pre-supposed::.
+
+  2. Be sure you have a suitable Haskell compiler, or else the
+     intermediate C (`.hc') files.  In some cases, you might want an
+     alternative set of interface (`.hi') files (quicker than
+     generating a fresh set). Section *Note install-strategy:: lists
+     the various strategies you might adopt.
+
+     If you don't have a Haskell compiler, the most painless option is
+     to use a binary-distributed GHC to compile Glasgow tools
+     (including GHC itself) from source.  Installing a binary
+     distribution (the first step) is described in section *Note
+     installing-bin-distrib::.
+
+  3. You might want to write-protect your source files at this point:
+          cd <the-very-top-dir>
+          find . -type f \! -name \*.hi \! -name \*.hc \! -name \*.jm -print \
+                  | xargs chmod a-w
+
+  4. Run the `configure' script.  It is a shell script that looks around
+     to find out things about your system.  You can see the `configure'
+     options by passing it a `--help' flag, or by reading section *Note
+     Configuring::.
+
+  5. Once configured, build the basic support utilities and make your
+     Makefiles, including the automagically-created dependencies between
+     files.  The near-universal incantation is:
+          % cd <the-very-top-dir>
+          % sh < STARTUP >& startup.log   # and chk the log afterwards!
+
+  6. Build the Glasgow tools you are interested in, as `STARTUP'
+     suggests:
+          % cd <the-very-top-dir>/<tool>
+          % make all >& make.log          # time to go to lunch!
+     Consult the list of known pitfalls (section *Note
+     build-pitfalls::) if something goes wrong.
+
+  7. Test what you've built, enough to know that it's working.
+
+  8. Actually install the tools, if you wish:
+          % cd <the-very-top-dir>/<tool>
+          % make install
+
+  9. Make and/or install the documentation.
+
+ 10. Save a copy of your `config.status' file, for the next
+     even-more-wonderful release!
+
+ 11. If you're finished, tidy up after yourself [`make clean'], if you
+     want to.
+
+     Alternatively, `/bin/rm -rf <tool>' :-)
+
+
+File: installing.info,  Node: building-GHC,  Next: building-Haggis,  Prev: checklist,  Up: Top
+
+Building the Glasgow Haskell Compiler (GHC)
+===========================================
+
+* Menu:
+
+* installing_5::       Building GHC from source, compiling it with itself.
+* booting-from-C::     Booting/porting from C (`.hc') files.
+* building-with-HBC::  Building GHC with HBC or other funny Haskell compilers.
+* Pre-supposed::       Installing pre-supposed utilities.
+* build-pitfalls::     Known pitfalls in building Glasgow Haskell.
+* weird-configs::      Making weird GHC configurations.
+
+
+File: installing.info,  Node: installing_5,  Next: booting-from-C,  Prev: building-GHC,  Up: building-GHC
+
+Building GHC from source, compiling it with itself
+--------------------------------------------------
+
+This section describes how to build GHC from source.  You would do this
+if (a) there is no "canned" binary distribution for your machine, (b)
+the binary distribution omits features that you want, (c) you want to
+make changes to GHC and them build them in, or (d) you like torturing
+yourself.
+
+This blow-by-blow description follows the general checklist in section
+*Note checklist::.
+
+* Menu:
+
+* Right-compiler-and-files::  Do you have a suitable compiler and/or `.hc' files and/or `.hi' files?.
+* installing_5.2::            Write-protecting your source files.
+* installing_5.3::            Running `configure' and `STARTUP' for GHC.
+* installing_5.4::            Build the compiler!.
+* GHC_test::                  Test that GHC seems to be working.
+* GHC_install::               Actually installing GHC.
+* make-docs::                 Installing the GHC documentation (optional).
+* clean-up::                  Cleaning up after yourself.
+
+
+File: installing.info,  Node: Right-compiler-and-files,  Next: installing_5.2,  Prev: installing_5,  Up: installing_5
+
+Do you have a suitable compiler and/or `.hc' files and/or `.hi' files?
+......................................................................
+
+We now proceed through each installation step, carefully.
+
+Because the compiler heart of Glorious Glasgow Haskell is written in
+Haskell, you have to use some "bootstrapping" mechanism.
+
+Your best choice, if available, is to use a binary distribution for
+your platform; i.e., compile GHC 0.26 with a GHC 0.26 that we have
+provided.  Please see section *Note installing-bin-distrib:: for how to
+install a binary distribution.
+
+Your remaining choice is to use the intermediate C (`.hc') files that we
+supply.  This is the *only* choice for anyone trying to port to a new
+or weakly-supported system.
+
+The main drawback of the supplied-`.hc' approach is that you will have
+a lot of very bulky intermediate files on your disk for a while.
+
+One obscure note: if you're going to build GHC to have a native-code
+generator, you're well advised to get a suitable set of interface files
+(to save making them yourself).  Please see section *Note
+Compiler_reconfig:: if you plan to end up with a native-code generator.
+
+
+File: installing.info,  Node: installing_5.2,  Next: installing_5.3,  Prev: Right-compiler-and-files,  Up: installing_5
+
+Write-protecting your source files
+..................................
+
+At this point, some people like to write-protect their source files
+against inadvertent change:
+     cd <very-top-dir>
+     find . -type f \! -name '*.hi' \! -name \*.hc \! -name '*.jm' -print \
+             | xargs chmod a-w
+
+
+File: installing.info,  Node: installing_5.3,  Next: installing_5.4,  Prev: installing_5.2,  Up: installing_5
+
+Running `configure' and `STARTUP' for GHC
+.........................................
+
+The `configure' script finds out things about your machine.  It also
+allows you to specify features to include/exclude from your GHC
+installation.
+
+Please see section *Note Configuring:: for all about `configure', and
+section *Note Configuring-GHC:: for details of GHC configuring
+(including examples).
+
+Once `configure' runs successfully, do as it says and do `sh < STARTUP'.
+
+
+File: installing.info,  Node: installing_5.4,  Next: GHC_test,  Prev: installing_5.3,  Up: installing_5
+
+Build the compiler!
+...................
+
+Do the main GHC build, just as `STARTUP' suggests:
+     % cd ghc
+     % make all >& make.log
+If this fails or something seems suspicious, check the "known pitfalls"
+(section *Note build-pitfalls::).  If you can't figure out how to
+proceed, please get in touch with us.
+
+If you have to restart the build, for whatever reason, you are just as
+well to make the whole thing; i.e., re-do as described above.  (Well,
+the `compiler' and `lib' subdirectories are the last two; if the build
+"dies" in one of them, it is usually safe to finish the job by hand.)
+
+
+File: installing.info,  Node: GHC_test,  Next: GHC_install,  Prev: installing_5.4,  Up: installing_5
+
+Test that GHC seems to be working
+.................................
+
+The way to do this is, of course, to compile and run *this* program (in
+a file `Main.hs'):
+     main = putStr "Hello, world!\n"
+
+First, give yourself a convenient way to execute the driver script
+`ghc/driver/ghc', perhaps something like...
+     % ln -s /local/src/ghc-0.26/ghc/driver/ghc ~/bin/sun4/ghc
+     % rehash
+
+Compile the program, using the `-v' (verbose) flag to verify that
+libraries, etc., are being found properly:
+     % ghc -v -o hello -fhaskell-1.3 Main.hs
+
+Now run it:
+     % ./hello
+     Hello, world!
+
+Some simple-but-profitable tests are to compile and run the notorious
+`nfib' program, using different numeric types.  Start with
+`nfib :: Int -> Int', and then try `Integer', `Float', `Double',
+`Rational' and maybe `Complex Float'.  Code for this is distributed in
+`ghc/misc/examples/nfib/'.
+
+For more information on how to "drive" GHC, either do `ghc -help' or
+consult the User's Guide (distributed in `ghc/docs/users_guide').
+
+
+File: installing.info,  Node: GHC_install,  Next: make-docs,  Prev: GHC_test,  Up: installing_5
+
+Actually installing GHC
+.......................
+
+"Installing GHC" means copying the files required to run it to their
+"permanent home."  You can then delete, or at least tidy up, your
+source directory.
+
+If you have no reason to install GHC, you can execute directly out of
+the source tree, as sketched in the section above (section *Note
+GHC_test::).
+
+Assuming that everything's OK so far, all you need to do is:
+     % cd <very-top>/ghc
+     % make install
+
+If you're a little dubious (as I usually am), you can always do a
+"trial run" first:
+     % cd <very-top>/ghc
+     % make -n install >& temp-log-file-to-look-at
+
+In both cases, if something breaks, it's a *bug*.
+
+
+File: installing.info,  Node: make-docs,  Next: clean-up,  Prev: GHC_install,  Up: installing_5
+
+Installing the GHC documentation (optional)
+...........................................
+
+Because our documentation is in DVI/Info formats, and because there is
+no standard practice about how such documents are "installed," we
+haven't tried to automate this (at least not enough that we promise it
+works).
+
+You can find all the documentation in the distribution with:
+     % cd ghc/docs
+     % find . \( -name '*.dvi' -o -name '*.info' -o -name '*.html' \) -print
+
+If you have a standard place to put such files, just copy them there. 
+(Better ideas welcome.)
+
+The following "man" pages are hidden around in the distribution:
+     ghc/utils/hp2ps/hp2ps.1
+     literate/info-utils/info.1
+     glafp-utils/scripts/mkdirhier.man
+     glafp-utils/scripts/lndir.man
+Please install them by hand if you need to.
+
+
+File: installing.info,  Node: clean-up,  Prev: make-docs,  Up: installing_5
+
+Cleaning up after yourself
+..........................
+
+`make clean' is the basic command to tidy things up.  However: if you
+do this, *you will not be able to execute directly out of the source
+tree thereafter!* (as sketched in section *Note GHC_test::).  Nor will
+you be able to make documents, etc. -- you would have to re-build parts
+of GHC first.
+
+If you want to execute out of the source tree but would like to clear
+off lots and lots of stuff, you can do:
+     % cd ghc/lib    # scrub library C and object files
+     % rm */*.hc
+     % find . -name '*.o' -print | xargs /bin/rm
+     
+     % cd ghc/compiler   # scrub compiler object files
+     % rm */*.o
+     % rm */*.hc         # if you have been keeping them around
+(You can scrub the object files in `ghc/runtime' similarly -- except
+`main/TopClosure*.o'.)
+
+
+File: installing.info,  Node: booting-from-C,  Next: building-with-HBC,  Prev: installing_5,  Up: building-GHC
+
+Booting/porting from C (`.hc') files
+------------------------------------
+
+This section is for people trying to get GHC going by using the
+supplied intermediate C (`.hc') files.  This would probably be because
+no binaries have been provided, or because the machine is not "fully
+supported."
+
+To boot from C (`.hc') files, you need the regular source distribution
+(`ghc-0.26-src.tar.gz') and also some extra files in
+`ghc-0.26-hc-files.tar.gz'.  DON'T FORGET any extra `.hc' files for
+profiling, concurrent, parallel, ...
+
+Whatever you want to build, just unpack all the files "together":
+     % cd <wherever>
+     % gunzip -c ghc-0.26-src.tar.gz      | tar xf -
+     % gunzip -c ghc-0.26-hc-files.tar.gz | tar xf -      # basic...
+     % gunzip -c ghc-0.26-prof-hc-files.tar.gz | tar xf - # profiling...
+     % gunzip -c ghc-0.26-conc-hc-files.tar.gz | tar xf - # concurrent...
+     ... etc ...
+
+For the "it's been tried before" machines, the normal configure/build
+procedure will probably work; just keep your eyes peeled for mischief.
+
+WORD OF WISDOM: Be sure you have a suitable GCC (GNU C compiler); please
+see section *Note port-info:: for any specific requirements for your
+machine.
+
+You'll need plenty of disk space to do this whole procedure!
+
+* Menu:
+
+* installing_6.1::     Do `configure'; `sh < STARTUP'; `cd ghc; make all'; test it!.
+* Compiler_reconfig::  Building GHC again after you've bootstrapped.
+
+
+File: installing.info,  Node: installing_6.1,  Next: Compiler_reconfig,  Prev: booting-from-C,  Up: booting-from-C
+
+Do `configure'; `sh < STARTUP'; `cd ghc; make all'; test it!
+............................................................
+
+Go ahead and try `configure', as described Section *Note Configuring::
+(GHC specifics in Section *Note Configuring-GHC::).
+
+The key `configure' option is `--with-hc=c'.  A typical going-via-C
+invocation might be:
+
+     % ./configure  --prefix=/local/fp --with-hc=c   # basic + profiling
+
+Other common possibilities might be:
+
+     % ./configure --with-hc=c --disable-profiling   # basic only
+     
+     % ./configure --with-hc=c --enable-concurrent --enable-parallel
+             # basic + profiling + concurrent + parallel
+
+Next, run `STARTUP' in the usual way, as described in Section *Note
+STARTUP::.
+
+It's now time to type `cd ghc; make all'!  This "should" work,
+especially, on a known machine.  Also, it can take a VERY long time
+(esp. on oldish machines), so it's good to run overnight, on a quiet
+machine, nice'd, etc., etc.
+
+When it's all built, test your alleged GHC system, as suggested in
+section *Note GHC_test::.
+
+
+File: installing.info,  Node: Compiler_reconfig,  Prev: installing_6.1,  Up: booting-from-C
+
+Building GHC again after you've bootstrapped
+............................................
+
+Two reasons why you might want to re-configure and re-build GHC after
+an initial boot are: (a) to get a native-code generator, or (b) if you
+are going to hack on GHC.
+
+The reason you must rebuild to get a native-code generator: The `.hc'
+files will *not* turn into a native-code generator, and the distributed
+`.hi' files "match" those `.hc' files.
+
+From here on, I presume you've installed your booted GHC as `ghc-0.26'.
+
+If you are going for a native-code generator, you can save yourself
+some re-compiling by getting a suitable set of interface (`.hi') files,
+for GHC for your machine.  You should end up doing, for example:
+     cd ghc-0.26/ghc/compiler # note where you are!
+     
+     rm */*.o    # scrub the old compiler files
+     
+     gunzip -c ghc-0.26-hi-files-alpha.tar.gz | tar xfv -
+
+Now you can configure as before, but using `--with-hc=ghc-0.26'
+(`config.status' records what you did before).
+
+Running `sh < STARTUP' isn't strictly necessary; you only need to
+rebuild in `ghc/compiler':
+     cd ghc-0.26/ghc/compiler
+     make Makefile   # if you didn't STARTUP...
+     
+     make all EXTRA_HC_OPTS=-fvia-C  # -fvia-C important!
+     make all EXTRA_HC_OPTS=-fvia-C  # again, until .hi files settle...
+
+You might want to to again test GHC "out of the build" before you type
+`make install' in `ghc/compiler' to finish the job.
+
+
+File: installing.info,  Node: building-with-HBC,  Next: Pre-supposed,  Prev: booting-from-C,  Up: building-GHC
+
+Building GHC with HBC or other funny Haskell compilers
+------------------------------------------------------
+
+GHC 0.26 doesn't build with HBC.  (It could, but we haven't put in the
+effort to maintain it.)
+
+GHC 0.26 is best built with itself, GHC 0.26.  We heartily recommend
+it.  GHC 0.26 can certainly be built with GHC 0.23 or 0.24, and with
+some earlier versions, with some effort.
+
+GHC has never been built with compilers other than GHC and HBC.
+
+
+File: installing.info,  Node: Pre-supposed,  Next: build-pitfalls,  Prev: building-with-HBC,  Up: building-GHC
+
+Installing pre-supposed utilities
+---------------------------------
+
+Here are the gory details about some utility programs you may need;
+`perl' and `gcc' are the only important ones. (PVM is important if
+you're going for Parallel Haskell.) The `configure' script will tell
+you if you are missing something.
+
+Perl:
+     *You have to have Perl to proceed!* Perl is a language quite good
+     for doing shell-scripty tasks that involve lots of text processing.
+     It is pretty easy to install.
+
+     (We still assume Perl version 4; experience suggests that Perl 5
+     is fine, too.)
+
+     Perl should be put somewhere so that it can be invoked by the `#!'
+     script-invoking mechanism. (I believe `/usr/bin/perl' is preferred;
+     we use `/usr/local/bin/perl' at Glasgow.)  The full pathname should
+     be less than 32 characters long.
+
+     Perl version 4.035 has a bug to do with recursion that will bite if
+     you run the `lit2texi' script, when making Info files from
+     "literate" files of various sorts.  Either use a more recent
+     version (4.036, or 5.00n) or an older version (e.g., perl 4.019).
+
+GNU C (`gcc'):
+     The current version is 2.7.0, and has no problems that we know of.
+
+     If your GCC dies with "internal error" on some GHC source file,
+     please let us know, so we can report it and get things improved.
+     (Exception: on `iX86' boxes -- you may need to fiddle with GHC's
+     `-monly-N-regs' option; ask if confused...)
+
+PVM version 3:
+     PVM is the Parallel Virtual Machine on which Parallel Haskell
+     programs run.  Underneath PVM, you can have (for example) a
+     network of workstations (slow) or a multiprocessor box (faster).
+
+     The current version of PVM is 3.3.7.  It is readily available on
+     the net; I think I got it from `research.att.com', in `netlib'.
+
+     A PVM installation is slightly quirky, but easy to do.  Just follow
+     the `Readme' instructions.
+
+`xargs' on Solaris2:
+     The GHC libraries are put together with something like:
+          find bunch-of-dirs -name '*.o' -print | xargs ar q ...
+     Unfortunately the Solaris `xargs' (the shell-script equivalent of
+     `map') only "bites off" the `.o' files a few at a time -- with
+     near-infinite rebuilding of the symbol table in the `.a' file.
+
+     The best solution is to install a sane `xargs' from the GNU
+     findutils distribution.  You can unpack, build, and install the GNU
+     version in the time the Solaris `xargs' mangles just one GHC
+     library.
+
+`bash' (Parallel Haskell only):
+     Sadly, the `gr2ps' script, used to convert "parallelism profiles"
+     to PostScript, is written in Bash (GNU's Bourne Again shell). This
+     bug will be fixed.
+
+Makeindex:
+     You won't need this unless you are re-making our documents. 
+     Makeindex normally comes with a TeX distribution, but if not, we
+     can provide the latest and greatest.
+
+Tgrind:
+     This is required only if you remake lots of our documents *and*
+     you use the `-t tgrind' option with `lit2latex' (also literate
+     programming), to do "fancy" typesetting of your code.  *Unlikely.*
+
+Flex:
+     This is a quite-a-bit-better-than-Lex lexer.  Used in the
+     literate-programming stuff.  You won't need it unless you're
+     hacking on some of our more obscure stuff.
+
+Something other than Sun's `/usr/bin/yacc':
+     If you mess with the Haskell parser, you'll need a Yacc that can
+     cope. The unbundled `/usr/lang/yacc' is OK; the GNU `bison' is OK;
+     Berkeley yacc, `byacc', is not OK.
+
+
+File: installing.info,  Node: build-pitfalls,  Next: weird-configs,  Prev: Pre-supposed,  Up: building-GHC
+
+Known pitfalls in building Glasgow Haskell
+------------------------------------------
+
+WARNINGS about pitfalls and known "problems":
+
+  1. One difficulty that comes up from time to time is running out of
+     space in `/tmp'.  (It is impossible for the configuration stuff to
+     compensate for the vagaries of different sysadmin approaches re
+     temp space.)
+
+     The quickest way around it is `setenv TMPDIR /usr/tmp' or even
+     `setenv TMPDIR .' (or the equivalent incantation with the shell of
+     your choice).
+
+     The best way around it is to use the `--with-tmpdir=<dir>' option
+     to `configure'.  Then GHC will use the appropriate directory in
+     all cases.
+
+  2. When configuring the support code (mkworld, glafp-utils, etc.), you
+     will see mention of `NO_SPECIFIC_PROJECT' and
+     `NO_SPECIFIC_VERSION'.  This is cool.
+
+  3. In compiling some support-code bits, e.g., in `ghc/runtime/gmp' and
+     even in `ghc/lib', you may get a few C-compiler warnings.  We think
+     these are OK.
+
+  4. In 0.26, when compiling via C, you'll sometimes get "warning:
+     assignment from incompatible pointer type" out of GCC.  Harmless.
+
+  5. Similarly, `ar'chiving warning messages like the following are not
+     a problem:
+          ar: filename GlaIOMonad__1_2s.o truncated to GlaIOMonad_
+          ar: filename GlaIOMonad__2_2s.o truncated to GlaIOMonad_
+          ...
+
+  6. Also harmless are some specialisation messages that you may see
+     when compiling GHC; e.g.:
+          SPECIALISATION MESSAGES (Desirable):
+          *** INSTANCES
+          {-# SPECIALIZE instance Eq [Class] #-}
+          {-# SPECIALIZE instance Eq (Class, [Class]) #-}
+          {-# SPECIALIZE instance Outputable [ClassOp] #-}
+          {-# SPECIALIZE instance Outputable [Id] #-}
+
+  7. In compiling the compiler proper (in `compiler/'), you *may* get an
+     "Out of heap space" error message.  These can vary with the
+     vagaries of different systems, it seems.  The solution is simple:
+     (1) add a suitable `-H' flag to the `compile' macro for the
+     offending module, in `ghc/compiler/Jmakefile' (towards the end);
+     (2) re-`make Makefile' in that directory; (3) try again: `make'.
+
+     Alternatively, just cut to the chase scene:
+          % cd ghc/compiler
+          % make EXTRA_HC_OPTS=-H32m  # or some nice big number
+
+  8. Not too long into the build process, you may get a huge complaint
+     of the form:
+          Giant error 'do'ing getopts.pl:  at ./lit2pgm.BOOT line 27.
+     This indicates that your `perl' was mis-installed; the binary is
+     unable to find the files for its "built-in" library.  Speak to your
+     perl installer, then re-try.
+
+  9. If you try to compile some Haskell, and you get errors from GCC
+     about lots of things from `/usr/include/math.h', then your GCC was
+     mis-installed.  `fixincludes' wasn't run when it should've been.
+
+     As `fixincludes' is now automagically run as part of GCC
+     installation, this bug also suggests that you have an old GCC.
+
+ 10. If you end up making documents that involve (La)TeX and/or `tib'
+     (Simon's favourite), the odds are that something about your/our
+     setup will reach out and bite you.  Yes, please complain;
+     meanwhile, you can do `make -n whatever.dvi' to see the intended
+     commands, then try to muddle through, doing them by hand.
+
+
+
+File: installing.info,  Node: weird-configs,  Prev: build-pitfalls,  Up: building-GHC
+
+Making weird GHC configurations
+-------------------------------
+
+The usual way to build a "weird" GHC configuration is to turn various
+`configure' knobs, e.g., `--enable-concurrent'. Please see section
+*Note Configuring-GHC:: about GHC configuring.
+
+If you want to build some Very Customised GHC libraries, it's probably
+best to send email to us, asking how.
+
+
+File: installing.info,  Node: building-Haggis,  Next: building-Happy,  Prev: building-GHC,  Up: Top
+
+Building Haggis (Haskell GUI toolkit)
+=====================================
+
+NOT DONE YET.
+
+
+File: installing.info,  Node: building-Happy,  Next: building-NoFib,  Prev: building-Haggis,  Up: Top
+
+Building Happy (Haskell parser generator)
+=========================================
+
+NOT DONE YET.
+
+
+File: installing.info,  Node: building-NoFib,  Next: Configuring,  Prev: building-Happy,  Up: Top
+
+Building NoFib (Haskell benchmark suite)
+========================================
+
+NOT DONE YET.
+
+
+File: installing.info,  Node: Configuring,  Next: STARTUP,  Prev: building-NoFib,  Up: Top
+
+Running `configure'
+===================
+
+The GNU-style `configure' script figures out things which we need to
+know to build one or more Glasgow tools for your machine.  Also,
+`configure' lets you specify what you want built.
+
+Most people will configure/build one tool at a time.  The "short-cut"
+instructions for GHC are in section *Note Configuring-GHC::, for Haggis
+in section *Note Configuring-Haggis::, for Happy in section *Note
+Configuring-Happy::, and for NoFib in section *Note Configuring-NoFib::.
+
+However, `configure' lets you pick and choose, so you can build several
+things "in a one-er".  Just fling in all the options at once, and be
+amazed.
+
+* Menu:
+
+* Configuring-general::  `configure' options for all tools.
+* Configuring-GHC::      GHC-specific things in `configure'.
+* Configuring-Haggis::   Haggis-specific things in `configure'.
+* Configuring-Happy::    Happy-specific things in `configure'.
+* Configuring-NoFib::    NoFib-specific things in `configure'.
+
+
+File: installing.info,  Node: Configuring-general,  Next: Configuring-GHC,  Prev: Configuring,  Up: Configuring
+
+`configure' options for all tools
+---------------------------------
+
+Many `configure' options apply no matter what tools you are building.
+
+`--help':
+     (a standard GNU option)
+
+     Prints out a long usage message.  The first part is GNU
+     boilerplate; after that is the Glasgow info.
+
+`--prefix='*directory*:
+     (a standard GNU option)
+
+     Sets the "root" directory for where a system should be installed;
+     defaults to `/usr/local'.
+
+     With Happy, for example, the main `happy' binary will end up in
+     `/usr/local/bin/happy'.
+
+`--exec-prefix='*directory*:
+     (a standard GNU option)
+
+     Sets the "root" directory for where executables (e.g., the GHC
+     driver) should be installed; defaults to whatever `--prefix' is,
+     meaning that things will be installed in `/usr/local/bin'.
+
+`--with-hc='*hask*:
+     Use *hask* as my "installed Haskell compiler."
+
+     The name *hask* has to be one of `ghc*' (for Glasgow Haskell),
+     `hbc*' (for Chalmers HBC), or `nhc*' (for Rojemo's NHC). We hope
+     to add more!
+
+     As a special case, `--with-hc=c' means "I don't have a Haskell
+     compiler, please compile from intermediate C files (produced by GHC
+     somewhere else)."
+
+`--with-tmpdir='*directory*:
+     Set the directory where temporary files should be created.  This is
+     `/tmp' by default, which is Sometimes Uncool (because, e.g.,
+     `/tmp' is too small).  There's just no telling.
+
+     On our Alphas, for example, we use `--with-tmpdir=/usr/tmp'.
+
+`--with-max-heap='*size*:
+     When whatever Haskell compiler is run while building the Glasgow
+     tools, it will try to use some sane-but-not-too-big heap size.  If
+     you have a machine with plenty of memory, you might want to say
+     "Go ahead and use a great big heap."  This option allows this. 
+     So, for example, on our Alphas we might say `--with-max-heap=48m'.
+
+
+File: installing.info,  Node: Configuring-GHC,  Next: Configuring-Haggis,  Prev: Configuring-general,  Up: Configuring
+
+GHC-specific things in `configure'
+----------------------------------
+
+The easiest way to see all the `configure' options for GHC is to type
+`./configure --help'.  (I don't feel like typing the whole thing again,
+into this document...)
+
+Some common combinations would be:
+
+     ./configure --prefix=/users/fp/partain --with-hc=c --disable-profiling
+         # use .hc files; don't bother with profiling
+     
+     ./configure --with-hc=ghc-0.26 --with-readline-library --with-sockets-library
+         # simple build with itself; for Sun4s & Alphas, you
+         # should grab & use ghc-0.26-hi-files-<blah>.tar.gz
+         # (because those machines have a native-code generator).
+         # For the extra libraries, you've got to have the right
+         # stuff to link to.
+     
+     ./configure --with-hc=ghc-0.26 --disable-hsc-optimised --enable-hsc-debug
+         # Don't use -O on GHC itself; turn on -DDEBUG.
+         # Slows things way down, but it's the right thing if
+         # you're hacking on GHC and doing lots of recompilations.
+     
+     ./configure --with-hc=c --enable-concurrent --enable-parallel --with-tmpdir=/usr/tmp
+         # Do everything from .hc files; besides the normal ones,
+         # you'll need the "prof", "conc" and "par" .hc files.
+         # Use /usr/tmp as TMPDIR...
+
+Remember, if you build `--with-hc=c' on a Sun4 or Alpha, you do *not*
+have a native-code generator.
+
+
+File: installing.info,  Node: Configuring-Haggis,  Next: Configuring-Happy,  Prev: Configuring-GHC,  Up: Configuring
+
+Haggis-specific things in `configure'
+-------------------------------------
+
+Use `--enable-haggis'.  If you have Haggis and GHC in the same build
+tree but only want to build Haggis, use `--disable-ghc'.
+
+MORE TO COME.
+
+
+File: installing.info,  Node: Configuring-Happy,  Next: Configuring-NoFib,  Prev: Configuring-Haggis,  Up: Configuring
+
+Happy-specific things in `configure'
+------------------------------------
+
+Use `--enable-happy'.  If you have Happy and GHC in the same build tree
+but only want to build Happy, use `--disable-ghc'.
+
+MORE TO COME.
+
+
+File: installing.info,  Node: Configuring-NoFib,  Prev: Configuring-Happy,  Up: Configuring
+
+NoFib-specific things in `configure'
+------------------------------------
+
+Use `--enable-nofib'.  If you have NoFib and GHC in the same build tree
+but only want to build the NoFib suite, use `--disable-ghc'.
+
+You may want to enable or disable various sets of tests, as suggested
+by `./configure --help'.  If you use `--enable-all-tests', be aware
+that many of them are GHC-specific.  Also, we may not have given you
+all of the source :-)
+
+
+File: installing.info,  Node: STARTUP,  Next: utils_install,  Prev: Configuring,  Up: Top
+
+Running `STARTUP'
+=================
+
+Once you've `configure'd, utter the magic incantation:
+     % sh < STARTUP >& startup.log
+The reason you might want to pipe the chatter into a file is so you can
+check it afterwards.  It should be pretty obvious if it is happy. Note:
+it takes a little while.
+
+`STARTUP' is a simple shell script that builds `mkworld'
+(Makefile-generating system), `literate' (literate-programming system),
+and `glafp-utils' (a few utility programs); then makes the Makefiles
+and dependencies for everything.
+
+If you have any problems before getting through `STARTUP', you are
+probably best off re-running `configure' and `STARTUP' (after fixing
+what was broken).
+
+
+File: installing.info,  Node: utils_install,  Next: arrangement-of-sources,  Prev: STARTUP,  Up: Top
+
+Installing the support software (optional)
+==========================================
+
+By default, the support software that comes with the Glasgow tools --
+`mkworld', `literate', and `glafp-utils' -- is not installed.  However,
+they're generally-useful tools, so...
+
+If you did want to install the "make world" system, for example:
+     % cd <very-top>/mkworld
+     % make install
+
+If it isn't installing things where you want it to, you can either
+fiddle things on the fly...
+     % make install prefix=/home/sweet/home
+
+If you want to install just one utility, for example `lndir':
+     % cd <very-top>/glafp-utils/scripts
+     % make install_lndir
+
+"Make world" -- It slices, it dices... it's great!
+
+
+File: installing.info,  Node: arrangement-of-sources,  Next: Index,  Prev: utils_install,  Up: Top
+
+Arrangement of the sources
+==========================
+
+Once you un`tar' the Glorious Haskell Compilation (GHC) system sources
+and `cd' into the top directory, here's a bird's-eye view of what you
+should see:
+
+     mkworld/              "Make world" sub-system for configuring the system.
+     
+     glafp-utils/          Utility programs and scripts used in building the distribution;
+                           often acquired from elsewhere.
+     literate/             Glasgow literate programming sub-system.
+     
+     ghc/driver/           The driver program for GHC;
+                           currently a perl script, `ghc'.
+     
+     ghc/compiler/         The Haskell compiler proper, called `hsc';
+                           source files are in `compiler/*/[A-Z]*.lhs'.
+     
+     ghc/runtime/          The runtime system, including the garbage-collector(s).
+     
+     ghc/lib/prelude/      Source for the linked-in code for the "standard prelude".
+     ghc/lib/glaExts/      Source for the linked-in code for our Glasgow extensions.
+     ghc/lib/haskell-1.3/  Source for the linked-in code for Haskell 1.3 I/O.
+     ghc/lib/hbc/          Source for the HBC `system library'.
+     ghc/lib/ghc/          Source for the GHC `system library'.
+     
+     ghc/includes/         The "public" .hi files slurped by the parser,
+                           and .h files `#include'd in generated .hc files come from.
+     
+     ghc/docs/             documents; see the README file there.
+     
+     ghc/CONTRIB/          reserved for contributed things
+     haggis/               Haggis Haskell X11 GUI toolkit
+     happy/                Happy Haskell parser generator
+     nofib/                NoFib Haskell benchmark and test suite
+
+
+File: installing.info,  Node: Index,  Prev: arrangement-of-sources,  Up: Top
+
+Index
+=====
+
+* Menu:
+
+* --exec-prefix configure option:       Configuring-general.
+* --help configure option:              Configuring-general.
+* --prefix configure option:            Configuring-general.
+* --with-hc configure option:           Configuring-general.
+* Configuring (general):                Configuring-general.
+* Configuring for GHC:                  Configuring-GHC.
+* Configuring for Haggis:               Configuring-Haggis.
+* Configuring for Happy:                Configuring-Happy.
+* Configuring for NoFib:                Configuring-NoFib.
+* GCC (GNU C compiler), pre-supposed:   Pre-supposed.
+* GHC installation, from binaries:      GHC-bin-distrib.
+* GHC installation, from sources:       building-GHC.
+* GHC ports:                            port-info.
+* GHC reconfiguration, after booting:   Compiler_reconfig.
+* GHC unusual configurations:           weird-configs.
+* GHC, building with HBC:               building-with-HBC.
+* GHC, building with old GHCs:          building-with-HBC.
+* GHC, building with other compilers:   building-with-HBC.
+* Haggis, Concurrent Haskell:           installing_1.2.2.
+* Haggis, building:                     building-Haggis.
+* Happy, building:                      building-Happy.
+* NoFib suite, building:                building-NoFib.
+* PVM3 (Parallel Virtual Machine), pre-supposed: Pre-supposed.
+* Perl, pre-supposed:                   Pre-supposed.
+* STARTUP script:                       STARTUP.
+* STARTUP, for GHC:                     installing_5.3.
+* Solaris: alternative xargs:           Pre-supposed.
+* Yacc, pre-supposed:                   Pre-supposed.
+* alpha-dec-osf1: fully supported:      installing_1.2.1.
+* bash, presupposed (Parallel Haskell only): Pre-supposed.
+* binary installations:                 installing-bin-distrib.
+* booting GHC from .hc files:           booting-from-C.
+* booting GHC with itself:              installing_5.
+* booting GHC, files needed:            Right-compiler-and-files.
+* booting, then GHC reconfigure:        Compiler_reconfig.
+* building GHC from .hc files:          booting-from-C.
+* building GHC with itself:             installing_5.
+* building Haggis:                      building-Haggis.
+* building Happy:                       building-Happy.
+* building pitfalls:                    build-pitfalls.
+* building the NoFib suite:             building-NoFib.
+* bundles of binary stuff:              GHC-bin-distrib.
+* cleaning up afterwards:               clean-up.
+* configure script:                     Configuring.
+* configure, GHC with .hc files:        installing_6.1.
+* configure, for GHC:                   installing_5.3.
+* disk space needed:                    installing_1.3.
+* documentation, making:                make-docs.
+* flex, pre-supposed:                   Pre-supposed.
+* fully-supported platforms:            installing_1.2.1.
+* hppa1.1-hp-hpux: concurrent--no:      installing_1.2.1.
+* hppa1.1-hp-hpux_2: parallel--no:        installing_1.2.1.
+* hppa1.1-hp-hpux_3: registerised port:   installing_1.2.1.
+* i386-*-linuxaout: concurrent--no:     installing_1.2.1.
+* i386-*-linuxaout_2: parallel--no:       installing_1.2.1.
+* i386-*-linuxaout_3: profiling--maybe:   installing_1.2.1.
+* i386-*-linuxaout_4: registerised port:  installing_1.2.1.
+* installation, GHC from binaries:      GHC-bin-distrib.
+* installation, of binaries:            installing-bin-distrib.
+* installing documentation:             make-docs.
+* installing, GHC:                      GHC_install.
+* m68k-apple-macos7: historically ported: installing_1.2.1.
+* m68k-next-nextstep3: concurrent--no:  installing_1.2.1.
+* m68k-next-nextstep3_2: historically ported: installing_1.2.1.
+* m68k-next-nextstep3_3: parallel--no:    installing_1.2.1.
+* m68k-sun-sunos4: concurrent--no:      installing_1.2.1.
+* m68k-sun-sunos4_2: parallel--no:        installing_1.2.1.
+* m68k-sun-sunos4_3: registerised port:   installing_1.2.1.
+* make all, GHC with .hc files:         installing_6.1.
+* make all, for GHC:                    installing_5.4.
+* make clean, GHC:                      clean-up.
+* make docs, GHC:                       make-docs.
+* make install, GHC:                    GHC_install.
+* makeindex, pre-supposed:              Pre-supposed.
+* mips-sgi-irix5: concurrent--no:       installing_1.2.1.
+* mips-sgi-irix5_2: parallel--no:         installing_1.2.1.
+* mips-sgi-irix5_3: profiling--maybe:     installing_1.2.1.
+* mips-sgi-irix5_4: registerised port:    installing_1.2.1.
+* native-code generator:                installing_1.2.1.
+* native-code generator, after booting: Compiler_reconfig.
+* pitfalls, in building:                build-pitfalls.
+* platforms, supported:                 port-info.
+* ports, GHC:                           port-info.
+* pre-supposed utilities:               Pre-supposed.
+* pre-supposed: GCC (GNU C compiler):   Pre-supposed.
+* pre-supposed_2: PVM3 (Parallel Virtual Machine): Pre-supposed.
+* pre-supposed_3: Perl:                   Pre-supposed.
+* pre-supposed_4: flex:                   Pre-supposed.
+* pre-supposed_5: makeindex:              Pre-supposed.
+* pre-supposed_6: non-worthless Yacc:     Pre-supposed.
+* pre-supposed_7: tgrind:                 Pre-supposed.
+* problems, building:                   build-pitfalls.
+* registerised ports:                   installing_1.2.1.
+* sparc-sun-solaris2: fully supported:  installing_1.2.1.
+* sparc-sun-sunos4: fully supported:    installing_1.2.1.
+* supported platforms:                  port-info.
+* testing a new GHC:                    GHC_test.
+* tgrind, pre-supposed:                 Pre-supposed.
+* unregisterised ports:                 installing_1.2.1.
+* utilities, installing:                utils_install.
+* utilities, pre-supposed:              Pre-supposed.
+* write-protecting source files:        installing_5.2.
+* xargs, presupposed (Solaris only):    Pre-supposed.
+
+
+
+Tag Table:
+Node: Top100
+Node: install-intro1360
+Node: install-strategy2202
+Node: port-info4093
+Node: installing_1.2.14848
+Node: installing_1.2.28029
+Node: installing_1.38303
+Node: installing-bin-distrib10477
+Node: GHC-bin-distrib10901
+Node: non-GHC-bin-distrib15259
+Node: checklist15622
+Node: building-GHC18152
+Node: installing_518745
+Node: Right-compiler-and-files19896
+Node: installing_5.221166
+Node: installing_5.321587
+Node: installing_5.422163
+Node: GHC_test22864
+Node: GHC_install23986
+Node: make-docs24757
+Node: clean-up25661
+Node: booting-from-C26558
+Node: installing_6.128088
+Node: Compiler_reconfig29257
+Node: building-with-HBC30786
+Node: Pre-supposed31352
+Node: build-pitfalls34987
+Node: weird-configs38454
+Node: building-Haggis38903
+Node: building-Happy39098
+Node: building-NoFib39303
+Node: Configuring39502
+Node: Configuring-general40575
+Node: Configuring-GHC42563
+Node: Configuring-Haggis44093
+Node: Configuring-Happy44432
+Node: Configuring-NoFib44768
+Node: STARTUP45302
+Node: utils_install46079
+Node: arrangement-of-sources46888
+Node: Index48724
+
+End Tag Table

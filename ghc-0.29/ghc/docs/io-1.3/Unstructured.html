@@ -1,0 +1,3766 @@
+<html>
+<head>
+<title>Haskell 1.3 Monadic I/O Definition</title>
+</head>
+<body>
+
+<img src="Haskell.gif" alt="(Haskell Logo)"></a>.
+<p>
+
+<p><hr><p>
+Last Modified On Thu Dec 8 02:32:27 GMT 1994 By Kevin Hammond
+<h1>The Definition of Monadic I/O for Haskell 1.3</h1>
+
+Haskell 1.3 is a revision of Haskell 1.2 (<A
+href="Biblio.html#haskell1.2">Hudak 92</a>).  This document defines a
+standard monadic programming model for input/output (I/O) in Haskell
+1.3.  There is also a <strong>BIG</strong> <a
+href="Unstructured.html">unstructured version</a> of this document,
+suitable for printing, searching or FTPing.  Note: to keep it
+reasonably short and simple, the unstructured version does not include
+any of the sample operating system bindings such as <a
+href="Posix.html"><code>LibPOSIX</code></a>, and tags refer to the
+structured version.  <p>
+
+A good general overview of the problems faced in designing an I/O
+standard, with tips to help implementors and programmers maximise
+portability can be found in
+<a href="Biblio.html#ANSI-C-Library">Plauger's book on the Standard
+C library</a>.
+<p>
+
+<h2>Purpose</h2>
+
+The purpose of this definition is to provide a framework for Haskell
+I/O on a variety of commonly used operating systems.  This document
+defines basic high-level I/O functionality for Haskell in a series of
+Prelude and Library modules.<p>
+
+Entities defined in Prelude modules (whose names begin with
+<code>Prelude</code>) are in scope unless explicitly renamed or
+hidden. Entities defined in Library modules (whose names begin with
+<code>Lib</code>) are in scope <em>only</em> if that module is
+explicitly imported <a href="Rationale.html#Libraries">
+<img src="Rationale.gif" alt="(Rationale)"></a>.
+<p>
+
+<h2>Conformance</h2>
+
+A strictly-conforming Haskell 1.3 implementation implements the Core
+I/O operations completely and exactly.  A mostly-conforming Haskell
+1.3 implementation implements a large subset of the Core I/O
+operations, and provides full and complete documentation of any
+extensions to or deviations from the semantics given here.  For any
+conforming implementation, all implementation dependencies which are
+allowed by the standard must be explicitly documented.
+ <a href="Rationale.html#Conformance">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<h3>Bindings</h3>
+
+It is possible to build on this framework to produce implementations
+which conform to accepted I/O standards or operating system
+interfaces.  One such "binding" (for the <a href="Biblio.html#POSIX">POSIX</a>
+standard -- IEEE 1003 --
+<a href="Posix.html"><code>LibPosix</code></a>) has already been defined, and similar bindings
+should be defined for the Win32 and Macintosh environments, amongst
+others.  As experience is gained with the I/O definition, it is
+expected that some common functions will be promoted into the Core
+I/O definition.
+<p>
+
+<h2>The Definition</h2>
+
+Some of the computations defined here are specified in terms of other
+Haskell functions.  This is done <em>solely</em> to simplify the semantics
+of the definition.  An implementation is free to use any semantically
+correct definition of these computations.<p>
+
+<ul>
+<li><a href="Credits.html">Credits</a>
+<li><a href="HighLights.html">Highlights</a>
+<li><a href="Notation.html">Notation</a>
+<li><a href="Summary.html">Summary of I/O Operations</a>
+<li>The Haskell 1.3 Core I/O Definition
+  <ul>
+  <li>Prelude Modules
+    <ul>
+    <li><a href="Programs.html">Programs</a>
+    <li><a href="PreludeIO.html">Top-Level I/O: "PreludeIO"</a>
+    <li><a href="PreludeMonadicIO.html">Monadic I/O Primitives: "PreludeMonadicIO"</a>
+      <ul>
+      <li><a href="PreludeMonadicIO.html#IO-Monad">The IO Monad</a>
+      <li><a href="PreludeMonadicIO.html#Error-Handling">Error Handling</a>
+      <li><a href="PreludeMonadicIO.html#User-Errors">User-Defined Errors</a>
+      <li><a href="PreludeMonadicIO.html#HOFs">Higher-Order Utility Functions</a>
+      </ul>
+    <li><a href="PreludeIOError.html">I/O Errors: "PreludeIOError"</a>
+    <li><a href="PreludeStdIO.html">Standard I/O Operations: "PreludeStdIO"</a>
+      <ul>
+      <li><a href="PreludeStdIO.html#Handles">Handles</a>
+      <li><a href="PreludeStdIO.html#StandardHandles">Standard Handles</a>
+      <li><a href="PreludeStdIO.html#OpeningClosing">Opening and Closing Files</a>
+      <li><a href="PreludeStdIO.html#EOF">Detecting the End of Input</a>
+      <li><a href="PreludeStdIO.html#Buffering">Buffering Operations</a>
+      <li><a href="PreludeStdIO.html#Query">Handle Properties</a>
+      <li><a href="PreludeStdIO.html#Seeking">Repositioning Handles</a>
+      </ul>
+    <li><a href="PreludeReadTextIO.html">Text Input: "PreludeReadTextIO"</a>
+    <li><a href="PreludeWriteTextIO.html">Text Output: "PreludeWriteTextIO"</a>
+    </ul>
+  <li>Library Modules
+    <ul>
+    <li><a href="LibDirectory.html">Directory Operations: "LibDirectory"</a>
+    <li><a href="LibSystem.html">System Interaction: "LibSystem"</a>
+    <li><a href="LibTime.html">Time of Day: "LibTime"</a>
+    <li><a href="LibCPUTime.html">CPU Time Usage: "LibCPUTime"</a>
+    <li><a href="LibUserInterrupt.html">User Interrupt Handling: "LibUserInterrupt"</a>
+    </ul>
+  </ul>
+<li>Operating System Bindings
+  <ul>
+  <li><a href="Posix.html">POSIX Binding: "LibPOSIX"</a>
+  </ul>
+<li><a href="Examples.html">Examples</a>
+</ul>
+<p>
+
+<h2>Bibliography</h2>
+
+This is the <a href="Biblio.html">Bibliography</a> of 
+<a href="Biblio.html#Language-Standards">language standards</a>,
+<a href="Biblio.html#Operating-Systems"> operating system references</a>,
+and
+<a href="Biblio.html#FP-References">functional programming references</a>
+consulted when defining this standard.
+<p>
+
+<h2>Recent Changes</h2>
+
+A log of recent changes can be found <a href="ChangeLog.html">here</a>.
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Highlights</title>
+</head>
+<body>
+
+[<a href="Credits.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Notation.html">Next</a>]
+<p>
+<hr><p>
+
+
+<h2>Highlights</h2>
+
+Here are the highlights of the 1.3 I/O definition.
+<ul>
+<li>
+We define a <em>monadic programming model</em>
+(see <A href="Biblio.html#cupitt89">Cupitt 89</a>,
+<a href="Biblio.html#wadler-essence">Wadler 92</a>,
+<a href="Biblio.html#gordon92">Gordon 92</a>,
+<A href="Biblio.html#peytonjones93">Peyton Jones 93</a>,
+<a href="Biblio.html#launchbury94">Launchbury 94</a>,
+and the bibliographies of
+these papers). Expressions of type
+<code>IO</code> <var>a</var> denote computations that may engage in I/O before
+returning an answer of type <var>a</var>.
+<li>
+The <code>IO</code> monad admits computations that fail and recovery from
+such failures.
+<li>
+We propose a new type of <em>handles</em>, to mediate character I/O on
+both files and channels.
+<li>
+We propose input polling and input of characters.  Haskell 1.2
+represented character input as a single <code>String</code> (that is, a lazy
+list of characters), containing all the characters available for input
+throughout the program run.
+<li>
+Our proposal supports the majority of Haskell 1.2 I/O operations.
+We judged it too complex to support them all.
+<li>
+We provide an extensible framework for future Haskell implementations, built on
+existing I/O standards and common operating system practice.
+</ul>
+
+Monadic programming models have proved to be more general and in many
+respects simpler than the stream-based I/O system used in Haskell 1.2.
+Several implementations exist.  This document is intended to be a
+relatively conservative standard to allow programs to be ported
+between the various Haskell systems.  <p>
+
+[<a href="Credits.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Notation.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Notation</title>
+</head>
+<body>
+
+[<a href="HighLights.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Summary.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Notation</h2>
+
+We write specific phrases of the object language Haskell in <code>this</code>
+font and use <var>this</var> font for metavariables ranging over arbitrary
+phrases of the object language.  For instance, Haskell function
+<code>ident</code> applied to an arbitrary <var>x</var> equals <var>x</var>.
+<p>
+
+<hr><p>
+
+[<a href="HighLights.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Summary.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+
+<html>
+<head>
+<title>Haskell 1.3 Summary of I/O Operations</title>
+</head>
+
+<body>
+
+[<a href="Notation.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Programs.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Summary of I/O Operations</h2>
+
+This is an unstructured list of the types, instances, values and
+operations supported by Core Haskell 1.3 I/O.
+<p>
+
+<em>This summary is provided for information only, and does not form
+part of the I/O definition proper.  In case of inconsistency, 
+definitions given in the main body of the I/O definition take precedence
+over those given here.</em>
+<p>
+
+<hr>
+<p>
+
+<h3>Fixities</h3>
+
+Only two infix entities are defined.
+<p>
+
+<pre>
+> infixr 1 >>, >>=                         -- PreludeMonadicIO
+</pre>
+<p>
+
+<h3>Types and Instances</h3>
+
+This is a list of the types and instances required by the
+Core I/O definition.
+<p>
+
+<pre>
+> data IOError = AlreadyExists String           -- PreludeIOError
+>              | Deadlock String
+>              | HardwareFault String
+>              | IllegalOperation String
+>              | InappropriateType String
+>              | InvalidArgument String
+>              | NoSuchThing String
+>              | OperationInterrupted String
+>              | OtherError String
+>              | PermissionDenied String
+>              | ProtocolError String
+>              | ResourceBusy String
+>              | ResourceExhausted String
+>              | ResourceVanished String
+>              | SystemError String
+>              | TimeExpired String
+>              | UnsatisfiedConstraints String
+>              | UnsupportedOperation String
+>              | UserError String
+
+> type IO a                                     -- PreludeMonadicIO
+> data Either a b =  Left a | Right b           -- PreludeMonadicIO
+
+> type Handle                                   -- PreludeStdIO
+> type FilePath = String                        -- PreludeStdIO
+
+> data IOMode     = ReadMode                    -- PreludeStdIO
+>                 | WriteMode
+>                 | AppendMode 
+>                 | ReadWriteMode
+
+> data BufferMode = NoBuffering                 -- PreludeStdIO
+>                 | LineBuffering
+>                 | BlockBuffering (Maybe Int)
+
+> data HandlePosn                               -- PreludeStdIO
+> data SeekMode   = AbsoluteSeek                -- PreludeStdIO
+>                 | RelativeSeek
+>                 | SeekFromEnd 
+
+> data ExitCode   = ExitSuccess                 -- LibSystem
+>                 | ExitFailure Int
+
+> data ClockTime                                -- LibTime
+> instance Ord ClockTime                        -- LibTime
+> instance Eq  ClockTime                        -- LibTime
+> instance Text ClockTime                       -- LibTime
+> data CalendarTime =                           -- LibTime
+>      CalendarTime  Int  Int  Int  Int  
+>                    Int  Int  Integer 
+>                    Int  Int  String 
+>                    Int Bool
+
+> data TimeDiff    =                            -- LibTime
+>      TimeDiff Int  Int  
+>               Int  Int  Int  Int  Integer
+>      deriving (Eq,Ord)
+</pre>
+<p>
+
+<h3>Values</h3>
+
+There are three predefined handles.
+<p>
+
+<pre>
+> stdin, stdout, stderr :: Handle          -- PreludeStdIO
+</pre>
+<p>
+
+<h3>Operations</h3>
+
+The set of I/O operations is sorted alphabetically, subdivided by Prelude
+and Library operations.
+<p>
+
+<h4>Prelude Operations</h4>
+
+<pre>
+> (>>=)                :: IO a     -> (a -> IO b)           -> IO b 
+> (>>)                 :: IO a     -> IO b                  -> IO b
+> accumulate           :: [IO a]                            -> IO [a] 
+> appendFile           :: FilePath -> String                -> IO ()
+> either               :: (a -> c) -> (b -> c) -> (Either a b) -> c
+> fail                 :: String                            -> IO a 
+> failWith             :: IOError                           -> IO a
+> getChar              ::                                      IO Char
+> handle               :: IO a     -> (IOError -> IO a)     -> IO a 
+> hClose               :: Handle                            -> IO ()
+> hFileSize            :: Handle                            -> IO Integer
+> hFlush               :: Handle                            -> IO ()
+> hGetChar             :: Handle                            -> IO Char
+> hGetContents         :: Handle                            -> IO String
+> hGetPosn             :: Handle                            -> IO HandlePosn
+> hIsBlockBuffered     :: Handle                      -> IO (Bool,Maybe Int)
+> hIsClosed            :: Handle                            -> IO Bool
+> hIsEOF               :: Handle                            -> IO Bool
+> hIsLineBuffered      :: Handle                            -> IO Bool
+> hIsNotBuffered       :: Handle                            -> IO Bool
+> hIsOpen              :: Handle                            -> IO Bool
+> hIsReadable          :: Handle                            -> IO Bool
+> hIsSeekable          :: Handle                            -> IO Bool
+> hIsWritable          :: Handle                            -> IO Bool
+> hLookAhead           :: Handle                            -> IO Char
+> hPutChar             :: Handle   -> Char                  -> IO ()
+> hPutStr              :: Handle   -> String                -> IO ()
+> hPutText             :: Text a   => Handle     -> a       -> IO ()
+> hReady               :: Handle                            -> IO Bool
+> hSeek                :: Handle   -> SeekMode   -> Integer -> IO ()
+> hSetBuffering        :: Handle   -> BufferMode            -> IO ()
+> hSetPosn             :: HandlePosn                        -> IO ()
+> interact             :: (String -> String)                -> IO ()
+> isEOF                ::                                      IO Bool
+> openFile             :: FilePath -> IOMode                -> IO Handle
+> print                :: Text a =>                 a       -> IO ()
+> putChar              :: Char                              -> IO () 
+> putStr               :: String                            -> IO () 
+> putText              :: Text a   => a                     -> IO () 
+> readFile             :: FilePath                          -> IO String
+> return               ::  a                                -> IO a
+> sequence             :: [IO a]                            -> IO () 
+> try                  ::  IO a                     -> IO (Either IOError a)
+> writeFile            :: FilePath -> String               -> IO ()
+</pre>
+<p>
+
+<h4>Library Operations</h4>
+
+<pre>
+> addToClockTime       :: TimeDiff  -> ClockTime           -> ClockTime
+> diffClockTimes       :: ClockTime -> ClockTime           -> TimeDiff
+> createDirectory      :: FilePath                         -> IO ()
+> exitWith             :: ExitCode                         -> IO a
+> getArgs              ::                                     IO [String]
+> getClockTime         ::                                     IO ClockTime
+> getCPUTime           ::                                     IO Integer
+> getCurrentDirectory  ::                                     IO FilePath
+> getDirectoryContents :: FilePath                         -> IO [FilePath]
+> getEnv               :: String                           -> IO String
+> getProgName          ::                                     IO String
+> removeDirectory      :: FilePath                         -> IO ()
+> removeFile           :: FilePath                         -> IO ()
+> renameDirectory      :: FilePath -> FilePath             -> IO ()
+> renameFile           :: FilePath -> FilePath             -> IO ()
+> setCurrentDirectory  :: FilePath                         -> IO ()
+> setUserInterrupt     :: Maybe (IO ())                -> IO (Maybe (IO ()))
+> system               :: String                           -> IO ExitCode
+> toCalendarTime       :: ClockTime                        -> CalendarTime
+> toUTCTime            :: ClockTime                        -> CalendarTime
+> toClockTime          :: CalendarTime                     -> ClockTime
+</pre>
+<p>
+
+<h3>"Derived" Operations</h3>
+
+Some operations could notionally be defined in terms of other
+operations (though efficiency issues will probably mandate direct
+implementation).  Previous versions of the I/O proposal distinguished
+"primitive" and "derived" operations, leading to some confusion,
+especially where definitions could be circular (and either could
+therefore be "primitive").
+<p>
+
+This proposal does not generally distinguish operations in this way,
+though definitions in terms of other operations are given where
+possible in order to simplify the semantics, aid comprehension, and
+speed implementation.
+<p>
+
+The following operations are currently defined in terms of other
+operations, and could therefore be considered "derived" in the sense
+used above.  For the sake of completeness, the relevant definitions
+are repeated here.
+<p>
+
+<h4>"Derived" Prelude Operations</h4>
+
+<pre>
+> (>>)                 :: IO a     -> IO b                  -> IO b
+> p >> q               =  p >>= const q
+
+> accumulate           :: [IO a]                            -> IO [a] 
+> accumulate  =
+>   foldr mcons (return [])
+>     where
+>       mcons :: IO a -> IO [a] -> IO [a]
+>       mcons p q = p >>= \x -> q >>= \y -> return (x : y)
+
+> appendFile           :: FilePath -> String                -> IO ()
+> appendFile name str =
+>   openFile AppendMode name >>= \hdl -> hPutStr hdl str >> close hdl
+
+> either               :: (a -> c) -> (b -> c) -> (Either a b) -> c
+> either f g (Left x)  =  f x
+> either f g (Right x) =  g x
+
+> fail                 :: String                            -> IO a 
+> fail                 =  failwith . UserError
+
+> getChar              ::                                      IO Char
+> getChar              =  hGetChar stdin
+
+> hPutStr              :: Handle   -> String                -> IO ()
+> hPutText             :: Text a   => Handle     -> a       -> IO ()
+> hPutStr hdl          =  foldr (>>) (return ()) . map (hPutChar hdl)
+> hPutText hdl         =  hPutStr hdl . show
+
+> interact             :: (String -> String)                -> IO ()
+> interact f           =  hGetContents stdin >>= (putStr . f)
+
+> isEOF                ::                                      IO Bool
+> isEOF                =  hIsEOF stdin
+
+> print                :: Text a =>                 a       -> IO ()
+> print x              =  putText x >> putChar '\n'
+
+> putChar              :: Char                              -> IO () 
+> putStr               :: String                            -> IO () 
+> putText              :: Text a   => a                     -> IO () 
+> putChar              =  hPutChar stdout
+> putStr               =  hPutStr  stdout
+> putText              =  hPutText stdout
+
+> readFile             :: FilePath                          -> IO String
+> readFile name        =  openFile ReadMode name >>= hGetContents
+
+> sequence             :: [IO a]                            -> IO () 
+> sequence             =  foldr (>>) (return ())
+
+> try                  ::  IO a                     -> IO (Either IOError a)
+> try p                =  handle (p >>= (return . Right)) Left
+
+> writeFile            :: FilePath -> String               -> IO ()
+> writeFile name str =
+>   openFile WriteMode name >>= \hdl -> hPutStr hdl str >> close hdl
+</pre>
+<p>
+
+<hr><p>
+
+[<a href="Notation.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Programs.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Programs</title>
+</head>
+<body>
+
+[<a href="Summary.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Programs</h2>
+
+Haskell 1.3 programs are the result of executing <code>Main.main</code>.
+This must have type <code>IO ()</code>, as defined in <a
+href="PreludeMonadicIO.html#IO-Monad"><code>PreludeMonadicIO</code></a>.
+If a program <var>p</var> terminates without calling <a
+href="LibSystem.html#ExitCode"><code>exitWith</code></a> explicitly,
+it is treated identically to the computation <br> <var>p</var><code>>>
+exitWith ExitSuccess</code>.
+<p>
+
+<pre>
+> module Main where
+> 
+> main :: IO ()
+> main =  putStr "Hello World\n"
+</pre>
+<p>
+
+<hr><p>
+
+[<a href="Summary.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeIO.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</hmtl>
+<html>
+<head>
+<title>Haskell 1.3 Top-Level I/O: PreludeIO</title>
+</head>
+<body>
+
+[<a href="Programs.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeMonadicIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Top Level I/O  "PreludeIO"</h2>
+
+This module collects and exports the more primitive Prelude modules.
+<p>
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeIO (
+>       PreludeMonadicIO.., PreludeIOError..,
+>       PreludeStdIO.., PreludeReadTextIO.., PreludeWriteTextIO..,
+>       interact
+>     ) where
+
+> import PreludeMonadicIO
+> import PreludeStdIO
+> import PreludeIOError
+> import PreludeReadTextIO
+> import PreludeWriteTextIO
+</pre>
+<p>
+
+<a name="interact"><pre>
+> interact      :: (String -> String)       -> IO ()
+> interact f     = hGetContents stdin >>= (putStr . f)
+</pre></a>
+<p>
+
+The <code>interact</code> computation supports classical Landin-stream
+character I/O, as in Haskell 1.2 <a href="Rationale.html#interact">
+<img src="Rationale.gif" alt="(Rationale)"></a>.  <p>
+
+<hr><p>
+
+
+[<a href="Programs.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeMonadicIO.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Monadic I/O Primitives: PreludeMonadicIO</title>
+</head>
+<body>
+
+[<a href="PreludeIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeIOError.html">Next</a>]
+<p>
+<hr><p>
+
+
+<h2>Monadic I/O Primitives "PreludeMonadicIO"</h2>
+
+This module defines the basic monadic framework for Haskell 1.3 I/O.
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeMonadicIO where
+
+> import PreludeIOError
+</pre>
+<p>
+
+<pre>
+> infixr 1 >>, >>=
+</pre><p>
+
+<h3><a name="IO-Monad">The <code>IO</code> Monad</h3>
+
+I/O operations may need to indicate errors, and implementations may need
+to handle these errors.  The <code>IO</code> monad extends existing practice
+by making this functionality primitive.  The exact errors which may
+occur are defined in <a href="PreludeMonadicIO.html"><code>PreludeIOError</code>.</a><p>
+
+<pre>
+> type IO a
+> data Either a b =  Left a | Right b
+</pre><p>
+
+An expression of type <code>IO</code>
+<var>a</var>, for some type <var>a</var>, denotes a computation whose answer
+is either a result of type <var>a</var> or an
+<em>error</em> of type <code>IOError</code>.  The computation succeeds
+with result <var>succ</var> if its answer is <code>Right</code> <var>succ</var>,
+and fails with result <var>fail</var> if its answer is <code>Left</code>
+<var>fail</var>.  Note that the type system delimits the
+possibility of failure: only expressions of some type <code>IO</code>
+<var>a</var> can <em>fail</em> in the sense defined here.<p>
+
+<pre>
+> return        ::  a       -> IO a
+> failWith      ::  IOError -> IO a
+</pre><p>
+
+There are two primitives to create trivial computations, one for
+each of the two possibilities, success or failure.
+<br>
+<code>return</code> <var>result</var> is a computation that succeeds
+with result <var>result</var>.
+<br>
+<code>failWith</code> <var>fail</var> is a computation that fails
+with the error <var>fail</var>.<p>
+
+<pre>
+> (>>=)         ::  IO a    -> (a -> IO b)       -> IO b 
+</pre><p>
+
+The <code>>>=</code> operation is used to sequence two computations,
+where the second computation is parameterised on the result of the first.<p>
+
+<pre>
+> (>>)          ::  IO a    -> IO b              -> IO b
+> p >> q        = p >>= const q
+</pre><p>
+
+The restricted form of <code>>>=</code>, <code>>></code>, is used when
+the result of the first computation is uninteresting.<p>
+
+<h3><a name="Error-Handling">Error Handling</h3>
+
+<a name ="handle"><pre>
+> handle           ::  IO a    -> (IOError -> IO a) -> IO a 
+</pre></a><p>
+
+The construct <code>handle</code> <var>comp handler</var> can be used to
+handle a simple error during a computation <var>comp</var>.  Its
+usefulness is limited in that the replacement value must be of the
+same type as the result of <var>comp</var>.<p>
+
+<a name = "try"><pre>
+> try        ::  IO a    -> IO (Either IOError a) 
+> try p      =   (p >>= (return . Right)) `handle` (return . Left)
+</pre></a><p>
+
+The construct <code>try</code> <var>comp</var> exposes errors which
+occur within a computation, and which are not fully handled.  It
+always succeeds.<p>
+
+<h3><a name="User-Errors">User-Defined Errors</h3>
+
+<pre>
+> fail :: String -> IO a 
+> fail = failwith . UserError
+</pre><p>
+
+As a convention for user-generated errors, to return an error message
+<var>msg</var> <code>:: String</code>, return the error value
+<code>UserError</code> <var>msg</var> via the computation
+<code>fail</code> <var>msg</var>.<p>
+
+This construct should be used instead of Haskell's <code>error
+:: String -> a</code> operation wherever convenient<a href="Rationale.html#error">
+<img src="Rationale.gif" alt="(Rationale)"></a>.<p>
+
+<h3><a name="HOFs">Higher-Order Utility Functions</h3>
+
+<pre>
+> either        ::  (a -> c) -> (b -> c) -> (Either a b) -> c
+> either f g (Left x)  = f x
+> either f g (Right x) = g x
+</pre><p>
+
+The construct <code>either</code> <var>a b</var> can be used to generate
+functions on types of the form <code>Either</code> <var>a b</var>.<p>
+
+<pre>
+> accumulate    :: [IO a] -> IO [a] 
+> accumulate  =
+>   foldr mcons (return [])
+>     where
+>	mcons :: IO a -> IO [a] -> IO [a]
+>	mcons p q = p >>= \x -> q >>= \y -> return (x : y)
+</pre><p>
+
+The <code>accumulate</code> computation is used to process
+a list of computations of the same type, and to return
+a list of their results when executed in sequence.<p>
+
+<pre>
+> sequence      :: [IO a] -> IO () 
+> sequence = foldr (>>) (return ())
+</pre><p>
+
+The <code>sequence</code> computation is used for the simpler
+case when the computations are executed entirely for their
+external effect, and the results are therefore uninteresting.<p>
+
+<hr><p>
+
+
+[<a href="PreludeIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeIOError.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</hmtl>
+<html>
+<head>
+<title>Haskell 1.3 I/O Errors: PreludeIOError</title>
+</head>
+<body>
+
+
+[<a href="PreludeMonadicIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeStdIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>I/O Errors "PreludeIOError"</h2>
+
+Haskell 1.2 does not provide standard error values for I/O errors.
+This is unacceptable for portable implementations which indulge in
+non-trivial I/O.  The <code>IOError</code> type has therefore been
+extended from Haskell 1.2, and possible error values have been
+identified for all standard operations.
+<a href="Rationale.html#PreludeIOError">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeIOError where
+</pre>
+<p>
+
+<pre>
+> data IOError = AlreadyExists String
+>              | HardwareFault String
+>              | IllegalOperation String
+>              | InappropriateType String
+>              | Interrupted String
+>              | InvalidArgument String
+>              | NoSuchThing String
+>              | OtherError String
+>              | PermissionDenied String
+>              | ProtocolError String
+>              | ResourceBusy String
+>              | ResourceExhausted String
+>              | ResourceVanished String
+>              | SystemError String
+>              | TimeExpired String
+>              | UnsatisfiedConstraints String
+>              | UnsupportedOperation String
+>              | UserError String
+>              | EOF
+</pre>
+<p>
+
+<pre>
+> instance Text IOError where
+>    showsPrec _ e s = ...
+</pre>
+<p>
+<code>SystemError</code> is reserved for the low-level operating system 
+interface routines, such as those defined in <a
+href="Posix.html"><code>LibPOSIX</code></a>, and should not be returned
+by the high-level routines in the Prelude.
+<p>
+The <code>String</code> part of an <code>IOError</code> is
+platform-dependent.  However, to provide a uniform mechanism for
+distinguishing among errors within these broad categories, each
+platform-specific standard shall specify the exact strings to be used
+for particular errors.  For errors not explicitly mentioned in the
+standard, any descriptive string may be used.
+<p>
+<hr><p>
+
+
+[<a href="PreludeMonadicIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeStdIO.html">Next</a>]
+<p>
+
+
+</body>
+
+<hr>
+
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+
+<html>
+<head>
+<title>Haskell 1.3 Standard I/O: PreludeStdIO</title>
+</head>
+<body>
+
+[<a href="PreludeIOError.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeReadTextIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Standard I/O "PreludeStdIO"</h2>
+
+
+This module defines Haskell <em>handles</em> and the operations which
+are supported for them.<p>
+
+Haskell interfaces to the external world through an abstract <em>file
+system</em>.  This file system is a collection of named <em>file
+system objects</em>, which may be organised
+in <em>directories</em> (see <a href="LibDirectory.html"><code>LibDirectory</code></a>).  
+In some implementations, directories may themselves be file system
+objects and could be entries in other directories.  For simplicity,
+any non-directory file system object is termed a <em>file</em>,
+although it could in fact be a communication channel, or any other
+object recognised by the operating system.  <em>Physical files</em> are
+persistent, ordered files, and normally reside on disk.<p>
+
+File and directory names are values of type <code>String</code>, whose
+precise meaning is operating system dependent.  Files can be opened,
+yielding a handle which can then be used to operate on the contents
+of that file.<p>
+
+<hr><p>
+
+<pre>
+> interface PreludeStdIO where
+</pre><p>
+
+<pre>
+> import PreludeMonadicIO
+> import PreludeIOError
+</pre><p>
+
+<pre>
+> type Handle
+> type FilePath = String
+</pre><p>
+
+<hr>
+<p>
+
+<a name="Handles"><h3>Handles</h3></a>
+
+
+The standard defines operations to read/write finite sequences of
+items from/to files, represented by values of type
+<code>Handle</code>.  Each value of this type is a <em>handle</em>: a
+record used by the Haskell run-time system to <em>manage</em> I/O with
+operating system objects.<p>
+
+A handle has at least the following properties:
+<ul>
+<li> whether it manages input or output or both;
+<li> whether it is <em>open</em>, <em>closed</em> or <em>semi-closed</em>;
+<li> whether the object is seekable;
+<li> whether buffering is disabled, or enabled on a line or block basis;
+<li> a buffer (whose length may be zero).
+</ul>
+
+Most handles will also have a current I/O position indicating
+where the next input or output operation will occur.
+<p>
+
+A handle is <em>readable</em> if it manages only input or both input
+and output; likewise, it is <em>writable</em> if it manages only
+output or both input and output.  A handle is <em>open</em> when first
+allocated.  Once it is closed it can no longer be used for either
+input or output, though an implementation cannot re-use its storage
+while references remain to it <a href="Rationale.html#Handle-Reuse">
+<img src="Rationale.gif" alt="(Rationale)"></a>. <p>
+
+<a name="SemiClosed"><h4>Semi-Closed Handles</h4></a>
+
+The operation <code>hGetContents</code> puts a handle <var>hdl</var> into
+an intermediate state, <em>semi-closed</em>.  In this state, <var>hdl</var> is
+effectively closed, but items are read from <var>hdl</var> on demand 
+and accumulated in a special stream returned
+by <code>hGetContents</code> <var>hdl</var>.
+ <a href="Rationale.html#getContents">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+Any operation except for <code>hClose</code> that fails because a
+handle is closed, also fails if a handle is semi-closed.  A
+semi-closed handle becomes closed:
+<ul>
+<li> if 
+<a href="#hClose"><code>hClose</code></a> is applied to
+it <a href="Rationale.html#Semi-Close-Close">
+<img src="Rationale.gif" alt="(Rationale)"></a>;
+<li> if an I/O error occurs when reading an item from the
+file item from the stream;
+<li> or once the entire contents of the file has been read.
+</ul>
+<p>
+
+Once a semi-closed handle becomes closed, the contents of the
+associated stream becomes fixed, and is the list of those items which
+were successfully read from that handle. Any I/O errors encountered when
+a handle is semi-closed are simply discarded.
+ <a href="Rationale.html#Semi-Close-Discard">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<a name="StandardHandles"><h3>Standard Handles</h3></a>
+
+<pre>
+> stdin, stdout, stderr :: Handle
+</pre><p>
+
+Three handles are allocated during program initialisation .
+The first two manage input or output from the Haskell program's
+standard input or output channel respectively 
+ <a href="Rationale.html#Standard-Handles">
+<img src="Rationale.gif" alt="(Rationale)"></a>.  The third manages
+output to the standard error channel<a href="Rationale.html#stderr">
+<img src="Rationale.gif" alt="(Rationale)"></a>.
+These handles are
+initially open.
+<p>
+
+<a name="OpeningClosing"><h3>Opening and Closing Files</h3></a>
+
+<a name="Opening"><h4>Opening Files</h4></a>
+
+<a href="Rationale.html#Opening-Files">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<pre>
+> data IOMode = ReadMode | WriteMode | AppendMode | ReadWriteMode
+
+> openFile      :: FilePath -> IOMode -> IO Handle
+</pre><p>
+
+Computation <code>openFile</code> <var>file</var> <var>mode</var> allocates
+and returns a new, open handle to manage the file
+<var>file</var>.
+It manages input if <var>mode</var> is
+<code>ReadMode</code>, output if <var>mode</var> is <code>WriteMode</code>
+or <code>AppendMode</code>, and both input and output if mode is
+<code>ReadWriteMode</code> <a href="Rationale.html#ReadWrite">
+<img src="Rationale.gif" alt="(Rationale)"></a>.<p>
+
+If the file does not exist and it is opened for output, it should be
+created as a new file.  If <var>mode</var> is <code>WriteMode</code>
+and the file already exists, then it should be truncated to zero
+length (note: some operating systems delete empty files, so there is
+no guarantee that the file will exist following an
+<code>openFile</code> with <var>mode</var> <code>WriteMode</code>
+unless it is subsequently written to successfully).  The handle is
+positioned at the end of the file if <var>mode</var> is
+<code>AppendMode</code>, and otherwise at the beginning (in which case
+its internal I/O position is 0).  
+The initial buffer mode is implementation-dependent.
+<p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EACCES</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>EMFILE</code>, <code>ENFILE</code>, <code>EAGAIN</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid file name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The file does not exist.
+[<code>ENOENT</code>, <code>ENOTDIR</code>, <code>ENXIO</code>]
+<li><code>InappropriateType</code><br>
+The path refers to an existing directory.
+[<code>EISDIR</code>]
+</ul>
+<p>
+If <code>openFile</code> fails on a file opened for output, the file may 
+still have been created if it did not already exist.
+<p>
+Implementations should enforce, locally to the Haskell process,
+multiple-reader single-writer locking on files, which is to say that there may
+either be many handles on the same file which manage input, or just one handle on the
+file which manages output.
+If any open or semi-closed handle is managing a file for
+output, no new handle can be allocated for that file.  If any open or
+semi-closed handle is managing a file for input, new handles can only
+be allocated if they do not manage output.<p>
+
+Two physical files are the same if they have the same absolute name.
+An implementation is free to impose stricter conditions.  <a
+href="Rationale.html#Locking"> <img src="Rationale.gif"
+alt="(Rationale)"></a> <p>
+
+<a name="Closing"><h4>Closing Files</h4></a>
+
+<a name="hClose">
+<pre>
+> hClose        :: Handle -> IO () 
+</pre></a><p>
+
+Computation <code>hClose</code> <var>hdl</var> makes handle
+<var>hdl</var> closed.  Before the computation finishes, if <var>hdl</var> is
+writable its buffer is flushed as for
+<a href="#hFlush"><code>hFlush</code></a>.<p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+Buffered data cannot be flushed because of a broken connection.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is already closed.
+</ul>
+<p>
+
+If the operation fails for any reason, any further operations on the 
+handle will still fail as for a closed handle.
+<p>
+
+<a name="FileSize"><h3>Determining the Size of a File</h3></a>
+
+<pre>
+> hFileSize     :: Handle -> IO Integer
+</pre><p>
+
+For a handle <var>hdl</var> which attached to a physical file,
+<code>hFileSize</code> <var>hdl</var> returns the size of
+that file in 8-bit bytes (&gt;= 0).
+<p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InappropriateType</code><br>
+The handle is not attached to a physical file.
+<li><code>IllegalOperation</code><br>
+The handle is closed.
+</ul>
+<p>
+
+<a name="EOF"><h3>Detecting the End of Input</h3></a>
+
+<pre>
+> hIsEOF        :: Handle -> IO Bool
+> isEOF         ::           IO Bool
+> isEOF         =  hIsEOF stdin
+</pre><p>
+
+For a readable handle <var>hdl</var>, computation <code>hIsEOF</code>
+<var>hdl</var> returns <code>True</code> if no further input can be
+taken from <var>hdl</var> or for a physical file, if the current I/O
+position is equal to the length of the file.  Otherwise, it returns
+<code>False</code>. <p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+</ul>
+<p>
+
+<a name="Buffering"><h3>Buffering Operations</h3></a>
+
+Three kinds of buffering are supported: line-buffering, 
+block-buffering or no-buffering.  These modes have the following effects.
+For output, items are written out from the internal buffer 
+according to the buffer mode:
+<dl>
+<dt>line-buffering<dd>  the entire buffer is written
+                        out whenever a newline is output, the buffer overflows, 
+                        a flush is issued, or the handle is closed.
+
+<dt>block-buffering<dd> the entire buffer is written out whenever 
+                        it overflows, a flush is issued, or the handle
+                        is closed.
+
+<dt>no-buffering<dd>    output is written immediately, and never stored
+                        in the buffer.
+</dl>
+The buffer is emptied as soon as it has been written out.
+ <a href="Rationale.html#Buffer-Modes">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+Similarly, input occurs according to the buffer mode for handle <var>hdl</var>.
+<dl>
+<dt>line-buffering<dd>  when the buffer for <var>hdl</var> is not empty,
+                        the next item is obtained from the buffer;
+                        otherwise, when the buffer is empty,
+                        characters up to and including the next newline
+                        character are read into the buffer.  No characters
+                        are available until the newline character is
+                        available.
+<dt>block-buffering<dd>  when the buffer for <var>hdl</var> becomes empty,
+                        the next block of data is read into the buffer.
+<dt>no-buffering<dd>      the next input item is read and returned.
+</dl>
+<p>
+For most implementations, physical files will normally be block-buffered 
+and terminals will normally be line-buffered.
+<p>
+
+<pre>
+> data BufferMode = NoBuffering | LineBuffering | BlockBuffering (Maybe Int)
+
+> hSetBuffering :: Handle -> BufferMode     -> IO ()
+</pre><p>
+
+Computation <code>hSetBuffering</code> <var>hdl</var> <var>mode</var> sets the
+mode of buffering for handle <var>hdl</var> on subsequent reads and writes.
+<ul>
+<li>
+If <var>mode</var> is <code>LineBuffering</code>, line-buffering is
+enabled if possible.
+<li>
+If <var>mode</var> is <code>BlockBuffering</code> <var>size</var>, then block-buffering
+is enabled if possible.  The size of the buffer is <var>n</var> items
+if <var>size</var> is <code>Just</code><var>n</var> and is otherwise implementation-dependent.
+<li>
+If <var>mode</var> is <code>NoBuffering</code>, then buffering is disabled if possible.
+</ul><p>
+
+If the buffer mode is changed from <code>BlockBuffering</code> or
+<code>LineBuffering</code> to <code>NoBuffering</code>, then 
+<ul>
+<li>if <var>hdl</var> is writable, the buffer is flushed as for 
+<a href="#hFlush"><code>hFlush</code></a>;
+<li>if <var>hdl</var> is not writable, the contents of the buffer is discarded.
+</ul>
+<p>
+
+The default buffering mode when a handle is opened is
+implementation-dependent and may depend on the object which is
+attached to that handle.<p>
+The computation may fail with:
+<ul>
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is closed.
+<li><code>UnsupportedOperation</code><br>
+The handle has already been used for reading or writing
+and the implementation does not allow the buffering mode to
+be changed.
+</ul>
+<p>
+
+<a name="Flushing"><h4>Flushing Buffers</h4></a>
+
+<a name="hFlush">
+<pre>
+> hFlush        :: Handle -> IO () 
+</pre></a><p>
+
+Computation <code>hFlush</code> <var>hdl</var> causes any items
+buffered for output in handle <var>hdl</var> to be sent immediately to
+the operating system.  <p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+A connection has been broken.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is closed, or is not writable.
+</ul>
+<p>
+
+<a name="Seeking"><h3>Repositioning Handles</h3></a>
+
+<a href="Rationale.html#Seeking">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<h4>Revisiting an I/O Position</h4>
+
+<pre>
+> data HandlePosn
+
+</pre>
+<a name ="hGetPosn">
+<pre>
+> hGetPosn      :: Handle                 -> IO HandlePosn
+</pre>
+<a name ="hSetPosn">
+<pre>
+> hSetPosn      :: HandlePosn             -> IO () 
+</pre></a><p>
+
+Computation <code>hGetPosn</code> <var>hdl</var> returns the current I/O
+position of <var>hdl</var> as an abstract value.  Computation
+<code>hSetPosn</code> <var>p</var> sets the position of <var>hdl</var>
+to a previously obtained position <var>p</var>.<p>
+
+The computation <code>hSetPosn</code> may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+A connection has been broken.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is opened in <code>AppendMode</code> or the handle is closed.
+<li><code>UnsupportedOperation</code><br>
+The handle is not seekable.
+</ul>
+<p>
+
+<h4>Seeking to a new Position</h4>
+
+<pre>
+> data SeekMode =  AbsoluteSeek | RelativeSeek | SeekFromEnd
+</pre>
+<a name="hSeek">
+<pre>
+> hSeek         :: Handle -> SeekMode -> Integer      -> IO () 
+</pre></a><p>
+
+Computation <code>hSeek</code> <var>hdl mode i</var> sets the position of handle
+<var>hdl</var> depending on <code>mode</code>.  If <var>mode</var> is
+<dl>
+<dt><b>AbsoluteSeek</b>
+<dd>the position of <var>hdl</var> is set to <var>i</var>.
+<dt><b>RelativeSeek</b>
+<dd> The position of <var>hdl</var> is set to offset <var>i</var> from
+the current position.
+<dt><b>SeekFromEnd</b>
+<dd> The position of <var>hdl</var> is set to offset <var>i</var> from
+the end of the file.
+</dl>
+The offset is given in terms of 8-bit bytes.
+<p>
+
+If <var>hdl</var> is block- or line-buffered, then seeking to a
+position which is not in the current buffer will first cause any
+items in the output buffer to be written to the device,
+and then cause the input buffer to be discarded.
+<p>
+
+Some handles may not be seekable (see <a href="Query"><code>hIsSeekable</code></a>), 
+or only support a subset of the possible positioning operations
+(e.g. it may only be possible to seek to the end of a tape, or to a
+positive offset from the beginning or current position).<p>
+
+It is not possible to set a negative I/O position, or for a physical
+file, an I/O position beyond the current end-of-file.
+<p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+A connection has been broken.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is opened in <code>AppendMode</code> or the handle is closed.
+<li><code>UnsupportedOperation</code><br>
+The handle is not seekable.
+</ul>
+<p>
+
+<a name="Query"><h3>Handle Properties</h3></a>
+
+<pre>
+> hIsOpen          :: Handle -> IO Bool
+> hIsClosed        :: Handle -> IO Bool
+> hIsReadable      :: Handle -> IO Bool
+> hIsWritable      :: Handle -> IO Bool
+> hIsBlockBuffered :: Handle -> IO (Bool,Maybe Int)
+> hIsLineBuffered  :: Handle -> IO Bool
+> hIsNotBuffered   :: Handle -> IO Bool
+> hIsSeekable      :: Handle -> IO Bool
+</pre><p>
+
+A number of operations return information about the properties of a
+handle.  Each of these operations 
+except <code>hIsBlockBuffered</code> returns <code>True</code> if the handle 
+has the specified property,
+and <code>False</code> otherwise. <a href="Rationale.html#Properties">
+<img src="Rationale.gif" alt="(Rationale)"></a> <p>
+
+Computation <code>hIsBlockBuffered</code> <var>hdl</var> returns
+<code>( False, Nothing )</code> if <var>hdl</var> is not block-buffered.
+Otherwise it returns <code>( True, </code><var>size</var><code> )</code>,
+where <var>size</var> is <code>Nothing</code> for default buffering,
+and <code>( Just </code><var>n</var><code> )</code> for block-buffering
+of <var>n</var> 8-bit bytes.<p>
+
+Any of the latter six computations may fail with
+<ul>
+<li><code>IllegalOperation</code><br>
+The handle is closed.
+</ul>
+<p>
+
+<hr><p>
+
+
+[<a href="PreludeIOError.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeReadTextIO.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Text Input: PreludeReadTextIO</title>
+</head>
+<body>
+
+[<a href="PreludeStdIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeWriteTextIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+
+<h2>Text Input "PreludeReadTextIO"</h2>
+
+This module defines the standard set of input operations for reading
+characters and strings from text files, using 
+<a href="PreludeStdIO.html#Handles">handles</a>.
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeReadTextIO where
+
+> import PreludeMonadicIO
+> import PreludeIOError
+> import PreludeStdIO
+</pre><p>
+
+<a name="hReady"><h3>Checking for Input</h3></a>
+
+<pre>
+> hReady        :: Handle -> IO Bool 
+</pre><p>
+
+Computation <code>hReady</code> <var>hdl</var> indicates whether at least
+one item is available for input from handle <var>hdl</var>.
+ <a href="Rationale.html#hReady">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+<li><code>EOF</code><br>
+End of file.
+</ul>
+<p>
+
+<a name="hGetChar"><h3>Reading Characters</h3></a>
+
+<pre>
+> getChar       ::           IO Char
+> hGetChar      :: Handle -> IO Char
+> getChar       =  hGetChar stdin
+</pre><p>
+
+Computation <code>hGetChar</code> <var>hdl</var> reads the next
+character from handle <var>hdl</var>, blocking until a character is
+available.  <p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+<li><code>EOF</code><br>
+End of file.
+</ul>
+<p>
+
+<code>getChar</code> reads the next character from <code>stdin</code>.
+The computation may fail with the same errors as <code>hGetChar</code>.<p>
+
+<a name="hLookahead"><h3>Reading Ahead</h3></a>
+
+<pre>
+> hLookAhead    :: Handle -> IO Char
+</pre><p>
+
+Computation <code>hLookAhead</code> <var>hdl</var> returns the next
+character from handle <var>hdl</var> without removing it from
+the input buffer, blocking until 
+a character is available.
+ <a href="Rationale.html#LookAhead">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+
+<p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+<li><code>EOF</code><br>
+End of file.
+</ul>
+<p>
+
+<a name="hGetContents"><pre>
+> hGetContents  :: Handle -> IO String
+</pre></a><p>
+Computation <code>hGetContents</code> <var>hdl</var> returns the list of
+characters corresponding to the unread portion of the channel or file managed
+by <var>hdl</var>, which is made semi-closed.<p>
+
+The computation may fail with:
+<ul>
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+</ul>
+<p>
+
+<pre>
+> readFile      :: FilePath -> IO String
+> readFile name =  openFile name ReadMode >>= hGetContents
+</pre><p>
+
+<code>readFile</code> <var>file</var> returns the contents of
+<var>file</var> as a lazy string.<p>
+The computation may fail with:
+<ul>
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+</ul>
+<p>
+
+<hr><p>
+
+
+[<a href="PreludeStdIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeWriteTextIO.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Text Output: PreludeWriteTextIO</title>
+</head>
+<body>
+
+
+[<a href="PreludeReadTextIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibDirectory.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Text Output "PreludeWriteTextIO"</h2>
+
+This module defines the standard set of output operations for writing
+characters and strings to text files, using 
+<a href="PreludeStdIO.html#Handles">handles</a>.<p>
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeWriteTextIO where
+
+> import PreludeMonadicIO
+> import PreludeIOError
+> import PreludeStdIO
+</pre><p>
+
+<pre>
+> putChar       ::                     Char   -> IO () 
+> hPutChar      ::           Handle -> Char   -> IO ()
+> putChar       =  hPutChar stdout
+</pre><p>
+
+Computation <code>hPutChar</code> <var>hdl</var> <var>c</var> writes the
+character <var>c</var> to the file or channel managed by <var>hdl</var>.
+Characters may be buffered if buffering is enabled for <var>hdl</var>.
+<p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>, <code>ENOSPC</code>]
+<li><code>ResourceVanished</code><br>
+Insufficient resources are available to perform the operation.
+[<code>EPIPE</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for writing.
+</ul>
+
+<p>
+
+<pre>
+> putStr        ::                     String -> IO () 
+> hPutStr       ::           Handle -> String -> IO ()
+> putText       :: Text a =>           a      -> IO () 
+> hPutText      :: Text a => Handle -> a      -> IO ()
+> print         :: Text a =>           a      -> IO ()
+
+> putStr        =  hPutStr stdout
+> hPutStr hdl   =  foldr (>>) (return ()) . map (hPutChar hdl)
+> putText       =  hPutText stdout
+> hPutText hdl  =  hPutStr hdl . show
+> print x       =  putText x >> putChar '\n'
+</pre><p>
+
+Computation <code>hPutStr</code> <var>hdl s</var> writes the string
+<var>s</var> to the file or channel managed by <var>hdl</var>.<p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>, <code>ENOSPC</code>]
+<li><code>ResourceVanished</code><br>
+Insufficient resources are available to perform the operation.
+[<code>EPIPE</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for writing.
+</ul>
+<p>
+
+Computation <code>putStr</code> <var>s</var> writes the string
+<var>s</var> to <code>stdout</code>.
+The computation may fail with the same errors as <code>hPutChar</code>.
+<p>
+
+Computation <code>hPutText</code> <var>hdl t</var> writes the string
+representation of <var>t</var> given by the <code>shows</code> function
+to the file or channel managed by <var>hdl</var>.<p>
+The computation may fail with the same errors as <code>hPutStr</code>.
+<p>
+
+<pre>
+> writeFile  :: FilePath -> String -> IO ()
+> appendFile :: FilePath -> String -> IO ()
+
+> writeFile name str =
+>   openFile name WriteMode >>= \hdl -> hPutStr hdl str >> hClose hdl
+
+> appendFile name str =
+>   openFile name AppendMode >>= \hdl -> hPutStr hdl str >> hClose hdl
+</pre><p>
+
+<code>writeFile</code> <var>file</var>
+<var>s</var> replaces the contents of <var>file</var> by the string
+<var>s</var>.
+<br> <code>appendFile</code> <var>file</var> <var>s</var> appends
+string <var>s</var> to <var>file</var>.<p>
+These computations may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+Buffered data cannot be flushed because of a broken connection.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is already closed.
+</ul>
+<p> 
+
+<hr><p>
+
+
+[<a href="PreludeReadTextIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibDirectory.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Standard I/O: LibDirectory</title>
+</head>
+<body>
+
+[<a href="PreludeWriteTextIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibSystem.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Directory Operations</h2>
+
+A directory contains a series of entries, each of which is a named
+reference to a file system object (file, directory etc.).  Some
+entries may be hidden, inaccessible, or have some administrative
+function (e.g. "." or ".." under POSIX), but in this standard all such
+entries are considered to form part of the directory contents.
+Entries in sub-directories are not, however, considered to form part
+of the directory contents.<p>
+
+Each file system object is referenced by a <dfn>path</dfn>.  There is
+normally at least one absolute path to each file system object.  In
+some operating systems, it may also be possible to have paths which
+are relative to the current directory.
+<p>
+<hr>
+
+<pre>> interface LibDirectory where
+
+> createDirectory :: FilePath -> IO ()</pre><p>
+
+<code>createDirectory</code> <var>dir</var> creates a new directory
+<var>dir</var> which is initially empty, or as near to empty as the
+operating system allows.<p>
+
+The operation may fail with:
+<ul>
+<li><code>AlreadyExists</code><br>
+The operand refers to a directory that already exists.  
+[<code>EEXIST</code>]
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+There is no path to the directory. 
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources (virtual memory, process file descriptors,
+physical disk space, etc.) are available to perform the operation.
+[<code>EDQUOT</code>, <code>ENOSPC</code>, <code>ENOMEM</code>, 
+<code>EMLINK</code>] 
+<li><code>InappropriateType</code><br>
+The path refers to an existing non-directory object.
+[<code>EEXIST</code>]
+</ul>
+<p>
+
+<pre>> removeDirectory :: FilePath -> IO ()</pre><p>
+
+<code>removeDirectory</code> <var>dir</var> removes an existing
+directory <var>dir</var>.  The implementation may specify additional
+constraints which must be satisfied before a directory can be removed
+(e.g. the directory has to be empty, or may not be in use by other
+processes).  It is not legal for an implementation to partially remove
+a directory unless the entire directory is removed. A conformant
+implementation need not support directory removal in all situations
+(e.g. removal of the root directory). <p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The directory does not exist. 
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>, <code>EPERM</code>]
+<li><code>UnsatisfiedConstraints</code><br>
+Implementation-dependent constraints are not satisfied.  
+[<code>EBUSY</code>, <code>ENOTEMPTY</code>, <code>EEXIST</code>]
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support removal in this situation.
+[<code>EINVAL</code>]
+<li><code>InappropriateType</code><br>
+The operand refers to an existing non-directory object.
+[<code>ENOTDIR</code>]
+</ul>
+<p>
+
+<pre>> removeFile :: FilePath -> IO ()</pre><p>
+
+<code>removeFile</code> <var>file</var> removes the directory entry
+for an existing file <var>file</var>, where <var>file</var> is not
+itself a directory. The implementation may specify additional
+constraints which must be satisfied before a file can be removed
+(e.g. the file may not be in use by other processes).<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid file name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The file does not exist. 
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>, <code>EPERM</code>]
+<li><code>UnsatisfiedConstraints</code><br>
+Implementation-dependent constraints are not satisfied.  
+[<code>EBUSY</code>]
+<li><code>InappropriateType</code><br>
+The operand refers to an existing directory.
+[<code>EPERM</code>, <code>EINVAL</code>]
+</ul>
+<p>
+
+<pre>> renameDirectory :: FilePath -> FilePath -> IO ()</pre><p>
+
+<code>renameDirectory</code> <var>old</var> <var>new</var> changes the
+name of an existing directory from <var>old</var> to <var>new</var>.
+If the <var>new</var> directory already exists, it is atomically
+replaced by the <var>old</var> directory.  If the <var>new</var> directory
+is neither the <var>old</var> directory nor an alias of the
+<var>old</var> directory, it is removed as if by
+<code>removeDirectory</code>.  A conformant implementation need not
+support renaming directories in all situations (e.g. renaming to an
+existing directory, or across different physical devices), but the
+constraints must be documented.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+Either operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The original directory does not exist, or there is no path to the target.
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>, <code>EPERM</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.  
+[<code>EDQUOT</code>, <code>ENOSPC</code>, <code>ENOMEM</code>, 
+<code>EMLINK</code>]
+<li><code>UnsatisfiedConstraints</code><br>
+Implementation-dependent constraints are not satisfied.
+[<code>EBUSY</code>, <code>ENOTEMPTY</code>, <code>EEXIST</code>]
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support renaming in this situation.
+[<code>EINVAL</code>, <code>EXDEV</code>]
+<li><code>InappropriateType</code><br>
+Either path refers to an existing non-directory object.
+[<code>ENOTDIR</code>, <code>EISDIR</code>]
+</ul>
+<p>
+
+<pre>> renameFile :: FilePath -> FilePath -> IO ()</pre><p>
+
+<code>renameFile</code> <var>old</var> <var>new</var> changes the name
+of an existing file system object from <var>old</var> to <var>new</var>. 
+If the <var>new</var> object already exists, it is
+atomically replaced by the <var>old</var> object.  Neither path may
+refer to an existing directory.  A conformant implementation need not
+support renaming files in all situations (e.g. renaming across
+different physical devices), but the constraints must be
+documented.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+Either operand is not a valid file name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The original file does not exist, or there is no path to the target.
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EROFS</code>, <code>EACCES</code>, <code>EPERM</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.  
+[<code>EDQUOT</code>, <code>ENOSPC</code>, <code>ENOMEM</code>, 
+<code>EMLINK</code>]
+<li><code>UnsatisfiedConstraints</code><br>
+Implementation-dependent constraints are not satisfied.
+[<code>EBUSY</code>]
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support renaming in this situation.
+[<code>EXDEV</code>]
+<li><code>InappropriateType</code><br>
+Either path refers to an existing directory.
+[<code>ENOTDIR</code>, <code>EISDIR</code>, <code>EINVAL</code>, 
+<code>EEXIST</code>, <code>ENOTEMPTY</code>]
+</ul>
+<p>
+
+<pre>> getDirectoryContents :: FilePath -> IO [FilePath]</pre><p>
+
+<code>getDirectoryContents</code> <var>dir</var> returns a list of
+<i>all</i> entries in <var>dir</var>.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The directory does not exist.
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EACCES</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>EMFILE</code>, <code>ENFILE</code>]
+<li><code>InappropriateType</code><br>
+The path refers to an existing non-directory object.
+[<code>ENOTDIR</code>]
+</ul>
+<p>
+
+<pre>> getCurrentDirectory :: IO FilePath</pre><p>
+
+If the operating system has a notion of current directories,
+<code>getCurrentDirectory</code> returns an absolute path to the
+current directory of the calling process.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>NoSuchThing</code><br>
+There is no path referring to the current directory.
+[<code>EPERM</code>, <code>ENOENT</code>, <code>ESTALE</code>...]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EACCES</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+<li><code>UnsupportedOperation</code><br>
+The operating system has no notion of current directory.
+</ul>
+<p>
+
+<pre>> setCurrentDirectory :: FilePath -> IO ()</pre><p>
+
+If the operating system has a notion of current directories,
+<code>setCurrentDirectory</code> <var>dir</var> changes the current
+directory of the calling process to <var>dir</var>.<p>
+
+The operation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid directory name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The directory does not exist.
+[<code>ENOENT</code>, <code>ENOTDIR</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EACCES</code>]
+<li><code>UnsupportedOperation</code><br>
+The operating system has no notion of current directory, or the
+current directory cannot be dynamically changed.
+<li><code>InappropriateType</code><br>
+The path refers to an existing non-directory object.
+[<code>ENOTDIR</code>]
+</ul>
+<p>
+
+<hr><p>
+
+
+[<a href="PreludeWriteTextIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibSystem.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+<html>
+<head>
+<title>Haskell 1.3 System Interaction: LibSystem</title>
+</head>
+<body>
+
+[<a href="LibDirectory.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibTime.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>System Interaction "LibSystem"</h2>
+
+<hr>
+<p>
+
+<pre>
+> interface LibSystem where
+</pre>
+<p>
+
+<a name="ExitCode">
+The <code>ExitCode</code> type defines the exit codes that a program
+can return.  <code>ExitSuccess</code> indicates successful termination;
+and <code>ExitFailure</code> <var>code</var> indicates program failure
+with value <var>code</var>.  The exact interpretation of <var>code</var>
+is operating-system dependent.  In particular, some values of 
+<var>code</var> may be prohibited (e.g. 0 on a POSIX-compliant system).
+<br>
+<a href="Rationale.html#ExitCodes">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<pre>
+> data ExitCode =  ExitSuccess | ExitFailure Int
+> getArgs       :: IO [String] 
+> getProgName   :: IO String
+> getEnv        :: String -> IO String
+> system        :: String -> IO ExitCode
+> exitWith      :: ExitCode -> IO a
+</pre>
+<p>
+
+Computation <code>getArgs</code> returns a list of the program's command
+line arguments (not including the program name).<p>
+
+Computation <code>getProgName</code> returns the name of the program
+as it was invoked.<p>
+
+Computation <code>getEnv</code> <var>var</var> returns the value
+of the environment variable <var>var</var>.  
+<p>
+This computation may fail with
+<ul>
+<li><code>NoSuchThing</code><br>
+The environment variable does not exist.
+</ul>
+ <a href="Rationale.html#getEnv">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+
+<p>
+
+Computation <code>system</code> <var>cmd</var> returns the exit code
+produced when the operating system processes the command <var>cmd</var>.
+<p>
+This computation may fail with
+<ul>
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.  
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support system calls.
+</ul>
+<p>
+
+Computation <code>exitWith</code> <var>code</var> terminates the
+program, returning <var>code</var> to the program's caller.
+Before it terminates, any open or semi-closed handles are first closed.
+<p>
+
+<hr><p>
+
+[<a href="LibDirectory.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibTime.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 CPU Time Library: LibCPUTime</title>
+</head>
+<body>
+
+[<a href="LibTime.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibUserInterrupt.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>The CPU Time Library "LibCPUTime"</h2>
+
+<hr>
+<p>
+
+<pre>
+> interface LibCPUTime where
+</pre>
+<p>
+
+<pre>
+> getCPUTime      :: IO Integer
+</pre>
+<p>
+
+Computation <code>getCPUTime</code> returns the number of nanoseconds
+CPU time used by the current program.  The precision of this result
+is implementation-dependent.<p>
+
+<a href="Rationale.html#getCPUTime">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<hr><p>
+
+[<a href="LibTime.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibUserInterrupt.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+<title>Haskell 1.3 Time of Day: LibTime</title>
+</head>
+<body>
+
+[<a href="LibSystem.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibCPUTime.html">Next</a>]
+<p>
+<hr><p>
+
+
+<h2>The Time of Day Library "LibTime"</h2>
+
+The <em>LibTime</em> library provides the functionality of 
+<a href="Biblio.html#ANSI-C">ANSI C</a> "time.h", adapted to the Haskell environment.  
+It includes timezone
+information, as in <a href="Biblio.html#SysV">System V</a>, and follows <a href="Biblio.html#rfc1129"> RFC
+1129</a> in its use of Coordinated Universal Time (UTC).
+ <a href="Rationale.html#LibTime">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<hr>
+<p>
+
+<pre>
+> interface LibTime where
+</pre>
+
+<code>ClockTime</code> is an abstract type, used for the internal
+clock time.  Clock times may be compared, converted to strings, or
+converted to an external calendar time <code>CalendarTime</code>.<p>
+
+<pre>
+> data ClockTime
+> instance Ord ClockTime
+> instance Eq  ClockTime
+</pre>
+<p>
+
+When a <code>ClockTime</code> is shown, it is converted to a string of the form
+<br><code>"Mon Nov 28 21:45:41 GMT 1994"</code>.<p>
+
+<pre>
+> instance Text ClockTime where
+>    showsPrec _ t _ = ...
+</pre>
+<p>
+
+<code>CalendarTime</code> is a user-readable and manipulable
+representation of the internal <code>ClockTime</code> type.  The
+numeric fields have the following ranges.<p>
+
+<pre>
+Value         Range             Comments
+-----         -----             --------
+
+year    -maxInt .. maxInt       [Pre-Gregorian dates are inaccurate]
+mon           0 .. 11           [Jan = 0, Dec = 11]
+day           1 .. 31
+hour          0 .. 23
+min           0 .. 59
+sec           0 .. 61           [Allows for two Leap Seconds]
+picosec       0 .. (10^12)-1    [This could be over-precise?]
+wday          0 .. 6            [Sunday = 0, Saturday = 6]
+yday          0 .. 365          [364 in non-Leap years]
+tz       -43200 .. 43200        [Variation from UTC in seconds]
+</pre>
+<p>
+
+The <var>tzname</var> field is the name of the time zone.  The <var>isdst</var> field
+indicates whether Daylight Savings Time would be in effect.<p>
+
+<pre>
+> --                   year mon  day  hour min  sec  picosec wday yday tzname tz  isdst
+> data CalendarTime = 
+>        CalendarTime  Int  Int  Int  Int  Int  Int  Integer Int  Int  String Int Bool
+</pre>
+<p>
+
+The <code>TimeDiff</code> type records the difference between two clock times in
+a user-readable way.<p>
+
+<pre>
+> --                          year mon  day  hour min  sec  picosec
+> data TimeDiff    = TimeDiff Int  Int  Int  Int  Int  Int  Integer
+>                    deriving (Eq,Ord)
+</pre>
+<p>
+
+<code>getClockTime</code> returns the current time in its internal representation.<p>
+
+<pre>
+> getClockTime    :: IO ClockTime
+</pre>
+<p>
+
+<code>addToClockTime</code> <var>d</var> <var>t</var> adds a time
+difference <var>d</var> and a clock time <var>t</var> to yield a new
+clock time.  The difference <var>d</var> may be either positive or
+negative.  <code>diffClockTimes</code> <var>t1</var> <var>t2</var> returns
+the difference between two clock times <var>t1</var> and <var>t2</var> as a <code>TimeDiff</code>.
+<p>
+
+<pre>
+> addToClockTime  :: TimeDiff  -> ClockTime -> ClockTime
+> diffClockTimes  :: ClockTime -> ClockTime -> TimeDiff
+</pre>
+<p>
+
+<code>toCalendarTime</code> <var>t</var> converts <var>t</var> to a
+local time, modified by the current timezone and daylight savings time
+settings.  <code>toUTCTime</code> <var>t</var> converts <var>t</var> into UTC
+time.  <code>toClockTime</code> <var>l</var> converts
+<var>l</var> into the corresponding internal <code>ClockTime</code>.
+The <var>wday</var>, <var>yday</var>, <var>tzname</var>, and <var>isdst</var> 
+fields are ignored.<p>
+
+<pre>
+> toCalendarTime  :: ClockTime -> CalendarTime
+> toUTCTime       :: ClockTime -> CalendarTime
+> toClockTime     :: CalendarTime -> ClockTime
+</pre>
+<p>
+
+<hr><p>
+
+[<a href="LibSystem.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="LibCPUTime.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Interrupt Handling: LibUserInterrupt</title>
+</head>
+<body>
+
+[<a href="LibCPUTime.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Posix.html">Next</a>]
+<p>
+<hr><p>
+
+
+<h2>User Interrupt Handling "LibUserInterrupt"</h2>
+
+<hr>
+<p>
+
+<pre>
+> interface LibUserInterrupt where
+
+> setUserInterrupt :: Maybe (IO ()) -> IO (Maybe (IO ()))
+</pre>
+<p>
+
+Whenever a user interrupt occurs, the program is stopped.  If an
+interrupt handler is installed, this is then executed in place of the
+program.  If no interrupt handler is installed, the program is simply
+terminated.<p>
+
+Computation <code>setUserInterrupt (Just</code><var>p</var><code>)</code> installs <var>p</var> as the
+interrupt handler; Computation
+<code>setUserInterrupt Nothing</code> removes the current interrupt
+handler.  In either case, if an interrupt handler <var>q</var> was
+previously installed <code>(Just </code><var>q</var><code>)</code> is
+returned; otherwise <code>Nothing</code> is returned.
+ <a href="Rationale.html#LibUserInterrupt">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+The operation may fail with:
+<ul>
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.  
+<li><code>UnsupportedOperation</code><br>
+The implementation does not support interrupt handling.
+</ul>
+<hr><p>
+
+[<a href="LibCPUTime.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="Posix.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 I/O Rationale</title>
+</head>
+<body>
+[<a href="IO.html">Up</a>]
+<p>
+
+<hr><p>
+
+Last Modified On Wed Dec 14 16:32:27 GMT 1994 By Kevin Hammond
+<h1>Rationale for the Haskell 1.3 I/O Definition</h1>
+
+<strong>Note: the text in this rationale is for explanation only
+and does not form part of the Haskell 1.3 definition.  If
+the rationale conflicts with the definition, then the text
+of the definition always takes precedence.</strong>
+<p>
+
+The rationale is organised into a general section, and by module.
+<ul>
+<li><a href="#General">General</a>
+  <ul>
+  <li><a href="#Non-Determinism">Non-Determinism</a>
+  <li><a href="#Libraries">Libraries</a>
+  <li><a href="#Conformance">Conformance</a>
+  <li><a href="#Compatibility">Compatibility with Haskell 1.2</a>
+    <ul>
+    <li><a href="#Conversion">Converting Existing Programs</a>
+    </ul>
+  <li><a href="#Omissions">Omissions</a>
+  </ul>  
+<li><a href="#PreludeIO">PreludeIO</a>
+  <ul>
+  <a href="#interact">interact</a>
+  </ul>
+<li><a href="#PreludeMonadicIO">PreludeMonadicIO</a>
+<li><a href="#PreludeIOError">PreludeIOError</a>
+<li><a href="#PreludeStdIO">PreludeStdIO</a>
+  <ul>
+  <li><a href="#Handle-Reuse">Handle Reuse</a>
+  <li><a href="#Semi-closing">Semi-Closing</a>
+  <li><a href="#Standard-Handles">Standard Handles</a>
+  <li><a href="#Opening-Files">Opening Files</a>
+    <ul>
+    <li><a href="#OpenBinary">Text/Binary Files</a>
+    <li><a href="#ReadWrite">ReadWrite Mode</a>
+    <li><a href="#Locking">File Locking</a>
+    </ul>
+  <li><a href="#FileSize">File Sizes</a>
+  <li><a href="#Buffering">Buffering</a>
+    <ul>
+    <li><a href="#Buffer-Modes">Buffer Modes</a>
+    </ul>
+  <li> <a href="#Seeking">Changing the I/O position</a>
+    <ul>
+    <li> <a href="#hGetPosn">Revisiting an I/O position</a>
+    <li> <a href="#hSeek">Seeking to a new I/O position</a>
+    </ul>
+  <li> <a href="#Properties">Handle Properties</a>
+  <li> <a href="#Lookahead">Reading Ahead</a>
+  </ul>
+<li><a href="#PreludeReadTextIO">PreludeReadTextIO</a>
+  <ul>
+  <li> <a href="#hReady">Checking for Input</a>
+  </ul>
+<li><a href="#PreludeWriteTextIO">PreludeWriteTextIO</a>
+<li><a href="#LibDirectory">LibDirectory</a>
+<li><a href="#LibSystem">LibSystem</a>
+  <ul>
+  <li> <a href="#ExitCodes">Exit Codes</a>
+  <li> <a href="#getEnv">Environment Variables</a>
+  </ul>
+<li><a href="#LibTime">LibTime</a>
+<li><a href="#LibCPUTime">LibCPUTime</a>
+<li><a href="#LibUserInterrupt">LibUserInterrupt</a>
+<li><a href="#LibPOSIX">LibPOSIX</a>
+</ul>
+<p>
+
+<hr>
+<p>
+
+<a name="General"><h2>General</h2></a>
+
+The proposal (like most of Haskell) is supposed to be rather boring.
+It provides a basic interface to common operating systems such as
+Unix, DOS, VMS, or the Macintosh, but does not address future
+operating systems, include ones based on object-orientation or
+persistence, or even graphical interface issues.  Like other aspects
+of the Haskell design, it is somewhat more exciting than might be
+imagined, since it represents an attempt to provide
+"industrial-strength" input/output in a purely functional context.
+Other languages which have tried to do something like this are 
+<a href="Biblio.html#Hope+">Hope+</a>
+and <a href="Biblio.html#Clean">Clean</a>.
+<p>
+
+<a name="Non-Determinism"><h3>Non-Determinism</h3></a>
+
+I/O is not deterministic.  That is, the same program
+could have different results when run multiple times (for example
+if a user gives different input from the keyboard).  This is a
+requirement for real-world interaction.
+<p>
+
+The Haskell language is, however, both deterministic and referentially
+transparent.  This apparent contradiction is resolved because I/O
+operations exist outside the language.  Typically, a Haskell program
+is one process in a side-effecting operating system.  The operating
+system affects the environment that the Haskell program exists in, and
+may respond to the result produced by that program (a series of
+monadic values>) by side-effecting the environment and returning the
+result as an input to the program.  Internally, however, all
+expressions in the Haskell program are free from side-effect (including those
+of type <code>IO a</code>).  
+<p>
+
+<a name="Libraries"><h3>Libraries</h3></a>
+
+In Haskell 1.3, Library modules are
+distinguished from Prelude modules in order to avoid cluttering the
+name space with infrequently used names, and also so that
+implementations can avoid loading unreferenced names.  This should
+help produce faster translators and smaller binaries.<p>
+
+<a name="Conformance"><h3>Conformance</h3></a>
+
+Two levels of conformance are defined so
+that programmers can rely on exact portability between
+<em>strictly-conforming</em> Haskell implementations, while allowing
+implementation flexibility on systems where some operations are
+unnatural, or difficult to implement.  Documentation of
+non-conformance, and of all implementation dependencies, is required
+so that programmers know exactly how their program will behave without
+needing to test it under each new implementation.<p>
+
+<a name="Compatibility"><h3>Compatibility with Haskell 1.2</h3></a>
+
+The goal of strict backwards compatibility was abandoned in favour of
+a more compact, more flexible approach to I/O.  Existing
+implementations are encouraged to continue to provide Haskell 1.2 I/O
+functions where possible, but new programs should be written using
+Haskell 1.3 operations.
+<p>
+
+<a name="Conversion"><h4>Converting Existing Programs</h4></a>
+
+Most existing Haskell programs written using continuation-passing
+style or streams should be easily convertible to monadic I/O.
+<p>
+
+The following operations which were supported in Haskell 1.2
+are not supported in Haskell 1.3:
+<ul>
+<li> Binary files
+<li> Echoing control
+<li> Channels as distinct entities from files
+<li> File and channel status operations
+<li> Setting environment variables
+</ul>
+<p>
+
+<a name="Omissions"><h3>Omissions</h3></a>
+
+There is a tension between providing enough functionality to allow
+sensible applications to be written, and providing a reasonably
+compact, easily implemented I/O system.  This definition is intended
+to provide the functionality that most students or practising
+functional programmers are likely to need.
+<p>
+
+Here are some of the I/O operations that were considered, but which were
+not included in the final definition.
+<ul>
+<li> Determining file existence
+<li> Controlling file access permissions and locks
+<li> Truncating a file
+<li> Merging input from multiple handles
+<li> General interrupt handling
+<li> File information operations
+<li> Process control primitives
+<li> Binary file operations
+<li> Terminal control (echoing etc.) 
+<li> Setting environment variables
+<li> Synchronising disks
+<li> Asynchronous I/O operations
+<li> Indexed file access
+<li> More primitive monadic operations (GHC's <code>IO</code>)
+<li> Parsing primitives based on <code>read</code>
+<li> Interlanguage working
+<li> Spawning lazy computations
+<li> Creating fixpoints
+<li> Mutable variables
+</ul>
+<p>
+
+
+<hr><p>
+<a name="PreludeIO"><h2>PreludeIO</h2></a>
+
+<a name="interact"><h3>interact</h3></a>
+
+<a href="PreludeIO.html#interact"><code>interact</code></a> was provided in Haskell
+1.2 as a way to write simple I/O programs as functions from input
+strings to output strings.  This emulates the functionality provided
+by many previous functional languages, such as SASL.
+<p>
+
+<em>Example</em>: a program to replace all lower-case letters with their
+upper-case equivalents.
+<p>
+<pre>
+> main = interact (map toUpper)
+</pre>
+<p>
+
+<hr><p>
+<a name="PreludeMonadicIO"><h2>PreludeMonadicIO</h2></a>
+
+<a name="error"><h3>Use of fail rather than error</h3></a>
+<code>error</code> aborts the program without giving any opportunity
+to recover from the error.  It can be used in <em>any</em> type of
+expression.  <code>fail</code> allows the error to be handled if
+appropriate, using operations such as <a
+href="PreludeMonadicIO.html#handle"><code>handle</code></a> and <a
+href="PreludeMonadicIO.html#try"><code>try</code></a> but can only be used
+in expressions of type <code>IO a</code>.  <p>
+
+<hr><p>
+<a name="PreludeIOError"><h2>PreludeIOError</h2></a>
+
+This module tries to identify all errors which might arise when
+performing the I/O operations defined in the standard.  It is much
+more informative than Haskell 1.2 in that it gives specific names to
+errors rather than relying on the general classes
+<code>ReadError</code>, <code>WriteError</code>, etc.  This allows
+meaningful handlers to be written which are not
+implementation-dependent.
+
+<p>
+
+<hr><p>
+<a name="PreludeStdIO"><h2>PreludeStdIO</h2></a>
+
+The module is defined in terms of items read from a handle, rather
+than characters, to allow the possibility of reading structured files
+in an extended implementation.  <a
+href="PreludeReadTextIO.html"><code>PreludeReadTextIO</code></a> and
+<a href="PreludeWriteTextIO.html"><code>PreludeWriteTextIO</code></a> provide
+read and write operations for handles operating on steams of
+characters.
+<p>
+
+<a name="Handle-Reuse"><h3>Handle Reuse</h3></a>
+
+If an implementation reused a handle after it was closed while there
+where still implicit references to it from within the functional program,
+then the I/O semantics could be subverted, and cause non-intuitive
+results.  For example, in
+<p>
+<pre>
+> openFile ReadMode "foo" >>= \ foo ->
+> hClose foo              >>
+> openFile ReadMode "bar" >>= \ bar ->
+> hGetChar foo
+</pre><p>
+if handle <code>foo</code> was reused for <code>bar</code>, then
+this code sequence would return the first character in <code>"bar"</code>
+rather than raising an error.  This is therefore prohibited by the
+language semantics.
+<p>
+
+<a name="Semi-closing"><h3>Semi-Closing</h3></a>
+
+Semi-closing is used to emulate the lazy stream reading found in
+almost all functional languages.
+<p>
+
+<a name="Semi-Close-Discard">Errors are discarded</a> on a
+semi-closed handle because it is not possible to handle them!  The
+value read from the semi-closed handle is fixed as a list of items,
+but in order to raise an error this would need to be a list of
+<code>IO</code> items.  Using such a type would defeat the purpose of
+having semi-closed streams, which is to model lazy stream reading
+by returning a list of items from that stream.
+<p>
+
+Normally semi-closed handles will be closed automatically when the
+contents of the associated stream have been read completely.
+<a name="Semi-Close-Close">
+Occasionally, the programmer may want to force a semi-closed handle to be closed</a>
+before this happens, by using <code>hClose</code> (e.g. if an error occurs
+when reading a handle, or if the entire contents is not needed but the
+file must be overwritten with a new value).  In this case, the
+implementation defines exactly which characters have been read from
+the handle and which are frozen as the contents of the handle.
+<p>
+
+<a name="Standard-Handles"><h3>Standard Handles</h3></a>
+
+Most operating systems provide a notion of standard program input and
+output.  For interactive text-based programs, these are normally
+connected to the user's keyboard.  Operating systems which do not
+have this concept (such as the Macintosh) are normally graphics-based.
+In such a system, it does not make sense to have a text-based program,
+unless some primitive text emulation is performed.  Since, however, the
+majority of operating systems are still text-based, and it is unclear
+how to standardise a set of portable windowing operations for the
+graphics-based systems, the notion of standard input, output and
+error handles has been retained.
+<p>
+
+<a name="stderr">The <code>stderr</code> handle</a> is provided because it is often useful
+to separate error output from normal user output on
+<code>stdout</code>.  In operating systems which support this, one or
+the other is often directed into a file.  If an operating system
+doesn't distinguish between user and error output, a sensible
+default is for the two names to refer to the same handle.
+<p>
+
+<a name="Opening-Files"><h3>Opening Files</h3></a>
+
+The <code>openFile</code> operation proved surprisingly controversial,
+and difficult to specify.  In the interests of simplicity and
+portability, a single high-level <code>openFile</code> has been
+provided.  It would be possible to separate this into simpler
+operations (such as <code>open</code>,<code> create</code>,<code>
+truncate</code>,<code> lock</code>,<code> seek</code>,<code>
+setAccessRights</code>, etc. etc.), but this would be awkward to use, and
+probably non-portable.
+Programmers should use the relevant operating-system specific bindings
+if they require these lower levels of file access.
+<p>
+
+<a name="OpenBinary"><h4>Text/Binary Files</h4></a>
+
+The definition doesn't distinguish text and binary file types.  Files
+should be opened in the appropriate mode whenever possible.  On some
+systems the operations permitted on the two types of file are
+different, but the file types are distinguished by convention rather
+than by the operating system.  For these systems, it is important to
+specify whether a file is opened as in text or binary mode.
+In these cases, we recommend that the implementation introduces an extension,
+providing an additional <code>openBinaryFile</code> operation with the
+same parameters and results as <code>openFile</code>.  If this
+proves sufficiently useful, and general, it will be promoted to the
+core definition.
+<p>
+
+<a name="ReadWrite"><h4>ReadWrite Mode</h4></a>
+
+It has been argued that this mode is not necessary, but many useful
+applications are impossible to write otherwise.  Perhaps existing
+functional programmers only write compilers or similar functions
+from streams to streams?  If a file is large and changes are
+small, however, it is much more efficient to make a small incremental
+change than to copy an entire file.
+<p>
+
+An on-screen interactive text editor is an example of an application
+where this mode is useful (it is possible to write editors which work
+on streams, but they can be unpleasant to use!), and there are many
+business examples.  Providing this mode significantly extends the
+range of Haskell applications that can be written at almost no
+implementation cost.  It is rare to find a modern operating system
+that does not provide this kind of access directly.  <p>
+
+<a name="Locking"><h4>File Locking</h4></a>
+
+A consistent problem with Haskell 1.2 was that implementations were
+not required to lock files when they where opened.  Consequently, if a
+program reopened a file for writing while it was still being read, the
+results returned from the read could be garbled.  Because of lazy
+evaluation and implicit buffering (also not specified by Haskell 1.2),
+it was possible for this to happen on some but not all program
+executions.  This problem only occurs with languages which implement
+lazy stream input (<a
+href="PreludeReadTextIO.html#hGetContents"><code>hGetContents</code></a>)
+and also have non-strict semantics.  <p>
+
+It has been argued that programmers should avoid opening a file when
+it has already been opened in an incompatible way.  Unfortunately, in
+general, this is difficult or even impossible to do -- almost all
+non-trivial programs open user-supplied filenames, and there is often
+no way of telling from the names whether two filenames refer to the
+same file.  The only safe thing to do is implement file locks whenever
+a file is opened.  This could be done by the programmer if a suitable locking
+operation was provided, but to be secure this would need to be done on
+every <code>openFile</code> operation, and might also require knowledge
+of the operating system.
+<p>
+
+The definition requires that identical files are locked against
+accidental overwriting within a single Haskell program (single-writer,
+multiple-reader).  Two physical files are certainly identical if they
+have the same filename, but may be identical in other circumstances.
+A good implementation will use operating-system level locking
+(mandatory or advisory), if they are appropriate, to protect the
+user's data files.  Even so, the definition <em>only</em> requires an
+implementation to take precautions to avoid obvious and persistent
+problems due to lazy file I/O (a language feature): it does not
+require the implementation to protect against interference by other
+applications or the operating system itself.  <strong>Caveat
+user</strong>.  <p>
+
+<a name="FileSize"><h3>File Sizes</h3></a>
+
+The file size is given as an integral number of bytes.  On some operating
+systems, it is possible
+that this will not be an accurate indication of the number of characters
+that can be read from the file.
+<p>
+
+<a name="Extents"><h4>File Extents</h4></a>
+
+On some systems (e.g. the Macintosh), it is much more efficient to
+define the maximum size of a file (or extent) when it is created, and
+to increase this extent by the total number of bytes written if the
+file is appended to, rather than increasing the file size each time a
+block of data is written.  This may allow a file to be laid out
+contiguously on disk, for example, and therefore accessed more
+efficiently.  In any case, the actual file size will be no greater than the extent.
+<p>
+
+While efficient file access is a desirable characteristic, the
+designers felt that dealing with this aspect of I/O led to a design
+which was over-complex for the normal programmer.  The core Haskell
+I/O definition therefore does not distinguish between file size (the
+number of bytes in the file), and file extent (the amount of disk
+occupied by a file).  <p>
+
+<a name="End-of-file"><h3>End of File</h3></a>
+
+There are two alternative ways of detecting end-of-file, either by
+testing using <a href="PreludeStdIO.html#EOF"><code>hIsEOF</code></a> or
+by handling the <code>EOF</code> error after a <code>getChar</code> or
+similar operation.  While this may seem redundant, end-of-file
+detection often has algorithmic implications.  This design allows
+error handlers to be reserved for unusual or unexpected situations.
+<p>
+
+<a name="Buffering"><h3>Buffering</h3></a>
+
+Buffering interacts with many of the operations provided here.  While
+it might seem desirable to eliminate this complexity, for correct I/O
+semantics it is sometimes necessary to specify that a device should
+not be buffered, or that it should have a particular buffer size.  In
+the absence of such strict buffering semantics, it can also be
+difficult to reason (even informally) about the contents of a file
+following a series of interacting I/O operations.
+<p>
+
+While it would be sufficient to provide <a href="#hFlush"><code>hFlush</code></a>, this
+would be tedious to use (for any kind of buffering other than
+<code>BlockBuffering</code>), error-prone, and would
+require programmers to cooperate by providing optional flushing after
+each I/O operations when writing library functions.
+<p>
+
+<a name="Buffer-Modes"><h4>Buffer Modes</h4></a>
+
+The three buffer modes mirror those provided by <a
+href="Biblio.html#ANSI-C">ANSI C</a>.  The programmer should normally
+accept the buffering modes that the implementation chooses as default.
+<p>
+
+<a name="Seeking"><h3>Changing the I/O position</h3></a>
+
+Many applications need direct access to files if they are
+to be implemented efficiently.  Examples are text editors,
+or simple database applications.  It is surprising how
+complicated such a common and apparently simple operation as changing
+the I/O position is in practice.  The design given here draws
+heavily on the <a href="Biblio.html#ANSI-C">ANSI C standard</a>.
+<p>
+
+<a name="hGetPosn"><h4>Revisiting an I/O position</h4></a>
+
+On some operating systems or devices, it is not possible to seek to
+arbitrary locations, but only to ones which have previously been
+visited.  For example, if newlines in text files are represented by
+pairs of characters (as in DOS), then the I/O position will not be the
+same as the number of characters which have been read from the file up
+to that point and absolute seeking is not sensible.  
+<a href="PreludeStdIO.html#hGetPosn>
+<code>hGetPosn</code></a> and <a href="PreludeStdIO.html#hSetPosn>
+<code>hSetPosn</code></a> together provide this functionality, using
+an abstract type to represent the positioning information (which may
+be an <code>Integer</code> or any other suitable type).
+Note that there is no way to convert a <code>handlePosn</code> into
+an <code>Integer</code> offset.  Since this is not generally possible,
+and it is not normally difficult for a programmer to record the current
+I/O position if using <code>hSeek</code>,
+on balance the designers felt that this should be omitted.
+<pre>
+> toOffset :: HandlePosn -> Integer
+</pre>
+<p>
+
+<a name="hSeek"><h4>Seeking to a new I/O position</h4></a>
+
+Other operating systems (such as Unix or the Macintosh) allow I/O at
+any position in a file.  The <a
+href="PreludeStdIO.html#hSeek"><code>hSeek</code></a> operation
+allows three kinds of positioning: absolute positioning, positioning
+relative to the current I/O position, and positioning relative
+to the current end-of-file.  Some implementations may only support
+some of these operations.
+<p>
+
+All positioning offsets are an integral number of bytes.  This seems
+to be fairly widely supported and is quite simple.  The alternatives
+(e.g. defining positioning in terms of the number of items which
+can be read from the file)
+seem to give designs which are difficult both to understand and to use.
+<p>
+
+<a name="Properties"><h3>Handle Properties</h3></a>
+
+The original Haskell 1.3 design provided a single operation to return
+all the properties of a handle.  This proved to be very unwieldy, and
+would also have been difficult to extend to cover other properties
+(since Haskell does not have named records).
+The operation was therefore split into many component operations,
+one for each property that a handle must have (determining the I/O position
+is <a href="#hGetPosn> treated separately</a>).
+<p>
+
+Note that while there are <code>hIsOpen</code> and <code>hIsClosed</code> operations,
+there is no way to test whether a
+handle is semi-closed.  This was felt to be of marginal utility for
+most programmers, and is easy to define if necessary.  
+<p>
+<pre>
+> hIsSemiClosed     :: Handle -> IO Bool
+> hIsSemiClosed h   =  hIsOpen h                 >>= \ ho ->
+>                      hIsClosed h               >>= \ hc ->
+>                      return (not (ho || hc))
+</pre>
+<p>
+
+<hr><p>
+<a name="PreludeReadTextIO"><h2>PreludeReadTextIO</h2></a>
+
+<a name="hReady"><h3>Checking for Input</h3></a>
+
+<code>hReady</code> is intended to help write interactive programs or
+ones which manage multiple input streams.  Because it is non-blocking,
+this can lead to serious inefficiency if it is used to poll several
+handles.
+<p>
+
+One solution is to define an operation based on Unix <code>select</code>.
+<pre>
+> type SelectData = ([Handle], [Handle], [Handle], Maybe Integer)
+> select :: SelectData -> IO (Maybe SelectData)
+</pre>
+<p>
+
+<code>SelectData</code> consists of three sets of handles (which need
+not be disjoint) and an optional time interval.<p>
+
+Computation <code>select</code> (<var>ihs</var>, <var>ohs</var>, <var>ehs</var>,
+<var>mb</var>) waits until input is possible on at least one member
+of 
+<var>ihs</var>, output is available on at least one member of <var>ohs</var>
+or an exceptional condition arises on at least one member of <var>ehs</var>.
+All handles in the sets which meet the specified conditions are returned.
+If a timeout is given (<var>mb</var> is
+<code>Just</code> <var>i</var>) the computation waits at most <var>i</var> nanoseconds
+before timing out; in which case it returns <code>Nothing</code>.
+Otherwise, the time remaining before the timeout would occur is returned
+as the fourth component of the result (<code>Nothing</code> if no timeout was given).
+<p>
+
+<a name="Lookahead"><h3>Reading Ahead</h3></a>
+
+It can be useful to examine the next character in the input stream
+when writing a lexical analyser or similar input-processing function.
+The functionality of <a href="Biblio.html#Ada9x">Ada's</a> <code>lookAhead</code> was 
+preferred over that
+of <a href="Biblio.html#ANSI-C">ANSI C's</a> <code>ungetc</code> because 
+it is much less problematic
+to implement.  Compared with Modula-3's <code>unGetChar</code>,
+this definition avoids needing to record in each handle whether the last I/O
+operation was a <code>getChar</code>.  Even so, it is not entirely 
+cost-free: a one-character buffer must be provided even
+for unbuffered handles.
+<p>
+
+<hr><p>
+<a name="PreludeWriteTextIO"><h2>PreludeWriteTextIO</h2></a>
+
+There seems to be much less controversy over character-level output
+than input, and therefore no rationale is provided.
+<p>
+
+<hr><p>
+<a name="LibDirectory"><h2>LibDirectory</h2></a>
+
+No status operations are provided.
+Haskell 1.2 <code>statusFile</code>/<code>statusChan</code> were
+rarely, if ever, used.  Their functionality is probably better
+provided by operating-system specific operations, which can give
+more exact information.
+<p>
+
+<hr><p>
+<a name="LibSystem"><h2>LibSystem</h2></a>
+
+<a name="ExitCodes"><h3>Exit Codes</h3></a>
+
+Only <code>ExitSuccess</code> and <code>ExitFailure</code> are
+available.  Some operating systems may wish to test whether a program
+failed due to an unhandled interrupt.  This is best done using an
+operating-system specific routine, such as those provided in the POSIX
+binding <a href="Posix.html"><code>LibPosix</code></a>.
+<p>
+
+<a name="getEnv"><h3>Environment Variables</h3></a>
+
+<code>getEnv</code> is generally available in most operating
+systems in some form or other.  When available it provides
+a useful way of communicating infrequently-changed information to a program
+(which it is inconvenient to specify on the command-line for shell-based
+systems).
+Setting environment variables is a much less common feature. Although
+this can be highly useful when available, it is therefore not provided
+as part of the core definition.
+<p>
+
+<hr><p>
+<a name="LibTime"><h2>LibTime</h2></a>
+
+This library codifies existing practice in the shape of the
+<code>Time</code> library provided by <code>hbc</code>.  Unlike that
+library it is not Unix-specific, and it provides recognised support
+for international time standards, including time-zone information.
+Time differences are recorded in a meaningful datatype rather
+than as a double-precision number.
+<p>
+
+There are two obvious ways to specify subseconds.  <code>hbc</code>
+has chosen to use a <code>Double</code> to represent fractions of
+a second.  Because of limitations on floating-point accuracy, this is 
+potentially unacceptable if these values are actually significant (for example
+if they are used to timestamp similarly-timed stock-market transactions).
+Since Haskell does not define the precision of <code>Double</code>, it is
+also not clear that double-precision values are sufficiently accurate for
+sub-second timings.
+<p>
+
+An <code>Integer</code> has therefore been used instead.
+Subseconds are specified to picosecond precision (but not necessarily
+accuracy!), which should be more than accurate enough for the forseeable
+future.
+<p>
+
+<hr><p>
+<a name="LibCPUTime"><h2>LibCPUTime</h2></a>
+
+<code>getCPUTime</code> is specified to nanosecond precision, since
+this is the precision used by the most accurate existing clocks that
+are in common use.  Note that while OSF/1 for the DEC Alpha specifies
+timings to nanosecond precision, the times returned are only accurate
+to around 1ms.
+<p>
+
+<hr><p>
+<a name="LibUserInterrupt"><h2>LibUserInterrupt</h2></a>
+
+User-produced interrupts are the most important class of interrupt
+which programmers commonly want to handle.  Almost all platforms,
+including small systems such as Macintosh and DOS, provide some ability
+to generate user-produced interrupts.
+<p>
+
+<hr><p>
+<a name="LibPOSIX"><h2>LibPOSIX</h2></a>
+
+This section intentionally left blank.
+<p>
+
+[<a href="IO.html">Up</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Recent Changes</title>
+</head>
+<body>
+
+[<a href="IO.html">Up</a>]
+<p>
+
+<hr><p>
+
+<h2><a name="ChangeLog">Recent Changes to the Definition</h2>
+
+<dl>
+<dt>941214
+<dd> Final proofread. 
+<br> Fixed several minor typos. 
+<br> Reinstated print.
+<br> Improved User Interface.
+<br> KH
+<dt>941207
+<dd> Fixed typos pointed out by ADG.
+<br> Added Summary section for quick browsing.
+<!--     [HMTL doesn't seem to allow links from pre-formatted text, -->
+<!--      so definitions can't be properly linked-->
+<!--      to the correct module.  What a mess this system is.]-->
+<!--	Check out LINK and REL (not supported?). -->
+<br> KH
+<dt>941130
+<dd> Major revision to separate core and non-core functionality,
+     and to enhance portability based on long-term feedback.
+<br> Removed the separation between primitive and derived
+     values -- this was confusing, and not really useful.
+<br> Fixed HTML errors to allow code to be previewed
+     on all platforms.
+<br> KH
+</dl>
+<p>
+
+<hr><p>
+
+[<a href="IO.html">Up</a>]
+<p>
+
+</body>
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Credits</title>
+</head>
+<body>
+
+[<a href="IO.html">Up</a>] [<a href="HighLights.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Credits</h2>
+
+The authors of this definition were
+
+<dl>
+<dt><b>Andy Gordon</b>   [Editor]
+<dd>University of Cambridge, UK
+<dt><b>Kevin Hammond</b> [Editor]
+<dd>Glasgow University, UK
+<dt><b>Andy Gill</b>
+<dd>Glasgow University, UK
+<dt><b>Ian Poole</b>
+<dd>MRC Genetics Unit, Edinburgh University, UK
+<dt><b>Jim Mattson</b>
+<dd>Glasgow University, UK
+</dl><p>
+
+The Haskell 1.3 Committee is
+<dl>
+<dt><b>Lennart Augustsson</b>
+<dd>Chalmers University, Goteborg, Sweden
+<dt><b>Brian Boutel</b>
+<dd>Wellington University, New Zealand
+<dt><b>Warren Burton</b>
+<dd>Simon Fraser University, Canada
+<dt><b>Joe Fasel</b>
+<dd>Los Alamos National Labs., New Mexico, USA
+<dt><b>Andy Gordon</b>
+<dd>University of Cambridge, UK
+<dt><b>Kevin Hammond</b>
+<dd>Glasgow University, UK
+<dt><b>Mark Jones</b>
+<dd>Nottingham University, UK
+<dt><b>John Peterson</b>
+<dd>Yale University, USA
+<dt><b>Simon Peyton Jones</b>
+<dd>Glasgow University, UK
+</dl>
+
+We are grateful to the many people who have made concrete suggestions
+for improvements to this definition, without being part of the Haskell
+1.3 committee.  These have included
+<dl>
+<dt><b>Jon Fairbairn</b>
+<dd>University of Cambridge, UK
+<dt><b>Ian Holyer</b>
+<dd>Bristol University, UK
+<dt><b>Sandra Loosemoore</b>
+<dd>Yale University, USA
+<dt><b>Will Partain</b>
+<dd>Glasgow University, UK
+<dt><b>Alastair Reid</b>
+<dd>Yale University, USA
+<dt><b>Phil Wadler</b>
+<dd>Glasgow University, UK
+</dl>
+
+<hr><p>
+
+[<a href="IO.html">Up</a>] [<a href="HighLights.html">Next</a>]
+<p>
+
+</address>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</hmtl>
+<html>
+<head>
+<title>Haskell 1.3 Bibliography</title>
+</head>
+<body>
+
+[<a href="IO.html">Up</a>]
+<p>
+
+<hr><p>
+
+<h2><a name="Bibliography">Bibliography</h2>
+
+Warning: not all references are here yet, especially in the operating
+systems section.
+<p>
+
+<h3><a name="Language-Standards">Language Standards and Definitions</h3>
+
+<a name="Ada83">
+<a href="http://www.itl.saic.com/employee/gregg_hanna/ada/index.html">
+<b>Ada 83 Language Reference Manual</b></a>,
+<br>ANSI Standard <code>ANSI/MIL-STD-1815A-1983</code>, (1983).
+</a><br><p>
+
+
+<a name="Ada9x">
+<a href="http://lglwww.epfl.ch/Ada/LRM/9X/rm9x/rm9x-toc.html">
+<b>Programming Language Ada, Language and Standard Libraries 
+(Draft Version 5.0)</b></a>,
+<br>Proposed ANSI/ISO Standard <code>ISO/IEC CD 865</code>,
+(June 1994).
+</a><br><p>
+
+
+<a name="ANSI-C">
+<b>Programming Language C, Language and Standard Libraries</b>,
+<br>ANSI Standard <code>X3.159-1989</code>,
+ISO Standard <code>9899:1990</code>, (1989/90).
+</a><br><p>
+
+
+<a name="ANSI-C-Library">
+P.J. Plauger,
+<b>The Standard C Library</b>,
+<br>Prentice Hall, (1992).
+</a><br><p>
+
+
+<a name="Clean">
+M.C.J.D. van Eekelen, E.G.J.M.H. N&ouml;cker, M.J. Plasmeijer, and J.E.W. Smetsers,
+<br>&quot;Concurrent Clean&quot
+<br><b>Technical Report 89-18</b>, University of Nijmegen, (1989).
+</a><br><p>
+
+
+<a name="COBOL">
+COBOL 9x.
+</a><br><p>
+
+
+<a name="Common-Lisp">
+G.L. Steele,
+<a href="http://www.cs.cmu.edu:8001/Web/Groups/AI/html/cltl/cltl2.html">
+<br><b>Common Lisp, the Language, 2nd Edition</b></a>,
+<br>Digital Press, ISBN 1-55558-041-6, (1990).
+</a><br><p>
+
+
+<a name="Fortran9x">
+Fortran 9x.
+</a><br><p>
+
+
+<a name="Haskell-1.2">
+<a name="hudak92">
+P. Hudak, S.L. Peyton Jones, P.L. Wadler (eds.) et al.,
+<br><a href="http://www.cl.cam.ac.uk/users/adg/haskell.html">Report on the
+Functional Programming Language Haskell: 
+A Non-strict, Purely Functional Language, Version 1.2.</a> 
+<br><B>ACM SIGPLAN Notices</B>, 27(5) (March 1992). </a></a><br><p>
+
+
+<a name="Modula-2">
+N. Wirth,
+<br><b>Programming in Modula-2</b>,
+<br>Springer-Verlag, (1983).
+</a><br><p>
+
+
+<a name="Modula-3">
+<a href="http://www.research.digital.com/SRC/m3defn/html/m3.html">
+<B>Modula-3: Language definition</B>.
+</a><br><p>
+
+
+<a name="SystemProgInModula-3">
+G. Nelson (ed.),
+<br><B>System Programming with Modula-3</B>,
+<br>Prentice Hall Series in Innovative Technology, ISBN 0-13-590464-1. (1991).
+</a><br><p>
+
+
+<a name="Standard ML">
+A.J.R. Milner and M. Tofte,
+<br><B>The Definition of Standard ML</B>,
+<br>MIT Press, 1990.
+</a><br><p>
+
+
+
+<hr><p>
+<h3><a name="Operating-Systems">Operating System References</h3>
+
+<a name="BSD4x">
+Berkeley Unix 4.3.
+</a><br><p>
+
+
+<a name="Macintosh">
+Macintosh System 7.
+</a><br><p>
+
+
+<a name="MS-DOS">
+MS-DOS.
+</a><br><p>
+
+
+<a name="OS-2">
+OS/2.
+</a><br><p>
+
+
+<a name="OSF">
+OSF/1.
+</a><br><p>
+
+
+<a name="POSIX">
+POSIX.
+</a><br><p>
+
+
+<a name="Solaris">
+Solaris.
+</a><br><p>
+
+
+<a name="Sun413">
+SunOS 4.1.3.
+</a><br><p>
+
+
+<a name="SysV">
+Unix System V.
+</a><br><p>
+
+
+<a name="VMS">
+VMS.
+</a><br><p>
+
+
+<a name="Win16">
+Win16.
+</a><br><p>
+
+
+<a name="Win32">
+Win32.
+</a><br><p>
+
+
+<a name="Windows-31">
+Windows 3.1.
+</a><br><p>
+
+
+<a name="Windows-NT">
+Windows NT.
+</a><br><p>
+
+
+<a name="Windows-95">
+Windows95.
+</a><br><p>
+
+
+<hr><p>
+<h3><a name="FP-References">I/O in Functional Programming Languages</h3>
+
+<a name="achten89">
+P. Achten and M.J. Plasmeijer,
+<br>
+<a href="ftp://ftp.cs.kun.nl/pub/Clean/papers/ins_outs.ps.Z">
+&quot;The Ins and Outs of Clean I/O&quot;</a>, (1994).
+</a><br><p>
+
+
+<a name="cupitt89">
+J. Cupitt, 
+<br> &quot;A brief walk through KAOS&quot;.
+<br>  Technical Report 58, Computing Laboratory, UKC, Canterbury, Kent, (February 1989).</a><br><p>
+
+
+<a name="gordon92">
+A.D. Gordon, 
+<br><a href="http://www.cl.cam.ac.uk/users/adg/fpio.html">
+<B>Functional Programming and Input/Output</B></a>.
+<br>Distinguished Dissertations in Computer Science, 
+Cambridge University Press, (1994). </a><br><p>
+
+
+<a name="launchbury94">
+J. Launchbury and S.L. Peyton Jones, 
+<br>
+<a href="ftp://ftp.dcs.gla.ac.uk/pub/glasgow-fp/tech_reports/FP-94-??_lazy-functional-state-threads.ps.Z">Lazy Functional State Threads</a>.  
+<br> <B>Proc. ACM Conf. on Prog. Lang. Design and Implementation (PLDI '94)</B>, (1994).</a><br><p>
+
+
+<a name="Hope+">
+<a name="perry91">
+N. Perry,
+<br>
+
+<a href="ftp://smis-asterix.massey.ac.nz/ResearchPapers/thesis/">
+<B>The Implementation of Practical Functional Programming Languages</B></a>,
+<br>PhD Thesis, Department of Computing Science, 
+<br> Imperial College, London, (1991).
+ </a></a><br><p>
+
+
+<a name="peytonjones93">
+S.L. Peyton Jones and P.L. Wadler,
+<br><a href="ftp://ftp.dcs.gla.ac.uk/pub/glasgow-fp/papers/imperative.ps.Z">
+Imperative functional programming.</a>
+<br><B>Proc. 20th ACM Symp. on Principles of Programming Langs.
+(POPL '93),</b>
+<br>Charleston, South Carolina, (January 1993).</a><br><p>
+
+
+<a name="wadler-essence">
+P.L. Wadler,
+<br><a href="ftp://ftp.dcs.gla.ac.uk/pub/glasgow-fp/papers/essence-of-fp.dvi">
+The essence of functional programming.</a>  
+<br><B>Proc. 19th ACM Symp. on Principles of Programming Langs. (POPL '92)</B>,
+<br>(January 1992).
+</a><br><p>
+
+
+<hr><p>
+
+<h3>Miscellaneous</h3>
+
+<a name="rfc1129">
+RFC 1129.
+</a><br><p>
+
+
+<hr><p>
+
+[<a href="IO.html">Up</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>
+<html>
+<head>
+<title>Haskell 1.3 Examples</title>
+</head>
+<body>
+
+[<a href="IO.html">Up</a>]
+<hr><p>
+
+<h1>Examples</h1>
+
+Here are some simple examples showing how the Haskell 1.3 I/O
+operations can be used.  <p>
+
+<p><hr><p>
+
+<h2>Hello World</h2>
+
+The Hello World program in Haskell 1.3.
+<p>
+
+<pre>
+> main =  putStr "Hello World\n"
+</pre>
+
+<p><hr><p>
+<h2>Summing Two Numbers</h2>
+
+This program is adapted from the Haskell 1.2 report.  It reads and
+sums two integers (default overloading resolution is used to
+resolve the types of <code>x1</code> and <code>x2</code> to be <code>Int</code>).
+<p>
+
+<pre>
+> main =
+>       hSetBuffering stdout NoBuffering                  >>
+>       putStr   "Enter an integer: "                     >>
+>       readLine                                          >>= \ x1 -> 
+>       putStr   "Enter another integer: "                >>
+>       readLine                                          >>= \ x2 -> 
+>       putStr  ("Their sum is " ++ show (x1+x2) ++ "\n")
+>
+>  where readLine = isEOF                                 >>= \ eof ->
+>                   if eof then return []
+>                   else getChar                          >>= \ c ->
+>                        if c `isIn` ['\n','\p'] then
+>                           return []
+>                        else
+>                           readLine                      >>= \ cs ->
+>                           return (c:cs)
+</pre>
+<p>
+
+<p><hr><p>
+
+<h2>Copying Files</h2>
+
+A simple program to create a copy of a file, with all lower-case
+characters translated to upper-case.  This program will not allow a
+file to be copied to itself.  This version uses character-level I/O.
+<p>
+
+<pre>
+> main   =  getArgs                           >>=        \ [f1,f2] ->
+>           openFile f1 ReadMode              >>=        \ h1      ->
+>           openFile f2 WriteMode             >>=        \ h2      ->
+>           copyFile h1 h2                    >>
+>           hClose h1                         >>
+>           hClose h2
+</pre><p>
+
+<pre>
+> copyFile h1 h2 =
+>           hIsEOF h1                         >>=        \ eof ->
+>           if eof
+>             return ()
+>           else
+>             hGetChar h1                     >>=        \ c       ->
+>             hPutChar h2 (toUpper c)         >>
+>             copyFile h1 h2
+</pre><p>
+
+An equivalent but much shorter version, using string I/O is:
+<p>
+
+<pre>
+> main =    getArgs                           >>=        \ [f1,f2] ->
+>           readFile f1                       >>=        \ s       ->
+>           writeFile f2 (map toUpper s)
+</pre>
+<p>
+
+<p><hr><p>
+
+<h2>A Simple Talk Program</h2>
+
+It could be argued that this is somewhat whimsical, but it shows
+how some more advanced features can be used to good effect.
+<p>
+
+Assume that opening the &quot;file&quot <code>"u@h"</code> will open a connection
+to user <code>u</code> at host <code>h</code> (so
+<code>"kh@dcs.glasgow.ac.uk"</code> will open a connection to Kevin
+Hammond at Glasgow), then the following is a simple communication
+program that allows the user to communicate across the network.
+<p>
+
+<pre>
+> main =   getArgs                            >>=        \ [user,host] ->
+>          let username = (user ++ "@" ++ host) in
+>          openFile username ReadWriteMode    >>=        \ cd          ->
+>          hSetBuffering NoBuffering stdin    >>
+>          hSetBuffering NoBuffering stdout   >>
+>          hSetBuffering NoBuffering cd       >>
+>          hPutString speakString             >>
+>          speak cd
+>
+> speakString = "Someone wants to speak with you"
+</pre><p>
+
+<pre>
+> speak cd =
+>          hReady cd                          >>=        \ ready       ->
+>          if ready then (hGetChar cd >>= putChar)
+>          else return ()                     >>
+>
+>          hReady stdin                       >>=        \ ready       ->
+>          if ready then (getChar >>= hPutChar cd)
+>          else return ()                     >>
+>
+>          speak cd
+</pre><p>
+
+Note the use of <code>hReady</code> to allow interleaved
+communication, and <code>hSetBuffering</code> to disable buffered
+input and output.
+<p>
+
+
+<hr><p>
+
+[<a href="IO.html">Up</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+
+</html>

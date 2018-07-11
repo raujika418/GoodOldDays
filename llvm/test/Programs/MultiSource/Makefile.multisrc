@@ -1,0 +1,68 @@
+##==- test/Programs/MultiSource/Makefile.multisrc ----------*- Makefile -*-===##
+#
+# This makefile should be used by subdirectories that have multiple source files
+# to be linked together.  This contains all of the common makefile code required
+# to link an application together based on the $(Source) variable.
+#
+# Variables to be defined before including this makefile:
+#
+# 1. LEVEL - Must be set as per normal semantics: The depth from the top of tree
+#
+##===----------------------------------------------------------------------===##
+
+LCCFLAGS := $(CFLAGS) $(CPPFLAGS)
+PROGRAMS_TO_TEST := $(PROG)
+
+## LLVM bytecode libraries that must be linked with an application
+# FIXME: LIBS SHOULD BE SPECIFIED
+LIBS = -lm
+
+include $(LEVEL)/test/Programs/Makefile.programs
+
+# Figure out what object files we want to build...
+LObjs    := $(sort $(addsuffix .rbc, $(notdir $(basename $(Source)))))
+LObjects := $(addprefix Output/,$(LObjs))
+
+NObjs    := $(sort $(addsuffix .o, $(notdir $(basename $(Source)))))
+NObjects := $(addprefix Output/,$(NObjs))
+
+.PRECIOUS: $(LObjects) $(NObjects) Output/%.linked.rll
+
+Output/%.o: %.c Output/.dir
+	$(CC) $(CPPFLAGS) $(CFLAGS) -O2 -c $< -o $@
+
+Output/%.o: %.cpp Output/.dir
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) -O2 -c $< -o $@
+
+Output/%.o: %.cc Output/.dir
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) -O2 -c $< -o $@
+
+bugpoint-gccas: Output/$(PROG).bugpoint-gccas
+bugpoint-gccld: Output/$(PROG).bugpoint-gccld
+bugpoint-jit:   Output/$(PROG).bugpoint-jit
+bugpoint-llc:   Output/$(PROG).bugpoint-llc
+
+# Raw bytecode files are files created by simply linking the output of the GCC
+# frontend without running gccas.
+#
+Output/%.rbc: Output/%.ll $(LAS)
+	$(LAS) -f $< -o - | $(LOPT) -f -q -funcresolve -o $@
+
+
+ifndef USE_PRECOMPILED_BYTECODE
+
+# Output/*.linked.ll is all of the bytecode files of the program linked together
+# without any libraries linked in...
+#
+Output/%.linked.rll: $(LObjects) $(LLINK) $(LOPT) $(LDIS)
+	$(LLINK) -f $(LObjects) | $(LOPT) -funcresolve -deadtypeelim -q | $(LDIS) > $@
+
+$(PROGRAMS_TO_TEST:%=Output/%.LOC.txt): \
+Output/%.LOC.txt: $(Source)
+	cat $^ $(wildcard $(SourceDir)/*.h) | wc -l > $@
+
+endif
+
+Output/%.native: $(NObjects)
+	$(CC) -o $@ $(NObjects) $(LDFLAGS) $(CFLAGS)
+

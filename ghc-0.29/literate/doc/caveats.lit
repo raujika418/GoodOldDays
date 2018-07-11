@@ -1,0 +1,45 @@
+\section[Caveats]{Caveats: bugs and foibles}
+
+As mentioned in \sectionref{clunky-implementation}, the initial
+implementation of this literate-programming system is delicate at
+best.
+
+\begin{enumerate}
+\item
+Environment-commands should be on lines of their own, and preferably
+start in column~1; the latter is especially important for verbatim
+environments.
+
+\item
+The line numbers reported with errors stand a fair chance of being
+wrong or even laughably irrelevant.  \LaTeX{} doesn't report errors in
+terms of their original source anyway at all... (urgh)
+
+\item
+\tr{\Define}-itions (incl.~the built-in ones for \Haskell{},
+\LaTeX{}, etc.) are expanded inside \tr{\tr} and friends.
+
+\item
+You can get confused \tr{\items} (in enumerations, etc.) if you have:
+\begin{verbatim}
+\item[... stuff here... ]   ...................... ]
+ right bracket on the same line -------------------^
+\end{verbatim}
+The solution (and it's better style anyway) is to put \tr{\items} on
+lines of their own.  This is a vestige of the implementation...
+
+\item
+Don't put \tr{\index} commands inside footnotes.  There are probably
+some other related restrictions... (ToDo)
+
+\item
+Tabs in code will be expanded to spaces.  This matters only if you
+have tabs in string constants, or some such (which you shouldn't,
+because it's hard for the reader of your code to see what you've done;
+use \tr{\t} or the equivalent).
+
+\item
+If you use the cross-referencing (\tr{-D}, I think), you have the
+annoying feature of cross-referencing to things very near by, even on
+the same page.  I don't know how to stop this.
+\end{enumerate}

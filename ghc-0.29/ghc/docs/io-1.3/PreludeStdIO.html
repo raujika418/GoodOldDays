@@ -1,0 +1,567 @@
+<html>
+<head>
+<title>Haskell 1.3 Standard I/O: PreludeStdIO</title>
+</head>
+<body>
+
+[<a href="PreludeIOError.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeReadTextIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Standard I/O "PreludeStdIO"</h2>
+
+
+This module defines Haskell <em>handles</em> and the operations which
+are supported for them.<p>
+
+Haskell interfaces to the external world through an abstract <em>file
+system</em>.  This file system is a collection of named <em>file
+system objects</em>, which may be organised
+in <em>directories</em> (see <a href="LibDirectory.html"><code>LibDirectory</code></a>).  
+In some implementations, directories may themselves be file system
+objects and could be entries in other directories.  For simplicity,
+any non-directory file system object is termed a <em>file</em>,
+although it could in fact be a communication channel, or any other
+object recognised by the operating system.  <em>Physical files</em> are
+persistent, ordered files, and normally reside on disk.<p>
+
+File and directory names are values of type <code>String</code>, whose
+precise meaning is operating system dependent.  Files can be opened,
+yielding a handle which can then be used to operate on the contents
+of that file.<p>
+
+<hr><p>
+
+<pre>
+> interface PreludeStdIO where
+</pre><p>
+
+<pre>
+> import PreludeMonadicIO
+> import PreludeIOError
+</pre><p>
+
+<pre>
+> type Handle
+> type FilePath = String
+</pre><p>
+
+<hr>
+<p>
+
+<a name="Handles"><h3>Handles</h3></a>
+
+
+The standard defines operations to read/write finite sequences of
+items from/to files, represented by values of type
+<code>Handle</code>.  Each value of this type is a <em>handle</em>: a
+record used by the Haskell run-time system to <em>manage</em> I/O with
+operating system objects.<p>
+
+A handle has at least the following properties:
+<ul>
+<li> whether it manages input or output or both;
+<li> whether it is <em>open</em>, <em>closed</em> or <em>semi-closed</em>;
+<li> whether the object is seekable;
+<li> whether buffering is disabled, or enabled on a line or block basis;
+<li> a buffer (whose length may be zero).
+</ul>
+
+Most handles will also have a current I/O position indicating
+where the next input or output operation will occur.
+<p>
+
+A handle is <em>readable</em> if it manages only input or both input
+and output; likewise, it is <em>writable</em> if it manages only
+output or both input and output.  A handle is <em>open</em> when first
+allocated.  Once it is closed it can no longer be used for either
+input or output, though an implementation cannot re-use its storage
+while references remain to it <a href="Rationale.html#Handle-Reuse">
+<img src="Rationale.gif" alt="(Rationale)"></a>. <p>
+
+<a name="SemiClosed"><h4>Semi-Closed Handles</h4></a>
+
+The operation <code>hGetContents</code> puts a handle <var>hdl</var> into
+an intermediate state, <em>semi-closed</em>.  In this state, <var>hdl</var> is
+effectively closed, but items are read from <var>hdl</var> on demand 
+and accumulated in a special stream returned
+by <code>hGetContents</code> <var>hdl</var>.
+ <a href="Rationale.html#getContents">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+Any operation except for <code>hClose</code> that fails because a
+handle is closed, also fails if a handle is semi-closed.  A
+semi-closed handle becomes closed:
+<ul>
+<li> if 
+<a href="#hClose"><code>hClose</code></a> is applied to
+it <a href="Rationale.html#Semi-Close-Close">
+<img src="Rationale.gif" alt="(Rationale)"></a>;
+<li> if an I/O error occurs when reading an item from the
+file item from the stream;
+<li> or once the entire contents of the file has been read.
+</ul>
+<p>
+
+Once a semi-closed handle becomes closed, the contents of the
+associated stream becomes fixed, and is the list of those items which
+were successfully read from that handle. Any I/O errors encountered when
+a handle is semi-closed are simply discarded.
+ <a href="Rationale.html#Semi-Close-Discard">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<a name="StandardHandles"><h3>Standard Handles</h3></a>
+
+<pre>
+> stdin, stdout, stderr :: Handle
+</pre><p>
+
+Three handles are allocated during program initialisation .
+The first two manage input or output from the Haskell program's
+standard input or output channel respectively 
+ <a href="Rationale.html#Standard-Handles">
+<img src="Rationale.gif" alt="(Rationale)"></a>.  The third manages
+output to the standard error channel<a href="Rationale.html#stderr">
+<img src="Rationale.gif" alt="(Rationale)"></a>.
+These handles are
+initially open.
+<p>
+
+<a name="OpeningClosing"><h3>Opening and Closing Files</h3></a>
+
+<a name="Opening"><h4>Opening Files</h4></a>
+
+<a href="Rationale.html#Opening-Files">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<pre>
+> data IOMode = ReadMode | WriteMode | AppendMode | ReadWriteMode
+
+> openFile      :: FilePath -> IOMode -> IO Handle
+</pre><p>
+
+Computation <code>openFile</code> <var>file</var> <var>mode</var> allocates
+and returns a new, open handle to manage the file
+<var>file</var>.
+It manages input if <var>mode</var> is
+<code>ReadMode</code>, output if <var>mode</var> is <code>WriteMode</code>
+or <code>AppendMode</code>, and both input and output if mode is
+<code>ReadWriteMode</code> <a href="Rationale.html#ReadWrite">
+<img src="Rationale.gif" alt="(Rationale)"></a>.<p>
+
+If the file does not exist and it is opened for output, it should be
+created as a new file.  If <var>mode</var> is <code>WriteMode</code>
+and the file already exists, then it should be truncated to zero
+length (note: some operating systems delete empty files, so there is
+no guarantee that the file will exist following an
+<code>openFile</code> with <var>mode</var> <code>WriteMode</code>
+unless it is subsequently written to successfully).  The handle is
+positioned at the end of the file if <var>mode</var> is
+<code>AppendMode</code>, and otherwise at the beginning (in which case
+its internal I/O position is 0).  
+The initial buffer mode is implementation-dependent.
+<p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>PermissionDenied</code><br>
+The process has insufficient privileges to perform the operation.
+[<code>EACCES</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>EMFILE</code>, <code>ENFILE</code>, <code>EAGAIN</code>]
+<li><code>InvalidArgument</code><br>
+The operand is not a valid file name.
+[<code>ENAMETOOLONG</code>, <code>ELOOP</code>]
+<li><code>NoSuchThing</code><br>
+The file does not exist.
+[<code>ENOENT</code>, <code>ENOTDIR</code>, <code>ENXIO</code>]
+<li><code>InappropriateType</code><br>
+The path refers to an existing directory.
+[<code>EISDIR</code>]
+</ul>
+<p>
+If <code>openFile</code> fails on a file opened for output, the file may 
+still have been created if it did not already exist.
+<p>
+Implementations should enforce, locally to the Haskell process,
+multiple-reader single-writer locking on files, which is to say that there may
+either be many handles on the same file which manage input, or just one handle on the
+file which manages output.
+If any open or semi-closed handle is managing a file for
+output, no new handle can be allocated for that file.  If any open or
+semi-closed handle is managing a file for input, new handles can only
+be allocated if they do not manage output.<p>
+
+Two physical files are the same if they have the same absolute name.
+An implementation is free to impose stricter conditions.  <a
+href="Rationale.html#Locking"> <img src="Rationale.gif"
+alt="(Rationale)"></a> <p>
+
+<a name="Closing"><h4>Closing Files</h4></a>
+
+<a name="hClose">
+<pre>
+> hClose        :: Handle -> IO () 
+</pre></a><p>
+
+Computation <code>hClose</code> <var>hdl</var> makes handle
+<var>hdl</var> closed.  Before the computation finishes, if <var>hdl</var> is
+writable its buffer is flushed as for
+<a href="#hFlush"><code>hFlush</code></a>.<p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+Buffered data cannot be flushed because of a broken connection.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is already closed.
+</ul>
+<p>
+
+If the operation fails for any reason, any further operations on the 
+handle will still fail as for a closed handle.
+<p>
+
+<a name="FileSize"><h3>Determining the Size of a File</h3></a>
+
+<pre>
+> hFileSize     :: Handle -> IO Integer
+</pre><p>
+
+For a handle <var>hdl</var> which attached to a physical file,
+<code>hFileSize</code> <var>hdl</var> returns the size of
+that file in 8-bit bytes (&gt;= 0).
+<p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>InappropriateType</code><br>
+The handle is not attached to a physical file.
+<li><code>IllegalOperation</code><br>
+The handle is closed.
+</ul>
+<p>
+
+<a name="EOF"><h3>Detecting the End of Input</h3></a>
+
+<pre>
+> hIsEOF        :: Handle -> IO Bool
+> isEOF         ::           IO Bool
+> isEOF         =  hIsEOF stdin
+</pre><p>
+
+For a readable handle <var>hdl</var>, computation <code>hIsEOF</code>
+<var>hdl</var> returns <code>True</code> if no further input can be
+taken from <var>hdl</var> or for a physical file, if the current I/O
+position is equal to the length of the file.  Otherwise, it returns
+<code>False</code>. <p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+</ul>
+<p>
+
+<a name="Buffering"><h3>Buffering Operations</h3></a>
+
+Three kinds of buffering are supported: line-buffering, 
+block-buffering or no-buffering.  These modes have the following effects.
+For output, items are written out from the internal buffer 
+according to the buffer mode:
+<dl>
+<dt>line-buffering<dd>  the entire buffer is written
+                        out whenever a newline is output, the buffer overflows, 
+                        a flush is issued, or the handle is closed.
+
+<dt>block-buffering<dd> the entire buffer is written out whenever 
+                        it overflows, a flush is issued, or the handle
+                        is closed.
+
+<dt>no-buffering<dd>    output is written immediately, and never stored
+                        in the buffer.
+</dl>
+The buffer is emptied as soon as it has been written out.
+ <a href="Rationale.html#Buffer-Modes">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+Similarly, input occurs according to the buffer mode for handle <var>hdl</var>.
+<dl>
+<dt>line-buffering<dd>  when the buffer for <var>hdl</var> is not empty,
+                        the next item is obtained from the buffer;
+                        otherwise, when the buffer is empty,
+                        characters up to and including the next newline
+                        character are read into the buffer.  No characters
+                        are available until the newline character is
+                        available.
+<dt>block-buffering<dd>  when the buffer for <var>hdl</var> becomes empty,
+                        the next block of data is read into the buffer.
+<dt>no-buffering<dd>      the next input item is read and returned.
+</dl>
+<p>
+For most implementations, physical files will normally be block-buffered 
+and terminals will normally be line-buffered.
+<p>
+
+<pre>
+> data BufferMode = NoBuffering | LineBuffering | BlockBuffering (Maybe Int)
+
+> hSetBuffering :: Handle -> BufferMode     -> IO ()
+</pre><p>
+
+Computation <code>hSetBuffering</code> <var>hdl</var> <var>mode</var> sets the
+mode of buffering for handle <var>hdl</var> on subsequent reads and writes.
+<ul>
+<li>
+If <var>mode</var> is <code>LineBuffering</code>, line-buffering is
+enabled if possible.
+<li>
+If <var>mode</var> is <code>BlockBuffering</code> <var>size</var>, then block-buffering
+is enabled if possible.  The size of the buffer is <var>n</var> items
+if <var>size</var> is <code>Just</code><var>n</var> and is otherwise implementation-dependent.
+<li>
+If <var>mode</var> is <code>NoBuffering</code>, then buffering is disabled if possible.
+</ul><p>
+
+If the buffer mode is changed from <code>BlockBuffering</code> or
+<code>LineBuffering</code> to <code>NoBuffering</code>, then 
+<ul>
+<li>if <var>hdl</var> is writable, the buffer is flushed as for 
+<a href="#hFlush"><code>hFlush</code></a>;
+<li>if <var>hdl</var> is not writable, the contents of the buffer is discarded.
+</ul>
+<p>
+
+The default buffering mode when a handle is opened is
+implementation-dependent and may depend on the object which is
+attached to that handle.<p>
+The computation may fail with:
+<ul>
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is closed.
+<li><code>UnsupportedOperation</code><br>
+The handle has already been used for reading or writing
+and the implementation does not allow the buffering mode to
+be changed.
+</ul>
+<p>
+
+<a name="Flushing"><h4>Flushing Buffers</h4></a>
+
+<a name="hFlush">
+<pre>
+> hFlush        :: Handle -> IO () 
+</pre></a><p>
+
+Computation <code>hFlush</code> <var>hdl</var> causes any items
+buffered for output in handle <var>hdl</var> to be sent immediately to
+the operating system.  <p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+A connection has been broken.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is closed, or is not writable.
+</ul>
+<p>
+
+<a name="Seeking"><h3>Repositioning Handles</h3></a>
+
+<a href="Rationale.html#Seeking">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+<h4>Revisiting an I/O Position</h4>
+
+<pre>
+> data HandlePosn
+
+</pre>
+<a name ="hGetPosn">
+<pre>
+> hGetPosn      :: Handle                 -> IO HandlePosn
+</pre>
+<a name ="hSetPosn">
+<pre>
+> hSetPosn      :: HandlePosn             -> IO () 
+</pre></a><p>
+
+Computation <code>hGetPosn</code> <var>hdl</var> returns the current I/O
+position of <var>hdl</var> as an abstract value.  Computation
+<code>hSetPosn</code> <var>p</var> sets the position of <var>hdl</var>
+to a previously obtained position <var>p</var>.<p>
+
+The computation <code>hSetPosn</code> may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+A connection has been broken.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is opened in <code>AppendMode</code> or the handle is closed.
+<li><code>UnsupportedOperation</code><br>
+The handle is not seekable.
+</ul>
+<p>
+
+<h4>Seeking to a new Position</h4>
+
+<pre>
+> data SeekMode =  AbsoluteSeek | RelativeSeek | SeekFromEnd
+</pre>
+<a name="hSeek">
+<pre>
+> hSeek         :: Handle -> SeekMode -> Integer      -> IO () 
+</pre></a><p>
+
+Computation <code>hSeek</code> <var>hdl mode i</var> sets the position of handle
+<var>hdl</var> depending on <code>mode</code>.  If <var>mode</var> is
+<dl>
+<dt><b>AbsoluteSeek</b>
+<dd>the position of <var>hdl</var> is set to <var>i</var>.
+<dt><b>RelativeSeek</b>
+<dd> The position of <var>hdl</var> is set to offset <var>i</var> from
+the current position.
+<dt><b>SeekFromEnd</b>
+<dd> The position of <var>hdl</var> is set to offset <var>i</var> from
+the end of the file.
+</dl>
+The offset is given in terms of 8-bit bytes.
+<p>
+
+If <var>hdl</var> is block- or line-buffered, then seeking to a
+position which is not in the current buffer will first cause any
+items in the output buffer to be written to the device,
+and then cause the input buffer to be discarded.
+<p>
+
+Some handles may not be seekable (see <a href="Query"><code>hIsSeekable</code></a>), 
+or only support a subset of the possible positioning operations
+(e.g. it may only be possible to seek to the end of a tape, or to a
+positive offset from the beginning or current position).<p>
+
+It is not possible to set a negative I/O position, or for a physical
+file, an I/O position beyond the current end-of-file.
+<p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOSPC</code>]
+<li><code>PermissionDenied</code><br>
+A resource limit would be exceeded.
+[<code>EFBIG</code>]
+<li><code>ResourceVanished</code><br>
+A connection has been broken.
+[<code>EPIPE</code>]
+<li><code>IllegalOperation</code><br>
+The handle is opened in <code>AppendMode</code> or the handle is closed.
+<li><code>UnsupportedOperation</code><br>
+The handle is not seekable.
+</ul>
+<p>
+
+<a name="Query"><h3>Handle Properties</h3></a>
+
+<pre>
+> hIsOpen          :: Handle -> IO Bool
+> hIsClosed        :: Handle -> IO Bool
+> hIsReadable      :: Handle -> IO Bool
+> hIsWritable      :: Handle -> IO Bool
+> hIsBlockBuffered :: Handle -> IO (Bool,Maybe Int)
+> hIsLineBuffered  :: Handle -> IO Bool
+> hIsNotBuffered   :: Handle -> IO Bool
+> hIsSeekable      :: Handle -> IO Bool
+</pre><p>
+
+A number of operations return information about the properties of a
+handle.  Each of these operations 
+except <code>hIsBlockBuffered</code> returns <code>True</code> if the handle 
+has the specified property,
+and <code>False</code> otherwise. <a href="Rationale.html#Properties">
+<img src="Rationale.gif" alt="(Rationale)"></a> <p>
+
+Computation <code>hIsBlockBuffered</code> <var>hdl</var> returns
+<code>( False, Nothing )</code> if <var>hdl</var> is not block-buffered.
+Otherwise it returns <code>( True, </code><var>size</var><code> )</code>,
+where <var>size</var> is <code>Nothing</code> for default buffering,
+and <code>( Just </code><var>n</var><code> )</code> for block-buffering
+of <var>n</var> 8-bit bytes.<p>
+
+Any of the latter six computations may fail with
+<ul>
+<li><code>IllegalOperation</code><br>
+The handle is closed.
+</ul>
+<p>
+
+<hr><p>
+
+
+[<a href="PreludeIOError.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeReadTextIO.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>

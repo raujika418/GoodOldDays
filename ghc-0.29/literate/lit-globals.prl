@@ -1,0 +1,383 @@
+#% \section[Global_data]{Global data structures for processing}
+#% 
+#% The main stuff is kept in global structures; to improve quality of
+#% life, global things' names start with Capital Letters.  If it ain't
+#% described here, it ain't supposed to be global!  (Well, except for
+#% some command-line option variables...)
+#% 
+#% The document being processed is taken to be a sequence of {\em
+#% sections}\index{sections}, each made of zero or more {\em
+#% blocks}\index{blocks} (see next section) of stuff-of-one-kind.  Important:
+#% whereas the ``sections'' the user sees may be nested within each other
+#% (e.g., sections within a chapter), a ``section'' here just the
+#% sequence of blocks between one sectioning command (\tr{\section<n>})
+#% and the next (\tr{\section<m>}, for any \tr{<n>} and \tr{<m>}.  For
+#% example, the stuff before the first sectioning command is the root
+#% ``section'' (number~0.0.0...), the stuff between (e.g.) a
+#% \tr{\section1} command and an ensuing \tr{\section2} command is a
+#% ``section,'' etc.  Confusing, but only to us hackers...
+#% 
+#% \subsection[Data_about_sections]{Global data about sections}
+#% 
+#% \begin{code}
+&init_section_data_structures();
+
+sub init_section_data_structures { # also used in the linker
+#% \end{code}
+#% 
+#% Things we want to keep track of about ``sections'' (values for the root
+#% section are provided):
+#% \begin{description}
+#% \item[@Sec_depth@:]
+#% the sectioning depth provided by the user; 0 is a special depth only
+#% for the root section (pre-amble) [sparked by seeing
+#% \tr{\documentstyle}] and the \tr{\end{document}} section; -1 means no
+#% depth has been assigned.
+#% \begin{code}
+    @Sec_depth	= (-1);
+#% \end{code}
+#% 
+#% \item[@Sec_abs_depth@:]
+#% the absolute sectioning depth; it is calculated.
+#% \begin{code}
+    @Sec_abs_depth = (-1);
+#% \end{code}
+#% 
+#% \item[@Sec_nodename@:]
+#% the default node-name for that section; to go from a
+#% nodename to a section number, we have the auxiliary associative array
+#% @%Nodename_sec@.  The array @Sec_alias@ contains {\em extra}
+#% names for this section, introduced by \tr{\label}s.
+#% \begin{code}
+    @Sec_nodename = (''); # 'Top' (set by \documentstyle)
+    %Nodename_sec = (); # ('Top', 0);
+    @Sec_aliases = ('');
+#% \end{code}
+#% 
+#% \item[@Sec_nodespec@:]
+#% a specification (a string) for how each node is wired up (\tr{lit2texi}).
+#% \begin{code}
+    @Sec_nodespec = (''); # Top,,,(dir)
+#% \end{code}
+#% 
+#% \item[@Sec_title@]
+#% gives the text of the title for a
+#% section.
+#% \begin{code}
+    @Sec_title	= ('');
+#% \end{code}
+#% 
+#% \item[@Sec_numstr@:]
+#% the section number as a string,
+#% full-stop/period-separated; the associative array @%Sec_numstr_exists@
+#% (indexed by @Sec_numstr@'s) is used to help find (e.g.) a
+#% \tr{\section<n>}'s \tr{\section<n+1>}'s, and such like.
+#% @Sec_vec@, a sort-of counter, is very much related; in turn, the routine
+#% @incr_Sec_vec@ is very much related to it.
+#% \begin{code}
+    @Sec_numstr	= (''); # (0.0.0.0.0.0.0.0.0.0.0.0')
+    %Sec_numstr_exists = (); # ('0.0.0.0.0.0.0.0.0.0.0.0', 0)
+
+    # 12 sectioning levels for the user; level 0 is magic and extra
+    # that -1 will be bumped first thing (we hope)
+    @Sec_vec = (-1,0,0,0,0,0,0,0,0,0,0,0,0); # curr Sec_numstr in non-string form
+#% \end{code}
+#% 
+#% \item[@Sec_first_blk@ and  @Sec_last_blk@:]
+#% these point the way to a section's blocks (see next section).
+#% \begin{code}
+    @Sec_first_blk	= (0);   # to find their blocks
+    @Sec_last_blk	= (-1);
+#% \end{code}
+#% 
+#% \item[@Sec_owner@:]
+#% who should be listed as the owner of this section when a \tr{-O} flag
+#% given; set from \tr{\owner} command; otherwise, from who actually owns
+#% the source-file of the section's first block.
+#% \begin{code}
+    @Sec_owner = ('');
+#% \end{code}
+#% 
+#% \item[@Sec_extra_menu_entries@:]
+#% a string giving extra menu entries (from user's \tr{\menuentry}
+#% requests).
+#% \begin{code}
+    @Sec_extra_menu_entries = ('');
+#% \end{code}
+#% 
+#% \item[@Sec_codethings_defd@ and @Sec_codethings_used@:]
+#% a comma-separated string of ``interesting'' things found by
+#% @find_interesting_codethings@ in this section.
+#% 
+#% \begin{code}
+    @Sec_codethings_defd = ('');
+    @Sec_codethings_used = ('');
+    %Codething_defd_sec = (); # only used in the linker
+
+} # end of subroutine init_section_data_structures
+#% \end{code}
+#% \end{description}
+#% 
+#% \begin{code}
+sub tidy_numstr {
+    local($numstr) = @_;
+
+    $numstr =~ s/^-1\.//;	# strip leading -1 (I don't like this...)
+    $numstr =~ s/^[0\.]+\.//;	# strip leading zeros
+    $numstr =~ s/\.[0\.]+$//;	# strip trailing zeros
+    $numstr;
+}
+
+$S		= 0;   # reserved scalar for walking through sections
+
+# constants; full LaTeX hierarchy
+# all subparagraphs (LaTeX) or subsubsections (Texinfo) below
+# a certain level -- for now
+$MAX_SEC_DEPTH = 12;
+
+sub incr_Sec_vec {
+    local($i) = @_; # the section-depth to increment
+
+#   print STDERR "entering incr_Sec_vec: $i\n" if $Debugging;
+
+    $Sec_vec[$i] = $Sec_vec[$i] + 1;
+    $i++;
+    while ($i <= $#Sec_vec) { # zero out subsections
+    	$Sec_vec[$i] = 0;
+	$i++;
+    }
+}
+
+#operations on Secs
+
+sub start_new_section { # wind up curr section, make ready for next
+
+#   print STDERR "entering start_new_section\n" if $Debugging;
+
+    $S++;
+    if (! &empty_blk_p($B)) {
+        $Sec_last_blk[$S - 1] = $B;
+        &incr_blk_ctr();	  # new section -> new block
+    } else {
+        $Sec_last_blk[$S - 1] = $B - 1;
+        $Blk_sec[$B] = $S;
+    }
+
+    $Sec_depth[$S]	= -1; # means: unknown"
+    $Sec_abs_depth[$S]	= -1;
+    $Sec_nodename[$S]	= '';
+    $Sec_aliases[$S]	= '';
+    $Sec_nodespec[$S]	= '';
+    $Sec_title[$S]	= '';
+    $Sec_numstr[$S]	= '';
+    $Sec_first_blk[$S]	= $B;
+    $Sec_last_blk[$S]	= -1;
+
+    $Sec_owner[$S]	= '';
+    $Sec_extra_menu_entries[$S] = '';
+    $Sec_codethings_defd[$S] = '';
+    $Sec_codethings_used[$S] = '';
+}
+#% \end{code}
+#% 
+#% \subsection[Data_about_blocks]{Global data about blocks}
+#% 
+#% Each ``section'' is a sequence of ``blocks'' of stuff: each block
+#% has a type (text, code, etc.) and some text, plus some other
+#% miscellaneous information.  The presumption is that, though blocks may
+#% change internally (number of lines, etc.), the number/order/etc.~of
+#% blocks won't change.
+#% 
+#% \begin{code}
+@Blk_type		= ('');
+@Blk_sec		= (''); # backpointer to what section it's in
+@Blk_magic		= (''); # mainly ribbon names, for "code"
+@Blk_txt		= ('');
+@Blk_srcfile_name	= ('');
+@Blk_srcfile_lineno	= (1);
+
+# list of codethings defined/used in this block (if code)
+@Blk_codethings_defd	= ();
+@Blk_codethings_used	= ();
+
+$B			= 0; # reserved for walking through blocks
+
+# operations thereon
+
+sub empty_blk_p { # empty if it has no text
+    local($blk_no) = @_;
+
+    ($Blk_txt[$B] eq '') ? 1 : 0;
+}
+
+sub incr_blk_ctr {
+#   print STDERR "entering incr_blk_ctr\n" if $Debugging;
+
+    $B++;
+    $Blk_type[$B]           = '';
+    $Blk_sec[$B]            = $S; # that's where we are
+    $Blk_txt[$B]            = '';
+    $Blk_magic[$B]	    = '';
+    $Blk_srcfile_name[$B]   = '';
+    $Blk_srcfile_lineno[$B] = -1;
+    $Blk_codethings_defd[$B]= '';
+    $Blk_codethings_used[$B]= '';
+}
+
+sub set_blk_magic_info { # for special info about specific types of blks
+    local($b_info) = @_;
+
+    $Blk_magic[$B] = $b_info;
+}
+
+sub append_to_curr_blk {
+    local($b_type, $b_txt) = @_;
+
+    if (&empty_blk_p($B)) { # first use
+    	&not_OK($Srcfile_name, $Srcfile_lineno, # I hope that's right...
+		"non-matching type on empty blk with type already set\n")
+    	    if ($Blk_type[$B] && $Blk_type[$B] ne $b_type);
+
+	$Blk_type[$B]           = $b_type;
+        $Blk_txt[$B]            = $b_txt;
+        $Blk_srcfile_name[$B]   = $Srcfile_name;
+        $Blk_srcfile_lineno[$B] = $Srcfile_lineno;
+
+    } elsif ($Blk_type[$B] ne $b_type) { # ???
+    	&not_OK($Srcfile_name, $Srcfile_lineno, # I hope that's right...
+		"unexpected blk type change in append_to_curr_blk: $Blk_type[$B], $b_type; $b_txt\n");
+        $Blk_type[$B]           = $b_type;
+        $Blk_txt[$B]            = $b_txt;
+        $Blk_srcfile_name[$B]   = $Srcfile_name;
+        $Blk_srcfile_lineno[$B] = $Srcfile_lineno;
+
+    } else {
+        $Blk_txt[$B]           .= $b_txt;
+    }
+}
+#% \end{code}
+#% 
+#% Executable/compilable code (inside \tr{\begin{code} ... \end{code}}) is
+#% associated with one or more code {\em ribbons}; by default, code is
+#% appended onto ribbon \tr{main}.  During @read_and_categorize_input@, the
+#% numbers for all the blocks holding code for ribbon \tr{foo} are
+#% accumulated into @$Ribbon_blks{'foo'}@.
+#% 
+#% \begin{code}
+%Ribbon_blks = ();
+#% \end{code}
+#% 
+#% \subsection[Other_global_data]{Other global data}
+#% 
+#% Miscellaneous global things.
+#% 
+#% \begin{code}
+$Srcfile_name   = '';   # source file current line came from
+$Srcfile_lineno = 0;    # line number of current line
+
+$Doc_title	= '';
+$Doc_author	= '';
+$Doc_date	= '';
+
+$Only_latex = 0;
+$Only_info  = 0;
+
+# for \define{<foo>}{<bar>} things; some built-in for lit2texi
+%Define = ();
+if ($Lit2texi) {
+    $Define{'LaTeX'}    = 'LaTeX';
+    $Define{'Haskell'}  = 'Haskell';
+    $Define{'TeX'}      = 'TeX';
+    $Define{'ldots'}    = '...';
+}
+
+%SECCMD_DEPTH = ('RESERVED_A_bug_if_you_see_it', 0,
+		 'part', 1,	   'chapter', 2,       'section', 3,
+		 'subsection', 4,  'subsubsection', 5, 'paragraph', 6,
+		 'subparagraph', 7,'subparagraph', 8,  'subparagraph', 9,
+		 'subparagraph',10,'subparagraph', 11, 'subparagraph', 12
+		);
+# LaTeX (used for \section(ref|type)s for Texinfo as well)
+@SECDEPTH_LCMD =('RESERVED_A_bug_if_you_see_it',
+		 'part',	'chapter',	 'section',
+		 'subsection',	'subsubsection', 'paragraph',
+		 'subparagraph','subparagraph',  'subparagraph',
+		 'subparagraph','subparagraph',  'subparagraph'
+		);
+# Texinfo -- really need something like 'part'
+@SECDEPTH_TCMD =('RESERVED_A_bug_if_you_see_it',
+		 'chapter',	'chapter',	 'section',
+		 'subsection',	'subsubsection', 'subsubsection',
+		 'subsubsection','subsubsection','subsubsection',
+		 'subsubsection','subsubsection','subsubsection'
+		);
+
+# a table of \begin/end environments we known what to do with
+# this is so lit2texi can turn the others into something sensible
+$KNOWN_ENV{'change'} = 1;
+$KNOWN_ENV{'comment'} = 1;
+$KNOWN_ENV{'description'} = 1;
+$KNOWN_ENV{'display'} = 1;
+$KNOWN_ENV{'document'} = 1;
+$KNOWN_ENV{'enumerate'} = 1;
+$KNOWN_ENV{'figure'} = 1;
+$KNOWN_ENV{'flushdisplay'} = 1;
+$KNOWN_ENV{'flushverbatim'} = 1;
+$KNOWN_ENV{'itemise'} = 1;
+$KNOWN_ENV{'itemize'} = 1;
+$KNOWN_ENV{'menu'} = 1;
+# onlylatex/info/etc should never get far enough to be seen
+# so they aren't in this table.
+$KNOWN_ENV{'quotation'} = 1;
+$KNOWN_ENV{'table'} = 1;
+$KNOWN_ENV{'tabular'} = 1;
+$KNOWN_ENV{'test'} = 1;
+$KNOWN_ENV{'verbatim'} = 1;
+#% \end{code}
+#% 
+#% \subsection[Debugging_global_data]{Debugging global data}
+#% 
+#% \begin{code}
+sub dump_sections_and_blocks {
+    local(@ln, $l); # for blk text lines
+    local($temp);
+
+#   print STDERR "entering dump_sections_and_blocks\n" if $Debugging;
+# this may not be printing the latest and greatest stuff
+
+    foreach ($S = 0; $S <= $#Sec_depth; $S++) {
+        print STDERR "Section $S ($Sec_numstr[$S]):: depth: $Sec_depth[$S]; abs_depth: $Sec_abs_depth[$S]; nodename: $Sec_nodename[$S]; nodespec: $Sec_nodespec[$S]; blks: $Sec_first_blk[$S]:$Sec_last_blk[$S]; title: $Sec_title[$S]\n";
+        foreach ($B = $Sec_first_blk[$S]; $B <= $Sec_last_blk[$S]; $B++) {
+            print STDERR "    Block $B; sec $Blk_sec[$B]; srcfile: $Blk_srcfile_name[$B]/$Blk_srcfile_lineno[$B]; type: $Blk_type[$B]; magic: $Blk_magic[$B]\n";
+
+    	    &not_OK($Blk_srcfile_name[$B], $Blk_srcfile_lineno[$B],
+		"!!! Hey blk_sec ne sec: $Blk_sec[$B] != $S\n") if $Blk_sec[$B] != $S;
+            $temp = $Blk_txt[$B];
+            $temp =~ s/\n/\\n\n/g;
+            @ln = split(/\n/,$temp);
+            for $l (@ln) {
+		print STDERR "\t$l\n";
+            }
+	    if ($Blk_type[$B] eq 'code') {
+		print STDERR "codethings defd: $Blk_codethings_defd[$B]\n"
+		    if $Blk_codethings_defd[$B];
+		print STDERR "codethings used: $Blk_codethings_used[$B]\n"
+		    if $Blk_codethings_used[$B];
+	    }
+        }
+	print STDERR "sec codethings defd: $Sec_codethings_defd[$S]\n"
+	    if $Sec_codethings_defd[$S];
+	print STDERR "sec codethings used: $Sec_codethings_used[$S]\n"
+	    if $Sec_codethings_used[$S];
+    	print STDERR "\n";
+    }
+    print STDERR "Ribbons:\n";
+    local($ribbon,$blk_list);
+    while (($ribbon, $blk_list) = each %Ribbon_blks) {
+	print STDERR "\t$ribbon: $blk_list\n";
+    }
+}
+
+# keeps the including 'do' happy
+1;
+#% \end{code}

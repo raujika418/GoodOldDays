@@ -1,0 +1,253 @@
+./inout.c: if (fp == NULL) return 1;
+./inout.c: if (fp != NULL)
+./inout.c:  fp = NULL;
+./inout.c: if (usererror != NULL) usererror (s);
+./opcode.c:static Object stack[MAXSTACK] = {{T_MARK, {NULL}}};
+./opcode.c: if (s == NULL)
+./opcode.c:  return NULL;
+./opcode.c: if (s == NULL)
+./opcode.c:  return NULL;
+./opcode.c: if (svalue(obj) == NULL)
+./opcode.c:     if (h == NULL) return 1;
+./opcode.c:     if (h == NULL) return 1;
+./opcode.c:     if (h == NULL) return 1;
+./opcode.c:    if (avalue(top-1) == NULL)
+./opcode.c:    if (svalue(l) == NULL)
+./opcode.c:** Get a parameter, returning the object handle or NULL on error.
+./opcode.c: if (number <= 0 || number > top-base) return NULL;
+./opcode.c:** Given an object handle, return its string pointer. On error, return NULL.
+./opcode.c: if (tostring (object)) return NULL;
+./opcode.c:** Given an object handle, return a copy of its string. On error, return NULL.
+./opcode.c: if (tostring (object)) return NULL;
+./opcode.c:** Given an object handle, return its cfuntion pointer. On error, return NULL.
+./opcode.c: if (tag(object) != T_CFUNCTION) return NULL;
+./opcode.c:** Given an object handle, return its user data. On error, return NULL.
+./opcode.c: if (tag(object) != T_USERDATA) return NULL;
+./opcode.c:** On error, return NULL.
+./opcode.c:  return NULL;
+./opcode.c:** On error, return NULL.
+./opcode.c:  return NULL;
+./opcode.c:** Get a global object. Return the object handle or NULL on error.
+./opcode.c: if (n < 0) return NULL;
+./opcode.c: if (top <= base) return NULL;
+./opcode.c:  if (h == NULL) return 1;
+./opcode.c:  if (h == NULL) return 1;
+./opcode.c: return (object != NULL && tag(object) == T_NIL);
+./opcode.c: return (object != NULL && tag(object) == T_NUMBER);
+./opcode.c: return (object != NULL && tag(object) == T_STRING);
+./opcode.c: return (object != NULL && tag(object) == T_ARRAY);
+./opcode.c: return (object != NULL && tag(object) == T_CFUNCTION);
+./opcode.c: return (object != NULL && tag(object) == T_USERDATA);
+./opcode.c: while ((obj=lua_getparam (i++)) != NULL)
+./hash.c: Node *n=NULL, *p;
+./hash.c:  for (p=NULL,n=list(t,h); n!=NULL; p=n, n=n->next)
+./hash.c:  for (p=NULL,n=list(t,h); n!=NULL; p=n, n=n->next)
+./hash.c: if (n==NULL)				/* name not present */
+./hash.c:  return NULL;
+./hash.c: if (p!=NULL)				/* name present but not first */
+./hash.c:** Create a new hash. Return the hash pointer or NULL on error.
+./hash.c: if (t == NULL)
+./hash.c:  return NULL;
+./hash.c: if (nodelist(t) == NULL)
+./hash.c:  return NULL;
+./hash.c:** On error, return NULL.
+./hash.c: if (h < 0) return NULL; 
+./hash.c: if (n == NULL)
+./hash.c:  if (n == NULL)
+./hash.c:   return NULL;
+./hash.c:  for (n = list(h,i); n != NULL; n = n->next)
+./hash.c:   if (list(a,i) != NULL && tag(&list(a,i)->val) != T_NIL)
+./hash.c: if (o == NULL || r == NULL)
+./hash.c: if (lua_getparam (3) != NULL)
+./hash.c:     if (n->next == NULL)
+./hash.c:      while (next != NULL && tag(&next->val) == T_NIL) next = next->next;
+./hash.c:      if (next == NULL)
+./hash.c:   if (n == NULL)
+./fixed/lex_yy.c:FILE *yyin = {NULL}, *yyout = {NULL};
+./fixed/iolib.c:static FILE *in=NULL, *out=NULL;
+./fixed/iolib.c: if (o == NULL)			/* restore standart input */
+./fixed/iolib.c:   if (fp == NULL)
+./fixed/iolib.c: if (o == NULL)			/* restore standart output */
+./fixed/iolib.c:   if (fp == NULL)
+./fixed/iolib.c: if (o == NULL)			/* free format */
+./fixed/iolib.c: if (o1 == NULL)			/* new line */
+./fixed/iolib.c: else if (o2 == NULL)   		/* free format */
+./fixed/iolib.c: if (o == NULL || !lua_isstring (o))
+./fixed/iolib.c: if (o == NULL || !lua_isstring (o))
+Binary file ./fixed/.iolib.c.swp matches
+./lex_yy.c:FILE *yyin = {NULL}, *yyout = {NULL};
+./iolib.c.bak: if (o == NULL)			/* restore standart input */
+./iolib.c.bak:   if (fp == NULL)
+./iolib.c.bak: if (o == NULL)			/* restore standart output */
+./iolib.c.bak:   if (fp == NULL)
+./iolib.c.bak: if (o == NULL)			/* free format */
+./iolib.c.bak: if (o1 == NULL)			/* new line */
+./iolib.c.bak: else if (o2 == NULL)   		/* free format */
+./iolib.c.bak: if (o == NULL || !lua_isstring (o))
+./iolib.c.bak: if (o == NULL || !lua_isstring (o))
+./iolib.c:static FILE *in=NULL, *out=NULL;
+./iolib.c: if (o == NULL)			/* restore standart input */
+./iolib.c:   if (fp == NULL)
+./iolib.c: if (o == NULL)			/* restore standart output */
+./iolib.c:   if (fp == NULL)
+./iolib.c: if (o == NULL)			/* free format */
+./iolib.c: if (o1 == NULL)			/* new line */
+./iolib.c: else if (o2 == NULL)   		/* free format */
+./iolib.c: if (o == NULL || !lua_isstring (o))
+./iolib.c: if (o == NULL || !lua_isstring (o))
+./tags:in	fixed/iolib.c	/^static FILE *in=NULL, *out=NULL;$/;"	v	file:
+./tags:out	fixed/iolib.c	/^static FILE *in=NULL, *out=NULL;$/;"	v	file:
+./tags:stack	opcode.c	/^static Object stack[MAXSTACK] = {{T_MARK, {NULL}}};$/;"	v	file:
+./tags:yyin	fixed/lex_yy.c	/^FILE *yyin = {NULL}, *yyout = {NULL};$/;"	v
+./tags:yyout	fixed/lex_yy.c	/^FILE *yyin = {NULL}, *yyout = {NULL};$/;"	v
+./table.c: if (s_name(lua_ntable) == NULL)
+./table.c:** table, checking overflow, and returns its own pointer, or NULL on error.
+./table.c: if (s == NULL) return NULL;
+./table.c:   return NULL;
+./table.c:** or NULL on error.
+./table.c: if (a == NULL) return NULL;
+./table.c:   return NULL;
+./table.c: if ((lua_file[lua_nfile++] = strdup (fn)) == NULL)
+./table.c: if (o == NULL)
+./table.c: if (lua_getparam (2) != NULL)
+./mathlib.c:#include <stdio.h>		/* NULL */
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if (o == NULL)
+./mathlib.c: if ((o = lua_getparam(i++)) == NULL)
+./mathlib.c: while ((o = lua_getparam(i++)) != NULL)
+./mathlib.c: if ((o = lua_getparam(i++)) == NULL)
+./mathlib.c: while ((o = lua_getparam(i++)) != NULL)
+./grep.txt:./inout.c: if (fp == NULL) return 1;
+./grep.txt:./inout.c: if (fp != NULL)
+./grep.txt:./inout.c:  fp = NULL;
+./grep.txt:./inout.c: if (usererror != NULL) usererror (s);
+./grep.txt:./opcode.c:static Object stack[MAXSTACK] = {{T_MARK, {NULL}}};
+./grep.txt:./opcode.c: if (s == NULL)
+./grep.txt:./opcode.c:  return NULL;
+./grep.txt:./opcode.c: if (s == NULL)
+./grep.txt:./opcode.c:  return NULL;
+./grep.txt:./opcode.c: if (svalue(obj) == NULL)
+./grep.txt:./opcode.c:     if (h == NULL) return 1;
+./grep.txt:./opcode.c:     if (h == NULL) return 1;
+./grep.txt:./opcode.c:     if (h == NULL) return 1;
+./grep.txt:./opcode.c:    if (avalue(top-1) == NULL)
+./grep.txt:./opcode.c:    if (svalue(l) == NULL)
+./grep.txt:./opcode.c:** Get a parameter, returning the object handle or NULL on error.
+./grep.txt:./opcode.c: if (number <= 0 || number > top-base) return NULL;
+./grep.txt:./opcode.c:** Given an object handle, return its string pointer. On error, return NULL.
+./grep.txt:./opcode.c: if (tostring (object)) return NULL;
+./grep.txt:./opcode.c:** Given an object handle, return a copy of its string. On error, return NULL.
+./grep.txt:./opcode.c: if (tostring (object)) return NULL;
+./grep.txt:./opcode.c:** Given an object handle, return its cfuntion pointer. On error, return NULL.
+./grep.txt:./opcode.c: if (tag(object) != T_CFUNCTION) return NULL;
+./grep.txt:./opcode.c:** Given an object handle, return its user data. On error, return NULL.
+./grep.txt:./opcode.c: if (tag(object) != T_USERDATA) return NULL;
+./grep.txt:./opcode.c:** On error, return NULL.
+./grep.txt:./opcode.c:  return NULL;
+./grep.txt:./opcode.c:** On error, return NULL.
+./grep.txt:./opcode.c:  return NULL;
+./grep.txt:./opcode.c:** Get a global object. Return the object handle or NULL on error.
+./grep.txt:./opcode.c: if (n < 0) return NULL;
+./grep.txt:./opcode.c: if (top <= base) return NULL;
+./grep.txt:./opcode.c:  if (h == NULL) return 1;
+./grep.txt:./opcode.c:  if (h == NULL) return 1;
+./grep.txt:./opcode.c: return (object != NULL && tag(object) == T_NIL);
+./grep.txt:./opcode.c: return (object != NULL && tag(object) == T_NUMBER);
+./grep.txt:./opcode.c: return (object != NULL && tag(object) == T_STRING);
+./grep.txt:./opcode.c: return (object != NULL && tag(object) == T_ARRAY);
+./grep.txt:./opcode.c: return (object != NULL && tag(object) == T_CFUNCTION);
+./grep.txt:./opcode.c: return (object != NULL && tag(object) == T_USERDATA);
+./grep.txt:./opcode.c: while ((obj=lua_getparam (i++)) != NULL)
+./grep.txt:./hash.c: Node *n=NULL, *p;
+./grep.txt:./hash.c:  for (p=NULL,n=list(t,h); n!=NULL; p=n, n=n->next)
+./grep.txt:./hash.c:  for (p=NULL,n=list(t,h); n!=NULL; p=n, n=n->next)
+./grep.txt:./hash.c: if (n==NULL)				/* name not present */
+./grep.txt:./hash.c:  return NULL;
+./grep.txt:./hash.c: if (p!=NULL)				/* name present but not first */
+./grep.txt:./hash.c:** Create a new hash. Return the hash pointer or NULL on error.
+./grep.txt:./hash.c: if (t == NULL)
+./grep.txt:./hash.c:  return NULL;
+./grep.txt:./hash.c: if (nodelist(t) == NULL)
+./grep.txt:./hash.c:  return NULL;
+./grep.txt:./hash.c:** On error, return NULL.
+./grep.txt:./hash.c: if (h < 0) return NULL; 
+./grep.txt:./hash.c: if (n == NULL)
+./grep.txt:./hash.c:  if (n == NULL)
+./grep.txt:./hash.c:   return NULL;
+./grep.txt:./hash.c:  for (n = list(h,i); n != NULL; n = n->next)
+./grep.txt:./hash.c:   if (list(a,i) != NULL && tag(&list(a,i)->val) != T_NIL)
+./grep.txt:./hash.c: if (o == NULL || r == NULL)
+./grep.txt:./hash.c: if (lua_getparam (3) != NULL)
+./grep.txt:./hash.c:     if (n->next == NULL)
+./grep.txt:./hash.c:      while (next != NULL && tag(&next->val) == T_NIL) next = next->next;
+./grep.txt:./hash.c:      if (next == NULL)
+./grep.txt:./hash.c:   if (n == NULL)
+./grep.txt:./fixed/lex_yy.c:FILE *yyin = {NULL}, *yyout = {NULL};
+./grep.txt:./fixed/iolib.c:static FILE *in=NULL, *out=NULL;
+./grep.txt:./fixed/iolib.c: if (o == NULL)			/* restore standart input */
+./grep.txt:./fixed/iolib.c:   if (fp == NULL)
+./grep.txt:./fixed/iolib.c: if (o == NULL)			/* restore standart output */
+./grep.txt:./fixed/iolib.c:   if (fp == NULL)
+./grep.txt:./fixed/iolib.c: if (o == NULL)			/* free format */
+./grep.txt:./fixed/iolib.c: if (o1 == NULL)			/* new line */
+./grep.txt:./fixed/iolib.c: else if (o2 == NULL)   		/* free format */
+./grep.txt:./fixed/iolib.c: if (o == NULL || !lua_isstring (o))
+./grep.txt:./fixed/iolib.c: if (o == NULL || !lua_isstring (o))
+./grep.txt:./lex_yy.c:FILE *yyin = {NULL}, *yyout = {NULL};
+./grep.txt:./iolib.c.bak: if (o == NULL)			/* restore standart input */
+./grep.txt:./iolib.c.bak:   if (fp == NULL)
+./grep.txt:./iolib.c.bak: if (o == NULL)			/* restore standart output */
+./grep.txt:./iolib.c.bak:   if (fp == NULL)
+./grep.txt:./iolib.c.bak: if (o == NULL)			/* free format */
+./grep.txt:./iolib.c.bak: if (o1 == NULL)			/* new line */
+./grep.txt:./iolib.c.bak: else if (o2 == NULL)   		/* free format */
+./grep.txt:./iolib.c.bak: if (o == NULL || !lua_isstring (o))
+./grep.txt:./iolib.c.bak: if (o == NULL || !lua_isstring (o))
+./grep.txt:./iolib.c:static FILE *in=NULL, *out=NULL;
+./grep.txt:./iolib.c: if (o == NULL)			/* restore standart input */
+./grep.txt:./iolib.c:   if (fp == NULL)
+./grep.txt:./iolib.c: if (o == NULL)			/* restore standart output */
+./grep.txt:./iolib.c:   if (fp == NULL)
+./grep.txt:./iolib.c: if (o == NULL)			/* free format */
+./grep.txt:./iolib.c: if (o1 == NULL)			/* new line */
+./grep.txt:./iolib.c: else if (o2 == NULL)   		/* free format */
+./grep.txt:./iolib.c: if (o == NULL || !lua_isstring (o))
+./grep.txt:./iolib.c: if (o == NULL || !lua_isstring (o))
+./grep.txt:./tags:in	fixed/iolib.c	/^static FILE *in=NULL, *out=NULL;$/;"	v	file:
+./grep.txt:./tags:out	fixed/iolib.c	/^static FILE *in=NULL, *out=NULL;$/;"	v	file:
+./grep.txt:./tags:stack	opcode.c	/^static Object stack[MAXSTACK] = {{T_MARK, {NULL}}};$/;"	v	file:
+./grep.txt:./tags:yyin	fixed/lex_yy.c	/^FILE *yyin = {NULL}, *yyout = {NULL};$/;"	v
+./grep.txt:./tags:yyout	fixed/lex_yy.c	/^FILE *yyin = {NULL}, *yyout = {NULL};$/;"	v
+./grep.txt:./table.c: if (s_name(lua_ntable) == NULL)
+./grep.txt:./table.c:** table, checking overflow, and returns its own pointer, or NULL on error.
+./grep.txt:./table.c: if (s == NULL) return NULL;
+./grep.txt:./table.c:   return NULL;
+./grep.txt:./table.c:** or NULL on error.
+./grep.txt:./table.c: if (a == NULL) return NULL;
+./grep.txt:./table.c:   return NULL;
+./grep.txt:./table.c: if ((lua_file[lua_nfile++] = strdup (fn)) == NULL)
+./grep.txt:./table.c: if (o == NULL)
+./grep.txt:./table.c: if (lua_getparam (2) != NULL)
+./grep.txt:./mathlib.c:#include <stdio.h>		/* NULL */
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if (o == NULL)
+./grep.txt:./mathlib.c: if ((o = lua_getparam(i++)) == NULL)
+./grep.txt:./mathlib.c: while ((o = lua_getparam(i++)) != NULL)
+./grep.txt:./mathlib.c: if ((o = lua_getparam(i++)) == NULL)
+./grep.txt:./mathlib.c: while ((o = lua_getparam(i++)) != NULL)

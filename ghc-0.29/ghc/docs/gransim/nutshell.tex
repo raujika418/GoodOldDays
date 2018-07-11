@@ -1,0 +1,66 @@
+% Time-stamp: <Wed Jun 26 1996 22:59:47 Stardate: [-31]7719.58 hwloidl>
+% 
+% In a nutshell
+% Shortest description of GranSim (part of the paper
+%  ``Data-intensive Programs in Parallel Haskell'',
+%  PW Trinder, K Hammond, HW Loidl, SL Peyton Jones, J Wu
+%  in Glasgow FP Workshop 1996
+%
+% ----------------------------------------------------------------------------
+
+% wicsbook style to be used for the final proceedings
+%\documentstyle[12pt,a4,fp-workshop,psfig]{article}
+\documentstyle[wicsbook,psfig]{article}
+
+\begin{document}
+
+\title{GranSim in a Nutshell}
+
+\author{
+ \begin{tabular}{c} 
+   Hans Wolfgang Loidl   \\
+   Dept.\ of Computing Science  \\
+   University of Glasgow \\
+   {\tt hwloidl@dcs.gla.ac.uk} 
+ \end{tabular}
+}
+
+\date{}
+
+\maketitle
+
+GranSim is a   simulator for the  parallel  execution of  annotated Haskell
+programs. 
+% Parallelism  is introduced via the  {\tt `par`} annotation, which
+% creates a `spark' (a potential parallel thread)  for the first argument and
+% returns the  result of the second  argument. 
+A slightly modified  code generator of ghc  instruments  the generated code
+for checking data  locality  and  maintaining  a clock for  each  simulated
+processor.  The simulation   itself is  event  driven.  Via  runtime-system
+options GranSim  allows to simulate   a  wide range of  different  parallel
+architectures, different  processors and  optionally special features  like
+thread migration.
+
+GranSim has  been developed  around the   same time as   GUM and  they  are
+building  on  each others experiences.   Specifically, both systems use the
+same method for synchronising  parallel threads and  to a large extend  the
+same code for communicating data.  GranSim also allows to simulate features
+not   existing in  GUM  like   different   methods  for  packing  data  and
+synchronous, incremental communication as used in GRIP.
+
+For  parallelising  big functional   programs the  distinction  between two
+setups of GranSim  proved to be crucial:  The GranSim-Light setup simulates
+an idealised  machine by assuming zero cost  communication  and an infinite
+number of processors. This setup is typically used in an early stage of the
+parallelisation to study the  total parallelism inherent  to the algorithm. 
+The plain GranSim setup performs a very accurate modelling of communication
+costs but limits the number of processors by the word size  of the machine. 
+This is used to  simulate the execution  on a particular parallel machine.  
+Furthermore, a  set of visualisation tools  allows to  show the activity of
+the  whole machine, of  each processor and  of each thread.  Another set of
+tools visualises the granularity of the generated threads.
+ 
+
+
+\end{document}
+

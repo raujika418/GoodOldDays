@@ -1,0 +1,23 @@
+sub rm_embedded_stuff { # return clean code + entries (\002 separated)
+    local($codetxt) = @_;
+    
+    ($codetxt, '');
+}
+
+sub add_code_interests { # DO NOTHING
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $_) = @_;
+    
+    # nothing special on uses; here's the lex IGNORE_WD table:
+    & setup_lex_keywords();
+
+    ('', &std_codething_uses_check($s, $b, $_));
+}
+
+sub setup_lex_keywords {
+    $IGNORE_WD{'while'} = 1;
+#   $IGNORE_WD{''} = 1;
+}
+
+# this keeps 'do'ing happy
+1;

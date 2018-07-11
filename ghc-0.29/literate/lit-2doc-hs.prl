@@ -1,0 +1,305 @@
+sub rm_embedded_stuff { # return clean code + index entries (\002 separated)
+    local($_) = @_;
+    local($entries) = '';
+
+    $* = 1;
+    while (/^\s*--idx::(.*)$/) {
+	$entries .= "$1\002";
+	s/^\s*--idx::(.*)$//;
+    }
+
+    s/^\s*--\s*hide::.*$//g; # hidden comments
+
+    $* = 0;
+    
+    chop($entries) if $entries ne '';
+
+    ($_, $entries);
+}
+
+sub add_code_interests {
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $_) = @_;
+    local($defs_to_return) = '';
+    local($sub_ok) = 1;
+
+    &setup_haskell_keywords();
+
+    $* = 1; # multi-line searches
+    s/^>//g;		# de-Bird-ize
+    s/--.*$//g;		# de-commentize (simple ones only)
+    s/^\s*#.*\n//g;	# de-CPPize
+    s/\"[^\"\n]*\"//g;	# de-stringize
+    s/\'[^\'\n]+\'//g;	# de-characterize
+
+    # OK, the "interesting" DEFS are easy:
+    #	functions with type sigs
+    #   module definitions
+    #   data <thing> =
+    #   data ... = <thing> (NB: hack required)
+    #   | <constructor>
+    #   type <thing>
+    #
+    # CAN YOU SAY "HEURISTIC"???
+
+    while ($sub_ok && (
+	   /^(\s*)([A-Za-z0-9_']+)(\s*::)/ ||
+	   /^(\s*module\s+)([A-Za-z0-9_']+)(\s*)/ ||
+    	   /^\s*data(\s*)([A-Z][A-Za-z0-9_']+)(\s*)=/ ||
+    	   /^(\s*data\s*=\s*)([A-Z][A-Za-z0-9_']+)(\s*)/ ||
+    	   /^(\s*type\s*)([A-Z][A-Za-z0-9_']+)(\s*=)/ ||
+    	   /^(\s*\|\s*)([A-Z][A-Za-z0-9_']+)(\s*)/)) {
+    	local($before) = $1;
+	local($interesting_thing) = $2;
+	local($after) = $3;
+	$before =~ s/\|/\\\|/g; # oh dear
+
+#print STDERR "$before::$interesting_thing::$after\n";
+	local($really_interesting_thing) = (defined($IGNORE_WD{$interesting_thing})) ? '' : $interesting_thing;
+	if ($really_interesting_thing) {
+	    if ($s != -1) {
+		$Blk_codethings_defd[$b] .= "$really_interesting_thing\001";
+		$Sec_codethings_defd[$s] .= "$really_interesting_thing\001";
+	    } else {
+		$defs_to_return .= "$really_interesting_thing\001";
+	    }
+	}
+	$sub_ok = s/$before$interesting_thing$after//;
+
+	print STDERR "SUBSTITUTION NOT OK:\n$before::$interesting_thing::$after::\n$_"
+	    if ! $sub_ok;
+    }
+    $* = 0;
+
+    ($defs_to_return, &std_codething_uses_check($s, $b, $_));
+}
+
+sub setup_haskell_keywords {
+    $IGNORE_WD{'AppendChan'} = 1;
+    $IGNORE_WD{'Array'} = 1;
+    $IGNORE_WD{'Assoc'} = 1;
+    $IGNORE_WD{'Bin'} = 1;
+    $IGNORE_WD{'Binary'} = 1;
+    $IGNORE_WD{'Bool'} = 1;
+    $IGNORE_WD{'Char'} = 1;
+    $IGNORE_WD{'Complex'} = 1;
+    $IGNORE_WD{'Double'} = 1;
+    $IGNORE_WD{'Enum'} = 1;
+    $IGNORE_WD{'Eq'} = 1;
+    $IGNORE_WD{'False'} = 1;
+    $IGNORE_WD{'Float'} = 1;
+    $IGNORE_WD{'Fractional'} = 1;
+    $IGNORE_WD{'Int'} = 1;
+    $IGNORE_WD{'Integer'} = 1;
+    $IGNORE_WD{'Ix'} = 1;
+    $IGNORE_WD{'Num'} = 1;
+    $IGNORE_WD{'Ord'} = 1;
+    $IGNORE_WD{'Ratio'} = 1;
+    $IGNORE_WD{'Rational'} = 1;
+    $IGNORE_WD{'ReadS'} = 1;
+    $IGNORE_WD{'Real'} = 1;
+    $IGNORE_WD{'RealFloat'} = 1;
+    $IGNORE_WD{'RealFrac'} = 1;
+    $IGNORE_WD{'ShowS'} = 1;
+    $IGNORE_WD{'String'} = 1;
+    $IGNORE_WD{'Text'} = 1;
+    $IGNORE_WD{'Text'} = 1;
+    $IGNORE_WD{'True'} = 1;
+    $IGNORE_WD{'abs'} = 1;
+    $IGNORE_WD{'accum'} = 1;
+    $IGNORE_WD{'accumArray'} = 1;
+    $IGNORE_WD{'acos'} = 1;
+    $IGNORE_WD{'acosh'} = 1;
+    $IGNORE_WD{'amap'} = 1;
+    $IGNORE_WD{'and'} = 1;
+    $IGNORE_WD{'approxRational'} = 1;
+    $IGNORE_WD{'approximants'} = 1;
+    $IGNORE_WD{'array'} = 1;
+    $IGNORE_WD{'asTypeOf'} = 1;
+    $IGNORE_WD{'asin'} = 1;
+    $IGNORE_WD{'asinh'} = 1;
+    $IGNORE_WD{'assocs'} = 1;
+    $IGNORE_WD{'atan'} = 1;
+    $IGNORE_WD{'atan2'} = 1;
+    $IGNORE_WD{'atanh'} = 1;
+    $IGNORE_WD{'bounds'} = 1;
+    $IGNORE_WD{'break'} = 1;
+    $IGNORE_WD{'case'} = 1;
+    $IGNORE_WD{'ceiling'} = 1;
+    $IGNORE_WD{'chr'} = 1;
+    $IGNORE_WD{'cis'} = 1;
+    $IGNORE_WD{'class'} = 1;
+    $IGNORE_WD{'concat'} = 1;
+    $IGNORE_WD{'conjugate'} = 1;
+    $IGNORE_WD{'cos'} = 1;
+    $IGNORE_WD{'cosh'} = 1;
+    $IGNORE_WD{'cycle'} = 1;
+    $IGNORE_WD{'data'} = 1;
+    $IGNORE_WD{'decodeFloat'} = 1;
+    $IGNORE_WD{'default'} = 1;
+    $IGNORE_WD{'denominator'} = 1;
+    $IGNORE_WD{'deriving'} = 1;
+    $IGNORE_WD{'div'} = 1;
+    $IGNORE_WD{'divRem'} = 1;
+    $IGNORE_WD{'drop'} = 1;
+    $IGNORE_WD{'dropWhile'} = 1;
+    $IGNORE_WD{'elems'} = 1;
+    $IGNORE_WD{'else'} = 1;
+    $IGNORE_WD{'encodeFloat'} = 1;
+    $IGNORE_WD{'enumFrom'} = 1;
+    $IGNORE_WD{'enumFromThen'} = 1;
+    $IGNORE_WD{'enumFromThenTo'} = 1;
+    $IGNORE_WD{'enumFromTo'} = 1;
+    $IGNORE_WD{'error'} = 1;
+    $IGNORE_WD{'even'} = 1;
+    $IGNORE_WD{'exp'} = 1;
+    $IGNORE_WD{'exponent'} = 1;
+    $IGNORE_WD{'filter'} = 1;
+    $IGNORE_WD{'floatDigits'} = 1;
+    $IGNORE_WD{'floatRadix'} = 1;
+    $IGNORE_WD{'floatRange'} = 1;
+    $IGNORE_WD{'floor'} = 1;
+    $IGNORE_WD{'foldl'} = 1;
+    $IGNORE_WD{'foldl1'} = 1;
+    $IGNORE_WD{'foldr'} = 1;
+    $IGNORE_WD{'foldr1'} = 1;
+    $IGNORE_WD{'fromInteger'} = 1;
+    $IGNORE_WD{'fromIntegral'} = 1;
+    $IGNORE_WD{'fromRational'} = 1;
+    $IGNORE_WD{'fromRealFrac'} = 1;
+    $IGNORE_WD{'fst'} = 1;
+    $IGNORE_WD{'gcd'} = 1;
+    $IGNORE_WD{'head'} = 1;
+    $IGNORE_WD{'hiding'} = 1;
+    $IGNORE_WD{'if'} = 1;
+    $IGNORE_WD{'imagPart'} = 1;
+    $IGNORE_WD{'import'} = 1;
+    $IGNORE_WD{'in'} = 1;
+    $IGNORE_WD{'inRange'} = 1;
+    $IGNORE_WD{'index'} = 1;
+    $IGNORE_WD{'indices'} = 1;
+    $IGNORE_WD{'infix'} = 1;
+    $IGNORE_WD{'infixl'} = 1;
+    $IGNORE_WD{'infixr'} = 1;
+    $IGNORE_WD{'init'} = 1;
+    $IGNORE_WD{'instance'} = 1;
+    $IGNORE_WD{'interface'} = 1;
+    $IGNORE_WD{'isAlpha'} = 1;
+    $IGNORE_WD{'isAlphanum'} = 1;
+    $IGNORE_WD{'isAscii'} = 1;
+    $IGNORE_WD{'isControl'} = 1;
+    $IGNORE_WD{'isDigit'} = 1;
+    $IGNORE_WD{'isLower'} = 1;
+    $IGNORE_WD{'isNullBin'} = 1;
+    $IGNORE_WD{'isPrint'} = 1;
+    $IGNORE_WD{'isSpace'} = 1;
+    $IGNORE_WD{'isUpper'} = 1;
+    $IGNORE_WD{'iterate'} = 1;
+    $IGNORE_WD{'ixmap'} = 1;
+    $IGNORE_WD{'last'} = 1;
+    $IGNORE_WD{'lcm'} = 1;
+    $IGNORE_WD{'length'} = 1;
+    $IGNORE_WD{'lex'} = 1;
+    $IGNORE_WD{'lines'} = 1;
+    $IGNORE_WD{'listArray'} = 1;
+    $IGNORE_WD{'log'} = 1;
+    $IGNORE_WD{'logBase'} = 1;
+    $IGNORE_WD{'magnitude'} = 1;
+    $IGNORE_WD{'main'} = 1;
+    $IGNORE_WD{'map'} = 1;
+    $IGNORE_WD{'max'} = 1;
+    $IGNORE_WD{'maximum'} = 1;
+    $IGNORE_WD{'min'} = 1;
+    $IGNORE_WD{'minimum'} = 1;
+    $IGNORE_WD{'mkPolar'} = 1;
+    $IGNORE_WD{'mod'} = 1;
+    $IGNORE_WD{'module'} = 1;
+    $IGNORE_WD{'negate'} = 1;
+    $IGNORE_WD{'not'} = 1;
+    $IGNORE_WD{'nub'} = 1;
+    $IGNORE_WD{'null'} = 1;
+    $IGNORE_WD{'nullBin'} = 1;
+    $IGNORE_WD{'numerator'} = 1;
+    $IGNORE_WD{'odd'} = 1;
+    $IGNORE_WD{'of'} = 1;
+    $IGNORE_WD{'or'} = 1;
+    $IGNORE_WD{'ord'} = 1;
+    $IGNORE_WD{'otherwise'} = 1;
+    $IGNORE_WD{'partialQuotients'} = 1;
+    $IGNORE_WD{'partition'} = 1;
+    $IGNORE_WD{'phase'} = 1;
+    $IGNORE_WD{'pi'} = 1;
+    $IGNORE_WD{'polar'} = 1;
+    $IGNORE_WD{'product'} = 1;
+    $IGNORE_WD{'properFraction'} = 1;
+    $IGNORE_WD{'range'} = 1;
+    $IGNORE_WD{'read'} = 1;
+    $IGNORE_WD{'readBin'} = 1;
+    $IGNORE_WD{'readList'} = 1;
+    $IGNORE_WD{'readList'} = 1;
+    $IGNORE_WD{'readParen'} = 1;
+    $IGNORE_WD{'reads'} = 1;
+    $IGNORE_WD{'readsPrec'} = 1;
+    $IGNORE_WD{'readsPrec'} = 1;
+    $IGNORE_WD{'realPart'} = 1;
+    $IGNORE_WD{'rem'} = 1;
+    $IGNORE_WD{'remove'} = 1;
+    $IGNORE_WD{'renaming'} = 1;
+    $IGNORE_WD{'repeat'} = 1;
+    $IGNORE_WD{'reverse'} = 1;
+    $IGNORE_WD{'round'} = 1;
+    $IGNORE_WD{'scaleFloat'} = 1;
+    $IGNORE_WD{'scan'} = 1;
+    $IGNORE_WD{'show'} = 1;
+    $IGNORE_WD{'showBin'} = 1;
+    $IGNORE_WD{'showChar'} = 1;
+    $IGNORE_WD{'showList'} = 1;
+    $IGNORE_WD{'showList'} = 1;
+    $IGNORE_WD{'showParen'} = 1;
+    $IGNORE_WD{'showString'} = 1;
+    $IGNORE_WD{'shows'} = 1;
+    $IGNORE_WD{'showsPrec'} = 1;
+    $IGNORE_WD{'showsPrec'} = 1;
+    $IGNORE_WD{'significand'} = 1;
+    $IGNORE_WD{'signum'} = 1;
+    $IGNORE_WD{'sin'} = 1;
+    $IGNORE_WD{'sinh'} = 1;
+    $IGNORE_WD{'snd'} = 1;
+    $IGNORE_WD{'span'} = 1;
+    $IGNORE_WD{'sqrt'} = 1;
+    $IGNORE_WD{'sum'} = 1;
+    $IGNORE_WD{'tail'} = 1;
+    $IGNORE_WD{'take'} = 1;
+    $IGNORE_WD{'takeWhile'} = 1;
+    $IGNORE_WD{'tan'} = 1;
+    $IGNORE_WD{'tanh'} = 1;
+    $IGNORE_WD{'then'} = 1;
+    $IGNORE_WD{'to'} = 1;
+    $IGNORE_WD{'toInteger'} = 1;
+    $IGNORE_WD{'toLower'} = 1;
+    $IGNORE_WD{'toRational'} = 1;
+    $IGNORE_WD{'toUpper'} = 1;
+    $IGNORE_WD{'truncate'} = 1;
+    $IGNORE_WD{'type'} = 1;
+    $IGNORE_WD{'unlines'} = 1;
+    $IGNORE_WD{'until'} = 1;
+    $IGNORE_WD{'unwords'} = 1;
+    $IGNORE_WD{'where'} = 1;
+    $IGNORE_WD{'words'} = 1;
+    $IGNORE_WD{'zip'} = 1;
+    $IGNORE_WD{'zip3'} = 1;
+    $IGNORE_WD{'zip4'} = 1;
+    $IGNORE_WD{'zip5'} = 1;
+    $IGNORE_WD{'zip6'} = 1;
+    $IGNORE_WD{'zip7'} = 1;
+    $IGNORE_WD{'zipWith'} = 1;
+    $IGNORE_WD{'zipWith3'} = 1;
+    $IGNORE_WD{'zipWith4'} = 1;
+    $IGNORE_WD{'zipWith5'} = 1;
+    $IGNORE_WD{'zipWith6'} = 1;
+    $IGNORE_WD{'zipWith7'} = 1;
+#   $IGNORE_WD{''} = 1;
+}
+
+# this keeps 'do'ing happy
+1;

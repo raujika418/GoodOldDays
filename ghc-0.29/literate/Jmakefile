@@ -1,0 +1,146 @@
+#define IHaveSubdirs
+
+#if IncludeTestDirsInBuild == YES
+#define __lit_tests_dir tests
+#else
+#define __lit_tests_dir /* nothing */
+#endif
+
+#if IncludeInfoUtilsInBuild == YES
+#define __lit_utils_dir info-utils
+#else
+#define __lit_utils_dir /* nothing */
+#endif
+
+SUBDIRS =   __lit_tests_dir \
+	    __lit_utils_dir \
+	    doc
+
+#undef __lit_tests_dir
+#undef __lit_utils_dir
+
+/* stuff to have before we get going */
+MsubNeededHere(lit2stuff lit-inputter)
+
+/* _must_ use special lit2pgm to re-build the lit2pgm source here */
+LIT2PGM = ./lit2pgm.BOOT -Alit2pgm
+
+LIT2PGM_OPTS = -q /* so we go fast; not really necessary (ToDo) */
+
+all :: lit-deatify
+
+/* BUILDING STUFF ================================================= */
+/****** the driver script "lit2stuff" *******/
+
+/* has host-platform type wired in, so in BIN, not SCRIPT, dir */
+
+/* slam INSTLIBDIR_LITERATE, INSTDATADIR_LITERATE, TMPDIR from Makefile into lit2stuff */
+MsubMakefileDependentProgramScriptTarget(PerlCmd,lit2stuff,lit2stuff.prl,/*no flags*/,$(LITDATASTUFF))
+/****** the names by which "lit2stuff" may be invoked */
+LinkTarget(lit2pgm,lit2stuff)
+LinkTarget(lit2texi,lit2stuff)
+LinkTarget(lit2html,lit2stuff)
+LinkTarget(lit2latex,lit2stuff)
+LinkTarget(mkdependlit,lit2stuff)
+LinkTarget(lit2changelog,lit2stuff)
+LinkTarget(lit2text,lit2stuff)
+
+/****** all the support code that is slurped in or fired up by "lit2stuff"
+******/
+
+/* these two (lit-deatify & lit-inputter) are executables: */
+lit-deatify.c : lit-deatify.lex /* a flex program ... */
+	$(RM) lit-deatify.c
+	$(FLEX) -t lit-deatify.lex > lit-deatify.c || ( $(RM) lit-deatify.c && exit 1 )
+
+BuildPgmFromCFiles(lit-deatify,lit-deatify.o,$(FLEX_LIB),)
+
+MsubMakefileDependentProgramScriptTarget(PerlCmd,lit-inputter,lit-inputter.prl,,)
+
+/* LaTeX macros to support the enterprise;
+ * not kept in the TeX directories because we want to
+ * know where it is so we can be sure to \input the right version
+*/
+LITDATASTUFF =  lit-2changes.prl \
+		lit-2depend.prl \
+		lit-2doc-c.prl \
+		lit-2doc-hs.prl \
+		lit-2doc-jm.prl \
+		lit-2doc-lex.prl \
+		lit-2doc-none.prl \
+		lit-2doc-prl.prl \
+		lit-2doc-sml.prl \
+		lit-2doc.prl \
+		lit-2html-c.prl \
+		lit-2html-f.prl \
+		lit-2html-hs.prl \
+		lit-2html-jm.prl \
+		lit-2html-lex.prl \
+		lit-2html-none.prl \
+		lit-2html-prl.prl \
+		lit-2html-sml.prl \
+		lit-2html.prl \
+	    	lit-2latex-c.prl \
+		lit-2latex-hs.prl \
+		lit-2latex-jm.prl \
+		lit-2latex-lex.prl \
+		lit-2latex-none.prl \
+		lit-2latex-prl.prl \
+		lit-2latex-sml.prl \
+		lit-2latex.prl \
+		lit-2pgm-c.prl \
+		lit-2pgm-hs.prl \
+		lit-2pgm-jm.prl \
+		lit-2pgm-lex.prl \
+		lit-2pgm-none.prl \
+		lit-2pgm-prl.prl \
+		lit-2pgm-sml.prl \
+		lit-2pgm.prl \
+		lit-2texi-c.prl \
+		lit-2texi-hs.prl \
+		lit-2texi-jm.prl \
+		lit-2texi-lex.prl \
+		lit-2texi-none.prl \
+		lit-2texi-prl.prl \
+		lit-2texi-sml.prl \
+		lit-2texi.prl \
+		lit-2text.prl \
+		lit-globals.prl \
+		lit-link-globals.prl \
+		lit-linker.prl \
+		lit-reader.prl
+
+AllTarget($(LITDATASTUFF))
+
+litdatastuff : $(LITDATASTUFF)
+
+/* INSTALLING STUFF =============================================== */
+
+INSTDATADIR_LITERATE = $(INSTDATADIR)/literate
+INSTLIBDIR_LITERATE  = $(INSTDATADIR_LITERATE)/$(HOSTPLATFORM)
+
+MakeDirectories(install, $(INSTBINDIR) $(INSTLIBDIR_LITERATE) $(INSTDATADIR_LITERATE))
+
+InstallMsubbedScriptTarget(PerlCmd,lit2stuff,lit2stuff.prl,$(INSTBINDIR))
+InstallLinkTarget(lit2pgm,lit2stuff,$(INSTBINDIR))
+InstallLinkTarget(lit2texi,lit2stuff,$(INSTBINDIR))
+InstallLinkTarget(lit2html,lit2stuff,$(INSTBINDIR))
+InstallLinkTarget(lit2latex,lit2stuff,$(INSTBINDIR))
+InstallLinkTarget(mkdependlit,lit2stuff,$(INSTBINDIR))
+InstallLinkTarget(lit2changelog,lit2stuff,$(INSTBINDIR))
+InstallLinkTarget(lit2text,lit2stuff,$(INSTBINDIR))
+
+InstallBinaryTarget(lit-deatify, $(INSTLIBDIR_LITERATE))
+InstallScriptTarget(lit-inputter, $(INSTLIBDIR_LITERATE))
+
+InstallDataTarget(lit-style.tex, $(INSTDATADIR_LITERATE))
+InstallTarget(litdatastuff)
+InstallMultNonExecTargets(litdatastuff, $(LITDATASTUFF), $(INSTDATADIR_LITERATE))
+
+/* OTHER STUFF ==================================================== */
+
+ClearTagsFile()
+PerlTagsTarget( lit2stuff.prl lit-inputter.prl $(LITDATASTUFF) )
+EtagsNeededHere(tags) /* need this to do "make tags" */
+CTagsTarget( lit-deatify.lex )
+/* LaTeX style file ? */

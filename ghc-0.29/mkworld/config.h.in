@@ -1,0 +1,10 @@
+/*
+    @configure_input@
+
+    We really want to use the GNU CPP; "configure"
+    will have found it for us.  In this file,
+    we tell jmake about it.
+*/
+#ifndef GnuCppCmd
+#define GnuCppCmd "@GNUCPP@"
+#endif

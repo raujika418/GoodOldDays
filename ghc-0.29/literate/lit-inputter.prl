@@ -1,0 +1,121 @@
+#% \section[Inputter]{Read files, follow \tr{\input}'s, do definitions}
+#% 
+#% At the beginning and end of each \tr{\input}'d file, the source file
+#% name and line number is reported, in lines of the form (separate for
+#% reasons of C-hacking convenience):
+#% % first space makes it invisible to itself
+#% \begin{verbatim}
+#%  srcfile!_!filename!_!line-number!_!
+#% \end{verbatim}
+#% 
+#% At this point, I expect the filename specified in the
+#% \tr{\input} to be exactly the desired name (no implied suffix,
+#% etc.), somewhere along the \tr{LITINPUTS} path (specified by that
+#% environment variable).
+#% 
+#% \begin{code}
+($Pgm = $0) =~ s/.*\/([^\/]+)$/$1/;
+$Verbose       = shift(@ARGV); # they had better be there!
+$Follow_inputs = shift(@ARGV);
+$Litinputs     = shift(@ARGV);
+@Litinput      = split(/:/,$Litinputs);
+$Exit_status   = 0; # everything OK
+
+# read STDIN ("-") if no files specified
+#
+unshift(@ARGV, '-') if $#ARGV < $[;
+while ($ARGV = shift) {
+    &send_file($ARGV, 'fh00');
+}
+exit $Exit_status;
+
+sub send_file { # follows an example in the `open' item in perl man page
+
+    local($fname,$fhandle) = @_;
+    local($l_no) = 1;
+    local($follow_file);
+    $fhandle++; # a string increment
+
+    local($last_seen_dir) = $fname;
+    $last_seen_dir =~ s/\/[^\/]+$//; # strip to dir name
+    $last_seen_dir = '.' if ($last_seen_dir eq $fname);
+
+    unless (open($fhandle, $fname)) {
+         print STDERR "$Pgm: Can't open $fname: $!\n";
+	 $Exit_status++;
+         return;
+    }
+
+    local($is_intermed_file) = ($fname =~ /\.(itxi|itex|ihtml)$/) ? 1 : 0;
+
+    while (<$fhandle>) {
+	if ($l_no == 1 && ! $is_intermed_file) { # beginning
+	    print "srcfile!_!$fname!_!1!_!\n";
+	}
+
+	# we do *nothing* to rawlatex environments
+	if ( /^\\begin\{rawlatex\}/ || /\001beginrawlatex\003/ ) {
+	    while ($_ ne '' && ! (/^\\end\{rawlatex\}/ || /\001endrawlatex\003/ )) {
+		print $_;
+		$_ = <$fhandle>;
+	    }
+	}
+
+        if (/^\\inputnow\{(.*)\}\s*(%.*)?$/ # dubious ...
+    	  || ($Follow_inputs
+	      && (/^\\input\s*\{(.*)\}\s*(%.*)?$/
+	         || /^\@input\s*\{(.*\.itxi)\}\s*$/))) {
+            $follow_file = &find_on_Litinputs($1, $last_seen_dir);
+
+            if ($follow_file) { # it found something
+		print STDERR "reading $follow_file ...\n" if $Verbose;
+		&send_file($follow_file,$fhandle);
+		# add a couple of blank lines in case
+		# the last thing was some Miranda-style code
+		print "\n\n\n";
+		print "srcfile!_!$fname!_!".($l_no+1)."!_!\n" if ! $is_intermed_file;
+            } else {
+                print STDERR "$fname:$l_no: Couldn't handle: $_";
+		$Exit_status++;
+            }
+        } else {
+	    print $_;
+        }
+    } continue { $l_no++; }
+    close($fhandle);
+}
+
+sub find_on_Litinputs {
+    local($name, $last_seen_dir) = @_;
+    local($lit);
+
+    if ($name =~ /^\//) { # absolute pathname
+	print STDERR "trying $name...\n" if $Verbose;
+        if (-f $name) { # exists
+            return($name);
+        } else {
+            print STDERR " file `$name' doesn't exist\n";
+	    $Exit_status++;
+            return('');
+        }
+    } else { # hop along $Litinputs
+        foreach $lit (@Litinput) {
+	    # handle . magically
+	    if ($lit eq '.') { # SPECIAL try for a file in last_seen_dir
+		
+		print STDERR "trying $last_seen_dir/$name...\n" if $Verbose;
+		if (-f "$last_seen_dir/$name") {
+		    return("$last_seen_dir/$name");
+		}
+	    }
+	    print STDERR "trying $lit/$name...\n" if $Verbose;
+            if (-f "$lit/$name") {
+		return("$lit/$name");
+            }
+        }
+	$Exit_status++;
+        print STDERR "No file `$name' along LITINPUTS path `$Litinputs'\n";
+        return (''); # sigh
+    }
+}
+#% \end{code}

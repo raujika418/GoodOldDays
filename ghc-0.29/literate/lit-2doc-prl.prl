@@ -1,0 +1,107 @@
+sub rm_embedded_stuff { # return clean code + entries (\002 separated)
+    local($_) = @_;
+    local($entries) = '';
+
+    $* = 1;
+    while (/^\s*#idx::(.*)$/) {
+	$entries .= "$1\002";
+	s/^\s*#idx::(.*)$//;
+    }
+
+    s/^\s*#hide::.*$//g; # hidden comments
+
+    $* = 0;
+    
+    chop($entries) if $entries ne '';
+
+    ($_, $entries);
+}
+
+sub add_code_interests { # DO NOTHING
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $_) = @_;
+    local($defs_to_return) = '';
+    local($uses_to_return) = '';
+
+    &setup_perl_keywords();
+
+    $* = 1; # multi-line searches
+    s/^>//g;		# de-Bird-ize
+    s/^#.*$//g;		# de-commentize
+    s/([^\\\n])#.*$/$1/g;
+    s/\"[^\"\n]*\"//g;	# de-stringize
+    s/\'[^\'\n]*\'//g;
+    s/s?\/.*\/.*\/g?//g;# de-regexp
+
+    # OK, the "interesting" DEFS are subroutines and globals
+    #	sub <thing>
+    #	[@$%]<thing> (=|.=)
+
+    while (/^(\s*sub\s+)([A-Za-z0-9_]+)(\s*\{)/ ||
+           /^(\s*)([\@\$\%][A-Z][A-Za-z0-9_]+)(\s*=|\s*\.=)/) {
+    	local($before) = $1;
+	local($interesting_thing) = $2; # see hacks below
+	local($after) = $3;
+
+#print STDERR "defs=>$before::$interesting_thing::$after::\n";
+	local($really_interesting_thing) = (defined($IGNORE_WD{$interesting_thing})) ? '' : $interesting_thing;
+	if ($really_interesting_thing) {
+	    if ($s != -1) {
+		$Blk_codethings_defd[$b] .= "$really_interesting_thing\001";
+		$Sec_codethings_defd[$s] .= "$really_interesting_thing\001";
+	    } else {
+		$defs_to_return .= "$really_interesting_thing\001";
+	    }
+	}
+	# escaping all magic chars in before/interesting/after
+	# is v important for avoiding infinite loops! (also below)
+	$before =~ s/\s+/\\s\+/g;
+	$interesting_thing =~ s/\$/\\\$/;
+	$interesting_thing =~ s/\@/\\\@/;
+	$interesting_thing =~ s/\%/\\\%/;
+	$after =~ s/\s+/\\s\+/g;
+	$after =~ s/\{/\\\{/;
+	$after =~ s/\./\\\./;
+
+	s/$before$interesting_thing$after//g;
+    }
+
+    # uses are the same sorts of things
+    while (/(\&\s*)([A-Za-z0-9_]+)(\s*)/ || # subroutine calls
+           /(\s*)([\@\$\%][A-Z][A-Za-z0-9_]+)(\s*)/) {
+    	local($before) = $1;
+	local($interesting_thing) = $2; # more hacks below
+	local($after) = $3;
+
+#print STDERR "uses=>$before::$interesting_thing::$after::\n";
+
+	local($really_interesting_thing) = (defined($IGNORE_WD{$interesting_thing})) ? '' : $interesting_thing;
+	if ($really_interesting_thing) {
+	    if ($s != -1) {
+		$Blk_codethings_used[$b] .= "$really_interesting_thing\001";
+		$Sec_codethings_used[$s] .= "$really_interesting_thing\001";
+	    } else {
+		$uses_to_return .= "$really_interesting_thing\001";
+	    }
+	}
+	$before =~ s/\s+/\\s\+/g;
+	$interesting_thing =~ s/\$/\\\$/;
+	$interesting_thing =~ s/\@/\\\@/;
+	$interesting_thing =~ s/\%/\\\%/;
+	$after =~ s/\s+/\\s\+/g;
+
+	s/$before$interesting_thing$after//g;
+    }
+    $* = 0;
+
+    ($defs_to_return, $uses_to_return);
+}
+
+sub setup_perl_keywords {
+   $IGNORE_WD{'ARGV'} = 1;
+   $IGNORE_WD{'SIG'} = 1;
+   $IGNORE_WD{'ENV'} = 1;
+}
+
+# this keeps 'do'ing happy
+1;

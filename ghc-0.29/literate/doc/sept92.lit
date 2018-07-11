@@ -1,0 +1,45 @@
+\section[sept92-thoughts]{SEPT92 THOUGHTS}
+
+These are further ruminations, having had another year to watch how
+people do and do not use this system.
+
+\begin{description}
+%------------------------------------------------------------------
+\item[Death to `ribbons' and code re-ordering:]
+
+No-one uses it, and it's pretty clunky in this system, both
+conceptually and implementationally.
+
+%------------------------------------------------------------------
+\item[Suppressable `detail':]
+
+Be able to mark sections as `detail', as well as to be able to put
+\tr{\begin{detail}/\end{detail}} around arbitrary stuff.  Obviously,
+you then want to format with/without the details in.
+
+%------------------------------------------------------------------
+\item[A minimally-extensible notation?]
+
+Texinfo now supports setting and testing of variables, and the using
+the values thereof.
+
+%------------------------------------------------------------------
+\item[Support ``all non-code is raw XXX'':]
+
+Something like: given a flag \tr{-r latex}, then all non-code would be
+taken to be pure \LaTeX{} and wouldn't be mangled {\em at all}.
+
+Another likely possibility: a \tr{-r verbatim}, to support the dubious
+\tr{verbatim} script that's popular in some circles.
+
+%------------------------------------------------------------------
+\item[Stop automagic indexing of code-in-text:]
+
+I'm not sure it's useful.
+
+%------------------------------------------------------------------
+\item[Throw out tree-grabbing (\tr{-g <node>} option):]
+
+Too hacky, not used, probably inadequate.
+
+\end{description}

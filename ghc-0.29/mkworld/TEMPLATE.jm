@@ -1,0 +1,427 @@
+#if 0
+%************************************************************************
+%*									*
+\section[mkworld-TEMPLATE]{Main ``mkworld'' template; slurps in ...}
+%*									*
+%************************************************************************
+
+\begin{pseudocode}
+#define JMAKE_TEMPLATE  "TEMPLATE.jm"
+#define INCLUDE_JMAKEFILE       <Jmakefile>
+#define SetupLabel      std
+#define SetupIsStd      1
+#define ProjectLabel    none
+#define ProjectIsNone   1
+#define SITE_SETUP_FILE <site-none-std.jm>
+#define SITE_PROJECT_FILE       <site-none.jm>
+#define ONLY4_SETUP_FILE        <only4-none-std.jm>
+#define ONLY4_PROJECT_FILE      <only4-none.jm>
+#define SUFFIXES_SETUP_FILE     <suffixes-none-std.jm>
+#define SUFFIXES_PROJECT_FILE   <suffixes-none.jm>
+#define MACROS_SETUP_FILE       <macros-none-std.jm>
+#define MACROS_PROJECT_FILE     <macros-none.jm>
+#define UTILS_SETUP_FILE        <utils-none-std.jm>
+#define UTILS_PROJECT_FILE      <utils-none.jm>
+#define INSTALLATION_SETUP_FILE <install-none-std.jm>
+#define INSTALLATION_PROJECT_FILE       <install-none.jm>
+\end{pseudocode}
+
+
+This is the main template that is ``filled in'' by the @mkworld@
+configuration system, to create a Makefile.
+
+This whole scheme is derived from the fine work on a ``multi-project
+Imake'' by Paul DuBois at the Wisconsin Regional Primate Research Center.
+
+First some pervasive, needed-everywhere definitions:
+\begin{code}
+#endif /* 0 */
+#ifndef XCOMM
+#define XCOMM #
+#endif
+
+#define YES	1
+#define NO	0
+
+#if __STDC__
+#define CAT2(a,b)a##b
+#define CAT3(a,b,c)a##b##c
+#define CAT4(a,b,c,d)a##b##c##d
+#define CAT5(a,b,c,d,e)a##b##c##d##e
+#else
+#define CAT2(a,b)a/**/b
+#define CAT3(a,b,c)a/**/b/**/c
+#define CAT4(a,b,c,d)a/**/b/**/c/**/d
+#define CAT5(a,b,c,d,e)a/**/b/**/c/**/d/**/e
+#endif /* not STDC */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-platform]{Platform-specific things}
+%*									*
+%************************************************************************
+
+Here, we read in \tr{platform.h}, which tells us the host, target, and
+build platforms---usually all the same.
+The \tr{configure} script created this file, and we assume it to
+be correct!
+
+\begin{code}
+#endif /* 0 */
+#include "platform.h"
+#if 0
+\end{code}
+
+CPP will rather annoyingly substitute for some nice friendly words
+in our Makefiles; subvert it...
+\begin{code}
+#endif /* 0 */
+#if sun_HOST_VENDOR
+#undef sun
+#endif
+
+#if sparc_HOST_ARCH
+#undef sparc
+#endif
+
+#if m68k_HOST_ARCH
+#undef m68k
+#endif
+
+#if next_HOST_VENDOR
+#undef NeXT
+#endif
+
+#if i386_HOST_ARCH
+#undef i386
+#undef i486
+#endif
+
+#if linux_HOST_OS || linuxaout_HOST_OS
+#undef linux
+#endif
+#if freebsd_HOST_OS
+#undef freebsd
+#endif
+#if netbsd_HOST_OS
+#undef netbsd
+#endif
+
+#if ultrix_HOST_OS
+#undef ultrix
+#endif
+
+#if mipsel_HOST_ARCH || mipseb_HOST_ARCH
+#undef mips
+#undef mipsel
+#undef mipseb
+#endif
+
+#if mips_sgi_irix_HOST
+#undef sgi
+#undef irix
+#endif
+
+#if alpha_dec_osf1_HOST
+#undef alpha
+#undef osf
+#endif
+
+#if hppa1_1_hp_hpux_HOST
+#undef hppa
+#undef hpux
+#endif
+
+#if powerpc_ibm_aix_HOST
+#undef powerpc
+#undef ibm
+#undef aix
+#endif
+#if 0
+\end{code}
+
+Weird and wonderful {\em obscure} facts about various platforms:
+\begin{code}
+#endif /* 0 */
+#if hppa1_1_hp_hpux_HOST \
+ || mips_dec_ultrix_HOST
+#define MakeDoesNestedMacros NO
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-site]{Site-specific things}
+%*									*
+%************************************************************************
+
+Site-specific configuration stuff is, by definition, to override
+default definitions to satisfy the needs of a particular ((setup of a)
+project at a) site.
+
+\begin{code}
+#endif /* 0 */
+#if ProjectIsNone == NO
+#if SetupIsStd == NO
+#include SITE_SETUP_FILE	/* site-specific things for a setup of a project */
+#endif
+#include SITE_PROJECT_FILE	/* site-specific things for a project */
+#endif /* Project != none */
+
+#include <site.jm>		/* project-independent site-specific things */
+#include <site-DEF.jm>		/* _defaults_ for site-specific things */
+#if 0
+\end{code}
+
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-macros]{Main mkworld CPP macros}
+%*									*
+%************************************************************************
+
+These don't generate any Makefile text, just define macros to be used
+later.  They have to come early, notably before the ONLY4 stuff.
+
+\begin{code}
+#endif /* 0 */
+#if ProjectIsNone == NO
+#if SetupIsStd == NO
+#include MACROS_SETUP_FILE
+#endif
+#include MACROS_PROJECT_FILE
+#endif /* Project != none */
+
+#include <macros-GEN.jm>
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-only4]{Extra things ``only for'' a specific project}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#if ProjectIsNone == NO
+#if SetupIsStd == NO
+#include ONLY4_SETUP_FILE
+#endif
+#include ONLY4_PROJECT_FILE
+#endif /* Project != none */
+
+/* Project identification -- name, version, and stuff */
+#ifndef ProjectName
+#define ProjectName     NO_SPECIFIC_PROJECT
+#endif
+#ifndef ProjectVersion
+#define ProjectVersion  NO_SPECIFIC_VERSION
+#endif
+#ifndef ProjectPatchLevel
+#define ProjectPatchLevel /*nothing*/
+#endif
+PROJECTNAME      = ProjectName
+PROJECTVERSION   = ProjectVersion
+PROJECTPATCHLEVEL= ProjectPatchLevel
+PROJECTLABEL     = ProjectLabel
+SETUPLABEL       = SetupLabel
+#ifdef HaveProjectMkworldDir
+PROJ_MKWORLD_DIR = ProjectMkworldDir
+#else
+PROJ_MKWORLD_DIR =
+#endif
+HOSTPLATFORM     = HostPlatform
+BUILDPLATFORM	 = BuildPlatform
+TARGETPLATFORM	 = TargetPlatform
+/* HOSTPLATFORM: the platform we expect the thing we are building will run on. */
+
+/* BUILDPLATFORM: the platform we are building on NOW (if we can figure it out)
+	set by the platform-specific files
+*/
+/* TARGETPLATFORM: relevant for compilers and such tools */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-suffixes]{Suffix rules}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#if ProjectIsNone == NO
+#if SetupIsStd == NO
+#include SUFFIXES_SETUP_FILE
+#endif
+#include SUFFIXES_PROJECT_FILE
+#endif /* Project != none */
+
+#include <suffixes-GEN.jm>
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-utils]{``Utilities''}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#if ProjectIsNone == NO
+#if SetupIsStd == NO
+#include UTILS_SETUP_FILE
+#endif
+#include UTILS_PROJECT_FILE
+#endif /* Project != none */
+
+#include <utils-GEN.jm>
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-installation]{Installation stuff}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#if ProjectIsNone == NO
+#if SetupIsStd == NO
+#include INSTALLATION_SETUP_FILE
+#endif
+#include INSTALLATION_PROJECT_FILE
+#endif /* Project != none */
+
+#include <install-GEN.jm>
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-dir-specific]{Bring in directory-specific stuff (@Jmakefile@)}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+/* something so "all" is the first target... */
+all ::
+	@:
+
+#include INCLUDE_JMAKEFILE
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-template-end-Makefile]{Common end-of-Makefile stuff}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+/* end of stuff from Jmakefile */
+/* --------------------------- */
+/* common end-of-Makefile rules -- (still) DO NOT EDIT !!! */
+/*
+ * These need to be here so that rules in Jmakefile occur first;  the blank
+ * all is to make sure that an empty Jmakefile doesn't default to make clean.
+ */
+emptyrule::
+
+CleanTarget()
+
+VeryCleanTarget()
+
+#ifndef IHaveSpecialMakefileTarget
+MakefileTarget()
+#endif
+
+/* tags not in by default: you have to ask: TagsTarget() */
+tags::
+
+#ifdef MakefileAdditions
+MakefileAdditions()
+#endif
+
+
+#ifdef IHaveSubdirs
+/*
+  rules for building in SUBDIRS - DO NOT EDIT !!!
+*/
+#ifndef NoAllTargetForSubdirs
+DoAllinSubdirs($(SUBDIRS))
+#endif
+#ifndef NoDocsTargetForSubdirs
+DoDocsinSubdirs($(SUBDIRS))
+#else
+docs:: /* nothing */
+#endif
+#ifndef NoRunTestsTargetForSubdirs
+RunTestsSubdirs($(SUBDIRS))
+#else
+runtests::
+	@echo "runtests in $(CURRENT_DIR) done"
+#endif
+#ifndef NoInstallTargetForSubdirs
+InstallSubdirs($(SUBDIRS))
+#else
+install::
+	@echo "install in $(CURRENT_DIR) done"
+#endif
+#ifndef NoInstallDocsTargetForSubdirs
+InstallDocsSubdirs($(SUBDIRS))
+#else
+install_docs::
+	@echo "install_docs in $(CURRENT_DIR) done"
+#endif
+#ifndef NoDependTargetForSubdirs
+DependSubdirs($(SUBDIRS))
+#else
+depend::
+	@echo "depend in $(CURRENT_DIR) done"
+#endif
+#ifndef NoTagTargetForSubdirs
+TagSubdirs($(SUBDIRS))
+#endif
+
+CleanSubdirs($(SUBDIRS))
+VeryCleanSubdirs($(SUBDIRS))
+MakefileSubdirs($(SUBDIRS))
+
+#else
+/*
+  empty rules for directories that do not have SUBDIRS - DO NOT EDIT !!!
+*/
+/* clean and veryclean rules not given here because they're added above... */
+
+docs::
+
+tags::
+	@echo "tags in $(CURRENT_DIR) done"
+
+runtests::
+	@echo "runtests in $(CURRENT_DIR) done"
+
+install::
+	@echo "install in $(CURRENT_DIR) done"
+
+install_docs::
+	@echo "install_docs in $(CURRENT_DIR) done"
+
+Makefiles::
+
+depend::
+	@echo "depend in $(CURRENT_DIR) done"
+
+#endif /* if subdirectory rules are needed */
+#if 0
+\end{code}
+#endif /* 0 */

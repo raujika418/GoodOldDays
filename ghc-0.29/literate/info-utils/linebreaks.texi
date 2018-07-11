@@ -1,0 +1,18 @@
+@setfilename linebreaks.info
+
+@node Top, , , (dir)
+@comment node, next, previous, up
+@srcfilename handbook.lit
+@srclineno 1
+
+@c see the bug if paragraph-indent is run at zero
+
+The one command that needs more explanation is the @w{@samp{m}} command, which is
+short for "menu", becuase you have to specify which subsection you want to
+visit.
+
+An example of a menu appears just below.  It gives the names and title
+of the subsections of this section.  These give further information
+about using the index to find your way around, using cross-references,
+printing parts of the handbook, and so on.  You can use the @w{@samp{m}}
+command to read them.

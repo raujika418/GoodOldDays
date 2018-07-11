@@ -1,0 +1,150 @@
+##=== TEST.dsgraph.report - Report description for dsgraph -----*- perl -*-===##
+#
+# This file defines a report to be generated for the dsgraph test.
+#
+##===----------------------------------------------------------------------===##
+
+# Sort numerically, not textually...
+$SortNumeric = 1;
+
+# Helper function
+sub Ratio {
+  my ($Cols, $Col) = @_;
+  if ($Cols->[$Col-2] ne "*" and
+      $Cols->[$Col-2] != "0") {
+    return $Cols->[$Col-1]/$Cols->[$Col-2];
+  } else {
+    return "n/a";
+  }
+}
+
+sub FormatSize {
+  my $Size = shift;
+  if ($Size > 10*1024*1024) {
+    return (int $Size*10 / (1024*1024))/10 . "MB";
+  } elsif ($Size > 10*1024) {
+    return (int $Size / 1024);
+  } else {
+    return $Size . "B";
+  }
+}
+
+sub NoStar {
+  return "0" if ($_[0] eq '*');
+  return $_[0];
+}
+
+sub NoCallNodes {
+  $_[0] =~ m/([0-9]+)\+/;
+  return $1;
+}
+
+# Sort by total analyze time
+$SortCol = 7;
+
+# Sort in descending order
+$SortReverse = 1;
+
+# For latex output, limit benchmarks and rename as appropriate
+@LatexRowMapOrder = (
+            'MultiSource/Olden/treeadd/treeadd'      => 'Olden-treeadd',
+            'MultiSource/Olden/bisort/bisort'        => 'Olden-bisort',
+            'MultiSource/Olden/mst/mst'              => 'Olden-mst',
+            'MultiSource/Olden/perimeter/perimeter'  => 'Olden-perimeter',
+            'MultiSource/Olden/health/health'        => 'Olden-health',
+            'MultiSource/Olden/tsp/tsp'              => 'Olden-tsp',
+            'MultiSource/Olden/power/power'          => 'Olden-power',
+            'MultiSource/Olden/em3d/em3d'            => 'Olden-em3d',
+            'MultiSource/Olden/voronoi/voronoi'      => 'Olden-voronoi',
+            'MultiSource/Olden/bh/bh'                => 'Olden-bh',
+            '-' => '-',
+            'MultiSource/Ptrdist/anagram/anagram'    => 'ptrdist-anagram',
+            'MultiSource/Ptrdist/ks/ks'              => 'ptrdist-ks',
+            'MultiSource/Ptrdist/ft/ft'              => 'ptrdist-ft',
+            'MultiSource/Ptrdist/yacr2/yacr2'        => 'ptrdist-yacr2',
+            'MultiSource/Ptrdist/bc/bc'              => 'ptrdist-bc',
+            '-' => '-',
+            'External/SPEC/CFP2000/179.art/179.art'        => '179.art',
+            'External/SPEC/CFP2000/183.equake/183.equake'  => '183.equake',
+            'External/SPEC/CINT2000/181.mcf/181.mcf'       => '181.mcf',
+            'External/SPEC/CINT2000/256.bzip2/256.bzip2'   => '256.bzip2',
+            'External/SPEC/CINT2000/164.gzip/164.gzip'     => '164.gzip',
+            'External/SPEC/CINT2000/197.parser/197.parser' => '197.parser',
+            'External/SPEC/CFP2000/188.ammp/188.ammp'      => '188.ammp',
+            'External/SPEC/CINT2000/175.vpr/175.vpr'       => '175.vpr',
+            'External/SPEC/CINT2000/300.twolf/300.twolf'   => '300.twolf',
+            'External/SPEC/CINT2000/186.crafty/186.crafty' => '186.crafty',
+            'External/SPEC/CINT2000/255.vortex/255.vortex' => '255.vortex',
+            'External/SPEC/CINT2000/254.gap/254.gap'       => '254.gap',
+            '-' => '-',
+            'MultiSource/sgefa/sgefa'         => 'sgefa',
+            'MultiSource/sim/sim'             => 'sim',
+            'MultiSource/Burg/burg'           => 'burg',
+            'MultiSource/gnuchess/gnuchess'   => 'gnuchess',
+            'MultiSource/larn/larn'           => 'larn',
+            'MultiSource/flex/flex'           => 'flex',
+            'MultiSource/moria/moria'         => 'moria',
+            'MultiSource/povray31/povray31'   => 'povray31'
+           );
+
+@LatexColumns = (1, 27, 19,    # LOC, #MemInstrs, MaxSCC
+                 4, 5, 6, 7,   # Execution times
+                 11,           # Memory BU
+                 12,           # Memory TD
+                 16, 17,       # Total, Max Nodes
+                 15);          # NumFolded
+
+# Specify how to format columns nicely for printing...
+%LatexColumnFormat = (
+                      11 => \&FormatSize,
+                      12 => \&FormatSize,
+                      15 => \&NoStar,
+                      16 => \&NoCallNodes
+                     );
+
+@Graphs = (["scatter", "timeVmem.txt", 27, 7],
+           ["scatter", "timeVloc.txt", 1, 7]);
+
+
+# These are the columns for the report.  The first entry is the header for the
+# column, the second is the regex to use to match the value.  Empty list create
+# seperators, and closures may be put in for custom processing.
+(
+# Name
+            ["Name:" , '\'([^\']+)\' Program'],
+            ["LOC:"  , 'LOC: *([0-9]+)'],
+            [],
+# Times
+            ["Anlyz:", '([0-9.]+) \([^)]+\)[ 0-9]+TOTAL'],
+            ["LocTm:", '([0-9.]+) \([^)]+\)[ 0-9]+Local'],
+            ["BUTim:", '([0-9.]+) \([^)]+\)[ 0-9]+Bottom'],
+            ["TDTim:", '([0-9.]+) \([^)]+\)[ 0-9]+Top'],
+            ["SumTm:", sub { return SumCols(@_, 3); }],
+            ["SteTm:", '([0-9.]+) \([^)]+\)[ 0-9]+Steensgaard'],
+            [],
+# Sizes
+            ["LcSize:" , '([0-9]+)  Local'],
+            ["BUSize:" , '([0-9]+)  Bottom-up'],
+            ["TDSize:" , '([0-9]+)  Top-down'],
+            ["BUTDSz:" , sub { return SumCols(@_, 2); }],
+            [],
+# Misc stuff
+            ["NumFold" , '([0-9]+).*Number of folded nodes '],
+            ["NumNodes", 'Graphs contain \\[([0-9+]+)\\] nodes total'],
+            ["MaxSz"   , '([0-9]+).*Maximum graph size'],
+            ["GlobGr"  , '\\.GlobalsGraph\\.dot\'... \\[([0-9+]+)\\]'],
+            ["MaxSCC"  , '([0-9]+).*Maximum SCC Size in Call Graph'],
+            [],
+            ["Loads"   , '([0-9]+).*Number of Load insts'],
+            ["Store"   , '([0-9]+).*Number of Store insts'],
+            ["Calls"   , '([0-9]+).*Number of Call insts'],
+            ["Allca"   , '([0-9]+).*Number of Alloca insts'],
+            ["Mallc"   , '([0-9]+).*Number of Malloc insts'],
+            ["GEP"     , '([0-9]+).*Number of GetElementPtr insts'],
+            ["Sum"   , sub { return SumCols(@_, 6); }],
+            [],
+            ["num/ind" , '([0-9]+).*number of indirect call sites'],
+            ["indcallee",'([0-9]+).*number of callee functions at'],
+            ["ratio"   , \&Ratio],  # indcallee / num/ind
+            []
+           );

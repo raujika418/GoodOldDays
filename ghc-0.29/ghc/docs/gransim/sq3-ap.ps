@@ -1,0 +1,238 @@
+%!PS-Adobe-2.0
+%%BoundingBox:	0 0 560 800
+%%Title: 	sq 2 99 +RTS -bP -bp: 
+%%Creator: 	qp2ap
+%%CreationDate:	Fri Jul 12 17:44:25 BST 1996
+%%EndComments
+% -----------------------------------------------------------------------------
+% Tunable Parameters:
+% The width of a line representing a task
+/width 50 def
+% Scaling factor for the y-axis (usful to enlarge)
+/y-scale 1 def
+% -----------------------------------------------------------------------------
+/total-len 283149 def
+/show-len 790 def
+/x-offset 100 def
+/y-offset 50 def
+% normalize is the PS version of the formula: 
+%   int((/283149) * (790-100) + 100) 
+% in psout.
+/normalize { total-len div show-len x-offset sub mul x-offset add floor } def
+/x-normalize { exch show-len mul total-len div exch } def
+/y-normalize { y-offset sub y-scale mul y-offset add } def
+/str-len 12 def
+/prt-n { cvi str-len string cvs 
+         dup stringwidth pop 
+         currentpoint pop 780 gt { 10 sub } { 2 div } ifelse 
+         neg 0 rmoveto 
+         show  } def 
+        % print top-of-stack integer centered at the current point
+/R { 0.8 0 0 } def
+/G { 0 0.9 0.1 } def
+/B { 0 0.1 0.9 } def
+/set-bg { setrgbcolor } def
+% RL: runlineto; draws a horizontal line in given color
+% Operands: x-from x-to y color
+/RL { set-bg   % set color 
+      newpath y-normalize  % mangle y val
+      2 index 1 index moveto width setlinewidth 
+      lineto pop stroke} def
+% SL: suspendlineto; draws a horizontal line in given color (thinner)
+% Operands: x-from x-to y color
+/SL { set-bg   % set color 
+      newpath y-normalize  % mangle y val
+      2 index 1 index moveto width 2 div setlinewidth 
+      lineto pop stroke} def
+% FL: fetchlineto; draws a horizontal line in given color (thinner)
+% Operands: x-from x-to y color
+/FL { set-bg   % set color 
+      newpath y-normalize  % mangle y val
+      2 index 1 index moveto width  2  div setlinewidth 
+      lineto pop stroke} def
+/printText { 0 0 moveto (GrAnSim) show } def
+/asciilogo { 5 sub moveto HB16 setfont (GrAnSim) show } def
+/logo { gsave 
+        translate 
+        .95 -.05 0
+          { dup 1 exch sub 0 exch setrgbcolor printText 1 -.5 translate } for 
+        1 0 0 setrgbcolor printText
+        grestore} def
+% For debugging PS uncomment this line and add the file behandler.ps
+%  begin printonly endprint 
+/HE10 /Helvetica findfont 10 scalefont def
+/HE12 /Helvetica findfont 12 scalefont def
+/HE14 /Helvetica findfont 14 scalefont def
+/HB16 /Helvetica-Bold findfont 16 scalefont def
+% -----------------------------------------------------------------------------
+newpath
+-90 rotate
+-785 30 translate
+0 8.000000 moveto
+0 525.000000 760.000000 525.000000 8.000000 arcto
+4 {pop} repeat
+760.000000 525.000000 760.000000 0 8.000000 arcto
+4 {pop} repeat
+760.000000 0 0 0 8.000000 arcto
+4 {pop} repeat
+0 0 0 525.000000 8.000000 arcto
+4 {pop} repeat
+0.500000 setlinewidth
+stroke
+newpath
+4.000000 505.000000 moveto
+4.000000 521.000000 752.000000 521.000000 4.000000 arcto
+4 {pop} repeat
+752.000000 521.000000 752.000000 501.000000 4.000000 arcto
+4 {pop} repeat
+752.000000 501.000000 4.000000 501.000000 4.000000 arcto
+4 {pop} repeat
+4.000000 501.000000 4.000000 521.000000 4.000000 arcto
+4 {pop} repeat
+0.500000 setlinewidth
+stroke
+HE14 setfont
+100 505 moveto
+(sq 2 99 +RTS -bP -bp:  ) show
+(Fri Jul 12 17:44:25 BST 1996) dup stringwidth pop 750 exch sub 505.000000 moveto show
+-40 -40 translate
+% -----------------------------------------------------------------------------
+% Print x-axis:
+/y-val 50 def % { y-offset 40 sub 2 div y-offset add } def
+0.5 setlinewidth
+x-offset y-val moveto total-len normalize x-offset sub 0 rlineto stroke
+0 total-len 10 div total-len
+ { dup normalize dup y-val moveto 0 -2 rlineto stroke  % tic
+   y-val 10 sub moveto HE10 setfont round prt-n  % print label 
+ } for 
+1 setlinewidth
+% -----------------------------------------------------------------------------
+% ---------------------------------------------------------------------------
+% Y-Axis:
+% ---------------------------------------------------------------------------
+0 0 0 setrgbcolor
+gsave
+HE12 setfont
+(tasks)
+dup stringwidth pop
+500
+exch sub
+55 exch
+translate
+90 rotate
+0 0 moveto
+show
+grestore
+0.5 setlinewidth
+HE12 setfont
+100 50 moveto
+100 500 lineto
+% Total number of tasks: 2
+% Number of ticks: 2
+100 500 moveto
+95 500 lineto
+70 500 moveto
+(2) show
+100 500 moveto
+95 500 lineto
+70 500 moveto
+(2) show
+100 275 moveto
+95 275 lineto
+70 275 moveto
+(1) show
+100 50 moveto
+95 50 lineto
+70 50 moveto
+(0) show
+ stroke
+1 setlinewidth
+% ---------------------------------------------------------------------------
+100 274 275 G RL
+274 275 275 G RL
+279 280 275 G RL
+284 285 275 G RL
+289 290 275 G RL
+294 295 275 G RL
+298 299 275 G RL
+303 304 275 G RL
+308 309 275 G RL
+313 314 275 G RL
+318 319 275 G RL
+323 324 275 G RL
+328 329 275 G RL
+333 334 275 G RL
+338 339 275 G RL
+343 344 275 G RL
+348 349 275 G RL
+353 354 275 G RL
+358 359 275 G RL
+363 364 275 G RL
+368 369 275 G RL
+373 374 275 G RL
+378 379 275 G RL
+383 384 275 G RL
+388 411 275 G RL
+416 421 275 G RL
+425 426 275 G RL
+429 430 275 G RL
+434 439 275 G RL
+443 444 275 G RL
+447 448 275 G RL
+451 457 275 G RL
+460 461 275 G RL
+465 466 275 G RL
+469 474 275 G RL
+478 479 275 G RL
+482 483 275 G RL
+487 492 275 G RL
+496 497 275 G RL
+500 501 275 G RL
+505 510 275 G RL
+513 514 275 G RL
+518 519 275 G RL
+522 527 275 G RL
+531 532 275 G RL
+535 536 275 G RL
+540 545 275 G RL
+549 550 275 G RL
+553 554 275 G RL
+558 563 275 G RL
+566 567 275 G RL
+571 572 275 G RL
+575 580 275 G RL
+584 585 275 G RL
+589 590 275 G RL
+593 598 275 G RL
+602 603 275 G RL
+606 607 275 G RL
+611 616 275 G RL
+620 621 275 G RL
+624 625 275 G RL
+628 633 275 G RL
+637 638 275 G RL
+642 643 275 G RL
+646 651 275 G RL
+655 656 275 G RL
+659 660 275 G RL
+664 669 275 G RL
+673 674 275 G RL
+677 678 275 G RL
+681 687 275 G RL
+690 691 275 G RL
+695 696 275 G RL
+699 704 275 G RL
+708 709 275 G RL
+712 713 275 G RL
+717 722 275 G RL
+726 727 275 G RL
+730 731 275 G RL
+734 740 275 G RL
+743 744 275 G RL
+748 749 275 G RL
+752 757 275 G RL
+271 761 500 G RL
+761 790 275 G RL
+HE14 setfont
+50 550 logo
+showpage

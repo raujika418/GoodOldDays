@@ -1,0 +1,239 @@
+From REM@suwatson.stanford.edu Mon Jul  8 09:29:34 1991
+X-VM-Attributes: [nil nil nil nil t]
+Status: RO
+Via: uk.ac.nsf; Mon, 8 Jul 91 09:29:08 BST
+Received: from vax.nsfnet-relay.ac.uk by sun2.nsfnet-relay.ac.uk 
+          with SMTP inbound id <5497-0@sun2.nsfnet-relay.ac.uk>;
+          Sun, 7 Jul 1991 16:34:38 +0100
+Received: from [36.21.0.12] by vax.NSFnet-Relay.AC.UK via NSFnet with SMTP 
+          id aa03596; 7 Jul 91 16:16 BST
+Received: from SUWATSON.stanford.edu 
+          by SUWATSON.stanford.edu (IBM VM SMTP R1.2.2MX) with BSMTP id 6616;
+          Sun, 07 Jul 91 08:30:53 PDT
+From: REM@SUWATSON.stanford.edu
+Sender: REM@suwatson.stanford.edu
+To: partain
+Subject: Glasgow literate programming (documentation -- long)
+Date: Sun, 07 Jul 91 08:30:50 PDT
+
+(Hi. I'm currently months behind in reading PARA archives, but now trying
+to catch up. Currently I'm reading postings from 1991.Apr ...)
+
+<<Date: Tue, 23 Apr 91 13:59:41 BST -- Programs are just documents for
+people to read and enjoy which happen to have machine-manipulable code
+"buried" in them.>>
+
+Hmmm, interesting concept. So you just write as if you were submitting an
+article to COMM ACM with embedded program snippets, except (1) there's
+automatic machinery to extract the snippets, and (2) all the snippets
+together in your article just happen to be one complete program when put
+together!
+
+<<... depending on whether that language is "supported" or not.>>
+I hope you support LISP.
+
+<<programs/documents divided into sections, subsections within sections,
+subsubsections...>>
+
+Whether this is a good idea or not is a major question. If you have one
+person organizing the file and others just add to pieces, and if it's
+small enough that others can find the appropriate place easily, this
+might work. This assumes everyone can agree on the organization. But a
+non-heirarchial representation, nodes with links but no strict heirarchy,
+or even pure tagged-node representation, is usually necessary when more
+than one person can contribute new nodes asynchronously and without
+agreeing upon a heirarchy that the new nodes can neatly fit into. The
+best model may be to simply have each section tagged with keywords, and
+have tools for searching for the desired section by keywords, and let
+anyone try to make a heirarchial index of the whole document for their
+personal use if they feel they can but watch them give up in frustration
+as they have more and more trouble fitting new nodes into their old
+heirarchy.
+
+<<Hierarchy is a very powerful structuring tool, but its utility for
+wading around a large sea of code is not apparent.>>
+
+Yes. That's the other problem with a heirarchy. Even if you can neatly
+organize everything into topics subtopics etc., can you find things
+easily by traversing that heirarchy, or do you really need keywords after
+all just so you can quickly find a given node by name (keyword) instead
+of by location (topic subtopic etc.).
+
+<<Say you're writing a Haskell compiler ...>>
+As in Eddie Haskell on Leave It To Beaver??
+
+<<You could make copies of files, edit them, etc., but that's tacky,>>
+
+not to mention impossible to maintain, and a royal pain even if you can.
+You really want HyperText, any segment of text can be located in multiple
+places simultaneously and all edits immediately propagate, because really
+each occurance of the piece of text is via pointer to one master copy.
+But making HyperText work in the first place, then arranging for
+incremental backups and rollbacks etc. is really hard. I wonder if the
+Xanadu folks have found real solutions for these major problems, or are
+just winging it (sweeping the dirt under the rug and hoping nobody will
+notice)?
+
+<<As it stands, this system lets you put "\begin{onlystandalone}" and
+"\end{onlystandalone}" around pieces of your files that only apply in the
+"do this as a standalone document" case; similarly,
+"\begin{onlypartofdoc}" and "\end{onlypartofdoc}" for stuff that only
+applies in the "the glorious whole" case.>>
+
+UUGGGGLLLLEEEEEEEE! You've re-invented conditional assembly, a common
+feature of machine-language assemblers for at least 20 years. Even
+CommonLisp has it, but I avoid it since it can so easily get out of hand.
+But as things stands, if you don't have HyperText, then conditional
+assembly is probably the only game in town for having multiple versions
+of a document simultaneously available in the same file.
+
+One problem, you can't have the different versions put the sections in a
+different sequence, unless you use the most hated feature ever invented,
+CONDITIONAL-ASSEMBLY GOTO, present in IBM 360 assemblers I believe. But
+what the heck, if you want your document to look like a BASIC program,
+it's your priviledge.
+
+Hmmm, about assembly macros? IBM 360 assembler has them too, and they are
+a bit cleaner than GOTOs. Each section you might want to put in various
+places, you define as a macro at the top of the file, then simply call it
+where you want that body of text to appear in the virtual document that
+exists under any of the presentation modes. Unfortunately that means if
+you look at the raw source file, the top of the file has all these random
+sections, instead of any sort of introduction, because macros have to be
+defined before used. There are various hacks to avoid this problem...
+
+<<We don't have a "\define" command that let's you define new macros in
+terms of old ones.>>
+Awwww, shucks.
+
+<<Some programming languages have a narrow-minded idea about what order
+the pieces of a program must be presented (e.g., COBOL: identification
+division, then file division, then data division>>
+
+I did, sort of. I knew the divisions but not what order they were
+supposed to be in, but I knew they had to be in the right order and I'd
+look in the manual or at a sample program if I ever needed that info.
+(Last time I touched COBOL was 1974, but I respect it for having some
+good ideas not present in any other language I've ever seen,
+particularily single declaration of relationship between variables in
+records in memory and columns of data in file, even if braindamaged by
+fixed-width mentality. I wish that single-declaration method of defining
+I/O syntaxes existed in other languages that allowed variable-length
+fields. printf and scanf are a poor attempt.)
+
+<<Within non-code parts of documents, code snippets may be included
+between `at' signs; e.g., "@f x y = y@">>
+
+I don't like that. What if your code contains an atsign to indicate
+indirect addressing through a pointer variable? Do you double the atsign,
+or put a backslant before it?
+
+A better way is an invention I made when writing POX (Prototype Overlay
+Xerographics) at SU-AI (Sail.Stanford.Edu under the domain system),
+namely having a whole class of available parenthesizing (grouping)
+characters, some symmetric like '' and "" and @@ and // and \\ and some
+balanced like () and {} and [] and <> and /* */. You can use any pair
+from either class to avoid stepping on the same character within the
+embedded text. Furthermore you can nest any of the balanced ones (you
+can't nest the symmetric ones for obvious reasons).
+
+In POX, stuff inside a single level of generic-parentheses was treated as
+a body of whatever (macro definition etc.) but was further interpreted,
+whereas inside a second level of balanced generic-parentheses was
+super-quoted, but for your application of quoting code segments from
+within text this distinction may be moot, but I mentionned it to make my
+presentation of my invention complete.
+
+(I had a further idea of allowing interchangeability between
+generic-parentheses and BEGIN-END pairs which can be named. For very long
+quoted passages, finding the matching ( and ) can be very painful,
+whereas if you say BEGIN "Comments on sex" and later say END "Comments on
+sex" but you don't have your parentheses or BEGIN-END pairs matched, the
+compiler will notice the problem and help you diagnose it. So you
+normally use parentheses for short passages where you can eyeball the
+matching or EMACS etc. can flash the cursor back and forth to help you,
+but you use named BEGIN-END pairs over large blocks where you need
+additional help. But I never had time to program this BEGIN-END extension
+to parenthesization. P.s. the original labeled BEGIN and END is from
+SAIL, a variant of ALGOL 60 developed at SU-AI, the Stanford University
+Artificial Intelligence Lab; P.S., from those 5 initial letters, drop the
+U to get SAIL, drop the L to get SU-AI.)
+
+<<"\tr{<text>}" command; the only restriction on "<text>" is that braces
+must be balanced.>>
+
+They should use the POX convention. If you use \tr{<text>} then of course
+the braces must be balanced in <text>, but if you want to quote text that
+has unbalanced braces you use some other nesting pair such as \tr[<text>]
+or \tr/*<text>*/} etc. to avoid stepping on some unbalanced character. Of
+course if you want to quote the ASCII character set, but omit all the
+right-sides of each nesting pair, you are up a creek, since no matter
+what nesting pair you use on the outside you get an inbalance from the
+<text>, but c'est la vie.
+
+<<No graphics, pictures, or sound.>>
+Someday maybe we'll all be using the NBS standard for representing
+structured multimedia text, then you'll be able to include sound etc. :-)
+
+<<it's *your problem* to make sure that you don't get nodename clashes.>>
+
+If somebody proposes a new nodename, your system should tell him if it is
+already in use, and also tell which similar nodenames (say varying by at
+most two characters replaced or inserted or deleted) are also in use, to
+help him find a name that not only isn't in use but isn't so close to
+something in use as to encourage typos to collide with another name.
+
+<<Having one index for a pretty-big program is a dubious proposition; you
+get a *huge* index.>>
+
+I prefer one big index so I can find what I want instantly even if I
+don't know a priori its syntactic class (the Common Lisp book has this
+single-index feature) rather than having to first find the correct index
+before I can find what I want. Perhaps you should do like Macintosh menus
+sort of. In your case, you select a mode and an index term. It shows you
+the vicinity of that index term in the full index, but all words not in
+the correct mode are dimmed (grayed). So you can still see the words from
+the other parts of the index, but you can easily skip over them as you
+eyeball the index. (If you use this idea, please give me credit. I
+invented it as I was replying to your posting tonight, or is it morning
+already, I see sunlight behind the window curtains, sigh, up too late.)
+
+<<The main thing that is a pain about the current sectioning (see section
+*Note Sectioning::) is making up unique node names all the time.>>
+
+I agree. Nobody should be REQUIRED to do that in the course of entering
+new text (I hate having to remember to press RETURN every 70 or so
+characters too, which is why I use miniWRITER all the time for entering
+text, because it has automatic word wrap). There should be a single
+keystroke that generates a new label with some obvious machine-look such
+as LISP's GENSYM feature that makes G0001 G0002 G0003 etc. It should of
+course skip over any that already exist. Later you should be able in
+reviewing the document to notice one of these and decide you'd like to
+change it to a more meaningful label, get help finding one that doesn't
+step on existing ones or get too close (see earlier), and upon finding
+one ask the program to automatically change the definition and all
+references to this label. If you want to do a massive cleanup some day,
+there should be a command to search to find the next such
+machine-generated label.
+
+<<* recording-who-to-blame::  \owner{<name>}.>>
+
+Hmmm, sounds like an audit trail, very important in any commercial
+venture when more than one person can modify the file. You absolutely
+have to an audit trail of who made what changes or one worker can
+sabotage the project and blame it on the other and nobody can prove
+anything.
+
+No, I see you mean something different, sigh. Well, if somebody can mark
+a section as being his, and the program respects that claim (as in gold
+mining) and won't anyone else modify that section, only attach proposed
+changes to it, but the author must approve those proposals before the
+section can be destructively changed, that would be a good method of
+audit control. You'd need a way that one person can "give" a section to
+another, and that person can accept or refuse the gift, all
+program-mediated.
+
+<<[Para: CHOPPED OFF HERE -- another 60K or so to go]>>
+Gosh darn. How can I get the rest of it so I can nitpick it??
+
+

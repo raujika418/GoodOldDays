@@ -1,0 +1,401 @@
+#% \section[lit2doc_code]{Code for processing documents (\tr{lit2texi}, \tr{lit2latex} and \tr{lit2html})}
+#% 
+#% \subsection[Do_substitutions]{Doing \tr{\defines}s}
+#% 
+#% Make a little \tr{perl} script from the collected substitution info
+#% then throw each text block at it with @eval@.  We love \tr{perl}!
+#% 
+#% \begin{code}
+sub do_text_substitutions {
+    # first, build up perl eval string
+    local($evalstring) = '';
+    local($text,$replacement);
+    while (($text, $replacement) = each %Define) {
+	$replacement =~ s/\\/\\\\/g; # hide slashes, etc; need something more general
+	$replacement =~ s/\//\\\//g;
+	$replacement =~ s/\$/\\\$/g; # all regexp meta-chars; sigh
+	$replacement =~ s/\%/\\\%/g;
+	$replacement =~ s/\@/\\\@/g;
+	$replacement =~ s/\^/\\\^/g;
+	$replacement =~ s/\(/\\\(/g;
+	$replacement =~ s/\)/\\\)/g;
+	$replacement =~ s/\{/\\\{/g;
+	$replacement =~ s/\}/\\\}/g;
+	$replacement =~ s/\./\\\./g;
+	$evalstring .= "s/\\\\$text\\{\\}/$replacement/g;"
+		     . "s/\\\\$text\\\\ /$replacement /g;"
+		     . "s/\\\\$text\\b/$replacement/g;";
+    }
+    
+    # now cycle through section titles and non-code/non-verbatim blocks
+    foreach ($S = 0; $S <= $#Sec_depth; $S++) { # titles...
+        local($_) = ($Lit2html) ? $Sec_title[$S] 
+                                : $Sec_title[$S] ;
+   
+	eval($evalstring);
+	die "Subst eval failed: $@\neval_string=$eval_string\n" if $@;
+	$Sec_title[$S] = $_;
+    }
+
+    foreach ($B = 0; $B <= $#Blk_type; $B++) { # blocks...
+	if ($Blk_type[$B] !~ /(code|verb)$/) {
+	    local($_) = $Blk_txt[$B];
+
+	    s/\%de[a-z][a-z]\%([^\n])/$1/g;
+
+	    eval($evalstring);
+	    die "Subst eval failed: $@\neval_string=$eval_string\n" if $@;
+	    $Blk_txt[$B] = $_;
+	}
+    }
+}
+#% \end{code}
+#% 
+#% \subsection[Finding_codethings]{Finding interesting codethings}
+#% 
+#% This code passes over the input looking for ``interesting''
+#% definitions and uses of things in the code (``interesting'' and
+#% ``things'' depending on @$Code_lang@, modified by @$Lang_xref@ cues).
+#% It records this information in
+#% @Sec_codethings_defd[$S]@, @Sec_codethings_used[$S]@
+#% @Blk_codethings_defd[$B]@, and @Blk_codethings_used[$B]@
+#% (long lists of names of codethings).
+#% This info is used for indexing during processing and for
+#% cross-referencing during linking.
+#% 
+#% \begin{code}
+sub find_interesting_codethings {
+
+    foreach ($S = 0; $S <= $#Sec_depth; $S++) {
+        foreach ($B = $Sec_first_blk[$S]; $B <= $Sec_last_blk[$S]; $B++) {
+    	    if ($Blk_type[$B] eq 'code') { 
+
+		# language-specific...
+		&add_code_interests($S, $B, $Blk_txt[$B]);
+
+    	    	# for uses, rm duplicates
+		if ($Blk_codethings_used[$B]) {
+		    $Blk_codethings_used[$B] =
+		    	&tidy_codething_list($Blk_codethings_used[$B]);
+		}
+	    }
+	}
+	if ($Sec_codethings_used[$S]) { # tidy, as well
+	    $Sec_codethings_used[$S] =
+		&tidy_codething_list($Sec_codethings_used[$S]);
+	}
+    }
+}
+
+sub std_codething_uses_check {
+
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $_) = @_;
+    local($uses_to_return) = '';
+
+    # ANY identifier (> 2 chars) not in (presumably language-specific)
+    # IGNORE_WD table is recorded as being "used"
+    while (/([A-Za-z][A-Za-z0-9_']{2,})/) {
+	local($interesting_thing) = $1;
+	if ( ! defined($IGNORE_WD{$interesting_thing})) {
+	    if ($s != -1) {
+		$Blk_codethings_used[$b] .= "$interesting_thing\001";
+		$Sec_codethings_used[$s] .= "$interesting_thing\001";
+	    } else {
+		$uses_to_return .= "$interesting_thing\001";
+	    }
+	}
+	s/$interesting_thing//;
+    }
+    $uses_to_return;
+}
+
+sub tidy_codething_list {
+    local($unsorted_list) = @_;
+    local(@sorted_list) = sort(split(/\001/,$unsorted_list));
+    local($prev_thing)  = '';
+    local($s);
+    foreach $s (@sorted_list) {
+	if ($s eq $prev_thing) {
+	    $prev_thing = $s;
+	    $s = '';
+	} else {
+	    $prev_thing = $s;
+	}
+    }
+    local($outlist) = join("\001",@sorted_list);
+    $outlist =~ s/\001\001+/\001/g;
+    $outlist;
+}
+#% \end{code}
+#% 
+#% \subsection[Generating_a_document]{Generating a Texinfo or \LaTeX{} document}
+#% 
+#% Code for when producing a document (either Texinfo or \LaTeX{}).
+#% 
+#% \begin{code}
+sub print_intermed_document {
+
+    foreach ($S = 0; $S <= $#Sec_depth; $S++) {
+
+        &print_section_heading($S) if $Sec_nodename[$S];
+
+        foreach ($B = $Sec_first_blk[$S]; $B <= $Sec_last_blk[$S]; $B++) {
+
+	    # report where we are (lang specific)
+	    if (!$Lit2html){
+	    print &mk_line_directive($Blk_srcfile_name[$B],$Blk_srcfile_lineno[$B]);
+	    }
+            if ($Blk_type[$B] eq 'txt') {
+		if ($Lit2texi) {
+		    local($stuff,$idxstuff) =
+		          &texinfoize_text($Blk_srcfile_name[$B],
+					     $Blk_srcfile_lineno[$B],
+					     $Blk_txt[$B]
+			  );
+		    if ($stuff =~ /\n$/) {
+	    	        print "$stuff$idxstuff";
+		    } else {
+	    	        print "$stuff\n$idxstuff";
+		    }
+		} elsif ($Lit2html) {
+		    local($stuff,$idxstuff) =
+		          &htmlize_text($Blk_srcfile_name[$B],
+					     $Blk_srcfile_lineno[$B],
+					     $Blk_txt[$B]
+			  );
+		    print "$stuff\n$idxstuff"; # never a newline in between
+		} else {
+		    local($stuff,$idxstuff) =
+		          &latexize_text($Blk_srcfile_name[$B],
+					     $Blk_srcfile_lineno[$B],
+					     $Blk_txt[$B]
+			  );
+		    print "$stuff$idxstuff"; # never a newline in between
+		}
+
+            } elsif ($Blk_type[$B] =~ /^(code|pseudocode)$/) {
+		local($what) = $1;
+		if ($what eq 'code' && $Blk_magic[$B] ne 'main') {
+		    print "CODE FOR ",(($Blk_magic[$B] =~ /,/) ? "RIBBONS" : "RIBBON");
+		    print ": ",$Blk_magic[$B],"\n\n"
+			if $Lit2texi;
+                    print ": <code>",$Blk_magic[$B],"</code><p>\n"
+			if $Lit2html;
+		    print ": \\mbox\{\\tt\{\}",&verb2latex("\\tt",$Blk_magic[$B]),"\}\n\n"
+			if $Lit2latex;
+		}
+
+		&print_index_entries_for_code_blk($B)
+		    if $Lang_xref !~ /noindex/;
+		&print_code_blk($Blk_txt[$B]) if $Lit2latex; # lang specific
+		&std_print_code_blk($Blk_txt[$B]) if $Lit2html; # ?????
+		&std_print_code_blk($Blk_txt[$B]) if $Lit2texi; # _always_
+
+		&print_latex_labels_for_code_blk_defs($B) if $Lit2latex;
+
+#		print "\\par\n" if $Lit2latex; # doubtful long-term value
+
+            } elsif ($Blk_type[$B] eq 'menu') {
+		if ($Lit2texi) { # menus only apply for Texinfo
+		    print "\@menu\n";
+		    print $Blk_txt[$B];
+		    print "\@end menu\n";
+		}
+		elsif ($Lit2html) { # and HTML 
+		    print "<menu>\n";
+                    print $Blk_txt[$B];
+		    print "</menu>\n";
+		}
+            } elsif ($Blk_type[$B] eq 'rawlatex') {
+		if ($Lit2latex) {
+		    print "\001beginrawlatex\003\n";
+		    print $Blk_txt[$B];
+		    print "\001endrawlatex\003\n";
+		}
+
+            } elsif ($Blk_type[$B] eq 'tabular') {
+		if ($Lit2texi) {
+		    local($text_stuff,$idx_stuff) = &texinfoize_table_body($Blk_txt[$B]);
+		    print "\@example\n";
+		    print &texinfoize_tabular($text_stuff);
+		    print "\@end example\n$idx_stuff";
+		} elsif ($Lit2html) {
+		    local($text_stuff,$idx_stuff) = &htmlize_table_body($Blk_txt[$B]);
+		    print "<pre>\n";
+		    print &htmlize_tabular($text_stuff);
+		    print "</pre>\n$idx_stuff\n";
+		} else {
+		    print "\\begin\{tabular\}",$Blk_magic[$B],"\n";
+		    local($text_stuff,$idx_stuff) = &latexize_text($Blk_srcfile_name[$B],
+					 $Blk_srcfile_lineno[$B],
+					 $Blk_txt[$B]
+			  );
+		    print "$text_stuff\n\\end\{tabular\}\n$idx_stuff\n";
+		}
+            } elsif ($Blk_type[$B] =~ /verb$/) {
+		if ($Lit2texi) {
+		    print "\@example\n",&texinfoize_verb($Blk_txt[$B]),"\@end example\n"
+		    	if $Blk_type[$B] eq 'verb';
+		    print "\@format\n",&texinfoize_verb($Blk_txt[$B]),"\@end format\n"
+		    	if $Blk_type[$B] eq 'flushverb';
+		} elsif ($Lit2html) {
+		    print "<pre>\n", &htmlize_verb($Blk_txt[$B]),"</pre><p>\n";
+		} else {
+#new: nothing for flushverb yet
+		    print "\\begin\{verbtext\}\n";
+		    local($mangled_verb) = &verb2verbcode($Blk_txt[$B]);
+		    if (($mangled_verb =~ s/\n/\n/g) >= 5) { # a terrible way to count lines
+			print "\\codeallowbreaks\{\}";
+		    }
+		    $mangled_verb =~ s/\n$//; # don't want newline before \end{verbtext}
+                    print $mangled_verb;
+		    print "\\end\{verbtext\}%\n";
+#old:
+#		    print "\\BeginLitVerb\n"
+#		    	if $Blk_type[$B] eq 'verb';
+#		    print "\\BeginLitVerbNoIndent\n"
+#		    	if $Blk_type[$B] eq 'flushverb';
+#		    local($mangled_verb) = "\\mbox\{\\tt\{\}" .
+#					   &verb2latex("\\tt",$Blk_txt[$B]) .
+#					   "\}";
+#    	    	    # chop junk off the end (nobody said life was easy)
+#		    $mangled_verb =~ s/\\\\\n\\mbox\{\\tt\{\}\}$//;
+#		    print $mangled_verb;
+#		    print "\\EndLitVerb\n";
+#		    print "\\par\n";
+		}
+            } elsif ($Blk_type ne '') { # let null ones through (?)
+                &not_OK($Blk_srcfile_name[$B], $Blk_srcfile_lineno[$B],
+		    "unknown or unimplemented blk type: $Blk_type[$B]\n");
+            }
+        }
+	# end of section stuff would go here, e.g., where
+	# ref'd ribbons can be found (?)
+    }
+}
+#% \end{code}
+#% 
+#% \subsection[Other_doc_only_code]{Other code for document generation}
+#% 
+#% \begin{code}
+sub print_section_heading { # dump the collected info for this section
+    local($s) = @_;
+
+    # fix up section/node's owner if necessary (recorded in first blk, I hope...)
+    if ($Show_node_owner && ! $Sec_owner[$s]) {
+	local($srcfile) = $Blk_srcfile_name[$Sec_first_blk[$s]];
+	if (! defined($srcfile) || ! -f $srcfile) {
+	   &not_OK("","","can't find source file: $srcfile\n");
+	} else {
+	   local(@srcfile_stats) = stat($srcfile);
+	   local(@owner_stuff)   = getpwuid($srcfile_stats[4]);
+
+	   $Sec_owner[$s] = $owner_stuff[0];
+	}
+    }
+
+    chop($Sec_aliases[$S]) if $Sec_aliases[$S];
+
+    local($guessname,$guessline) = ('',-1);
+    # try to guess where \section command is
+    if (($Sec_first_blk[$S] >= $Sec_last_blk[$S])
+     && (! &empty_blk_p($Sec_first_blk[$S]) )) {
+	$guessname = $Blk_srcfile_name[$Sec_first_blk[$S]];
+	$guessline = ($Blk_srcfile_lineno[$Sec_first_blk[$S]] - 1);
+    }
+    print "\001section\003",$Sec_depth[$s],
+	  "\002",$Sec_nodename[$s],
+	  "\002",$Sec_nodespec[$s],
+# I doubt that texinfoize_text call... (idx_stuff?)
+	  "\002",(($Lit2texi) ? &texinfoize_text('???','???',$Sec_owner[$s])
+			      : $Sec_owner[$s]),
+	  "\002",&de_newlined($Sec_extra_menu_entries[$s]),
+	  "\002",$Sec_codethings_defd[$S],
+	  "\002",$Sec_aliases[$S],
+	  "\002",$Sec_codethings_used[$S],
+	  "\002",$guessname,
+	  "#%%#",$guessline,
+	  "#%%#";
+
+    local($fixed_title) = $Sec_title[$s];
+    if ($Lit2latex) {
+	local($title,$idx_stuff) = &latexize_text("???","???",$fixed_title);
+	print "{$title}";
+	# no label if funny chars found inside !!!
+	# (perhaps a warning?)
+	print "\\label{",$Sec_nodename[$s],"}" if $Sec_nodename[$s] !~ /[\\\{\}\$\%]/;
+	print "\n$idx_stuff";
+    } elsif ($Lit2html) {
+	local($title,$idxtitle) = &htmlize_text('???','???',$fixed_title);
+	local($foo) = $Sec_depth[$s] +1;
+	if ($Sec_nodename[$s] eq "Bottom") { # end of doc. - append html signature
+	   local($post) = &end_html_doc();
+	
+           print $post;
+        } else {
+	  print "\n<a name=\"$Sec_nodename[$s]\"><h$foo>$title</h$foo></a>\n" if $title;
+        }
+    } else { # $Lit2texi
+	local($title,$idxtitle) = &texinfoize_text('???','???',$fixed_title);
+	print " $title\n$idxtitle";
+    }
+}
+
+sub print_index_entries_for_code_blk {
+    # see also print_latex_labels_for_code_blk_defs
+    local($b) = @_;
+    
+    # print an index entry for each definition in this code blk
+    local($d);
+    foreach $d (split(/\001/, $Blk_codethings_defd[$b])) {
+	if ($d && $Lit2texi) {
+	    print "\@cindex ".&mk_texi_index_entry("$d [def]")."\n";
+	} elsif ($d && $Lit2html) {
+	    print "<a name =\"".&mk_html_index_entry("$d")."\"><\/a>\n";
+	} elsif ($d) {
+	    # thinking about a "\|ttunderline" in there, too...
+	    print "\\index\{".&mk_latex_index_entry('tt',$d)."\|underline\}\%\n";
+	}
+    }
+
+    # print the uses that want indexing
+    # this cannot be done until linking time
+    print "\001index_uses\003",$Blk_codethings_used[$b],"\n"
+	if $Blk_codethings_used[$b];
+
+    # we want this for xrefs too -- but only those not def'd here
+    if ($Lit2latex && $Blk_codethings_used[$b]) {
+    	local(@far_use) = split(/\001/,$Blk_codethings_used[$b]);
+	local($f);
+
+	foreach $f (@far_use) { # a good enough check ?
+	    if ( ($Blk_codethings_defd[$b] =~ /^$f/)
+    	      || ($Blk_codethings_defd[$b] =~ /$f$/)
+    	      || ($Blk_codethings_defd[$b] =~ /\001$f\001/)) {
+		$f = '';
+	    }
+	}
+	$f =  join("\001join\003",@far_use); # join & tidy up
+	$f =~ s/(\001join\003){2,}/\001join\003/g;
+	$f =~ s/^\001join\003//;
+	$f =~ s/\001join\003$//;
+	$f =~ s/\001join\003/\001/g;
+
+	print "\001xref_uses\003$f\n" if $f;
+    }
+}
+
+sub fiddle_sectiontypes {
+    local($_) = @_;
+
+    # \[Ss]ectiontype; rm shorthand first
+    s/\\([Ss])ectionref\{([^\}]+)\}/\\$1ectiontype\{$2\}~\\ref\{$2\}/g;
+
+    # nothing else can be done until linking
+    $_;
+}
+
+# a trailing 1 seems to be the habit for inc'd perl files
+1;
+#% \end{code}

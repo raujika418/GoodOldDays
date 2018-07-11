@@ -1,0 +1,8 @@
+sub mk_line_directive {
+    local($filename,$lineno) = @_;
+
+    "# line $lineno \"$filename\"\n";
+}
+
+# so we get 'do'ne correctly
+1;

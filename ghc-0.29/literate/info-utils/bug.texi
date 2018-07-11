@@ -1,0 +1,12 @@
+@setfilename bug-info
+
+@node Top, , , (dir)
+
+@subsubsection Options for the driver @samp{ghc}
+   
+@menu
+* Controlling_phases::           What phases in what order.
+* Verbosity::                    How to be verbose.
+* Forcing_options::              Forcing options to a particular phase.
+* Many_versions_at_once::        Running several versions of the compiler at once.
+@end menu

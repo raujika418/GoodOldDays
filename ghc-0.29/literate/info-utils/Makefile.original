@@ -1,0 +1,69 @@
+# Makefile for the info sources... -*- text -*-
+
+# Define OS = -DUSG if you are compiling for System V-like machines.
+# OS = -DUSG
+
+# Define OS = -DVMS if you are compiling under VMS.
+# OS = -DVMS
+
+CC = gcc
+DEBUG_FLAG = -g
+#PROFFLAGS = -pg
+CFLAGS = $(DEBUG_FLAG) $(PROFFLAGS) $(OS)
+LDFLAGS = $(PROFFLAGS) $(DEBUG_FLAG) #-Bstatic
+
+BINDIR = /usr/gnu/bin
+
+# Colon-separated list of directories in which to look for info files.
+DEFAULT_INFOPATH = .:/local/doc/info
+
+# Command used to print out a text file.  The filename follows this command.
+INFO_PRINT_COMMAND = lpr
+
+PATHSPEC = -DDEFAULT_INFOPATH='"$(DEFAULT_INFOPATH)"'
+PRINTSPEC = -DINFO_PRINT_COMMAND='"$(INFO_PRINT_COMMAND)"'
+INFO_FLAGS = $(PATHSPEC) $(PRINTSPEC)
+
+SOURCES = info.c makeinfo.c getopt.c getopt1.c
+OBJECTS = info.o makeinfo.o getopt.o getopt1.o
+HEADERS = getopt.h
+SUPPORT = Makefile ChangeLog testfile.texinfo test-suite.texinfo\
+	default-nodes.texinfo makeinfo.texinfo info.1
+
+THINGS_TO_TAR = $(SOURCES) $(HEADERS) $(SUPPORT)
+
+PROGS = info makeinfo
+
+all: $(PROGS)
+
+info:	info.o getopt.o getopt1.o
+	$(CC) $(LDFLAGS) -o info info.o getopt.o getopt1.o -ltermcap
+
+info.o: info.c
+	$(CC) -c $(CFLAGS) $(INFO_FLAGS) info.c
+
+makeinfo: makeinfo.o getopt.o getopt1.o
+	$(CC) $(LDFLAGS) -o makeinfo makeinfo.o getopt.o getopt1.o
+
+makeinfo.o: makeinfo.c
+	$(CC) -c $(CFLAGS) $(MAKEINFO_FLAGS) makeinfo.c
+
+install: info makeinfo
+	for i in $(PROGS); \
+	  do install -c $$i $(BINDIR); \
+	done
+
+info.tar.Z: $(THINGS_TO_TAR)
+	tar -chof info.tar $(THINGS_TO_TAR)
+	compress < info.tar > info.tar.Z
+
+dist: $(SOURCES) $(HEADERS) $(SUPPORT)
+	mkdir info-dist
+	(cd info-dist; for i in $(SOURCES) $(HEADERS) $(SUPPORT); do \
+	  ln -s ../$$i .; done)
+	tar chof info.tar info-dist
+	rm -r info-dist
+	compress < info.tar > info.tar.Z
+
+clean:
+	rm -f $(PROGS) $(OBJECTS)

@@ -1,0 +1,57 @@
+{-# GHC_PRAGMA INTERFACE VERSION 6 #-}
+interface I386Code where
+import AbsCSyn(MagicId)
+import AsmRegAlloc(MachineCode, MachineRegisters, Reg)
+import BitSet(BitSet)
+import CLabelInfo(CLabel)
+import CharSeq(CSeq)
+import FiniteMap(FiniteMap)
+import Maybes(Labda)
+import OrdList(OrdList)
+import PreludePS(_PackedString)
+import PrimKind(PrimKind)
+import Stix(CodeSegment)
+import UniqFM(UniqFM)
+import UniqSet(UniqSet(..))
+import Unique(Unique)
+data Addr   = Addr (Labda Reg) (Labda (Reg, Int)) Imm | ImmAddr Imm Int
+type Base = Labda Reg
+data MagicId 
+data BitSet 
+data CLabel 
+data FiniteMap a b 
+data CodeSegment 
+data Cond   = ALWAYS | GEU | LU | EQ | GT | GE | GU | LT | LE | LEU | NE | NEG | POS
+type Displacement = Imm
+type I386Code = OrdList I386Instr
+data I386Instr
+  = MOV Size Operand Operand | MOVZX Size Operand Operand | MOVSX Size Operand Operand | LEA Size Operand Operand | ADD Size Operand Operand | SUB Size Operand Operand | IMUL Size Operand Operand | IDIV Size Operand | AND Size Operand Operand | OR Size Operand Operand | XOR Size Operand Operand | NOT Size Operand | NEGI Size Operand | SHL Size Operand Operand | SAR Size Operand Operand | SHR Size Operand Operand | NOP | SAHF | FABS | FADD Size Operand | FADDP | FIADD Size Addr | FCHS | FCOM Size Operand | FCOS | FDIV Size Operand | FDIVP | FIDIV Size Addr | FDIVR Size Operand | FDIVRP | FIDIVR Size Addr | FICOM Size Addr | FILD Size Addr Reg | FIST Size Addr | FLD Size Operand | FLD1 | FLDZ | FMUL Size Operand | FMULP | FIMUL Size Addr | FRNDINT | FSIN | FSQRT | FST Size Operand | FSTP Size Operand | FSUB Size Operand | FSUBP | FISUB Size Addr | FSUBR Size Operand | FSUBRP | FISUBR Size Addr | FTST | FCOMP Size Operand | FUCOMPP | FXCH | FNSTSW | FNOP | TEST Size Operand Operand | CMP Size Operand Operand | SETCC Cond Operand | PUSH Size Operand | POP Size Operand | JMP Operand | JXX Cond CLabel | CALL Imm | CLTD | LABEL CLabel | COMMENT _PackedString | SEGMENT CodeSegment | ASCII Bool [Char] | DATA Size [Imm]
+data I386Regs 
+data Imm   = ImmInt Int | ImmInteger Integer | ImmCLbl CLabel | ImmLab CSeq | ImmLit CSeq
+type Index = Labda (Reg, Int)
+data Operand   = OpReg Reg | OpImm Imm | OpAddr Addr
+data OrdList a 
+data PrimKind 
+data Size   = B | HB | S | L | F | D
+data UniqFM a 
+type UniqSet a = UniqFM a
+data Unique 
+eax :: Reg
+ebp :: Reg
+ebx :: Reg
+ecx :: Reg
+edi :: Reg
+edx :: Reg
+esi :: Reg
+esp :: Reg
+freeRegs :: [Reg]
+is13Bits :: Integral a => a -> Bool
+kindToSize :: PrimKind -> Size
+offset :: Addr -> Int -> Labda Addr
+spRel :: Int -> Addr
+st0 :: Reg
+st1 :: Reg
+strImmLit :: [Char] -> Imm
+instance MachineCode I386Instr
+instance MachineRegisters I386Regs
+

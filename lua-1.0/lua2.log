@@ -1,0 +1,1 @@
+cc -O2 -I.   -c -o lex_yy.o lex_yy.c

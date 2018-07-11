@@ -1,0 +1,597 @@
+#% This code involves looking at the input and stuffing it in the
+#% right global data structure.  You may wish to consult the description
+#% of said structures (\sectionref{Global_data}).
+#% 
+#% \begin{code}
+sub read_and_categorize_input {
+
+  local($gobbling) = '';   # more on this below
+
+  $S = $B = 0; # initialise section and block counters
+
+  line: while (<INPIPE>) {
+    $Srcfile_lineno++;
+
+    study; # to speed up regexp matching ???
+
+    # first, deal with magic "srcfile" lines from `lit-inputter'
+    # (lest they be "gobbled")
+    if (/^srcfile!_!(.*)!_!(.*)!_!$/) {
+        $Srcfile_name   = $1;
+        $Srcfile_lineno = $2 - 1; # will be incr next time thru
+	#
+        # kick over to a new blk
+	# if not empty, start another block of same type
+	# otherwise, kick curr one again to insert the srcfilename/lineno
+	# (No: this doesn't work -- we can, e.g., get lots of little
+	# "tabular" envs, which is junk.)
+        #
+#	&incr_blk_ctr() if ! &empty_blk_p($B);
+#	&append_to_curr_blk($Blk_type[$B],'');
+
+        next line;
+    }
+
+    # Next, we worry about the \begin/\end's that serve only to
+    # include/exclude code.  These are "onlylatex", "onlyinfo",
+    # "onlypartofdoc", "onlystandalone".
+    #
+    # this is a dull-witted implementation and things can go badly wrong
+    # if the input has errors
+    #
+    if (/^\\(begin|end)\{(onlylatex|onlyinfo|onlypartofdoc|onlystandalone|onlyhtml)\}/) {
+	local($begin_or_end) = $1;
+	local($b_or_e_what)  = $2;
+
+	$Only_latex = (($begin_or_end eq 'begin') ? 1 : 0) if $b_or_e_what eq 'onlylatex';
+	$Only_info  = (($begin_or_end eq 'begin') ? 1 : 0) if $b_or_e_what eq 'onlyinfo';
+	$Only_html  = (($begin_or_end eq 'begin') ? 1 : 0) if $b_or_e_what eq 'onlyhtml';
+	$Only_partofdoc  = (($begin_or_end eq 'begin') ? 1 : 0) if $b_or_e_what eq 'onlypartofdoc';
+	$Only_standalone = (($begin_or_end eq 'begin') ? 1 : 0) if $b_or_e_what eq 'onlystandalone';
+
+	next line; # finished with this line
+    }
+    next line if $Only_latex && ! $Lit2latex;
+    next line if $Only_info  && ! $Lit2texi;
+    next line if $Only_html  && ! $Lit2html;
+    next line if $Only_partofdoc  && $Standalone_doc;
+    next line if $Only_standalone && (! $Standalone_doc);
+
+    # Now, we worry about "gobbling": that is, once we've seen a
+    # \begin{somethingInteresting}, we want to gobble everything up to
+    # the \end{somethingInteresting} -- no ifs, ands, buts or nesting!
+    # these are \begin/\end's that suggest _categories_ of stuff
+    # (text, code, etc.)
+
+    # the two arguments to std_gobbling_stuff says how to categorize
+    # an ordinary line and an \end{somethingInteresting} line.
+
+    if ($gobbling) {
+
+        if ($gobbling eq 'change') { # not really implemented
+            $gobbling = &std_gobbling_stuff('TOSS IT','TOSS IT');
+
+        } elsif ($gobbling eq 'test') {   # ditto
+            $gobbling = &std_gobbling_stuff('TOSS IT','TOSS IT');
+
+        } elsif ($gobbling eq 'verbatim') {
+            $gobbling = &std_gobbling_stuff('verb','NEW BLK ONLY');
+        } elsif ($gobbling eq 'flushverbatim') {
+            $gobbling = &std_gobbling_stuff('flushverb','NEW BLK ONLY');
+
+        } elsif ($gobbling eq 'display') {
+            $gobbling = &std_gobbling_stuff('txt','txt');
+        } elsif ($gobbling eq 'flushdisplay') {
+            $gobbling = &std_gobbling_stuff('txt','txt');
+
+        } elsif ($gobbling eq 'pseudocode') {
+            $gobbling = &std_gobbling_stuff('pseudocode','NEW BLK ONLY');
+
+        } elsif ($gobbling eq 'tabular') {
+            $gobbling = &std_gobbling_stuff('tabular','NEW BLK ONLY');
+
+        } elsif ($gobbling eq 'menu') {
+            $gobbling = &std_gobbling_stuff(
+                ($Lit2texi) ? 'menu'         : 'TOSS IT',
+                ($Lit2texi) ? 'NEW BLK ONLY' : 'TOSS IT');
+
+        } elsif ($gobbling eq 'rawlatex') {
+            $gobbling = &std_gobbling_stuff(
+                ($Lit2latex) ? 'rawlatex'     : 'TOSS IT',
+                ($Lit2latex) ? 'NEW BLK ONLY' : 'TOSS IT');
+
+	# rawtexinfo is too hard (and not that useful?)
+
+        } elsif ($gobbling eq 'code') {
+            $gobbling = &std_gobbling_stuff('code','NEW BLK ONLY');
+
+        } elsif ($gobbling eq 'bird-code') { # > Bird-track code lines
+            if (/^>.*/) { # append...
+		s/^>// if $Lang_typeset =~ /nobird/; # coerce to non-Bird
+                &append_to_curr_blk('code', $_);
+            } else { # it's over... (in trouble if this is \begin...)
+                &incr_blk_ctr();
+                &append_to_curr_blk('txt',$_);
+                $gobbling = ''; # finished
+            }
+        }
+        next line; # outta here...
+    }
+
+    # now let's do all the stuff that gets us gobbling
+    #
+
+    # change/test: not implemented
+    if (/^\\begin\{(change|test)\}/) { # not implemented
+        $gobbling = $1;
+	# just a warning
+        print STDERR "$Srcfile_name:$Srcfile_lineno: \\begin/\\end\{$1\} not implemented yet [warning]\n";
+
+    } elsif (/^\\begin\{verbatim\}/) {
+        $gobbling = 'verbatim';
+        &incr_blk_ctr();
+    } elsif (/^\\begin\{flushverbatim\}/) {
+        $gobbling = 'flushverbatim';
+        &incr_blk_ctr();
+
+    # special handling of display so we can put \hfil\break onto each
+    # line (for lit2latex)
+    } elsif (/^\\begin\{display\}/) { # no new block here
+        $gobbling = 'display';
+	&append_to_curr_blk('txt',$_);
+    } elsif (/^\\begin\{flushdisplay\}/) {
+        $gobbling = 'flushdisplay';
+	&append_to_curr_blk('txt',$_);
+
+    } elsif (/^\\begin\{pseudocode\}/) {
+        $gobbling = 'pseudocode';
+        &incr_blk_ctr();
+
+    } elsif (/^\\begin\{tabular\}(.*)/) {
+        $gobbling = 'tabular';
+        &incr_blk_ctr();    		# for new tabular blk
+        &set_blk_magic_info($1);	# the main thing!
+
+    } elsif (/^\\begin\{menu\}/) {
+        $gobbling = 'menu';
+        &incr_blk_ctr() if $Lit2texi || $Lit2html; # for new menu blk
+
+    } elsif (/^\\begin\{rawlatex\}/) {
+        $gobbling = 'rawlatex';
+        &incr_blk_ctr() if $Lit2latex; # for new blk
+
+    } elsif (/^\\begin\{code\}/) {
+        $gobbling = 'code';
+        if (/\\begin\{code\}\[(.+)\]/) { # named ribbons...
+            $ribbon_names = $1;
+            $ribbon_names =~ s/\s*,\s*/,/g; # rm spaces around commas
+        } else { 			# implicitly more of code ribbon <<main>>
+            $ribbon_names = 'main';
+        }
+        &incr_blk_ctr();    			# for new code blk
+        &set_blk_magic_info($ribbon_names);	# the main thing!
+
+        # record this block's number in %Ribbon_blks
+        local(@ribbons) = split(/,/,$ribbon_names);
+        local($r);
+        foreach $r (@ribbons) {
+            if ($Ribbon_blks{$r}) {
+                $Ribbon_blks{$r} .= ",$B";
+            } else { # first block
+                $Ribbon_blks{$r} = $B;
+            }
+        }
+
+    } elsif (/^>.*/) {
+        $gobbling = 'bird-code';
+        &incr_blk_ctr();		# for new code blk
+
+	s/^>// if $Lang_typeset =~ /nobird/; # coerce to non-Bird
+        &append_to_curr_blk('code', $_);
+
+	# incr srclineno, because it may later be fiddled downwards
+	$Blk_srcfile_lineno[$B]++ if ! $Lit2pgm;
+        &set_blk_magic_info('main');
+
+	if ($Ribbon_blks{'main'}) {
+	    $Ribbon_blks{'main'} .= ",$B";
+	} else { # first block
+	    $Ribbon_blks{'main'} = $B;
+	}
+    }
+
+    next line if $gobbling; # now set...
+    
+    # in alphabetical order, magical things to look for while categorizing
+
+    if (/\\author\{(.+)\}/) {
+	if ($Lit2texi || $Lit2html) {
+	    $Doc_author = &deatified2verb($1);
+	    $Doc_author = &htmlize_verb($Doc_author) if $Lit2html;
+	    $Doc_author =~ s/\\\\/\n\\center /g if (! $Lit2html);
+	    $Doc_author =~ s/\\\\/ /g if $Lit2html;
+	} else {
+	    &append_to_curr_blk('txt',$_);
+	}
+	next line; # to help perl
+
+    } elsif ($Lit2texi && /^\\appendix/) {
+	# tossed
+	next line; # to help perl
+
+    } elsif ($Lit2texi && /^\\caption\{(.*)\}/) {
+	&append_to_curr_blk('txt',"CAPTION: $1\n");
+	next line; # to help perl
+
+    } elsif (/\\date\{(.+)\}/) {
+	if ($Lit2texi || $Lit2html) {
+	    $Doc_date = &deatified2verb($1);
+            $Doc_date = &htmlize_verb($Doc_date) if $Lit2html;
+	    $Doc_date =~ s/\\\\/\n\\center /g if (! $Lit2html);
+	    $Doc_date =~ s/\\\\/\n\\ /g if $Lit2html;
+	} else {
+	    &append_to_curr_blk('txt',$_);
+	}
+	next line; # to help perl
+
+    } elsif (/^\\define\{\\(.*)\}\s*\{(.*)\}/) {
+	$Define{$1} = $2;
+	# text not saved
+	next line; # to help perl
+
+    } elsif (/^\\end\{document\}/) { # a magic section all its own!
+        &start_new_section();
+    	&incr_Sec_vec(0); # magical depth
+        $Sec_numstr[$S] = join('.',@Sec_vec);
+
+	$Sec_depth[$S] = 0;	# magic value for \begin/\end{document}
+	$Sec_nodename[$S]='';	# so a \001section\003 line will not be dumped for it
+
+	$Sec_nodename[$S] = 'Bottom';
+	# $Nodename_sec{'Bottom'} = $S; # no need for this
+
+        &append_to_curr_blk('txt',$_) if $Lit2latex;
+        &append_to_curr_blk('txt','') if ! $Lit2latex; # need something there
+	next line; # to help perl
+
+    } elsif (/^\\documentstyle(.*)\{(\w+)\}$/) { # says what top-level section should be
+	local($style_options) = $1;
+        local($document_type) = $2;
+
+	$Standalone_doc = 1;
+
+	$Sec_depth[0]     = 0;
+	# makes node 'Top' start to exist (?)
+    	&incr_Sec_vec(0); # magical depth
+        $Sec_numstr[0] = join('.',@Sec_vec);
+
+	$Sec_nodename[0] = 'Top';
+	$Nodename_sec{'Top'} = 0;
+	$Sec_nodespec[0] = 'Top,,,(dir)';
+
+	# depths are set so that top-level menu of sections can be constructed
+        if ($document_type eq 'report' || $document_type eq 'book') {
+    	    # \section1 is a "chapter"
+	    # save info in weird form
+	    &append_to_curr_blk('txt',"\001rootsectiontype\0032\002\n");
+	} elsif ($document_type eq 'article') {
+    	    # \section1 is a "section"
+	    &append_to_curr_blk('txt',"\001rootsectiontype\0033\002\n");
+    	} else {
+    	    &not_OK($Srcfile_name, $Srcfile_lineno,
+		"don't recognise document type: $document_type\n");
+	}
+	
+	# strip the literate style option and put in an explicit \input
+	# this ensures we get the version we want
+	$style_options =~ s/\bliterate\b//;
+	$style_options =~ s/,,/,/; # tidy any mess
+	$style_options =~ s/^\[,/\[/;
+	$style_options =~ s/,\]$/\]/;
+	$style_options =~ s/^\[\]$//;
+	if ($Lit2latex) {
+	    &append_to_curr_blk('txt',"\\documentstyle$style_options\{$document_type\}\n");
+	    # \input is split over two lines so lit-inputter won't recognize it but LaTeX will
+	    &append_to_curr_blk('txt',"\\input%\n");
+	    &append_to_curr_blk('txt',"\{$LIB_DIR/lit-style.tex\}\n");
+	}
+	next line; # to help perl
+
+    }
+    # split here to help perl
+    if (/^\\downsection/) { # save in weird form
+        &append_to_curr_blk('txt',"\001downsection\003\n");
+	next line; # to help perl
+
+    } elsif ($Lit2texi && /^\\(begin|end)\{figure\}/) {
+    	#tossed
+	next line; # to help perl
+
+    } elsif (! $Lit2pgm && /^\\input\{(.*)\}/) {
+	local($iname)   = $1;
+	local($newsuff) = ($Lit2html) ? 'ihtml' : (($Lit2texi) ? 'itxi' : 'itex');
+
+	# change name to the expected suffix or add it if it doesn't have it
+	# cf setting Inputfile_root, etc. in lit2stuff driver
+	if ($iname =~ /\.lit\.[^\.\/]+$/) { # a .lit.<xx> suffix
+	   $iname =~ s/\.lit\.[^\.\/]+$/\.$newsuff/;
+	} elsif ($iname =~ /\.[^\.\/]+$/) {
+	    $iname =~ s/[^\.\/]+$/$newsuff/;
+	} else {
+	    $iname .= ".$newsuff";
+	}
+        &append_to_curr_blk('txt',"\\input\{$iname\}\n");
+	next line; # to help perl
+
+    } elsif (/^\\clear(doublepage|page)/) {
+	&append_to_curr_blk('txt',$_) if $Lit2latex;
+	next line; # to help perl
+
+    } elsif (/^\\listof(figures|tables)/) {
+	&append_to_curr_blk('txt',$_) if $Lit2latex;
+	next line; # to help perl
+
+    } elsif ($Lit2texi && /^\\infocommand\{\\(.*)\}\s*\{(.*)\}/) {
+	&not_OK($Srcfile_name, $Srcfile_lineno, "\\infocommand is obsolete; pls use \\define\n");
+	# text not saved
+	next line; # to help perl
+
+    # \label's require a bit of extra stuff; see below
+
+    } elsif (/^\\makeindex/) {
+#ignored	&append_to_curr_blk('txt',$_) if $Lit2latex;
+	next line; # to help perl
+
+    } elsif (/\\menuentry\{(.+)\}\{(.+)\}/) {
+	if ($Lit2texi) {
+	    local($tag)	  = $1;
+	    local($descr) = $2;
+	    $Sec_extra_menu_entries[$S] .= "\* $tag::\t$descr\n";
+	}
+	next line; # to help perl
+
+    } elsif (! $Lit2texi && /\\node\{.*\}/) {
+	# toss it
+	next line; # to help perl
+
+    } elsif (/\\owner\{([^\}]+)\}/) {
+	local($owner_name) = &deatified2verb($1);
+
+	$Sec_owner[$S] = $owner_name;
+	next line; # to help perl
+    }
+
+    # split here to help perl
+    if (/^\\printindex/) { # sectioning-like things need doing for Texinfo
+
+    	if ($Lit2latex) { # hmm... means index might get tacked on when -g used
+#	    &append_to_curr_blk('txt',$_);
+
+	    # manufacture a top-level section [very carefully]
+	    # otherwise you can get index entries pinned on after the
+	    # \printindex
+    	    &start_new_section();
+	    $Sec_depth[$S]	= 1 ;
+	    $Sec_title[$S]	= ''; # no title
+	    &incr_Sec_vec( 1 );
+	    $Sec_numstr[$S]	= join('.',@Sec_vec);
+	    $Sec_numstr_exists{$Sec_numstr[$S]} = $S;
+	    $Sec_nodename[$S] = ''; # no nodename
+    	    $Nodename_sec{'Index'} = $S;
+	    $Sec_nodespec[$S] = '';
+
+	    &append_to_curr_blk('txt',$_);
+
+	} elsif ($Lit2texi) {
+	    # manufacture a top-level section
+	    # (gaze in handle_sectioning_line, for enlightenment...)
+    	    &start_new_section();
+	    $Sec_depth[$S]	= 1 ;
+	    $Sec_title[$S]	= 'Index';
+	    &incr_Sec_vec( 1 );
+	    $Sec_numstr[$S]	= join('.',@Sec_vec);
+	    $Sec_numstr_exists{$Sec_numstr[$S]} = $S;
+	    $Sec_nodename[$S] = 'Index';
+    	    $Nodename_sec{'Index'} = $S;
+	    $Sec_nodespec[$S] = 'Index,?,?,?';
+
+	    &append_to_curr_blk('txt',"\\printindex cp\n");
+	}
+	next line; # to help perl
+    } elsif (/^\\rootsectiontype\{\\(\w+)\}/ || /^\\rootsectiontype\{(\w+)\}/) {
+    	if ( ! defined($SECCMD_DEPTH{$1})) {
+    	    &not_OK($Srcfile_name, $Srcfile_lineno, "bogus \\rootsectiontype: $1\n");
+	}
+	# saved in weird form
+	&append_to_curr_blk('txt',"\001rootsectiontype\003$SECCMD_DEPTH{$1}\002\n");
+	next line; # to help perl
+
+    } elsif ( ! /^\\section(type|ref)/
+           && (/^\\section[^A-Za-z]/   || /^\\(sub){1,3}section/)) {
+        # quick, zap the synonyms...
+        s/^\\section([^\d])/\\section1$1/;
+        s/^\\subsubsubsection/\\section4/;
+        s/^\\subsubsection/\\section3/;
+        s/^\\subsection/\\section2/;
+
+        # now the real work
+    	&start_new_section();
+        &handle_sectioning_line();
+	next line; # to help perl
+
+    } elsif (/(.*)\\standaloneornot\{(.*)\}\{(.*)\}(.*\n)/) {
+	local($before)     = $1;
+	local($ifso_text)  = &deatified2verb_nl($2);
+	local($ifnot_text) = &deatified2verb_nl($3);
+	local($after)	   = $4;
+
+	&append_to_curr_blk('txt',"$before$ifso_text$after")  if $Standalone_doc;
+	&append_to_curr_blk('txt',"$before$ifnot_text$after") if ! $Standalone_doc;
+	next line; # to help perl
+
+    } elsif (/^\\suppresscomments/) {
+	&append_to_curr_blk('txt',$_) if $Lit2latex;
+	&not_OK($Srcfile_name,$Srcfile_lineno,"can't \\suppresscomments in Info files (warning)\n") if $Lit2texi;
+	next line; # to help perl
+
+    } elsif (/^\\suppressmenu/) {
+	&not_OK($Srcfile_name,$Srcfile_lineno,"\\suppressmenu not implemented\n");
+	next line; # to help perl
+
+    } elsif ($Lit2texi && /^\\(begin|end)\{table\}/) {
+	# tossed
+	next line; # to help perl
+
+    } elsif (/^\\tableofcontents/) {
+	&append_to_curr_blk('txt',$_);
+	next line; # to help perl
+
+    } elsif (/\\title\{(.+)\}/) {
+	if ($Lit2texi || $Lit2html) {
+	    $Doc_title = &deatified2verb($1);
+            $Doc_title = &htmlize_verb($Doc_title) if $Lit2html;
+	    $Doc_title =~ s/\\\\/\n\\center /g if (! $Lit2html);
+	    $Doc_title =~ s/\\\\//g if ($Lit2html);
+	} else {
+	    &append_to_curr_blk('txt',$_);
+	}
+	next line; # to help perl
+
+    } elsif (/^\\upsection/) { # save in weird form
+        &append_to_curr_blk('txt',"\001upsection\003\n");
+	next line; # to help perl
+
+    } else { # just some random line of text
+
+    	# go after \label's
+	while ( ! $Lit2pgm && /\\label\{([^\}]+)\}/) {
+	    local($label_name) = &deatified2verb($1);
+
+	    if (defined($Nodename_sec{$label_name})) {
+		&not_OK($Srcfile_name,$Srcfile_lineno,"$label_name already used as a label or nodename\n");
+	    } else {
+		$Nodename_sec{$label_name} = $S if !$Lit2html;
+		$Nodename_sec{&htmlize_text($label_name)} = $S if $Lit2html;
+		$Sec_aliases[$S] .= "$label_name,";
+	    }
+	    s/\\label\{([^\}]+)\}//  if $Lit2texi;
+	    s/\\label\{/\\label!_\{/ if $Lit2latex; # temp
+	}
+	s/\\label!_\{/\\label\{/g if $Lit2latex; # untemp
+
+        &append_to_curr_blk('txt',$_);
+    }
+  }
+  # wind up last section
+  $Sec_last_blk[$S] = $B;
+}
+
+sub std_gobbling_stuff { # looks at $_
+    # args say what to do with ordinary line ($curr_type)
+    # and what to do if \end{$gobbling} seen
+    local($curr_type, $end_type) = @_;
+
+    if (/^\\end\{$gobbling\}/) { # it's over...
+
+        if ($end_type eq 'NEW BLK ONLY') {
+            &incr_blk_ctr();
+
+        } elsif ($end_type ne 'TOSS IT') {
+            &incr_blk_ctr();
+            &append_to_curr_blk($end_type, $_);
+        }
+
+        $gobbling = ''; # finished
+
+    } elsif ($curr_type ne 'TOSS IT') { # just append...
+
+	# magic stuff for code and (flush)display
+	$_ = '>'.$_ if $gobbling eq 'code' && $Lang_typeset =~ /\bbird/;
+	s/\n$/\\hfil\\break\n/ if $Lit2latex && $gobbling =~ /display$/;
+
+        &append_to_curr_blk($curr_type, $_);
+    }
+    # new $gobbling value returned
+    $gobbling;
+}
+
+sub handle_sectioning_line { # part of categorizing input
+    local($sec_depth,$title,$node_spec) = ('', '', '');
+
+    if (/^\\section(\d+)\*\[([^\]]+)\]\{(.*)\}\s*\n/) { # given title, node-spec (STARRED)
+    	$sec_depth = $1; $node_spec = $2; $title = "\001starred\003$3";
+    	$node_spec .= ',?,?,?' unless $node_spec =~ /,/;
+
+    } elsif (/^\\section(\d+)\[([^\]]+)\]\{(.*)\}\s*\n/) { # given title, node-spec
+    	$sec_depth = $1; $node_spec = $2; $title = $3;
+    	$node_spec .= ',?,?,?' unless $node_spec =~ /,/;
+
+    } elsif (/^\\section(\d+)\*\{(.*)\}\s*\n/) { # given title, default node-spec (STARRED)
+    	$sec_depth = $1; $node_spec = '?,?,?,?'; $title = "\001starred\003$2"; 
+
+    } elsif (/^\\section(\d+)\{(.*)\}\s*\n/) { # given title, default node-spec
+    	$sec_depth = $1; $title = $2; $node_spec = '?,?,?,?';
+
+    } else {
+    	&not_OK($Srcfile_name, $Srcfile_lineno, "hey, sectioning command has me confused: $_");
+    }
+    if ($sec_depth <= 0) {
+	&not_OK($Srcfile_name, $Srcfile_lineno, "section depth not positive: $_");
+	$sec_depth = 1;
+    } elsif ($sec_depth > $MAX_SEC_DEPTH) {
+	&not_OK($Srcfile_name, $Srcfile_lineno, "section depth more than $MAX_SEC_DEPTH: $_");
+	$sec_depth = $MAX_SEC_DEPTH;
+    }
+
+    $Sec_title[$S]	=  $title;		  # stored as deatified ...
+    $Sec_title[$S]	=~ s/\001newline\003/ /g; # but the newlines go
+    $Sec_depth[$S]	= $sec_depth;
+    &incr_Sec_vec($Sec_depth[$S]);
+
+    $Sec_numstr[$S]	= join('.',@Sec_vec);
+    $Sec_numstr_exists{$Sec_numstr[$S]} = $S;
+
+    $node_spec =~ s/^\s+//;	    # tidy up
+    $node_spec =~ s/\s+$//;	    # no leading/trailing spaces
+    $node_spec =~ s/\s*,\s*/,/g;    # no spaces around commas
+
+    if ($node_spec =~ /^\?(,.*)/) {
+    	local($rest_of_nodespec) = $1;
+    	# default node name is root of input filename + section number
+        $Sec_nodename[$S] = $Inputfile_root
+			    . '_' . &tidy_numstr($Sec_numstr[$S])
+			    . $Nodename_suffix;
+        $Sec_nodespec[$S] = $Sec_nodename[$S] . $rest_of_nodespec;
+    } elsif ($node_spec =~ /^([^,\?]+)(,.*)/) {
+        $Sec_nodename[$S] = $1 . $Nodename_suffix;
+    	local($rest_of_nodespec) = $2;
+        $Sec_nodespec[$S] = $Sec_nodename[$S] . $rest_of_nodespec;
+    } else {
+        &not_OK($Srcfile_name, $Srcfile_lineno, "node_spec has me confused: $node_spec\n");
+    }
+    $Nodename_sec{$Sec_nodename[$S]} = $S;
+}
+
+sub fiddle_line_numbers {
+    # there are some off-by-one errors in line numbers, because of the
+    # way things are recorded in read_and_categorize_input.  try to fix.
+    local($S, $B);
+
+    foreach ($S = 0; $S <= $#Sec_depth; $S++) {
+        foreach ($B = $Sec_first_blk[$S]; $B <= $Sec_last_blk[$S]; $B++) {
+
+	    # all the things where the \begin{something}/\end{something}
+	    # isn't kept
+
+	    $Blk_srcfile_lineno[$B]--
+		if  ($Blk_type[$B] =~ /^(code|pseudocode)$/)
+		 || ($Blk_type[$B] eq 'menu')
+		 || ($Blk_type[$B] eq 'tabular')
+		 || ($Blk_type[$B] =~ /verb$/);
+        }
+    }
+}
+
+# keeps the including 'do' happy
+1;
+#% \end{code}

@@ -1,0 +1,300 @@
+\section[Programs-and-options]{Programs to process literate documents}
+
+In this incarnation, the programs \tr{lit2pgm}, \tr{lit2latex}, and
+\tr{lit2texi} (to extract program, \LaTeX{}, or GNU Texinfo fodder)
+are just three ways of invoking one killer \tr{perl} script,
+\tr{lit2stuff}.
+%\begin{comment}
+%A shell script \tr{lit2info}, to run
+%\tr{lit2texi} and then \tr{makeinfo} is not yet implemented.  A script
+%\tr{lit2dvi} to run \tr{lit2latex} and then some sequence of
+%\tr{latex} and \tr{makeindex} invocations is also not out of the
+%question.
+%\end{comment}
+
+[Actually, this same script may be invoked as
+\tr{mkdependlit},\index{mkdependlit} to
+build a set of \tr{make} dependencies for a literate document, as
+\tr{lit2text}\index{lit2text}, to extract just the non-code text
+(perhaps for spell-checking), or as \tr{lit2changelog}, which is the
+(mainly unimplemented) interface to the changelog-slurping code.  I
+ignore these details herein.]
+
+APRIL91: there are starting to be enough options that getopt-style
+one-letter names aren't enough/too obtuse.  Some revision may be in
+order there...  See \sectionref{revised-pgm-options}.
+
+For all three programs, their invocation takes the form
+\tr{lit2<whatever> [options] [input-file]}.
+Usually, output is to a file determined from the input-file's suffix
+(e.g., a \tr{.hs} file from a \tr{.lhs} file); if no input file is
+provided or life becomes confused, output is to the standard output.
+You can control input and output explicitly with the \tr{-i} and
+\tr{-o} options.
+
+Known file suffixes and what they mean:
+
+\begin{tabular}{ll}
+.lit  & a literate-document file with no code in it (e.g., this one) \\
+.lhs  & literate \Haskell{} source \\
+.lprl & literate Perl source \\
+.llex & literate Lex source \\
+.lc   & literate C source \\
+.lh   & literate C header source \\
+.ltex & literate \TeX{} macros \\
+.lf   & literate FORTRAN \\
+\end{tabular}
+
+The suffixes \tr{.itex} and \tr{.itxi} indicate the intermediate files
+from ``separate compilation'' (to \LaTeX{} and Texinfo, respectively)
+of parts of a larger document.
+
+In ordinary life, given a literate C program \tr{foo} in file
+\tr{foo.lc}, one would hope that the following simple invocations
+would suffice:
+\begin{verbatim}
+lit2pgm foo.lc
+gcc -o foo foo.c
+
+lit2latex foo.lc
+latex foo.tex
+
+lit2texi foo.lc
+makeinfo foo.texi
+# (and if you really want to make things right, use the script...
+postmakeinfo foo.info
+# as well)
+\end{verbatim}
+
+What follows are the options to control these programs (and to
+complicate your life [and mine, too]).  Not all command-line options
+make sense for all three programs; they are so noted.  Options may be
+glopped together in the best getopt(3) style.
+
+\subsection*[A_option]{\pl{-A <pgm-name>} option}
+\index{a option@-A <pgm-name> option}
+(For hackers only.)  Assume the program was invoked as \tr{<pgm-name>}.
+must be the first option given.  Still has to be either \tr{lit2pgm},
+\tr{lit2texi}, or \tr{lit2latex}.
+
+\subsection*[c_option]{\pl{-c} option}
+\index{c option@-c option}
+(Not \tr{lit2pgm}.) Produce Texinfo or \LaTeX{} output (as
+appropriate) but don't try to ``link'' together with other parts of
+the same document.  Think of the \tr{-c} option to a C compiler...
+
+\subsection*[d_option]{\pl{-d} option}
+\index{d option@-d option}
+Print debugging information.  I will be monumentally surprised if this
+is of any use to you!
+
+\subsection*[capital_D_option]{\pl{-D} option}
+\index{D option@-D option}
+(\tr{lit2latex} only.) Print cross-references to code
+definitions in the text.
+
+APRIL91: this option stands some chance of being renamed if the
+pseudo-C-preprocessor comes in; see
+\sectionref{pseudo-C-preprocessor}.
+
+\subsection*[f_option]{\pl{-f <nodename-suffix>} option}
+\index{f option@-f <nodename-suffix> option}
+(\tr{lit2texi} only.) Append the string \tr{<nodename-suffix>} to
+every nodename in a file.  This can be useful if you're trying to
+avoid nodename clashes between nodes in different parts of a big
+document (two of which might, for example, have nodes named
+``Introduction'').
+
+APRIL91: A feeble solution; see \sectionref{clumsy-node-namespace}.
+
+\subsection*[g_option]{\pl{-g <node-name>} option}
+\index{g option@-g <node-name> option}
+(\tr{lit2latex} only.) Grab the sub-tree of text for which node
+\tr{<node-name>} is the root.  Used when you want to print a whole chapter
+or section or something, rather than just one Info node.
+
+{\em At this time, this option is only suitable for printing drafts.}
+
+What is actually done: the output \LaTeX{}-file consists of the
+pre-amble (really: everything before the first \tr{\section}
+command---not quite what you want), the subtree you asked for, and
+\tr{\end{document}}.  Your section will be numbered \tr{1} no matter
+what.
+
+\subsection*[H_option]{\pl{-H <dir1>:<dir2>} option}
+\index{h option@-H <dir1>:<dir2> option}
+(For hackers only.) Used by villanous people to override the hardwired
+directories (\tr{<dir1>} for platform-specific files and \tr{<dir2>} for
+platform-independent \tr{perl} libraries) where the
+literate-programming system finds its stuff.  Also see the \tr{-A}
+flag.
+
+\subsection*[i_option]{\pl{-i <input-file>} option}
+\index{i option@-i <input-file> option}
+Specify a specific input file.  If not specified with \tr{-i}, then
+the first non-option command-line argument; if no such thing, then
+standard input.  You may also specify standard input as the ``input
+file'' with \tr{-i -}.
+
+\subsection*[capital_I_option]{\pl{-I <directories>} option}
+\index{i option@-I <directories> option}
+Add (colon-separated) \tr{<directories>} to the front of the
+default path used to follow \tr{\input} commands (just \tr{.} at the
+moment).  Only give one \tr{-I} option; I cannot promise what will
+happen if you give more than one.
+
+Slight magic: the \tr{.} in the path means: first, look in the
+directory where the file doing the \tr{\input}'ing is; if not there,
+look in the current working directory.  (This is usually what you
+want.)
+
+\subsection*[capital_L_option]{\pl{-L} option}
+\index{l option@-L option}
+(\tr{lit2texi} only.) Alternate style of node linking---puts in more
+defaults for ``next'' and ``previous'' nodes.  If a node doesn't have
+a ``next'' [``previous''] at its level (e.g., it's the last section in
+a chapter), then its ``next'' [``previous''] node will be the
+physically-next [-previous] one, regardless of sectioning level.  (The
+default is for such nodes to have no next [previous] node.)
+
+[I like the -L node-linking scheme but \tr{makeinfo} issues warnings
+about it.  APRIL91: newer version of some Info readers achieve the
+same effect using additional moving-around-the-tree commands.]
+
+\subsection*[l_option]{\pl{-l <language>} option}
+\index{l option@-l <language> option}
+(Not \tr{lit2pgm}.) Assume that any code in the input file is written in
+\pl{<language>} and process accordingly (automatic indexing, etc.).
+The \pl{<language>} is normally intuited from the input-file suffix
+(e.g., \tr{.lhs} suggests \Haskell{} code).  The \tr{-x},
+\tr{-p}, and \tr{-t} options may be used to tweak cross-referencing,
+page-breaking, and typesetting of code, respectively.
+
+\subsection*[n_option]{\pl{-n} option}
+\index{n option@-n option}
+Follow \tr{\input} commands.
+
+\subsection*[capital_N_option]{\pl{-N <info-filename>} option}
+\index{n option@-N <info-filename> option}
+(\tr{lit2texi} only.) Arrange for the Info file to
+be called \tr{<infofilename>}.  By default, for input file \tr{foo.xxx}, the
+Info file will be called \tr{foo.info}.  For a multi-file
+document, the Info filename will be derived from the name of the
+first file encountered.
+
+\subsection*[o_option]{\pl{-o <output-file>} option}
+\index{o option@-o <output-file> option}
+Specify a specific output file.  If not specified with \tr{-o}, then
+it's determined by puzzling over the input file's suffix (see the 
+\tr{-i <input-file>} option).  When in doubt, it reverts to the
+standard output.  You may also specify standard output as the ``output
+file'' with \tr{-o -}.
+
+(For hackers only.) If the first character to the \tr{-o} argument is
+a \tr{|}, then the output is piped through the shell command(s) that
+presumably follow.
+
+\subsection*[capital_O_option]{\pl{-O} option}
+\index{o option@-O option}
+(\tr{lit2texi} and \tr{lit2latex} only.)  At the beginning of each
+section, list the owner of the source file from which it was extracted.
+
+[APRIL91: There is some doubt just how this option would work; see
+\sectionref{recording-who-to-blame}.]
+
+\subsection*[p_option]{\pl{-p <pagebreak-hints>} option}
+\index{p option@-p <pagebreak-hints> option}
+(\tr{lit2latex} only.)  The (language-specific) code for typesetting
+the code in the document is passed the \pl{<pagebreak-hints>} to
+further control how it is determined where pagebreaks are allowed.
+This is because it is not always obvious where to do pagebreaks in
+long stretches of code.
+
+These hints, if any, will be mentioned in the documentation of
+language-specific processing (\Sectionref{Language_specific}).
+
+[NOT IMPLEMENTED FOR ANY LANGUAGE]
+
+\subsection*[q_option]{\pl{-q} option}
+\index{q option@-q option}
+(\tr{lit2pgm} only.) Take quick shortcut.  This will work if you are
+only using ribbon \tr{main} (i.e., the usual recommended practice).
+
+Should be much faster than the plain \tr{lit2pgm}.
+The \tr{-q} option will be the {\em default} in the Glorious new
+\Haskell{} compiler.
+
+\subsection*[r_option]{\pl{-r <ribbons-to-get>} option}
+\index{r option@-r <ribbons-to-get> option}
+(\tr{lit2pgm} only.) Extract code-ribbons \tr{<ribbons-to-get>}
+(comma-separated), instead of the default ribbon, \tr{main}.
+An artifact of the implementation is that \tr{-r ''} gets you
+\tr{main}; use \tr{-r junkName} to extract nothing.
+
+\subsection*[s_option]{\pl{-s <stop-list-file>} option}
+\index{s option@-s <stop-list-file> option}
+(\tr{lit2texi} and \tr{lit2latex} only.) The file
+\pl{<stop-list-file>} provides extra information for the automatic
+code-indexing about words that should {\em not} be indexed.
+One hacker's dross is another's gold.
+
+[I'm not sure this is used for any language yet. ToDo: check]
+
+\subsection*[capital_S_option]{\pl{-S} option}
+\index{s option@-S option}
+(Not \tr{lit2pgm}.) Process the input as if it is a standalone document.
+It is so processed if a \tr{\documentstyle} command is seen,
+\tr{-S} option or not.
+
+APRIL91: in jeopardy of going away; see
+\sectionref{pseudo-C-preprocessor}.
+
+\subsection*[t_option]{\pl{-t <typesetting-hints>} option}
+\index{t option@-t <typesetting-hints> option}
+The (language-specific) routines for
+typesetting (really: outputting) the code in the document is passed the
+\pl{<typesetting-hints>} to further control how typesetting is done.
+
+These (comma-separated) hints, if any, will be mentioned in the
+documentation of language-specific processing
+(\Sectionref{Language_specific}).  Available hints:
+\begin{description}
+\item[\tr{-t tgrind}:]
+Typeset code blocks by passing them through the \tr{tgrind} program.
+%
+\item[\tr{-t ruled}:]
+Put lines (rules) above and below blocks of code.
+(The default may vary with other outputting options.)
+%
+\item[\tr{-t unruled}:]
+Do {\em not} put lines (rules) above and below blocks of code.
+%
+\item[\tr{-t bird}:]
+Format all code (but not pseudocode) with Bird-tracks in the first
+column.  By default, only code input with Bird-tracks is so formatted.
+%
+\item[\tr{-t nobird}:]
+Format all code without Bird-tracks.
+\end{description}
+
+\subsection*[v_option]{\pl{-v} option}
+\index{v option@-v option}
+Be verbose.  This is really a debugging thing, too.
+
+\subsection*[x_option]{\pl{-x <xref-hints>} option}
+\index{x option@-x <xref-hints> option}
+The (language-specific) code for indexing
+and/or cross-referencing the code in the document is passed the
+\pl{<xref-hints>} to further control how things are done.
+
+A general one you can use is \tr{-x noindex}, to turn off code
+indexing.
+
+These hints, if any, will be mentioned in the documentation of
+language-specific processing (\Sectionref{Language_specific}).
+
+An example might be using \tr{-l cpp -x extra:make} on the
+configuration files for \tr{jmake}.  These files have both C
+pre-processor and \tr{make} things worthy of
+indexing/cross-referencing, and these options would ensure that the
+code was put through the appropriate routines for both languages.

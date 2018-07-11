@@ -1,0 +1,52 @@
+/* makefile that comes with distribution is in Makefile.original */
+
+PROGRAMS = makeinfo info postmakeinfo
+/* the last is a script that helps cooperation w/ the literate programming stuff */
+
+all:: $(PROGRAMS)
+
+MsubNeededHere(postmakeinfo)
+
+/* CC = gcc termcap'ping does not work right with gcc on sun4s for info */
+
+XCOMM Colon-separated list of directories in which to look for info files.
+DEFAULT_INFOPATH = DefaultInfoPath
+
+XCOMM Command used to print out a text file.  The filename follows this command.
+INFO_PRINT_COMMAND = lpr
+
+PATHSPEC = -DDEFAULT_INFOPATH='"$(DEFAULT_INFOPATH)"'
+PRINTSPEC = -DINFO_PRINT_COMMAND='"$(INFO_PRINT_COMMAND)"'
+INFO_DEFINES = $(PATHSPEC) $(PRINTSPEC)
+
+XCOMM TRACK_SRCFILE and ALLOW_JUNK are partain additions
+MAKEINFO_DEFINES = -DTRACK_SRCFILE -DALLOW_JUNK
+
+/* roll them together; hurts nothing... */
+CPP_DEFINES = $(INFO_DEFINES) $(MAKEINFO_DEFINES)
+
+SRCS_C = info.c makeinfo.c getopt.c getopt1.c
+INFO_OBJS_C     = info.o     getopt.o getopt1.o
+MAKEINFO_OBJS_C = makeinfo.o getopt.o getopt1.o
+
+/*
+HEADERS = getopt.h
+SUPPORT = Makefile ChangeLog testfile.texinfo test-suite.texinfo\
+	default-nodes.texinfo
+*/
+
+BuildPgm(info,$(CC),$(INFO_DEFINES) $(CFLAGS),$(INFO_OBJS_C),-ltermcap,)
+
+BuildPgm(makeinfo,$(CC),$(MAKEINFO_DEFINES) $(CFLAGS),$(MAKEINFO_OBJS_C),,)
+
+MsubProgramScriptTarget(PerlCmd,postmakeinfo,postmakeinfo.prl,,)
+
+InstallBinaryTarget(info, $(INSTBINDIR))
+InstallBinaryTarget(makeinfo, $(INSTBINDIR))
+InstallScriptTarget(postmakeinfo, $(INSTSCRIPTDIR))
+
+CDependTarget( $(SRCS_C) )
+
+EtagsNeededHere(tags) /* need this to do "make tags" */
+ClearTagsFile()
+CTagsTarget( *.h $(SRCS_C) )

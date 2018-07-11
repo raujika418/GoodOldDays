@@ -1,0 +1,162 @@
+<html>
+<head>
+<title>Haskell 1.3 Text Input: PreludeReadTextIO</title>
+</head>
+<body>
+
+[<a href="PreludeStdIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeWriteTextIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+
+<h2>Text Input "PreludeReadTextIO"</h2>
+
+This module defines the standard set of input operations for reading
+characters and strings from text files, using 
+<a href="PreludeStdIO.html#Handles">handles</a>.
+
+<hr>
+<p>
+
+<pre>
+> interface PreludeReadTextIO where
+
+> import PreludeMonadicIO
+> import PreludeIOError
+> import PreludeStdIO
+</pre><p>
+
+<a name="hReady"><h3>Checking for Input</h3></a>
+
+<pre>
+> hReady        :: Handle -> IO Bool 
+</pre><p>
+
+Computation <code>hReady</code> <var>hdl</var> indicates whether at least
+one item is available for input from handle <var>hdl</var>.
+ <a href="Rationale.html#hReady">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+<p>
+
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+<li><code>EOF</code><br>
+End of file.
+</ul>
+<p>
+
+<a name="hGetChar"><h3>Reading Characters</h3></a>
+
+<pre>
+> getChar       ::           IO Char
+> hGetChar      :: Handle -> IO Char
+> getChar       =  hGetChar stdin
+</pre><p>
+
+Computation <code>hGetChar</code> <var>hdl</var> reads the next
+character from handle <var>hdl</var>, blocking until a character is
+available.  <p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+<li><code>EOF</code><br>
+End of file.
+</ul>
+<p>
+
+<code>getChar</code> reads the next character from <code>stdin</code>.
+The computation may fail with the same errors as <code>hGetChar</code>.<p>
+
+<a name="hLookahead"><h3>Reading Ahead</h3></a>
+
+<pre>
+> hLookAhead    :: Handle -> IO Char
+</pre><p>
+
+Computation <code>hLookAhead</code> <var>hdl</var> returns the next
+character from handle <var>hdl</var> without removing it from
+the input buffer, blocking until 
+a character is available.
+ <a href="Rationale.html#LookAhead">
+<img src="Rationale.gif" alt="(Rationale)"></a>
+
+<p>
+The computation may fail with:
+<ul>
+<li><code>HardwareFault</code><br>
+A physical I/O error has occurred.
+[<code>EIO</code>]
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+[<code>ENOMEM</code>]
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+<li><code>EOF</code><br>
+End of file.
+</ul>
+<p>
+
+<a name="hGetContents"><pre>
+> hGetContents  :: Handle -> IO String
+</pre></a><p>
+Computation <code>hGetContents</code> <var>hdl</var> returns the list of
+characters corresponding to the unread portion of the channel or file managed
+by <var>hdl</var>, which is made semi-closed.<p>
+
+The computation may fail with:
+<ul>
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+<li><code>IllegalOperation</code><br>
+The handle is not open for reading.
+</ul>
+<p>
+
+<pre>
+> readFile      :: FilePath -> IO String
+> readFile name =  openFile name ReadMode >>= hGetContents
+</pre><p>
+
+<code>readFile</code> <var>file</var> returns the contents of
+<var>file</var> as a lazy string.<p>
+The computation may fail with:
+<ul>
+<li><code>ResourceExhausted</code><br>
+Insufficient resources are available to perform the operation.
+</ul>
+<p>
+
+<hr><p>
+
+
+[<a href="PreludeStdIO.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeWriteTextIO.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</html>

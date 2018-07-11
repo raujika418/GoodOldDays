@@ -1,0 +1,1040 @@
+%!PS-Adobe-2.0
+%%BoundingBox:    0 0 560 800
+%%Title:          Activity Profile
+%%Creator:        qp2ps.pl
+%%CreationDate:   Fri Jun 14 21:36:22 BST 1996
+
+%%EndComments
+/red { 0.8 0 0 } def
+/green { 0 0.9 0.1 } def
+/blue { 0 0.1 0.9 } def
+/crimson { 0.7 0.5 0 } def
+/amber { 0.9 0.7 0.2 } def
+/cyan { 0 0.6 0.9 } def
+/printText { 0 0 moveto (GrAnSim) show } def
+/logo { gsave 
+        translate 
+        .95 -.05 0
+          { dup 1 exch sub 0 exch setrgbcolor printText 1 -.5 translate } for 
+        1 0 0 setrgbcolor printText
+        grestore} def
+/asciilogo { 5 sub moveto HB16 setfont (GrAnSim) show } def
+/cmpx {pop exch pop eq} def             % compare x-coors of 2 points
+/cmpy {exch pop 3 2 roll pop eq} def    % compare y-coors of 2 points
+/cmp {2 index eq {exch pop eq}          % compare 2 points
+                 {pop pop pop false} ifelse } def
+% -----------------------------------------------------------------------------
+/scale-y { gsave
+           0 50 0.03125 mul translate
+           1 0.96875 scale } def
+/unscale-y { grestore } def 
+% -----------------------------------------------------------------------------
+/str-len 12 def
+/prt-n { cvi str-len string cvs 
+         dup stringwidth pop 
+         currentpoint pop 780 gt { 10 sub } { 2 div } ifelse 
+         neg 0 rmoveto 
+         show  } def 
+        % print top-of-stack integer centered at the current point
+/total-len 7520663 def
+/show-len 790 def
+/x-offset 100 def
+/y-offset 50 def
+/normalize { total-len div show-len x-offset sub mul x-offset add floor } def
+% -----------------------------------------------------------------------------
+%/L { lineto } def
+%/L {2 copy pop 1 sub currentpoint exch pop lineto lineto} def
+/L {2 copy currentpoint cmpx not
+     {2 copy pop currentpoint exch pop lineto} if
+    2 copy currentpoint cmpy 
+     {pop pop} 
+     {lineto} ifelse
+} def
+/F { % flush a segment of the overall area; Arg: color
+            currentpoint pop 50 lineto closepath
+            setrgbcolor fill 
+} def
+/M {  % Start drawing a slice (vert. line and moveto startpoint)
+      % Arg: x y
+      newpath 1 index 50 moveto lineto
+} def
+% For debugging PS uncomment this line and add the file behandler.ps
+%  begin printonly endprint 
+/HE10 /Helvetica findfont 10 scalefont def
+/HE12 /Helvetica findfont 12 scalefont def
+/HE14 /Helvetica findfont 14 scalefont def
+/HB16 /Helvetica-Bold findfont 16 scalefont def
+% -----------------------------------------------------------------------------
+-90 rotate
+-785 30 translate
+newpath
+0 8 moveto
+0 525 760 525 8 arcto
+4 {pop} repeat
+760 525 760 0 8 arcto
+4 {pop} repeat
+760 0 0 0 8 arcto
+4 {pop} repeat
+0 0 0 525 8 arcto
+4 {pop} repeat
+0.500000 setlinewidth
+stroke
+newpath
+4 505 moveto
+4 521 752 521 4 arcto
+4 {pop} repeat
+752 521 752 501 4 arcto
+4 {pop} repeat
+752 501 4 501 4 arcto
+4 {pop} repeat
+4 501 4 521 4 arcto
+4 {pop} repeat
+0.500000 setlinewidth
+stroke
+HE14 setfont
+100 505 moveto
+(pf +RTS -bP -bp16 -bl400  ) show
+4 8 moveto
+4 24 756 24 4 arcto
+4 {pop} repeat
+756 24 756 4 4 arcto
+4 {pop} repeat
+756 4 4 4 4 arcto
+4 {pop} repeat
+4 4 4 24 4 arcto
+4 {pop} repeat
+0.500000 setlinewidth
+stroke
+100 10 moveto
+0 10 rlineto
+10 0 rlineto
+0 -10 rlineto
+closepath
+gsave
+green setrgbcolor
+fill
+grestore
+stroke
+HE14 setfont
+115 10 moveto
+(running) show
+200 10 moveto
+0 10 rlineto
+10 0 rlineto
+0 -10 rlineto
+closepath
+gsave
+amber setrgbcolor
+fill
+grestore
+stroke
+HE14 setfont
+215 10 moveto
+(runnable) show
+300 10 moveto
+0 10 rlineto
+10 0 rlineto
+0 -10 rlineto
+closepath
+gsave
+cyan setrgbcolor
+fill
+grestore
+stroke
+HE14 setfont
+315 10 moveto
+(fetching) show
+400 10 moveto
+0 10 rlineto
+10 0 rlineto
+0 -10 rlineto
+closepath
+gsave
+red setrgbcolor
+fill
+grestore
+stroke
+HE14 setfont
+415 10 moveto
+(blocked) show
+500 10 moveto
+0 10 rlineto
+10 0 rlineto
+0 -10 rlineto
+closepath
+gsave
+blue setrgbcolor
+fill
+grestore
+stroke
+HE14 setfont
+515 10 moveto
+(migrating) show
+-40 -10 translate
+% -----------------------------------------------------------------------------
+% Print x-axis:
+/y-val 50 def
+0.5 setlinewidth
+x-offset y-val moveto total-len normalize x-offset sub 0 rlineto stroke
+0 total-len 10 div total-len
+ { dup normalize dup y-val moveto 0 -2 rlineto stroke  % tic
+   y-val 10 sub moveto HE10 setfont round prt-n  % print label 
+ } for 
+1 setlinewidth
+% -----------------------------------------------------------------------------
+scale-y
+100 50 moveto
+% -----------------------------------------------------------------------------
+100 50 M
+100 64 L
+145 79 L
+145 93 L
+146 93 L
+146 166 L
+147 180 L
+147 282 L
+148 282 L
+480 267 L
+480 238 L
+481 253 L
+481 325 L
+482 325 L
+559 311 L
+559 296 L
+560 311 L
+560 340 L
+607 340 L
+608 340 L
+608 369 L
+609 369 L
+610 354 L
+610 369 L
+611 369 L
+628 354 L
+628 369 L
+632 354 L
+632 369 L
+634 354 L
+634 340 L
+635 340 L
+635 354 L
+637 340 L
+637 354 L
+638 354 L
+639 354 L
+640 369 L
+686 369 L
+687 354 L
+687 412 L
+688 427 L
+688 441 L
+689 441 L
+689 456 L
+690 456 L
+691 441 L
+692 427 L
+692 441 L
+693 441 L
+693 427 L
+694 427 L
+695 427 L
+695 412 L
+696 427 L
+698 412 L
+698 427 L
+704 412 L
+704 427 L
+706 427 L
+707 412 L
+708 412 L
+708 427 L
+709 441 L
+710 441 L
+711 456 L
+712 456 L
+713 470 L
+714 456 L
+715 470 L
+715 456 L
+716 470 L
+717 470 L
+718 470 L
+719 456 L
+719 470 L
+720 470 L
+721 456 L
+722 470 L
+723 456 L
+724 441 L
+725 441 L
+726 427 L
+727 412 L
+727 427 L
+728 412 L
+728 427 L
+729 427 L
+730 427 L
+731 427 L
+732 441 L
+732 427 L
+733 412 L
+733 427 L
+734 427 L
+735 412 L
+735 427 L
+736 441 L
+736 456 L
+737 456 L
+737 470 L
+738 470 L
+738 456 L
+739 456 L
+740 456 L
+740 441 L
+741 441 L
+741 485 L
+743 470 L
+743 485 L
+744 485 L
+744 470 L
+745 485 L
+745 470 L
+746 485 L
+747 485 L
+748 485 L
+red F
+100 50 M
+100 64 L
+145 79 L
+145 93 L
+146 79 L
+146 166 L
+147 180 L
+147 282 L
+148 267 L
+148 282 L
+480 267 L
+480 238 L
+481 253 L
+481 282 L
+482 267 L
+482 282 L
+559 267 L
+559 253 L
+560 267 L
+560 282 L
+607 296 L
+608 282 L
+608 296 L
+609 282 L
+609 296 L
+610 282 L
+610 296 L
+611 282 L
+611 296 L
+628 282 L
+628 296 L
+632 282 L
+632 296 L
+634 282 L
+634 267 L
+635 282 L
+635 296 L
+637 282 L
+637 311 L
+638 296 L
+638 311 L
+639 296 L
+639 311 L
+640 325 L
+686 340 L
+687 325 L
+688 340 L
+689 325 L
+689 354 L
+690 340 L
+690 354 L
+691 340 L
+692 325 L
+692 340 L
+693 325 L
+694 311 L
+694 325 L
+695 311 L
+695 296 L
+696 311 L
+698 296 L
+698 325 L
+704 311 L
+704 325 L
+706 311 L
+707 296 L
+708 311 L
+709 325 L
+710 311 L
+711 325 L
+712 311 L
+712 325 L
+713 340 L
+714 325 L
+714 340 L
+715 354 L
+715 340 L
+716 354 L
+717 340 L
+718 354 L
+719 340 L
+719 354 L
+720 340 L
+720 354 L
+721 340 L
+722 354 L
+723 340 L
+724 325 L
+724 340 L
+725 325 L
+725 340 L
+726 325 L
+727 311 L
+727 340 L
+728 325 L
+728 340 L
+729 325 L
+730 325 L
+731 311 L
+732 325 L
+733 311 L
+733 354 L
+734 340 L
+734 354 L
+735 340 L
+735 354 L
+736 369 L
+737 354 L
+737 369 L
+738 354 L
+738 340 L
+739 354 L
+740 354 L
+740 340 L
+741 325 L
+741 354 L
+743 340 L
+743 354 L
+744 340 L
+744 325 L
+745 340 L
+745 311 L
+746 325 L
+747 340 L
+747 354 L
+748 340 L
+cyan F
+100 50 M
+100 64 L
+145 79 L
+146 79 L
+146 151 L
+147 166 L
+147 238 L
+148 238 L
+148 282 L
+480 267 L
+480 238 L
+481 253 L
+482 253 L
+482 282 L
+559 267 L
+559 253 L
+560 267 L
+560 282 L
+607 296 L
+608 282 L
+609 282 L
+609 296 L
+610 282 L
+610 267 L
+611 267 L
+611 296 L
+628 282 L
+628 296 L
+632 282 L
+632 296 L
+634 282 L
+634 267 L
+635 282 L
+635 296 L
+637 282 L
+637 296 L
+638 296 L
+638 311 L
+639 296 L
+639 311 L
+640 325 L
+686 340 L
+687 325 L
+687 282 L
+688 296 L
+688 340 L
+689 325 L
+689 340 L
+690 340 L
+690 354 L
+691 340 L
+692 325 L
+693 325 L
+693 311 L
+694 311 L
+694 325 L
+695 311 L
+695 296 L
+696 311 L
+698 296 L
+698 325 L
+704 311 L
+704 325 L
+706 311 L
+707 296 L
+708 311 L
+709 325 L
+710 311 L
+711 325 L
+712 311 L
+713 325 L
+713 340 L
+714 325 L
+714 340 L
+715 354 L
+715 340 L
+716 354 L
+717 340 L
+718 354 L
+719 340 L
+720 340 L
+720 354 L
+721 340 L
+722 354 L
+723 340 L
+724 325 L
+725 325 L
+725 340 L
+726 325 L
+727 311 L
+727 340 L
+728 325 L
+728 340 L
+729 325 L
+730 325 L
+731 311 L
+732 325 L
+732 311 L
+733 296 L
+733 340 L
+734 340 L
+734 354 L
+735 340 L
+736 354 L
+736 369 L
+737 354 L
+737 369 L
+738 354 L
+738 340 L
+739 354 L
+739 340 L
+740 340 L
+741 325 L
+741 354 L
+743 340 L
+744 340 L
+744 311 L
+745 325 L
+745 311 L
+746 325 L
+746 311 L
+747 325 L
+748 325 L
+blue F
+100 50 M
+100 64 L
+145 79 L
+146 79 L
+146 151 L
+147 166 L
+147 238 L
+148 238 L
+148 282 L
+480 267 L
+480 238 L
+481 253 L
+482 253 L
+482 282 L
+559 267 L
+559 253 L
+560 267 L
+560 282 L
+607 296 L
+608 282 L
+609 282 L
+609 296 L
+610 282 L
+610 267 L
+611 267 L
+611 296 L
+628 282 L
+628 296 L
+632 282 L
+632 296 L
+634 282 L
+634 267 L
+635 282 L
+635 296 L
+637 282 L
+637 296 L
+638 296 L
+638 311 L
+639 296 L
+639 311 L
+640 325 L
+686 340 L
+687 325 L
+687 282 L
+688 296 L
+688 340 L
+689 325 L
+689 340 L
+690 340 L
+690 354 L
+691 340 L
+692 325 L
+693 325 L
+693 311 L
+694 311 L
+694 325 L
+695 311 L
+695 296 L
+696 311 L
+698 296 L
+698 325 L
+704 311 L
+704 325 L
+706 311 L
+707 296 L
+708 311 L
+709 325 L
+710 311 L
+711 325 L
+712 311 L
+713 325 L
+713 340 L
+714 325 L
+714 340 L
+715 354 L
+715 340 L
+716 354 L
+717 340 L
+718 354 L
+719 340 L
+720 340 L
+720 354 L
+721 340 L
+722 354 L
+723 340 L
+724 325 L
+725 325 L
+725 340 L
+726 325 L
+727 311 L
+727 340 L
+728 325 L
+728 340 L
+729 325 L
+730 325 L
+731 311 L
+732 325 L
+732 311 L
+733 296 L
+733 340 L
+734 340 L
+734 354 L
+735 340 L
+736 354 L
+736 369 L
+737 354 L
+737 369 L
+738 354 L
+738 340 L
+739 354 L
+739 340 L
+740 340 L
+741 325 L
+741 354 L
+743 340 L
+744 340 L
+744 311 L
+745 325 L
+745 311 L
+746 325 L
+746 311 L
+747 325 L
+748 325 L
+amber F
+100 50 M
+100 64 L
+145 79 L
+146 79 L
+146 151 L
+147 166 L
+147 238 L
+148 238 L
+148 282 L
+480 267 L
+480 238 L
+481 253 L
+482 253 L
+482 282 L
+559 267 L
+559 253 L
+560 267 L
+560 282 L
+607 282 L
+608 267 L
+609 267 L
+609 282 L
+610 267 L
+610 253 L
+611 253 L
+611 282 L
+628 267 L
+628 282 L
+632 267 L
+632 282 L
+634 267 L
+635 267 L
+635 282 L
+637 267 L
+638 267 L
+638 282 L
+639 267 L
+640 282 L
+686 282 L
+687 267 L
+687 224 L
+688 238 L
+688 282 L
+689 267 L
+690 267 L
+690 282 L
+691 267 L
+691 282 L
+692 267 L
+693 267 L
+694 267 L
+694 282 L
+695 267 L
+696 282 L
+698 267 L
+698 282 L
+704 267 L
+704 282 L
+706 267 L
+706 282 L
+707 267 L
+708 267 L
+709 282 L
+710 267 L
+711 282 L
+712 267 L
+712 253 L
+713 267 L
+713 282 L
+714 267 L
+715 282 L
+715 267 L
+716 282 L
+717 267 L
+717 282 L
+718 282 L
+719 267 L
+720 267 L
+720 282 L
+721 267 L
+722 282 L
+723 267 L
+723 282 L
+724 267 L
+725 267 L
+725 282 L
+726 267 L
+726 282 L
+727 267 L
+727 282 L
+728 267 L
+728 282 L
+729 267 L
+730 282 L
+731 267 L
+732 282 L
+732 267 L
+733 253 L
+733 267 L
+734 267 L
+734 282 L
+735 267 L
+735 253 L
+736 267 L
+736 282 L
+737 267 L
+737 282 L
+738 267 L
+738 282 L
+739 282 L
+739 253 L
+740 267 L
+741 253 L
+741 282 L
+743 267 L
+744 267 L
+744 253 L
+745 267 L
+745 253 L
+746 267 L
+746 238 L
+747 253 L
+747 238 L
+748 238 L
+green F
+748 500 M
+749 500 L
+749 456 L
+750 456 L
+750 470 L
+751 470 L
+751 441 L
+752 456 L
+753 456 L
+753 427 L
+754 427 L
+755 412 L
+755 296 L
+756 296 L
+756 224 L
+757 209 L
+758 195 L
+758 151 L
+759 151 L
+759 137 L
+765 122 L
+765 108 L
+766 93 L
+768 79 L
+770 64 L
+790 50 L
+red F
+748 340 M
+748 354 L
+749 340 L
+749 325 L
+750 340 L
+751 340 L
+751 325 L
+752 340 L
+753 325 L
+753 311 L
+754 296 L
+755 282 L
+755 224 L
+756 209 L
+756 166 L
+757 151 L
+757 122 L
+758 108 L
+759 93 L
+759 79 L
+765 64 L
+766 50 L
+766 64 L
+768 50 L
+768 64 L
+770 50 L
+770 64 L
+790 50 L
+cyan F
+748 340 M
+749 340 L
+749 325 L
+750 340 L
+750 325 L
+751 325 L
+751 311 L
+752 325 L
+752 340 L
+753 325 L
+753 296 L
+754 282 L
+755 267 L
+755 224 L
+756 209 L
+756 166 L
+757 151 L
+757 122 L
+758 108 L
+759 93 L
+759 79 L
+765 64 L
+766 50 L
+766 64 L
+768 50 L
+768 64 L
+770 50 L
+770 64 L
+790 50 L
+blue F
+748 340 M
+749 340 L
+749 325 L
+750 340 L
+750 325 L
+751 325 L
+751 311 L
+752 325 L
+752 340 L
+753 325 L
+753 296 L
+754 282 L
+755 267 L
+755 224 L
+756 209 L
+756 166 L
+757 151 L
+757 122 L
+758 108 L
+759 93 L
+759 79 L
+765 64 L
+766 50 L
+766 64 L
+768 50 L
+768 64 L
+770 50 L
+770 64 L
+790 50 L
+amber F
+748 253 M
+749 253 L
+749 267 L
+750 267 L
+750 253 L
+751 267 L
+751 253 L
+752 267 L
+752 282 L
+753 267 L
+753 224 L
+754 209 L
+754 224 L
+755 209 L
+755 180 L
+756 166 L
+756 151 L
+757 137 L
+757 108 L
+758 93 L
+758 108 L
+759 93 L
+759 64 L
+765 50 L
+765 64 L
+766 50 L
+766 64 L
+768 50 L
+768 64 L
+770 50 L
+770 64 L
+790 50 L
+green F
+% ---------------------------------------------------------------------------
+0 0 0 setrgbcolor
+unscale-y
+HE14 setfont (Average Parallelism = 14.2
+) dup stringwidth pop 790 exch sub 515 moveto show
+HE14 setfont (Runtime = 7520663
+) dup stringwidth pop 790 exch sub 20 moveto show
+% ---------------------------------------------------------------------------
+% Y-Axis:
+% ---------------------------------------------------------------------------
+0 0 0 setrgbcolor
+scale-y
+gsave
+HE12 setfont
+(tasks)
+dup stringwidth pop
+500
+exch sub
+55 exch
+translate
+90 rotate
+0 0 moveto
+show
+grestore
+HE12 setfont
+100 50 moveto
+100 500 lineto
+% Max number of tasks: 31
+% Number of ticks: 10
+0.5 setlinewidth
+100 500 moveto
+95 500 lineto
+70 500 moveto
+(31) show
+100 485.483870967742 moveto
+95 485.483870967742 lineto
+70 485.483870967742 moveto
+(30) show
+100 441.935483870968 moveto
+95 441.935483870968 lineto
+70 441.935483870968 moveto
+(27) show
+100 398.387096774194 moveto
+95 398.387096774194 lineto
+70 398.387096774194 moveto
+(24) show
+100 354.838709677419 moveto
+95 354.838709677419 lineto
+70 354.838709677419 moveto
+(21) show
+100 311.290322580645 moveto
+95 311.290322580645 lineto
+70 311.290322580645 moveto
+(18) show
+100 267.741935483871 moveto
+95 267.741935483871 lineto
+70 267.741935483871 moveto
+(15) show
+100 224.193548387097 moveto
+95 224.193548387097 lineto
+70 224.193548387097 moveto
+(12) show
+100 180.645161290323 moveto
+95 180.645161290323 lineto
+70 180.645161290323 moveto
+(9) show
+100 137.096774193548 moveto
+95 137.096774193548 lineto
+70 137.096774193548 moveto
+(6) show
+100 93.5483870967742 moveto
+95 93.5483870967742 lineto
+70 93.5483870967742 moveto
+(3) show
+100 50 moveto
+95 50 lineto
+70 50 moveto
+(0) show
+ stroke
+1 setlinewidth
+% ---------------------------------------------------------------------------
+unscale-y
+HE14 setfont
+50 520 logo
+showpage
+%% y_scaling: 0.96875

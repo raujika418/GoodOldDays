@@ -1,0 +1,15 @@
+# still probably too simplistic
+sub spit_out_raw_text {
+
+    foreach ($S = 0; $S <= $#Sec_depth; $S++) {
+        print "\\section$Sec_depth[$S]\[$Sec_nodespec[$S]\]\{$Sec_title[$S]\}\n";
+
+        foreach ($B = $Sec_first_blk[$S]; $B <= $Sec_last_blk[$S]; $B++) {
+
+	    print $Blk_txt[$B] if $Blk_type[$B] ne 'code';
+	}
+    }
+}
+
+# this keeps 'do'ing happy
+1;

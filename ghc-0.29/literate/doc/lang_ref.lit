@@ -1,0 +1,472 @@
+\section[Command_reference]{\LaTeX{}-like markup commands: reference}
+
+This \sectiontype{Command_reference} assumes you are familiar with the
+tutorial-ish material in \sectionref{notation-tut}.  It also assumes
+some familiarity with \LaTeX{}, in that I may say say, ``It works as
+in \LaTeX{}''.
+
+The lists below catalog the environments\index{environment}
+(\tr{\begin{...}/\end{...}} things) and commands\index{command}
+(backslashed \tr{\things}) of our Glasgow literate-programming notation.
+[For this clunky implementation, the \tr{\begin{...}} and \tr{\end{...}}
+delimiters should be on lines by themselves, beginning in the leftmost
+column.]
+
+Occasional mention is made of the main programs used to process
+literate files: \tr{lit2pgm}, which extracts the code from a file;
+\tr{lit2latex}, which creates real \LaTeX{} source from a file; and
+\tr{lit2texi}, which creates Texinfo source from a file (from which
+Info files can be made with \tr{makeinfo}).
+
+Little things first:
+\begin{itemize}
+\item
+In text, you should use the \TeX{} style of double quotes:
+\tr{``foo''}.
+\item
+In text, backslashed magic characters, e.g., \tr{\& \_ \# \$}, will
+produce the self-same de-backslashed magic characters in the output.
+\item
+Accents on characters (e.g., \tr{\'e}) are fine; they are tossed from
+Info files.
+\item
+You may safely use the italic correction \tr{\/}.
+\item
+At least the font-fiddling declarations \tr{\sc} and \tr{\tt} will
+work; they are heartily unrecommended.
+APRIL91: see the comments in \sectionref{diff-fonts-in-text}.
+Also, make them commands, not declarations?
+\end{itemize}
+
+Commands and environments (in alphabetical order):
+
+% I want to split these somehow so that info menus help one jump around
+
+\subsection*[\appendix]{\pl{\appendix}}
+\index{appendix@\appendix}
+Section numbering after this command is for appendices.
+(Has no effect on Info files.  ToDo: it probably should.)
+
+\subsection*[\author]{\pl{\author{<text>}}}
+\index{author@\author}
+Please see under \tr{\maketitle}.
+
+\subsection*[center_environment]{\pl{center} environment}
+\index{center environment}
+As for \LaTeX{}.  [APRIL91: Not implemented (and not sure how to do it
+easily on the Texinfo side), but I need to do something because Simon
+keeps using it.]
+
+\subsection*[\centerline]{\pl{\centerline{<text>}}}
+\index{centerline@\centerline}
+As for \LaTeX{}.
+
+\subsection*[\caption]{\pl{\caption{<text>}}}
+\index{caption@\caption}
+As for \LaTeX{}; likely to be unsatisfactory for Info files because the
+latter doesn't do figures.
+
+\subsection*[\clearpage-etc]{\pl{\clearpage} and \pl{\cleardoublepage}}
+\index{clearpage@\clearpage}
+\index{cleardoublepage@\cleardoublepage}
+As in \LaTeX{}; no effect on Info files.
+
+\subsection*[code_environment]{\pl{code} environment}
+\index{code environment}
+% could use some indexing here ???
+See \sectionref{code-in-doc}.  Also, don't forget the \tr{pseudocode}
+environment.
+
+You cannot nest other environments inside code environments.
+
+\subsection*[comment_environment]{\pl{comment} environment}
+\index{comment environment}
+Text in a \tr{comment} environment will be output (perhaps with
+extra indentation, smaller font, etc.) if a \tr{\suppresscomments}
+command hasn't yet been encountered.  [NB: \tr{\suppresscomments}
+doesn't work with \tr{lit2texi}.]
+
+A comment environment cannot include another comment environment.
+
+\subsection*[\date]{\pl{\date{<text>}}}
+\index{date@\date}
+As for \LaTeX{}; please see under \tr{\maketitle} for exact details.
+
+\subsection*[\define]{\pl{\define{<command>}{<replacement>}}}
+\index{define@\define}
+Ultra-simple macro substitution, NOT LIKE \LaTeX{}.  The text for
+\tr{<command>} will be replaced with \tr{<replacement>}; no nesting,
+no funny characters, nothing fancy.
+Don't \tr{\define} the same \tr{<command>} twice, for
+example.  Intended for customising documents; please see the note
+under \tr{\input}.
+
+Defaults are provided for \tr{\Haskell}, \tr{\LaTeX}, \tr{\TeX} and
+\tr{\ldots}.  More defaults on request.
+
+APRIL91: see \sectionref{pseudo-C-preprocessor} for what I would
+REALLY like to do about ``defining''.
+
+\subsection*[description_environment]{\pl{description} environment}
+\index{description environment}
+As in \LaTeX{}.
+
+\subsection*[display_environment]{\pl{display} environment}
+\index{display environment}
+Similar to \tr{verbatim} (line-breaks are obeyed) but formatted in the
+prevailing font (not necessarily typewriter).  There is a
+\tr{flushdisplay} environment as well.
+
+You can't nest one display environment inside another.
+
+\subsection*[\documentstyle]{\pl{\documentstyle[<style-options>]{<doc-type>}}}
+\index{documentstyle@\documentstyle}
+You do not have to  the \tr{literate} \LaTeX{} style option; e.g.,
+\tr{\documentstyle[literate]{report}}, but it is probably a good idea
+so people don't think you're writing real \LaTeX{}.
+
+\tr{\documentstyle} has two magical actions: (1)~the type of
+document (report, article, etc.) determines the default value
+for \tr{\rootsectiontype}, and (2)~it indicates that a standalone
+document is being generated (not just a part of one).  [APRIL91: bear
+in mind that this standalone business is in jeopardy.]
+
+\subsection*[\em]{\pl{{\em <text>}}}
+\index{em@\em}
+The \pl{\em} (emphasize) declaration works just as in \LaTeX{}.
+
+APRIL91: make it a command, not a declaration, i.e., \pl{\em{<text>}}?
+
+\subsection*[enumerate_environment]{\pl{enumerate} environment}
+\index{enumerate environment}
+As in \LaTeX{}.
+
+\subsection*[figure_environment]{\pl{figure} environment}
+\index{figure environment}
+Goes straight through for \LaTeX{}; ignored for Info files, meaning that
+whatever is inside won't ``float.''  (Remember: we don't really do
+figures; see \sectionref{texinfo-limits}.)
+
+\subsection*[flushdisplay_environment]{\pl{flushdisplay} environment}
+\index{flushdisplay environment}
+Same as the \tr{display} environment, except it is not indented
+relative to the left margin.
+
+You can't nest one flushdisplay environment inside another.
+
+\subsection*[flushverbatim_environment]{\pl{flushverbatim} environment}
+\index{flushverbatim environment}
+Same as the \tr{verbatim} environment except that text is not indented
+relative to the left margin.
+
+You can't nest other environments inside a flushverbatim environment;
+see the note in \sectionref{verbatim_environment}.
+
+\subsection*[\footnote]{\pl{\footnote{<text>}}}
+\index{footnote@\footnote}
+Footnotes work!  NB: with \tr{makeinfo}, you may choose one of two
+ways of doing footnotes in an Info file.  By default, they will be at
+the bottom of the node (style BN), as opposed to in a node of their
+own (style MN).  [ToDo: update the makeinfo info]
+
+\subsection*[\heading]{\pl{\heading{<title>}}}
+\index{heading@\heading}
+A pseudo-sectioning command that formats \tr{title} as if it were a
+section heading (no numbering or any of that rot), but it doesn't put
+anything in the table of contents, no Info node, no anything weird.
+
+\subsection*[\index]{\pl{\index{<entry>}}}
+\index{index@\index}
+Roughly as for \LaTeX{} with \tr{makeindex}.  Don't try anything too
+weird: for example, \tr{\index{<mumble>}} inside a footnote doesn't
+work.  Warning: full-blown \tr{makeindex}-style indexing has been
+``simplified'': please see \sectionref{Indexing} for the full gory
+(but wonderful!) details.
+
+\subsection*[\input]{\pl{\input{<filename>}}}
+\index{input@\input}
+Be sure these are on lines by themselves and start in column 1.  The
+argument should be the full filename---no implied suffix.  Files will
+be searched for along the \tr{LITINPUTS} path, specified by an
+environment variable of the same name.  The default path includes only
+your current working directory.
+
+\tr{\input}s are only followed at link time; if that's not what you
+want, either give the appropriate command-line flag (\tr{-n}) or use
+\tr{\inputnow}.
+
+APRIL91: see \sectionref{pseudo-C-preprocessor} for some thoughts
+about how inputting may be changed.
+
+\subsection*[\inputnow]{\pl{\inputnow{<filename>}}}
+\index{inputnow@\inputnow}
+These are \tr{\input}s that are followed always, no matter what.
+Otherwise, they are the same.
+
+APRIL91: \tr{\inputnow} may go away at any second.
+
+\subsection*[\insertribbon]{\pl{\insertribbon{<ribbon-name>}}}
+\index{insertribbon@\insertribbon}
+Used to insert the text of one code-ribbon into another; see
+\sectionref{code-in-doc}.  Must share a line with nothing
+but whitespace.  Not recommended.
+
+ToDo: needs to be made to work {\em outside} of code environments,
+rather than inside them.
+
+DOES NOT WORK WITH \tr{lit2pgm -q}! (which is what we often use.)
+
+\subsection*[itemize_environment]{\pl{itemize} environment}
+\index{itemize environment}
+As in \LaTeX{}.  British spelling (``itemise'') also accepted.
+
+\subsection*[\label]{\pl{\label}}
+\index{label@\label}
+Free-standing \tr{\label}s [supposedly] work as expected in \LaTeX{};
+in Info files, a
+\tr{\label} is taken as just another name for the node the \tr{\label}
+is in.  Determining which node it's in doesn't take account of
+\tr{\input}s---it's the one it ``appears'' to be in---which may not be
+what you want.  You {\em really should} use node-names as labels
+(see \sectionref{Node_specifications})...
+
+Labels (and, therefore, nodenames) shouldn't have weird characters in
+them.  Such labels (nodenames) will be studiously ignored.
+
+\subsection*[\listoffigures-etc]{\pl{\listoffigures} and \pl{\listoftables}}
+\index{listoffigures@\listoffigures}\index{listoftables@\listoftables}
+As for \LaTeX{}; has no effect on Info files, which don't do
+lists of figures or tables.
+
+\subsection*[\makeindex]{\pl{\makeindex}}
+\index{makeindex@\makeindex}
+Not necessary even for \LaTeX{}---one is inserted automagically just
+before \tr{\begin{document}}; has no effect on \tr{lit2texi}.
+
+\subsection*[\maketitle]{\pl{\maketitle}}
+\index{maketitle@\maketitle}
+Will work as in \LaTeX{} for simple cases, using values provided
+by \tr{\author{<author-stuff>}}, \tr{\title{<title-stuff>}}, and
+\tr{\date{<date-stuff>}}.  The \tr{\\} line-breaker works.  You
+die if you try anything weird.
+
+For better or worse, if you use the \tr{-g} option (to ``grab'' a
+subtree of text for printing), then it {\em does} matter if the
+\tr{\maketitle} is in the pre-amble (before
+\tr{\begin{document}}) or not.  Please see \sectionref{Programs-and-options}
+for the sorry details.
+
+\subsection*[menu_environment]{\pl{menu} environment}
+\index{menu environment}
+In producing an Info file, text in a \tr{menu} environment is
+copied verbatim to create an Info menu.  You must provide something
+that Texinfo can grok.  This whole mess
+might be used in
+conjunction with \tr{\suppressmenu}  [if \tr{\suppressmenu} were
+implemented yet].
+
+APRIL91: this should probably be nuked if the rawtexinfo environment
+comes online.
+
+\subsection*[\menuentry]{\pl{\menuentry{<tag>}{<description>}}}
+\index{menuentry@\menuentry}
+Requests that an extra menu entry be put at the {\em beginning} of
+this section's menu.
+
+\subsection*[\node]{\pl{\node{<node-spec>}}}
+\index{node@\node}
+(Ignored for \LaTeX{}.) Makes an extra node in the Texinfo file; the
+\tr{<node-spec>} is copied straight through to the output, so it's
+your problem to include something sensible.
+
+APRIL91: nuked if rawtexinfo environment comes in?
+
+\subsection*[\pounds]{\pl{\pounds<something-like-a-number>}}
+\index{pounds@\pounds}
+The \pl{\pounds} must be followed by: zero or more whitespace
+characters, a digit or a question mark, zero or more
+digits/question-marks/commas/full-stops/the-letters-K-or-M, and a
+digit/question-mark/the-letter-K-or-M.  The Ks or Ms may be in
+lower-case.  The mind boggles.
+
+\subsection*[onlyinfo_environment]{\pl{onlyinfo} environment}
+\index{onlyinfo environment}
+Only the Texinfo/Info extraction program(s) pay attention to stuff
+inside.  Don't put code in here!
+
+APRIL91: this stuff is in jeopardy of disappearing.
+
+\subsection*[onlylatex_environment]{\pl{onlylatex} environment}
+\index{onlylatex environment}
+Only the \LaTeX{} extraction program(s) pay attention to stuff
+inside.  Don't put code in here!
+
+APRIL91: this stuff is in jeopardy of disappearing.
+
+\subsection*[onlypartofdoc_environment]{\pl{onlypartofdoc} environment}
+\index{onlypartofdoc environment}
+The extraction programs pay attention to stuff inside only if they
+believe this is just a piece of a document (i.e., ``separate
+compilation'' is going on).  As always, don't put code in here!  See
+the \tr{\standaloneornot} command for a shortcut.
+
+% need an xref to how to separate-compile ...
+
+APRIL91: this stuff is in jeopardy of disappearing.
+
+\subsection*[onlystandalone_environment]{\pl{onlystandalone} environment}
+\index{onlystandalone environment}
+The extraction programs pay attention to stuff inside only if they
+believe that a standalone document is in the works (i.e., a
+\tr{\documentstyle} command has been seen or the \tr{-S} flag
+given).  As always, don't put
+code in here!  See the \tr{\standaloneornot} command for a shortcut.
+
+% need an xref to how to separate-compile ...
+
+APRIL91: this stuff is in jeopardy of disappearing.
+
+\subsection*[\pageref]{\pl{\pageref{<label-or-node-name>}}}
+\index{pageref@\pageref}
+In making \LaTeX{} documents, works as usual.  In making Info
+files, treated as a \tr{\ref} (there is no concept of ``page'' in
+an Info document).
+
+\subsection*[\pl]{\pl{\pl}}
+\index{pl@\pl}
+Plain text, set in a roman font; equivalent to \tr{\mbox{\rm #1}}, except
+that the argument can include any old printable ASCII characters, including
+properly-nested braces (escaping them is irrelevant).  If you want to
+do something weird, do it another way.  Note that linebreaks within
+the \tr{\pl} are prevented.
+
+The equivalent typewriter thing is \tr{\tr}.
+
+APRIL91: see possible changes in \sectionref{diff-fonts-in-text}.
+
+\subsection*[\printindex]{\pl{\printindex}}
+\index{printindex@\printindex}
+Should be just before \tr{\end{document}}.
+In Info mode, generates a node `Index' at the same sectioning depth as
+your top-level sectioning commands.
+
+APRIL91: see possible changes in \sectionref{multiple-indexes}.
+
+\subsection*[pseudocode_environment]{\pl{pseudocode} environment}
+\index{pseudocode environment}
+Format the same way as in a \tr{code} environment, but the enclosed
+stuff is not subject to extraction by \tr{lit2pgm}.
+
+Other environments do not nest inside a pseudocode environment.
+
+\subsection*[quotation_environment]{\pl{quotation} environment}
+\index{quotation environment}
+As in \LaTeX{}.
+
+\subsection*[rawlatex_environment]{\pl{rawlatex} environment}
+\index{rawlatex environment}
+If lit2latexing, copies the body of the environment straight through.
+Otherwise, discard it.
+
+One trick you may need: because of the feeble implementation, the
+system may still try to ``follow'' an \tr{\input} inside a rawlatex
+environment (which it shouldn't).  The solution is to ``hide'' the
+\tr{\input} so it isn't first on a line:
+\begin{verbatim}
+\begin{rawlatex}
+\begin{figure}
+{}\input{weird-fig.ps}
+\caption{Weird Figure}
+\end{figure}
+\end{rawlatex}
+\end{verbatim}
+
+\subsection*[\ref]{\pl{\ref{<label-or-node-name>}}}
+\index{ref@\ref}
+As for \LaTeX{}.
+
+\subsection*[\rootsectiontype]{\pl{\rootsectiontype{<real-sectioning-command>}}}
+\index{rootsectiontype@\rootsectiontype}
+Please see \sectionref{Sectioning}.
+
+\subsection*[\sectiontype]{\pl{\sectiontype{<nodename>}}}
+\index{sectiontype@\sectiontype}
+Please see \sectionref{sectiontype-and-ref}.
+
+\subsection*[\sectionref]{\pl{\sectionref{<nodename>}}}
+\index{sectionref@\sectionref}
+Please see \sectionref{sectiontype-and-ref}.
+
+\subsection*[\standaloneornot]{\pl{\standaloneornot{<ifso>}{<ifnot>}}}
+\index{standaloneornot@\standaloneornot}
+If doing standalone-document processing (i.e., a \tr{\documentstyle}
+seen or \tr{-S} flag given), use text \tr{<ifso>}; otherwise, use text
+\tr{<ifnot>}.  Keep this on one line {\em by itself}, OK?; for longer
+things, use the \tr{onlystandalone} and \tr{onlypartofdoc} environments.
+
+APRIL91: this stuff is in SEVERE jeopardy of being nuked; see
+\sectionref{pseudo-C-preprocessor}.
+
+\subsection*[\suppresscomments]{\pl{\suppresscomments}}
+\index{suppresscomments@\suppresscomments}
+Best put in the preamble of your overall document (i.e., before
+\tr{\begin{document}}).  Causes text in all subsequent \tr{comment}
+environments to be ignored.  NB: only works in producing \LaTeX{}
+documents. (ToDo: fix this)
+
+%\item[\suppressmenu]
+%\index{\suppressmenu}
+%Put one in a section if you don't want a menu to be
+%automagically generated for that section.  See about the
+%\tr{menu} environment above.  [Not yet implemented.]
+
+\subsection*[table_environment]{\pl{table} environment}
+\index{table environment}
+Goes straight through for \LaTeX{}; ignored for Info files, meaning that
+whatever is inside won't ``float.''
+
+\subsection*[\tableofcontents]{\pl{\tableofcontents}}
+\index{tableofcontents@\tableofcontents}
+As for \LaTeX{}; adds extra stuff to the top-level menu in an Info file.
+
+\subsection*[tabular_environment]{\pl{tabular} environment}
+\index{tabular environment}
+Same format as \LaTeX{}, but anything magical beyond \tr{&},
+\tr{\\}, and \tr{\hline} will probably get you in trouble.
+
+Other environments don't nest inside a tabular environment.
+
+\subsection*[\title]{\pl{\title{<text>}}}
+\index{title@\title}
+Please see under \tr{\maketitle}.
+
+\subsection*[\tr]{\pl{\tr}}
+\index{tr@\tr}
+Set in typewriter font; equivalent to \tr{\mbox{\tt #1}}, except
+that the argument can include any old printable ASCII characters, including
+properly-nested braces (escaping them is irrelevant).  If you want to
+do something weird, do it another way.  Note that linebreaks within
+the \tr{\tr} are prevented.
+
+The equivalent non-typewriter thing is \tr{\pl}.
+
+APRIL91: see \sectionref{diff-fonts-in-text} for further comment on
+this stuff.
+
+\subsection*[verbatim_environment]{\pl{verbatim} environment}
+\index{verbatim environment}
+As in \LaTeX{}---line-breaks are obeyed and everything is in typewriter
+font.  See also: the \tr{flushverbatim} and \tr{display} environments.
+
+You can't nest other environments inside verbatim environments.  A
+trick (hack) you can use to put a verbatim environment inside another
+is to indent the inner one by one space, as in:
+\begin{verbatim}
+ \begin{verbatim}
+  ...
+  \begin{verbatim}
+  ...
+  \end{verbatim}
+  ...
+ \end{verbatim}
+\end{verbatim}

@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>Haskell 1.3 Programs</title>
+</head>
+<body>
+
+[<a href="Summary.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeIO.html">Next</a>]
+<p>
+
+<hr><p>
+
+<h2>Programs</h2>
+
+Haskell 1.3 programs are the result of executing <code>Main.main</code>.
+This must have type <code>IO ()</code>, as defined in <a
+href="PreludeMonadicIO.html#IO-Monad"><code>PreludeMonadicIO</code></a>.
+If a program <var>p</var> terminates without calling <a
+href="LibSystem.html#ExitCode"><code>exitWith</code></a> explicitly,
+it is treated identically to the computation <br> <var>p</var><code>>>
+exitWith ExitSuccess</code>.
+<p>
+
+<pre>
+> module Main where
+> 
+> main :: IO ()
+> main =  putStr "Hello World\n"
+</pre>
+<p>
+
+<hr><p>
+
+[<a href="Summary.html">Prev</a>] [<a href="IO.html">Up</a>] [<a href="PreludeIO.html">Next</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+
+</hmtl>

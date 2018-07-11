@@ -1,0 +1,118 @@
+sub rm_embedded_stuff { # return clean code + index entries (\002 separated)
+    local($codetxt) = @_;
+    
+    ($codetxt, '');
+}
+
+sub add_code_interests { # DO NOTHING
+    # section and blk to record in ($s == -1: don't update) + the code
+    local($s, $b, $_) = @_;
+    local($defs_to_return) = '';
+    local($uses_to_return) = '';
+    
+    &setup_C_keywords();
+
+    $* = 1; # multi-line searches
+    s/^>//g;		# de-Bird-ize
+    s/\/\*[^\/]*\*\///g;# de-commentize (necessarily fraught with peril)
+    s/\"[^\"\n]*\"//g;	# de-string-ize and de-char-ize
+    s/\'[^\'\n]*\'//g;
+
+    # OK, the "interesting" DEFS are #define'd things
+    # and things that might be subroutine defns. (3 chars long or more)
+    # The latter must begin in col 1!
+
+    while (/^(\s*#define\s+)([A-Za-z_][A-Za-z0-9_]{2,})(\s*)/ ||
+           /^([A-Z][a-z]+\s+)?([A-Za-z_][A-Za-z0-9_]{2,})(\([A-Za-z0-9_, ]*\))/) {
+    	local($before) = $1;
+	local($interesting_thing) = $2; # see hacks below
+	local($after) = $3;
+
+#print STDERR "defs=>$before::$interesting_thing::$after::\n";
+	local($really_interesting_thing) = (defined($IGNORE_WD{$interesting_thing})) ? '' : $interesting_thing;
+	if ($really_interesting_thing) {
+	    if ($s != -1) {
+		$Blk_codethings_defd[$b] .= "$really_interesting_thing\001";
+		$Sec_codethings_defd[$s] .= "$really_interesting_thing\001";
+	    } else {
+		$defs_to_return .= "$really_interesting_thing\001";
+	    }
+	}
+	# escaping all magic chars in before/interesting/after
+	# is v important for avoiding infinite loops! (also below)
+	$before =~ s/\s+/\\s\+/g;
+	$after =~ s/\s+/\\s\+/g;
+	$after =~ s/\(/\\\(/;
+	$after =~ s/\)/\\\)/;
+
+	s/$before$interesting_thing$after//g;
+    }
+
+    # I AM NOT INTERESTED IN USES AT THE MOMENT
+    if ( 0 ) {
+	# uses are the same sorts of things
+	while (/^(#if\s+|#elif\s+|#else\s+)([A-Za-z_][A-Za-z0-9_]{2,})(\s*)/ || # CPP-ery
+	       /(\s*)([A-Za-z_][A-Za-z0-9_]{2,})(\s*)/) {
+	    local($before) = $1;
+	    local($interesting_thing) = $2; # more hacks below
+	    local($after) = $3;
+
+    #print STDERR "uses=>$before::$interesting_thing::$after::\n";
+
+	    local($really_interesting_thing) = (defined($IGNORE_WD{$interesting_thing})) ? '' : $interesting_thing;
+	    if ($really_interesting_thing) {
+		if ($s != -1) {
+		    $Blk_codethings_used[$b] .= "$really_interesting_thing\001";
+		    $Sec_codethings_used[$s] .= "$really_interesting_thing\001";
+		} else {
+		    $uses_to_return .= "$really_interesting_thing\001";
+		}
+	    }
+	    $before =~ s/\s+/\\s\+/g;
+	    $interesting_thing =~ s/\$/\\\$/;
+	    $interesting_thing =~ s/\@/\\\@/;
+	    $interesting_thing =~ s/\%/\\\%/;
+	    $after =~ s/\s+/\\s\+/g;
+
+	    s/$before$interesting_thing$after//g;
+	}
+    }
+    $* = 0;
+
+    ($defs_to_return, $uses_to_return);
+}
+
+sub setup_C_keywords {
+    $IGNORE_WD{'auto'} = 1;
+    $IGNORE_WD{'break'} = 1;
+    $IGNORE_WD{'case'} = 1;
+    $IGNORE_WD{'char'} = 1;
+    $IGNORE_WD{'continue'} = 1;
+    $IGNORE_WD{'default'} = 1;
+    $IGNORE_WD{'do'} = 1;
+    $IGNORE_WD{'double'} = 1;
+    $IGNORE_WD{'else'} = 1;
+    $IGNORE_WD{'entry'} = 1;
+    $IGNORE_WD{'extern'} = 1;
+    $IGNORE_WD{'float'} = 1;
+    $IGNORE_WD{'for'} = 1;
+    $IGNORE_WD{'goto'} = 1;
+    $IGNORE_WD{'if'} = 1;
+    $IGNORE_WD{'int'} = 1;
+    $IGNORE_WD{'long'} = 1;
+    $IGNORE_WD{'register'} = 1;
+    $IGNORE_WD{'return'} = 1;
+    $IGNORE_WD{'short'} = 1;
+    $IGNORE_WD{'sizeof'} = 1;
+    $IGNORE_WD{'static'} = 1;
+    $IGNORE_WD{'struct'} = 1;
+    $IGNORE_WD{'switch'} = 1;
+    $IGNORE_WD{'typedef'} = 1;
+    $IGNORE_WD{'union'} = 1;
+    $IGNORE_WD{'unsigned'} = 1;
+    $IGNORE_WD{'while'} = 1;
+#   $IGNORE_WD{''} = 1;
+}
+
+# this keeps 'do'ing happy
+1;

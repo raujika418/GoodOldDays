@@ -1,0 +1,34 @@
+\section[Habits]{A checklist of good literate habits}
+
+[Suggestions welcome.  Haven't worked on this in a while.]
+
+\begin{itemize}
+\item
+Express your ideas in a way amenable to plain ASCII representation, as
+well as that of full-blown \TeX{} typesetting.  For example, serious
+\TeX{} math-mode stuff is not really on (even if you can get it past
+\tr{lit2latex}).  If you find this constraint a big problem, you may
+well be using the wrong tool for the job.
+
+\item
+If you test your document first as an Info file (i.e., use
+\tr{lit2texi} to process it), once that is right then it is very
+likely that the \LaTeX{} side of things (using \tr{lit2latex}) will
+come out right as well.  The reverse is not true.
+
+\item
+Follow the convention that the sectioning in every file begins with a
+\tr{\section}.  For details on how to do sectioning, please see
+\sectionref{How_to_section}.
+
+\item
+Arrange your document so that your Info nodes come out no more than
+two screenfuls' long.  Very long nodes obviate the whole point of Info
+documents.
+
+\item
+It's hard to make up good sets of Info node names.  First, they must
+be unique!  Second, it's best if the uniqueness is in the first few
+characters, so that nodename completion may be used to most advantage.
+
+\end{itemize}

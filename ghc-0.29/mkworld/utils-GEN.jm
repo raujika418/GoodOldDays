@@ -1,0 +1,1191 @@
+#if 0
+
+%************************************************************************
+%*									*
+\section[mkworld-utils-GEN]{General stuff about ``utilities''}
+%*									*
+%************************************************************************
+
+%************************************************************************
+%*									*
+\subsection[mkworld-utils-what]{What they are (intro)}
+%*									*
+%************************************************************************
+
+%************************************************************************
+%*									*
+\subsection[mkworld-utils-where]{Where they are}
+%*									*
+%************************************************************************
+
+Generally-useful utils that are pre-supposed (but a project might want
+diff ones).
+
+For @ar@, the \tr{l} means to use \tr{.} for temp files; the \tr{s} in
+the SystemV-ish case takes the place of \tr{ranlib}.
+\begin{code}
+#endif /* 0 */
+#ifndef ArCmd
+#if HasSysVishArAndRanlib == YES
+#define ArCmd ar clqs
+#else
+#define ArCmd ar clq
+#endif
+#endif
+AR = ArCmd
+
+#ifndef AsCmd
+#define AsCmd as
+#endif
+AS = AsCmd
+
+#ifndef BourneShell			/* to force shell in Makefile */
+#define BourneShell	/bin/sh
+#endif
+SHELL = BourneShell
+
+#ifndef WhatGccIsCalled /* version 2.n, please */
+#define WhatGccIsCalled gcc
+#endif
+
+#ifndef CcCmd
+#if (HaveGcc == YES) && (UseGcc == YES)
+#define CcCmd WhatGccIsCalled
+#else
+#define CcCmd cc
+#endif /* ! HaveGcc etc */
+#endif /* CcCmd */
+CC = CcCmd
+
+#ifndef CompressCmd
+#define CompressCmd compress
+#endif
+COMPRESS = CompressCmd
+
+#ifndef ContextDiffCmd
+#define ContextDiffCmd diff -C 1
+#endif
+CONTEXT_DIFF = ContextDiffCmd
+
+#ifndef CpCmd
+#define CpCmd cp
+#endif
+CP = CpCmd
+
+#ifndef CppCmd
+#define CppCmd /lib/cpp
+#endif
+#ifndef PreProcessCmd
+#define PreProcessCmd CcCmd -E
+#endif
+RAWCPP	      = CppCmd
+CPP           = CppCmd $(GLUED_CPP_INCLUDES) $(GLUED_CPP_DEFINES)	 /* simple filters */
+PREPROCESSCMD = PreProcessCmd $(GLUED_CPP_INCLUDES) $(GLUED_CPP_DEFINES) /* preferred; mdep */
+
+/* INSTALL is usually figured out by "configure"; we have to 
+   be sure that it is not a relative path name.  (Sounds like
+   a bug in "autoconf" to me, but what do I know? WDP 94/12)
+*/
+#ifndef InstallCmd
+#define InstallCmd install
+#endif /* InstallCmd */
+INSTALL = `echo InstallCmd | if [ x\`sed 's,/.*,,'\` = x ] ; then echo InstallCmd ; else echo $(TOP_PWD)/mkworld/InstallCmd ; fi`
+
+#ifndef InstallingByDefault
+#define InstallingByDefault 0
+#endif
+INSTALLING = InstallingByDefault
+
+/* flex: 8-bitness is important for GHC  */
+#ifndef EightBitLexCmd
+#define EightBitLexCmd LexCmd -s -8
+#endif
+
+LEX     = EightBitLexCmd $(EXTRA_FLEX_OPTS) /* this is asking for it... */
+LEX_LIB	= LexLib
+FLEX    = EightBitLexCmd $(EXTRA_FLEX_OPTS) /* this is asking for it... */
+FLEX_LIB= LexLib
+
+/* the installed Haskell compiler; it should already have been set */
+#ifndef HaskellCompilerCmd
+#define HaskellCompilerCmd haskell-compiler-not-specified
+#endif
+HC = HaskellCompilerCmd
+#ifndef HaskellCompilerType
+#define HaskellCompilerType HC_UNSPECIFIED
+#endif
+
+#ifndef LaTeXCmd
+#define LaTeXCmd	latex
+#endif
+LATEX = LaTeXCmd
+/* see also the LaTeX-wrapper script, LTX, in AllProjects */
+
+#ifndef LdCmd
+#define LdCmd ld
+#endif
+LD = LdCmd
+
+#ifndef LintCmd
+#define LintCmd lint
+#endif
+LINT = LintCmd
+
+#ifndef LnCmd
+#define LnCmd ln -s
+#endif /* LnCmd */
+LN = LnCmd
+
+#ifndef MakeCmd
+#define MakeCmd make -r
+#endif
+/* we use -r to avoid builtin implicit/suffix rules;
+   and the following might be useful at some point ...
+*/
+MAKE = MakeCmd
+#ifndef MakeCmdIsGnuMake
+#define MakeCmdIsGnuMake NO
+#endif
+#if MakeCmdIsGnuMake == NO && !defined(MakeDoesNestedMacros)
+#define MakeDoesNestedMacros YES
+/* a bozo system might set it to NO (platform section of TEMPLATE.ljm) */
+#endif
+
+#ifndef MvCmd
+#define MvCmd mv
+#endif
+MV = MvCmd
+
+#ifndef NroffCmd
+#define NroffCmd	nroff
+#endif
+#ifndef ManMacros
+#define ManMacros	-man
+#endif
+#ifndef MsMacros
+#define MsMacros	-ms
+#endif
+NROFF = NroffCmd
+MANMACROS = ManMacros
+MSMACROS = MsMacros
+
+#ifndef PerlCmd
+#define PerlCmd /usr/bin/perl
+#endif
+PERL = PerlCmd
+
+#ifndef PicCmd
+#define PicCmd	pic
+#endif
+PIC = PicCmd
+
+#ifndef PrinterCmd
+#define PrinterCmd	lpr
+#endif
+PRINTER = PrinterCmd
+
+#ifndef RanlibCmd
+#if HasSysVishArAndRanlib == YES
+#define RanlibCmd /bin/true /* does nothing */
+#else
+#define RanlibCmd ranlib
+#endif
+#endif
+RANLIB = RanlibCmd
+
+#ifndef RmCmd
+#define RmCmd rm -f
+#endif
+RM = RmCmd
+/* a project may want to override CLEAN_CMD */
+
+/* see the comment about not having #*, under CleanTarget rule in Jmake.rules */
+/* ToDo: what about bbl files? */
+#ifndef FilesToClean
+#define FilesToClean *.CKP *.ln *.BAK *.bak *.o core a.out errs ,* *.a .emacs_* tags TAGS \
+	*.ind *.ilg *.idx *.idx-prev *.aux *.aux-prev *.dvi *.log *.toc *.lot *.lof \
+	*.blg *.info *.itxi *.itex *.cb
+#endif
+/* you can override this in various ways... */
+/* Real Men (TM) will have the following in their veryclean stuff:
+	Makefile
+	.??*~ *~ (emacs backup files)
+	*.tex *.texi
+	*.lex.c *.yacc.c [however this should be done...]
+	*.orig *.rej (patch droppings)
+*/
+#ifndef ExtraFilesToBeVeryClean
+#define ExtraFilesToBeVeryClean .??*~ *~ *.orig *.rej
+#endif
+CLEAN_CMD      = $(RM) FilesToClean
+STD_VERY_CLEAN = ExtraFilesToBeVeryClean
+
+#ifndef SoelimCmd
+#ifndef UseSoelim
+#define SoelimCmd	cat		/* fake it */
+#else
+#if defined(UseInstalledUtils)
+#define SoelimCmd	soelim
+#else
+#define SoelimCmd	$(SOELIMSRC)/soelim
+#endif /* UseInstalledUtils */
+#endif /* UseSoelim */
+#endif /* SoelimCmd */
+SOELIM = SoelimCmd
+
+#ifndef CTagsCmd
+#define CTagsCmd $(ETAGS)
+#endif
+CTAGS = CTagsCmd
+
+#ifndef StripCmd
+#define StripCmd strip
+#endif
+STRIP = StripCmd
+
+#ifndef TblCmd
+#define TblCmd	tbl
+#endif
+TBL = TblCmd
+
+#ifndef TeXCmd
+#define TeXCmd	tex
+#endif
+TEX = TeXCmd
+
+#ifndef TgrindCmd
+#define TgrindCmd	tgrind
+#endif
+/* the program that really does the tgrind'ing */
+#ifndef TgrindHelperCmd
+#define TgrindHelperCmd	/usr/local/lib/tgrind/tfontedpr
+#endif
+TGRIND = TgrindCmd
+TGRIND_HELPER = TgrindHelperCmd
+
+#ifndef TibCmd
+#define TibCmd	tib	/* you could define this to "cat" if you don't have "tib"... */
+#endif			/* (I didn't say it would be pretty...) */
+TIB = TibCmd
+
+#ifndef TimeCmd
+#define TimeCmd	time
+#endif
+TIME = TimeCmd
+
+#ifndef TroffCmd
+#define TroffCmd	troff
+#endif
+TROFF = TroffCmd
+
+#ifndef UnameCmd
+#define UnameCmd uname
+#endif
+UNAME_CMD = UnameCmd
+
+#ifndef YaccCmd
+#define YaccCmd	yacc
+#endif
+YACC = YaccCmd
+
+/* Note on the <pgm>NeededHere rules: they don't really check that
+ * the program elsewhere in the sources is really up-to-date;
+ * they really just arrange to go build it if it doesn't exist at all.
+ * This is usually good enough.
+ */
+
+/* general idea behind these things (__* is an internal macro) ... */
+
+#ifndef __SomeUtilNeededHere
+#if defined(UseInstalledUtils)
+#define __SomeUtilNeededHere(target,neededthing,neededthingsrcdir,neededthingmaketarg) /**/
+#else
+#define __SomeUtilNeededHere(target,neededthing,neededthingsrcdir,neededthingmaketarg) @@\
+									@@\
+target:: neededthing                                                    @@\
+	@:								@@\
+									@@\
+neededthing:                                                            @@\
+	@echo "checking $@ over in" neededthingsrcdir "first..."; \     @@\
+	cd neededthingsrcdir && $(MAKE) neededthingmaketarg; \          @@\
+	echo "okay, continuing in $(CURRENT_DIR)"
+#endif /* ! UseInstalledUtils */
+#endif /* __SomeUtilNeededHere */
+
+/* ------------------------------------------------  */
+/* OTHER GENERALLY-USEFUL UTILS (w/ source provided) */
+
+#ifndef UseInstalledUtils
+UTILSRC   = $(TOP)/glafp-utils
+SCRIPTSRC = $(UTILSRC)/scripts
+#endif
+
+/* Configuration stuff (jmake, its friends and templates) */
+
+#ifndef JmkmfCmd
+#if     defined(UseInstalledUtils)
+#define JmkmfCmd jmkmf
+#else
+#define JmkmfCmd jmkmf_used_only_with_installed_utils
+#endif
+#endif
+
+#ifndef JrestoredepsCmd
+#if     defined(UseInstalledUtils)
+#define JrestoredepsCmd jrestoredeps
+#else
+#define JrestoredepsCmd $(JMAKESRC)/jrestoredeps
+#endif
+#endif
+
+#ifndef JmakeCmd
+#if     defined(UseInstalledUtils)
+#define JmakeCmd jmake
+#else
+#define JmakeCmd $(JMAKESRC)/jmake
+#endif
+#endif
+/*
+ * JmakeNeededHere -- generate rules to compile jmake if its source is
+ * within this project's source tree.
+ *
+ * [doesn't quite fit std pattern in __SomeUtilNeededHere]
+ */
+#ifndef JmakeNeededHere
+#if defined(UseInstalledUtils)
+#define JmakeNeededHere(target) /**/
+#else
+#define JmakeNeededHere(target)                                         @@\
+target:: $(JMAKE)                                                       @@\
+									@@\
+$(JMAKE):                                                               @@\
+	@(cd $(JMAKESRC) && if [ -f Makefile ]; then \                  @@\
+	echo "checking $@ in $(JMAKESRC) first..."; $(MAKE) all; else \ @@\
+	echo "bootstrapping $@ from Makefile.BOOT in $(JMAKESRC) first..."; \    @@\
+	$(MAKE) -f Makefile.BOOT BOOTSTRAPCFLAGS=$(BOOTSTRAPCFLAGS); fi; \       @@\
+	echo "okay, continuing in $(CURRENT_DIR)")
+#endif /* ! UseInstalledUtils */
+#endif /* JmakeNeededHere */
+
+JMKMF         = JmkmfCmd
+JRESTOREDEPS  = JrestoredepsCmd
+JMAKE         = JmakeCmd
+
+/* the project config dir is assumed to be relative to $(TOP) */
+
+#if defined(UseInstalledUtils)
+#if defined(HaveProjectMkworldDir)
+JMAKE_CMD = $(JMKMF) -P $(PROJECTLABEL) -S $(SETUPLABEL) -C $(PROJ_MKWORLD_DIR) - $(BOOTSTRAPCFLAGS) $(JMAKEFLAGS)
+#else
+JMAKE_CMD = $(JMKMF) -P $(PROJECTLABEL) -S $(SETUPLABEL) - $(BOOTSTRAPCFLAGS) $(JMAKEFLAGS)
+#endif /* !HaveProjectMkworldDir */
+
+#else /* ! using installed jmake */
+JMAKESRC = $(TOP)/mkworld
+
+#if ProjectIsNone == YES
+#define ProjectJmFiles	/*nothing*/
+#define SetupJmFiles	/*nothing*/
+#else /* have a project... */
+#define ProjectJmFiles \
+	$(PROJ_MKWORLD_DIR)/site-$(PROJECTLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/only4-$(PROJECTLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/suffixes-$(PROJECTLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/macros-$(PROJECTLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/utils-$(PROJECTLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/install-$(PROJECTLABEL).jm
+
+#if SetupIsStd == YES
+#define SetupJmFiles	/*nothing*/
+#else /* have project & a setup... */
+#define SetupJmFiles \
+	$(PROJ_MKWORLD_DIR)/site-$(PROJECTLABEL)-$(SETUPLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/only4-$(PROJECTLABEL)-$(SETUPLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/suffixes-$(PROJECTLABEL)-$(SETUPLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/macros-$(PROJECTLABEL)-$(SETUPLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/utils-$(PROJECTLABEL)-$(SETUPLABEL).jm \
+	$(PROJ_MKWORLD_DIR)/install-$(PROJECTLABEL)-$(SETUPLABEL).jm
+#endif
+#endif
+MYJCONFIGFILES = $(JMAKESRC)/TEMPLATE.jm \
+		 $(JMAKESRC)/site.jm \
+		 $(JMAKESRC)/site-DEF.jm \
+		 $(JMAKESRC)/suffixes-GEN.jm \
+		 $(JMAKESRC)/macros-GEN.jm \
+		 $(JMAKESRC)/utils-GEN.jm \
+		 $(JMAKESRC)/install-GEN.jm ProjectJmFiles SetupJmFiles
+
+#if defined(HaveProjectMkworldDir)
+JMAKE_CMD = $(NEWTOP)$(JMAKE) -P $(PROJECTLABEL) -S $(SETUPLABEL) -C $(NEWTOP)$(PROJ_MKWORLD_DIR) -I$(NEWTOP)$(JMAKESRC) $(BOOTSTRAPCFLAGS) $(JMAKEFLAGS)
+#else
+JMAKE_CMD = $(NEWTOP)$(JMAKE) -P $(PROJECTLABEL) -S $(SETUPLABEL) -I$(NEWTOP)$(JMAKESRC) $(BOOTSTRAPCFLAGS) $(JMAKEFLAGS)
+#endif /* ! HaveProjectMkworldDir */
+#endif /* ! using installed jmake */
+
+
+/* GNU info system [hacked] */
+
+#ifndef InfoCmd
+#if     defined(UseInstalledUtils)
+#define InfoCmd info
+#else
+#define InfoCmd $(INFOSRC)/info
+#endif
+#endif
+#ifndef MakeinfoCmd
+#if     defined(UseInstalledUtils)
+#define MakeinfoCmd makeinfo
+#else
+#define MakeinfoCmd $(INFOSRC)/makeinfo
+#endif
+#endif
+#ifndef PostMakeinfoCmd
+#if     defined(UseInstalledUtils)
+#define PostMakeinfoCmd postmakeinfo
+#else
+#define PostMakeinfoCmd $(INFOSRC)/postmakeinfo
+#endif
+#endif
+#ifndef InfoStuffNeededHere
+#if defined(UseInstalledUtils)
+#define InfoStuffNeededHere(target) /**/
+#else
+#define InfoStuffNeededHere(target) \
+__SomeUtilNeededHere(target,$(INFO) $(MAKEINFO) $(POSTMAKEINFO),$(INFOSRC),all)
+#endif /* ! UseInstalledUtils */
+#endif /* InfoStuffNeededHere */
+INFO         = InfoCmd /* who _knows_ where these might be ... */
+MAKEINFO     = MakeinfoCmd
+POSTMAKEINFO = PostMakeinfoCmd
+#ifndef UseInstalledUtils
+INFOSRC      = $(LITSRC)/info-utils
+#endif
+
+/* literate programming system */
+#ifndef Lit2PgmCmd
+#if     defined(UseInstalledUtils)
+#define Lit2PgmCmd lit2pgm
+#else
+#define Lit2PgmCmd $(LITSRC)/lit2pgm
+#endif
+#endif
+#ifndef Lit2TexiCmd
+#if     defined(UseInstalledUtils)
+#define Lit2TexiCmd lit2texi
+#else
+#define Lit2TexiCmd $(LITSRC)/lit2texi
+#endif
+#endif
+#ifndef Lit2HtmlCmd
+#if     defined(UseInstalledUtils)
+#define Lit2HtmlCmd lit2html
+#else
+#define Lit2HtmlCmd $(LITSRC)/lit2html
+#endif
+#endif
+#ifndef Lit2LaTeXCmd
+#if     defined(UseInstalledUtils)
+#define Lit2LaTeXCmd lit2latex
+#else
+#define Lit2LaTeXCmd $(LITSRC)/lit2latex
+#endif
+#endif
+#ifndef MkDependLitCmd
+#if     defined(UseInstalledUtils)
+#define MkDependLitCmd mkdependlit
+#else
+#define MkDependLitCmd $(LITSRC)/mkdependlit
+#endif
+#endif
+#ifndef Lit2ChangeLogCmd
+#if     defined(UseInstalledUtils)
+#define Lit2ChangeLogCmd lit2changelog
+#else
+#define Lit2ChangeLogCmd $(LITSRC)/lit2changelog
+#endif
+#endif
+
+/* NB: this *NeededHere rule offers LIMITED guarantee that
+    the literate-programming stuff is up-to-date when used
+*/
+#ifndef LitStuffNeededHere
+#if defined(UseInstalledUtils)
+#define LitStuffNeededHere(target) /**/
+#else
+#define LitStuffNeededHere(target) \
+									@@\
+target:: $(LITSRC)/lit2pgm $(LITSRC)/lit2texi $(LITSRC)/lit2html $(LITSRC)/lit2latex $(LITSRC)/mkdependlit $(LITSRC)/lit2changelog $(LITSRC)/lit-deatify @@\
+									@@\
+$(LITSRC)/lit2pgm $(LITSRC)/lit2texi $(LITSRC)/lit2html $(LITSRC)/lit2latex $(LITSRC)/mkdependlit $(LITSRC)/lit2changelog $(LITSRC)/lit-deatify: @@\
+	@(cd $(LITSRC) && if [ -f lit2pgm ]; then \                     @@\
+	echo "checking $@ in $(LITSRC) first..."; $(MAKE) all; else \   @@\
+	echo "bootstrapping $@ with ./lit2pgm.BOOT in $(LITSRC) first..."; \      @@\
+	$(MAKE) LIT2PGM="./lit2pgm.BOOT -Alit2pgm" lit-deatify all; fi; \ @@\
+	echo "okay, continuing in $(CURRENT_DIR)")
+#endif /* ! UseInstalledUtils */
+#endif /* LitStuffNeededHere */
+
+LIT2PGM = Lit2PgmCmd
+/* sometimes, we _must_ use the installed version of lit2pgm,
+ * e.g., for building lit2pgm itself
+ */
+LIT2TEXI      = Lit2TexiCmd
+LIT2HTML      = Lit2HtmlCmd
+LIT2LATEX     = Lit2LaTeXCmd
+MKDEPENDLIT   = MkDependLitCmd
+LIT2CHANGELOG = Lit2ChangeLogCmd
+#ifndef UseInstalledUtils
+LITSRC        = $(TOP)/literate
+#endif
+
+/*  mkdepend scripts for various languages */
+/*   ["mkdependlit" is under literate programming stuff above]       */
+
+/* for these MkDepend things, we use the scripts only [for now] */
+
+#ifndef MkDependCSrc
+#define MkDependCSrc $(SCRIPTSRC)
+#endif
+#ifndef MkDependCCmd
+#if     defined(UseInstalledUtils)
+#define MkDependCCmd mkdependC
+#else
+#define MkDependCCmd $(MKDEPENDCSRC)/mkdependC
+#endif  /* ! installed */
+#endif  /* MkDependCCmd */
+
+/*
+	MkdependCNeededHere -- generate rules to build the mkdependC program
+	if its source is within this project's source tree.
+
+	[kind of a weird one, for now at least]
+*/
+#ifndef MkDependCNeededHere
+#if defined(UseInstalledUtils)
+#define MkDependCNeededHere(target) /**/
+#else
+#define MkDependCNeededHere(target) \
+__SomeUtilNeededHere(target,$(MKDEPENDC),$(MKDEPENDCSRC),mkdependC)
+#endif /* UseInstalledUtils */
+#endif /* MkDependCNeededHere */
+MKDEPENDC = MkDependCCmd
+#ifndef UseInstalledUtils
+MKDEPENDCSRC = MkDependCSrc
+#endif
+
+#ifndef MkDependHSCmd /* this is the default; hope you have it! */
+#define MkDependHSCmd mkdependHS
+#endif
+#ifndef MkDependHSNeededHere /* ditto */
+#define MkDependHSNeededHere(targets) /*no such thing*/
+#endif
+MKDEPENDHS = MkDependHSCmd
+
+/* mkdependlit is with the literate stuff above */
+
+/* tags utilities */
+
+#ifndef PerlTagsSrc
+#define PerlTagsSrc $(SCRIPTSRC)
+#endif
+#if     defined(UseInstalledUtils)
+#define PerlTagsCmd perltags
+#else
+#define PerlTagsCmd $(PERLTAGSSRC)/perltags
+#endif
+
+#ifndef PerlTagsNeededHere
+#if defined(UseInstalledUtils)
+#define PerlTagsNeededHere(target) /**/
+#else
+#define PerlTagsNeededHere(target) \
+__SomeUtilNeededHere(target,$(PERLTAGS),$(PERLTAGSSRC),perltags)
+#endif /* UseInstalledUtils */
+#endif /* PerlTagsNeededHere */
+PERLTAGS = PerlTagsCmd
+#ifndef UseInstalledUtils
+PERLTAGSSRC = PerlTagsSrc
+#endif
+
+/*  misc utilities */
+
+#ifndef FastmakeCmd
+#if     defined(UseInstalledUtils)
+#define FastmakeCmd fastmake
+#else
+#define FastmakeCmd $(FASTMAKESRC)/fastmake
+#endif
+#endif
+#ifndef FastmakeNeededHere
+#if defined(UseInstalledUtils)
+#define FastmakeNeededHere(target) /**/
+#else
+#define FastmakeNeededHere(target) \
+__SomeUtilNeededHere(target,$(FASTMAKE),$(FASTMAKESRC),fastmake)
+#endif /* ! UseInstalledUtils */
+#endif /* FastmakeNeededHere */
+FASTMAKE = FastmakeCmd
+#ifndef UseInstalledUtils
+FASTMAKESRC = $(SCRIPTSRC)
+#endif
+
+#ifndef LtxCmd
+#if     defined(UseInstalledUtils)
+#define LtxCmd ltx
+#else
+#define LtxCmd $(LTXSRC)/ltx
+#endif
+#endif
+#ifndef LtxNeededHere
+#if defined(UseInstalledUtils)
+#define LtxNeededHere(target) /**/
+#else
+#define LtxNeededHere(target) \
+__SomeUtilNeededHere(target,$(LTX),$(LTXSRC),ltx)
+#endif /* ! UseInstalledUtils */
+#endif /* LtxNeededHere */
+LTX = LtxCmd /* a LaTeX-wrapper script */
+#ifndef UseInstalledUtils
+LTXSRC = $(SCRIPTSRC)
+#endif
+
+#ifndef MkdirHierCmd
+#if     defined(UseInstalledUtils)
+#define MkdirHierCmd mkdirhier
+#else
+#define MkdirHierCmd $(MKDIRHIERSRC)/mkdirhier
+#endif
+#endif
+#ifndef MkdirHierNeededHere
+#if defined(UseInstalledUtils)
+#define MkdirHierNeededHere(target) /**/
+#else
+#define MkdirHierNeededHere(target) \
+__SomeUtilNeededHere(target,$(MKDIRHIER),$(MKDIRHIERSRC),mkdirhier)
+#endif /* ! UseInstalledUtils */
+#endif /* MkdirHierNeededHere */
+MKDIRHIER = MkdirHierCmd
+#ifndef UseInstalledUtils
+MKDIRHIERSRC = $(SCRIPTSRC)
+#endif
+
+/* Simon Marlow says: Lndir is sometimes dubious; if you
+   have GNU cp, define "LndirCmd" to: cp -Rsv
+*/
+#ifndef LndirCmd
+#if     defined(UseInstalledUtils)
+#define LndirCmd lndir
+#else
+#define LndirCmd $(LNDIRSRC)/lndir
+#endif
+#endif
+#ifndef LndirNeededHere
+#if defined(UseInstalledUtils)
+#define LndirNeededHere(target) /**/
+#else
+#define LndirNeededHere(target) \
+__SomeUtilNeededHere(target,$(LNDIR),$(LNDIRSRC),lndir)
+#endif /* ! UseInstalledUtils */
+#endif /* LndirNeededHere */
+LNDIR = LndirCmd
+#ifndef UseInstalledUtils
+LNDIRSRC = $(SCRIPTSRC)
+#endif
+
+#ifndef MsubCmd
+#if     defined(UseInstalledUtils)
+#define MsubCmd msub
+#else
+#define MsubCmd $(MSUBSRC)/msub
+#endif /* ! installed */
+#endif /* MsubCmd */
+/*      MsubNeededHere - generate rules to build the msub program
+	if its source is within this project's source tree.  This rule
+	should be included manually once in each Jmakefile that generates
+	targets with msub.  (Ideally it would be invoked automatically from
+	within each msub-target-generating rule, but then you have a million
+	sets of these rules in the Makefile.  Ugh.  This could be avoided if
+	there were some way for a rule to void itself after being invoked
+	once.)
+*/
+#ifndef MsubNeededHere
+#if defined(UseInstalledUtils)
+#define MsubNeededHere(target) /**/
+#else
+#define MsubNeededHere(target) \
+__SomeUtilNeededHere(target,$(MSUB),$(MSUBSRC),msub)
+#endif /* ! UseInstalledUtils */
+#endif /* MsubNeededHere */
+MSUB = MsubCmd
+#ifndef UseInstalledUtils
+MSUBSRC = $(UTILSRC)/msub
+#endif
+
+#ifndef EtagsCmd
+#if     defined(UseInstalledUtils)
+#define EtagsCmd etags
+#else
+#define EtagsCmd $(ETAGSSRC)/etags
+#endif /* ! installed */
+#endif /* EtagsCmd */
+#ifndef EtagsNeededHere
+#if defined(UseInstalledUtils)
+#define EtagsNeededHere(target) /**/
+#else
+#define EtagsNeededHere(target) \
+__SomeUtilNeededHere(target,$(ETAGS),$(ETAGSSRC),etags)
+#endif /* ! UseInstalledUtils */
+#endif /* EtagsNeededHere */
+ETAGS = EtagsCmd
+#ifndef UseInstalledUtils
+ETAGSSRC = $(UTILSRC)/etags
+#endif
+
+#ifndef VerbatimCmd
+#if     defined(UseInstalledUtils)
+#define VerbatimCmd verbatim
+#else
+#define VerbatimCmd $(VERBATIMSRC)/verbatim
+#endif /* ! installed */
+#endif /* VerbatimCmd */
+#ifndef VerbatimNeededHere
+#if defined(UseInstalledUtils)
+#define VerbatimNeededHere(target) /**/
+#else
+#define VerbatimNeededHere(target) \
+__SomeUtilNeededHere(target,$(VERBATIM),$(VERBATIMSRC),verbatim)
+#endif /* ! UseInstalledUtils */
+#endif /* VerbatimNeededHere */
+VERBATIM = VerbatimCmd
+#ifndef UseInstalledUtils
+VERBATIMSRC = $(UTILSRC)/verbatim
+#endif
+
+#ifndef RunStdTestCmd
+#if     defined(UseInstalledUtils)
+#define RunStdTestCmd runstdtest
+#else
+#define RunStdTestCmd $(RUNSTDTESTSRC)/runstdtest
+#endif
+#endif
+#ifndef RunStdTestNeededHere
+#if defined(UseInstalledUtils)
+#define RunStdTestNeededHere(target) /**/
+#else
+#define RunStdTestNeededHere(target) \
+__SomeUtilNeededHere(target,$(RUNSTDTEST),$(RUNSTDTESTSRC),runstdtest)
+#endif /* ! UseInstalledUtils */
+#endif /* RunStdTestNeededHere */
+RUNSTDTEST = RunStdTestCmd
+#ifndef UseInstalledUtils
+RUNSTDTESTSRC = $(SCRIPTSRC)
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-utils-flags]{Feeding flags to them}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+/* for the whole nasty business of flags for programs,
+    some naming conventions are worth remembering; for program <foo>:
+
+    <foo>FLAGS              what is actually passed to <foo>; usually
+			    built from pieces below
+
+    ALLPROJ_<foo>_<things>  <things> needed for _all_ runs of <foo>;
+			    probably set in one of the AllProject*
+			    config files.
+    PLAT_<foo>_<things>     <things> (options, defines, etc.) needed for
+			    all runs of <foo> *on this platform*;
+			    probably set in <platform>.cf.
+    PROJ_<foo>_<things>     <things> needed for all runs of <foo>
+			    related to this project; probably set in
+			    one of the Project-* config files.
+    <foo>_<things>          <things> needed for runs of <foo> in this
+			    directory; set in its Jmakefile.
+    EXTRA_<foo>_<things>    name reserved for adding <things> from the
+			    command line.
+    GLUED_<foo>_<things>    all the above, glued together; not for
+			    human use.
+
+    <foo>_OPTS              the usual name for options
+    <foo>_DEFINES           CPP #defines
+    <foo>_INCLUDES          CPP #includes
+    <foo>_IMPORTS           Haskell "import"s
+
+   As a contrived example, the "makeinfo" program is usually called
+   with the $(MAKEINFOFLAGS), which would likely be put together as...
+   
+    ALLPROJ_MAKEINFO_OPTS       =
+    PLAT_MAKEINFO_OPTS          =
+    PROJ_MAKEINFO_OPTS          =
+    MAKEINFO_OPTS               =
+    EXTRA_MAKEINFO_OPTS         =
+    GLUED_MAKEINFO_OPTS         =
+    MAKEINFOFLAGS = $(GLUED_MAKEINFO_OPTS)
+
+   and used as...
+
+    $(MAKEINFO) $(MAKEINFOFLAGS) ...
+
+   The related CPP names are as you would expect: e.g.,
+   ProjectMakeinfoOpts for PROJ_MAKEINFO_OPTS, ...
+
+   For systems of interacting programs (e.g., cpp, cc, lint, as, and ld),
+   things can be [considerably] messier.
+
+*/
+
+/* CPP definitions for CPP #includes; -I must be explicit */
+
+/* I have not separated use of CPP w/ CC vs standalone... */
+
+#ifndef AllProjectsCppIncludes
+#define AllProjectsCppIncludes  /*none*/
+#endif
+#ifndef PlatformCppIncludes
+#define PlatformCppIncludes     /*none*/
+#endif
+#ifndef ProjectCppIncludes
+#define ProjectCppIncludes      /*none*/
+#endif
+#ifndef SetupCppIncludes
+#define SetupCppIncludes      /*none*/
+#endif
+GenerateOptionsMakeVars(CPP,INCLUDES,AllProjectsCppIncludes,PlatformCppIncludes,ProjectCppIncludes,SetupCppIncludes)
+
+/* CPP definitions for #defines */
+
+#ifndef AllProjectsCppDefines
+#define AllProjectsCppDefines   /*none*/
+#endif
+#ifndef PlatformCppDefines
+#define PlatformCppDefines /**/
+#endif /* PlatformCppDefines */
+#ifndef ProjectCppDefines
+#define ProjectCppDefines       /*none*/
+#endif
+#ifndef SetupCppDefines
+#define SetupCppDefines       /*none*/
+#endif
+GenerateOptionsMakeVars(CPP,DEFINES,AllProjectsCppDefines,PlatformCppDefines,ProjectCppDefines,SetupCppDefines)
+
+/* C-compiler (and cpp ... and lint) options */
+
+#ifndef AllProjectsCcOpts
+#define AllProjectsCcOpts /*none*/
+#endif
+#ifndef PlatformCcOpts
+#define PlatformCcOpts /*none*/
+#endif
+#ifndef ProjectCcOpts
+#define ProjectCcOpts /*none*/
+#endif
+#ifndef SetupCcOpts
+#define SetupCcOpts /*none*/
+#endif
+GenerateOptionsMakeVars(CC,OPTS,AllProjectsCcOpts,PlatformCcOpts,ProjectCcOpts,SetupCcOpts)
+
+CFLAGS = $(GLUED_CPP_INCLUDES) $(GLUED_CPP_DEFINES) $(GLUED_CC_OPTS)
+
+/* Yacc/bison options */
+
+#ifndef AllProjectsYaccOpts
+#define AllProjectsYaccOpts /*none*/
+#endif
+#ifndef PlatformYaccOpts
+#define PlatformYaccOpts /*none*/
+#endif
+#ifndef ProjectYaccOpts
+#define ProjectYaccOpts /*none*/
+#endif
+#ifndef SetupYaccOpts
+#define SetupYaccOpts /*none*/
+#endif
+GenerateOptionsMakeVars(YACC,OPTS,AllProjectsYaccOpts,PlatformYaccOpts,ProjectYaccOpts,SetupYaccOpts)
+
+YFLAGS = $(GLUED_YACC_OPTS)
+
+/* Haskell compiler (and cpp ... and lint) options
+
+   HcMaxHeapFlag comes from a --with-max-heap=<size> from configure
+*/
+#ifndef AllProjectsHcOpts
+#define AllProjectsHcOpts HcMaxHeapFlag
+#endif
+#ifndef PlatformHcOpts
+#define PlatformHcOpts /*none*/
+#endif
+#ifndef ProjectHcOpts
+#define ProjectHcOpts /*none*/
+#endif
+#ifndef SetupHcOpts
+#define SetupHcOpts /*none*/
+#endif
+GenerateOptionsMakeVars(HC,OPTS,AllProjectsHcOpts,PlatformHcOpts,ProjectHcOpts,SetupHcOpts)
+
+#ifndef AllProjectsHcImports
+#define AllProjectsHcImports  /*none*/
+#endif
+#ifndef PlatformHcImports
+#define PlatformHcImports     /*none*/
+#endif
+#ifndef ProjectHcImports
+#define ProjectHcImports      /*none*/
+#endif
+#ifndef SetupHcImports
+#define SetupHcImports      /*none*/
+#endif
+GenerateOptionsMakeVars(HC,IMPORTS,AllProjectsHcImports,PlatformHcImports,ProjectHcImports,SetupHcImports)
+HCFLAGS = $(GLUED_HC_IMPORTS) $(GLUED_CPP_DEFINES) $(GLUED_HC_OPTS)
+
+/* linker options */
+
+#ifndef AllProjectsLdOpts
+#define AllProjectsLdOpts /*none*//* -X -r "combine" flags (?) */
+#endif
+#ifndef PlatformLdOpts
+#define PlatformLdOpts /*none*/
+#endif
+#ifndef ProjectLdOpts
+#define ProjectLdOpts /*none*/
+#endif
+#ifndef SetupLdOpts
+#define SetupLdOpts /*none*/
+#endif
+#ifndef AllProjectsLdLibraries
+#define AllProjectsLdLibraries /*none*/
+#endif
+#ifndef PlatformLdLibraries
+#define PlatformLdLibraries /*none*/
+#endif
+#ifndef ProjectLdLibraries
+#define ProjectLdLibraries /*none*/
+#endif
+#ifndef SetupLdLibraries
+#define SetupLdLibraries /*none*/
+#endif
+GenerateOptionsMakeVars(LD,OPTS,AllProjectsLdOpts,PlatformLdOpts,ProjectLdOpts,SetupLdOpts)
+GenerateOptionsMakeVars(LD,LIBRARIES,AllProjectsLdLibraries,PlatformLdLibraries,ProjectLdLibraries,SetupLdLibraries)
+LDOPTIONS = $(GLUED_LD_OPTS) /* ToDo: and the libraries ? */
+
+/* lint stuff not tidied up yet */
+
+#ifndef LintLibFlag
+#define LintLibFlag -C
+#endif
+#ifndef LintOpts
+#define LintOpts -axz
+#endif
+LINTLIBFLAG = LintLibFlag
+LINTOPTS = LintOpts
+LINTFLAGS = $(LINTOPTS) -DLINT $(GLUED_CPP_INCLUDES) $(GLUED_CPP_DEFINES)
+
+/* literate-stuff options */
+
+/* some options are common (general) to all lit2* pgms; others specific */
+
+#ifndef AllProjectsGenLitOpts
+#define AllProjectsGenLitOpts /*none*/
+#endif
+#ifndef PlatformGenLitOpts
+#define PlatformGenLitOpts /*none*/
+#endif
+#ifndef ProjectGenLitOpts
+#define ProjectGenLitOpts /*none*/
+#endif
+#ifndef SetupGenLitOpts
+#define SetupGenLitOpts /*none*/
+#endif
+GenerateOptionsMakeVars(GENLIT,OPTS,AllProjectsGenLitOpts,PlatformGenLitOpts,ProjectGenLitOpts,SetupGenLitOpts)
+
+#ifndef AllProjectsLit2pgmOpts
+#define AllProjectsLit2pgmOpts /*none*/
+#endif
+#ifndef PlatformLit2pgmOpts
+#define PlatformLit2pgmOpts /*none*/
+#endif
+#ifndef ProjectLit2pgmOpts
+#define ProjectLit2pgmOpts /*none*/
+#endif
+#ifndef SetupLit2pgmOpts
+#define SetupLit2pgmOpts /*none*/
+#endif
+GenerateOptionsMakeVars(LIT2PGM,OPTS,AllProjectsLit2pgmOpts,PlatformLit2pgmOpts,ProjectLit2pgmOpts,SetupLit2pgmOpts)
+
+#ifndef AllProjectsLit2texiOpts
+#define AllProjectsLit2texiOpts /*none*/
+#endif
+#ifndef PlatformLit2texiOpts
+#define PlatformLit2texiOpts /*none*/
+#endif
+#ifndef ProjectLit2texiOpts
+#define ProjectLit2texiOpts /*none*/
+#endif
+#ifndef SetupLit2texiOpts
+#define SetupLit2texiOpts /*none*/
+#endif
+GenerateOptionsMakeVars(LIT2TEXI,OPTS,AllProjectsLit2texiOpts,PlatformLit2texiOpts,ProjectLit2texiOpts,SetupLit2texiOpts)
+#ifndef AllProjectsLit2HtmlOpts
+#define AllProjectsLit2HtmlOpts /*none*/
+#endif
+#ifndef PlatformLit2HtmlOpts
+#define PlatformLit2HtmlOpts /*none*/
+#endif
+#ifndef ProjectLit2HtmlOpts
+#define ProjectLit2HtmlOpts /*none*/
+#endif
+#ifndef SetupLit2HtmlOpts
+#define SetupLit2HtmlOpts /*none*/
+#endif
+GenerateOptionsMakeVars(LIT2HTML,OPTS,AllProjectsLit2HtmlOpts,PlatformLit2HtmlOpts,ProjectLit2HtmlOpts,SetupLit2HtmlOpts)
+#ifndef AllProjectsLit2latexOpts
+#define AllProjectsLit2latexOpts /*none*/
+#endif
+#ifndef PlatformLit2latexOpts
+#define PlatformLit2latexOpts /*none*/
+#endif
+#ifndef ProjectLit2latexOpts
+#define ProjectLit2latexOpts /*none*/
+#endif
+#ifndef SetupLit2latexOpts
+#define SetupLit2latexOpts /*none*/
+#endif
+GenerateOptionsMakeVars(LIT2LATEX,OPTS,AllProjectsLit2latexOpts,PlatformLit2latexOpts,ProjectLit2latexOpts,SetupLit2latexOpts)
+#ifndef AllProjectsLit2changelogOpts
+#define AllProjectsLit2changelogOpts /*none*/
+#endif
+#ifndef PlatformLit2changelogOpts
+#define PlatformLit2changelogOpts /*none*/
+#endif
+#ifndef ProjectLit2changelogOpts
+#define ProjectLit2changelogOpts /*none*/
+#endif
+#ifndef SetupLit2changelogOpts
+#define SetupLit2changelogOpts /*none*/
+#endif
+GenerateOptionsMakeVars(LIT2CHANGELOG,OPTS,AllProjectsLit2changelogOpts,PlatformLit2changelogOpts,ProjectLit2changelogOpts,SetupLit2changelogOpts)
+#ifndef AllProjectsMkDependLitOpts
+#define AllProjectsMkDependLitOpts /*none*/
+#endif
+#ifndef PlatformMkDependLitOpts
+#define PlatformMkDependLitOpts /*none*/
+#endif
+#ifndef ProjectMkDependLitOpts
+#define ProjectMkDependLitOpts /*none*/
+#endif
+#ifndef SetupMkDependLitOpts
+#define SetupMkDependLitOpts /*none*/
+#endif
+GenerateOptionsMakeVars(MKDEPENDLIT,OPTS,AllProjectsMkDependLitOpts,PlatformMkDependLitOpts,ProjectMkDependLitOpts,SetupMkDependLitOpts)
+
+LIT2PGMFLAGS            = $(GLUED_GENLIT_OPTS) $(GLUED_LIT2PGM_OPTS)
+LIT2TEXIFLAGS           = $(GLUED_GENLIT_OPTS) $(GLUED_LIT2TEXI_OPTS)
+LIT2HTMLFLAGS           = $(GLUED_GENLIT_OPTS) $(GLUED_LIT2HTML_OPTS)
+LIT2LATEXFLAGS          = $(GLUED_GENLIT_OPTS) $(GLUED_LIT2LATEX_OPTS)
+LIT2CHANGELOGFLAGS      = $(GLUED_GENLIT_OPTS) $(GLUED_LIT2CHANGELOG_OPTS)
+MKDEPENDLITFLAGS        = $(GLUED_GENLIT_OPTS) $(GLUED_MKDEPENDLIT_OPTS)
+
+/* same for other MkDepend things */
+
+#ifndef AllProjectsMkDependCOpts
+#define AllProjectsMkDependCOpts /*none*/
+#endif
+#ifndef PlatformMkDependCOpts
+#define PlatformMkDependCOpts /*none*/
+#endif
+#ifndef ProjectMkDependCOpts
+#define ProjectMkDependCOpts /*none*/
+#endif
+#ifndef SetupMkDependCOpts
+#define SetupMkDependCOpts /*none*/
+#endif
+GenerateOptionsMakeVars(MKDEPENDC,OPTS,AllProjectsMkDependCOpts,PlatformMkDependCOpts,ProjectMkDependCOpts,SetupMkDependCOpts)
+MKDEPENDCFLAGS        = $(GLUED_MKDEPENDC_OPTS)
+
+#ifndef AllProjectsMkDependHSOpts
+#define AllProjectsMkDependHSOpts /*none*/
+#endif
+#ifndef PlatformMkDependHSOpts
+#define PlatformMkDependHSOpts /*none*/
+#endif
+#ifndef ProjectMkDependHSOpts
+#define ProjectMkDependHSOpts /*none*/
+#endif
+#ifndef SetupMkDependHSOpts
+#define SetupMkDependHSOpts /*none*/
+#endif
+GenerateOptionsMakeVars(MKDEPENDHS,OPTS,AllProjectsMkDependHSOpts,PlatformMkDependHSOpts,ProjectMkDependHSOpts,SetupMkDependHSOpts)
+MKDEPENDHSFLAGS        = $(GLUED_MKDEPENDHS_OPTS)
+
+/* same for tags stuff */
+
+#ifndef AllProjectsCTagsOpts
+#define AllProjectsCTagsOpts -e -w /* emacs-style; no warnings */
+#endif
+#ifndef PlatformCTagsOpts
+#define PlatformCTagsOpts /*none*/
+#endif
+#ifndef ProjectCTagsOpts
+#define ProjectCTagsOpts /*none*/
+#endif
+#ifndef SetupCTagsOpts
+#define SetupCTagsOpts /*none*/
+#endif
+GenerateOptionsMakeVars(CTAGS,OPTS,AllProjectsCTagsOpts,PlatformCTagsOpts,ProjectCTagsOpts,SetupCTagsOpts)
+CTAGSFLAGS        = $(GLUED_CTAGS_OPTS)
+
+#ifndef AllProjectsPerlTagsOpts
+#define AllProjectsPerlTagsOpts /*none*/
+#endif
+#ifndef PlatformPerlTagsOpts
+#define PlatformPerlTagsOpts /*none*/
+#endif
+#ifndef ProjectPerlTagsOpts
+#define ProjectPerlTagsOpts /*none*/
+#endif
+#ifndef SetupPerlTagsOpts
+#define SetupPerlTagsOpts /*none*/
+#endif
+GenerateOptionsMakeVars(PERLTAGS,OPTS,AllProjectsPerlTagsOpts,PlatformPerlTagsOpts,ProjectPerlTagsOpts,SetupPerlTagsOpts)
+PERLTAGSFLAGS        = $(GLUED_PERLTAGS_OPTS)
+
+/* and for "runstdtest" */
+
+#ifndef AllProjectsRunStdTestOpts
+#define AllProjectsRunStdTestOpts /*none*/
+#endif
+#ifndef PlatformRunStdTestOpts
+#define PlatformRunStdTestOpts /*none*/
+#endif
+#ifndef ProjectRunStdTestOpts
+#define ProjectRunStdTestOpts /*none*/
+#endif
+#ifndef SetupRunStdTestOpts
+#define SetupRunStdTestOpts /*none*/
+#endif
+GenerateOptionsMakeVars(RUNSTDTEST,OPTS,AllProjectsRunStdTestOpts,PlatformRunStdTestOpts,ProjectRunStdTestOpts,SetupRunStdTestOpts)
+RUNSTDTEST_FLAGS = $(GLUED_RUNSTDTEST_OPTS)
+
+/* CPP definitions for #defines */
+
+#ifndef AllProjectsJmakeDefines
+#define AllProjectsJmakeDefines   /*none*/
+#endif
+#ifndef PlatformJmakeDefines
+#define PlatformJmakeDefines /**/
+#endif /* PlatformJmakeDefines */
+#ifndef ProjectJmakeDefines
+#define ProjectJmakeDefines       /*none*/
+#endif
+#ifndef SetupJmakeDefines
+#define SetupJmakeDefines       /*none*/
+#endif
+GenerateOptionsMakeVars(JMAKE,DEFINES,AllProjectsJmakeDefines,PlatformJmakeDefines,ProjectJmakeDefines,SetupJmakeDefines)
+JMAKEFLAGS = $(GLUED_JMAKE_DEFINES)
+

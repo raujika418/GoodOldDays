@@ -1,0 +1,46 @@
+In file included from lex_yy.c:1:0:
+lex_yy.c:20:15: error: initializer element is not constant
+ FILE *yyin = {stdin}, *yyout = {stdout};
+               ^
+lex_yy.c:20:15: note: (near initialization for ‘yyin’)
+lex_yy.c:20:33: error: initializer element is not constant
+ FILE *yyin = {stdin}, *yyout = {stdout};
+                                 ^
+lex_yy.c:20:33: note: (near initialization for ‘yyout’)
+lex_yy.c:59:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ yylex(){
+ ^~~~~
+lex_yy.c: In function ‘yylex’:
+lex_yy.c:61:15: warning: implicit declaration of function ‘yylook’; did you mean ‘yylex’? [-Wimplicit-function-declaration]
+ while((nstr = yylook()) >= 0)
+               ^~~~~~
+               yylex
+lex_yy.c:64:4: warning: implicit declaration of function ‘yywrap’ [-Wimplicit-function-declaration]
+ if(yywrap()) return(0); break;
+    ^~~~~~
+lex_yy.c: At top level:
+lex_yy.c:753:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ yylook(){
+ ^~~~~~
+lex_yy.c: In function ‘yylook’:
+lex_yy.c:867:12: warning: implicit declaration of function ‘yyback’; did you mean ‘yylook’? [-Wimplicit-function-declaration]
+      while(yyback((*lsp)->yystops,-*yyfnd) != 1 && lsp > yylstate){
+            ^~~~~~
+            yylook
+lex_yy.c: At top level:
+lex_yy.c:901:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ yyback(p, m)
+ ^~~~~~
+lex_yy.c: In function ‘yyback’:
+lex_yy.c:901:1: warning: type of ‘m’ defaults to ‘int’ [-Wimplicit-int]
+lex_yy.c: At top level:
+lex_yy.c:913:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ yyinput(){
+ ^~~~~~~
+lex_yy.c:916:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ yyoutput(c)
+ ^~~~~~~~
+lex_yy.c:920:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ yyunput(c)
+ ^~~~~~~
+make: *** [<builtin>: lex_yy.o] Error 1

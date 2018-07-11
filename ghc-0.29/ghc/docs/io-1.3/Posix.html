@@ -1,0 +1,598 @@
+<html>
+<title>Haskell 1.3 Standard I/O: LibPosix</title>
+
+[<a href="LibUserInterrupt.html">Prev</a>] [<a href="IO.html">Up</a>]
+<p>
+
+<hr><p>
+
+<h1>POSIX Bindings for Haskell</h1>
+
+<pre>> interface LibPosix where
+
+> import LibSystem(ExitCode)</pre>
+
+<h2>Process Primitives</h2>
+
+<pre>> data ProcessID
+
+> forkProcess :: IO (Maybe ProcessID)
+
+> executeFile :: FilePath		    -- Command
+>             -> Bool			    -- Search PATH?
+>             -> [String]		    -- Arguments
+>             -> Maybe [(String, String)]   -- Environment
+>             -> IO ()
+
+> runProcess :: FilePath		    -- Command
+>            -> [String]		    -- Arguments
+>            -> Maybe [(String, String)]    -- Environment
+>            -> Maybe FilePath		    -- Working directory    
+>            -> Maybe Handle		    -- stdin
+>            -> Maybe Handle		    -- stdout
+>            -> Maybe Handle		    -- stderr
+>            -> IO ProcessID
+
+> data TerminationCause = Exited ExitCode 
+>                       | Terminated Interrupt 
+>                       | Stopped Interrupt
+
+> type ProcessStatus = (ProcessID, TerminationCause)
+
+> waitForProcess       :: ProcessID -> Bool -> Bool -> IO (Maybe ProcessStatus)
+> waitForProcessGroup  :: ProcessGroupID -> Bool -> Bool -> IO (Maybe ProcessStatus)
+> waitForAnyProcess    :: Bool -> Bool -> IO (Maybe ProcessStatus)
+
+> exitImmediately :: ExitCode -> IO ()
+
+> getEnvironment  :: IO [(String, String)]
+
+> getEnv    :: String -> IO String
+> setEnv    :: String -> String -> IO ()
+> deleteEnv :: String -> IO ()
+> clearEnv  :: IO ()
+
+> data Interrupt = InternalAbort		-- SIGABRT
+>                | RealTimeAlarm		-- SIGALRM
+>                | FloatingPointException	-- SIGFPE
+>                | LostConnection		-- SIGHUP
+>                | IllegalInstruction		-- SIGILL
+>                | KeyboardInterrupt		-- SIGINT
+>                | KillProcess			-- SIGKILL
+>                | OpenEndedPipe		-- SIGPIPE
+>                | KeyboardTermination		-- SIGQUIT
+>                | SegmentationViolation	-- SIGSEGV
+>                | SoftwareTermination		-- SIGTERM
+>                | UserDefinedSignal1		-- SIGUSR1
+>                | UserDefinedSignal2		-- SIGUSR2
+>                | ProcessStatusChanged		-- SIGCHLD
+>                | ContinueProcess		-- SIGCONT
+>                | SoftwareStop			-- SIGSTOP
+>                | KeyboardStop			-- SIGTSTP
+>                | BackgroundRead		-- SIGTTIN
+>                | BackgroundWrite		-- SIGTTOU
+>                | OtherSignal Int
+
+> interruptProcess :: ProcessID -> Interrupt -> IO ()
+> raiseInterrupt   :: Interrupt -> IO ()
+> testProcessID    :: ProcessID -> IO Bool
+
+> interruptProcessGroup :: ProcessGroupID -> Interrupt -> IO ()
+> testProcessGroupID    :: ProcessGroupID -> IO Bool
+
+> enableStoppedChildInterrupt  :: Bool -> IO Bool
+> stoppedChildInterruptEnabled :: IO Bool
+
+> data Handler = Default | Ignore | Catch (IO ())
+
+> data InterruptSet
+
+> emptyInterruptSet :: InterruptSet
+> listToInterruptSet :: [Interrupt] -> InterruptSet
+> interruptSetToList :: InterruptSet -> [Interrupt]
+> setInterruptInSet :: Interrupt -> InterruptSet -> InterruptSet
+> testInterruptInSet :: Interrupt -> InterruptSet -> Bool
+> clearInterruptInSet :: Interrupt -> InterruptSet -> InterruptSet
+
+> installHandler       :: Interrupt
+>                      -> Handler 
+>                      -> Maybe InterruptSet	-- other signals to block
+>                      -> IO Handler		-- old handler
+
+> getInterruptSet      :: IO InterruptSet
+> setInterruptSet      :: InterruptSet -> IO InterruptSet
+
+> blockInterrupts      :: InterruptSet -> IO InterruptSet
+> unBlockInterrupts    :: InterruptSet -> IO InterruptSet
+
+> getPendingInterrupts :: IO InterruptSet 
+
+> awaitInterrupt       :: Maybe InterruptSet -> IO ()
+
+> scheduleAlarm        :: Integer -> IO Integer
+
+> sleep                :: Integer -> IO Integer</pre>
+
+<h2>Process Environment</h2>
+
+<pre>> getProcessID       :: IO ProcessID
+> getParentProcessID :: IO ProcessID
+
+> data UserID
+
+> getRealUserID        :: IO UserID
+> getEffectiveUserID   :: IO UserID
+> setUserID            :: UserID -> IO ()
+
+> getLoginName         :: IO String
+
+> data GroupID
+
+> getRealGroupID       :: IO GroupID
+> getEffectiveGroupID  :: IO GroupID
+> setGroupID           :: GroupID -> IO ()
+> getGroups            :: IO [GroupID]
+
+> getEffectiveUserName :: IO String
+
+> data ProcessGroupID
+
+> getProcessGroupID	:: IO ProcessGroupID
+> setProcessGroupID     :: Maybe ProcessID -> Maybe ProcessGroupID -> IO ()
+
+> createProcessGroup    :: ProcessID -> IO ProcessGroupID
+
+> createSession         :: IO ProcessGroupID
+
+> data SystemID
+
+> systemName :: SystemId -> String
+> nodeName   :: SystemId -> String
+> release    :: SystemId -> String
+> version    :: SystemId -> String
+> machine    :: SystemId -> String
+
+> getSystemID :: IO SystemID
+
+> epochTime   :: IO Integer
+
+> data ProcessTimes
+
+> elapsedRealTime :: ProcessTime -> Integer
+> userCPUTime :: ProcessTime -> Integer
+> systemCPUTime :: ProcessTime -> Integer
+> childUserCPUTime :: ProcessTime -> Integer
+> childSystemCPUTime :: ProcessTime -> Integer
+
+> getProcessTimes            :: IO ProcessTimes
+
+> getControllingTerminalName :: IO (Maybe PathName)
+
+> getTerminalName          :: FileDescriptor -> IO (Maybe PathName)
+
+> isTerminal               :: FileDescriptor -> IO Bool
+
+> getArgLimit		   :: IO Integer
+> getChildLimit		   :: IO Integer
+> getClockTick		   :: IO Integer
+> getGroupLimit		   :: IO Integer
+> getOpenFileLimit	   :: IO Integer
+> hasPosixJobControl	   :: IO Bool
+> hasPosixSavedIDs	   :: IO Bool
+> getPosixVersion          :: IO Integer</pre>
+
+<h2>Files and Directories</h2>
+
+<pre>> data Directory
+
+> openDirectory		    :: FilePath -> IO Directory
+> readDirectory		    :: Directory -> IO String
+> rewindDirectory	    :: Directory -> IO ()
+> closeDirectory	    :: Directory -> IO ()
+
+> getWorkingDirectory       :: IO FilePath
+> changeWorkingDirectory    :: FilePath -> IO ()
+
+> data FileMode
+
+> nullFileMode     :: FileMode
+> ownerReadMode    :: FileMode
+> ownerWriteMode   :: FileMode
+> ownerExecuteMode :: FileMode
+> groupReadMode    :: FileMode
+> groupWriteMode   :: FileMode
+> groupExecuteMode :: FileMode
+> otherReadMode    :: FileMode
+> otherWriteMode   :: FileMode
+> otherExecuteMode :: FileMode
+> setUserIDMode    :: FileMode
+> setGroupIDMode   :: FileMode
+> stickyMode       :: FileMode
+> permissiveFileMode :: FileMode
+
+> testOwnerReadMode :: FileMode -> Bool
+> testOwnerWriteMode :: FileMode -> Bool
+> testOwnerExecuteMode :: FileMode -> Bool
+> testGroupReadMode :: FileMode -> Bool
+> testGroupWriteMode :: FileMode -> Bool
+> testGroupExecuteMode :: FileMode -> Bool
+> testOtherReadMode :: FileMode -> Bool
+> testOtherWriteMode :: FileMode -> Bool
+> testOtherExecuteMode :: FileMode -> Bool
+> testSetUserIDMode :: FileMode -> Bool
+> testSetGroupIDMode :: FileMode -> Bool
+> testStickyMode :: FileMode -> Bool
+
+> ownerModes :: FileMode -> FileMode
+> groupModes :: FileMode -> FileMode
+> otherModes :: FileMode -> FileMode
+> accessModes :: FileMode -> FileMode
+
+> unionFileModes :: FileMode -> FileMode -> FileMode
+> intersectFileModes :: FileMode -> FileMode -> FileMode
+> listToFileMode :: [FileMode] -> FileMode
+
+> intToFileMode :: Int -> FileMode
+> fileModeToInt :: FileMode -> Int
+
+> data FileDescriptor
+
+> StandardInput :: FileDescriptor
+> StandardOutput :: FileDescriptor
+> StandardError :: FileDescriptor
+
+> fileDescriptorIsOpen :: FileDescriptor -> Bool
+
+> data AccessMode = ReadOnly | WriteOnly | ReadWrite
+
+> openFileDescriptor :: FilePath
+>                    -> AccessMode
+>                    -> Maybe FileMode	-- Just x => O_CREAT, Nothing => must exist
+>                    -> Bool		-- O_APPEND
+>                    -> Bool		-- O_EXCL
+>                    -> Bool		-- O_NOCTTY
+>                    -> Bool		-- O_NONBLOCK
+>                    -> Bool		-- O_TRUNC
+>                    -> IO FileDescriptor
+
+> createFile         :: FilePath -> FileMode -> IO FileDescriptor
+
+> setFileCreationMask :: FileMode -> IO FileMode
+
+> createLink :: FilePath -> FilePath -> IO ()
+
+> createDirectory :: FilePath -> FileMode -> IO ()
+
+> createNamedPipe :: FilePath -> FileMode -> IO ()
+
+> unlink :: FilePath -> IO ()
+
+> removeDirectory  :: FilePath -> IO ()
+
+> rename :: FilePath -> FilePath -> IO ()
+
+> data FileStatus
+> data FileID
+> data DeviceID
+
+> fileMode :: FileStatus -> FileMode
+
+> fileID :: FileStatus -> FileID
+> deviceID :: FileStatus -> DeviceID
+
+> linkCount :: FileStatus -> Integer
+
+> fileOwner :: FileStatus -> UserID
+> fileGroup :: FileStatus -> GroupID
+> fileSize :: FileStatus -> Integer
+
+> accessTime :: FileStatus -> Integer
+> modificationTime :: FileStatus -> Integer
+> statusChangeTime :: FileStatus -> Integer
+
+> isDirectory :: FileStatus -> Bool
+> isCharacterDevice :: FileStatus -> Bool
+> isBlockDevice :: FileStatus -> Bool
+> isRegularFile :: FileStatus -> Bool
+> isNamedPipe :: FileStatus -> Bool
+
+> getFileStatus :: FilePath -> IO FileStatus
+> getFileDescriptorStatus :: FileDescriptor -> IO FileStatus
+
+> data AccessMode = ReadOK | WriteOK | ExecuteOK
+
+> fileAccessible :: FilePath -> [AccessMode] -> IO Bool
+
+> fileExists :: FilePath -> IO Bool
+
+> setPermissions :: FilePath -> FileMode -> IO ()
+
+> setOwnerAndGroup :: FilePath -> UserID -> GroupID -> IO ()
+
+> setFileTimes :: FilePath -> Integer -> Integer -> IO ()
+
+> touchFile :: FilePath -> IO ()
+
+> linkLimit :: FilePath -> IO (Maybe Integer)
+> descriptorLinkLimit :: FileDescriptor -> IO (Maybe Integer)
+
+> inputLineLimit :: FilePath -> IO (Maybe Integer)
+> descriptorInputLineLimit :: FileDescriptor -> IO (Maybe Integer)
+
+> inputQueueLimit :: FilePath -> IO (Maybe Integer)
+> descriptorInputQueueLimit :: FileDescriptor -> IO (Maybe Integer)
+
+> fileNameLimit :: FilePath -> IO (Maybe Integer)
+> descriptorFileNameLimit :: FileDescriptor -> IO (Maybe Integer)
+
+> pathNameLimit :: FilePath -> IO (Maybe Integer)
+> descriptorPathNameLimit :: FileDescriptor -> IO (Maybe Integer)
+
+> pipeBufferLimit :: FilePath -> IO (Maybe Integer)
+> descriptorPipeBufferLimit :: FileDescriptor -> IO (Maybe Integer)
+
+> setOwnerAndGroupRestricted :: FilePath -> IO (Maybe Bool)
+> descriptorSetOwnerAndGroupRestricted :: FileDescriptor -> IO (Maybe Bool)
+
+> fileNameTruncated :: FilePath -> IO (Maybe Bool)
+> descriptorFileNameTruncated :: FileDescriptor -> IO (Maybe Bool)</pre>
+
+<h2>Input and Output Primitives</h2>
+
+<pre>> createPipe :: IO (FileDescriptor, FileDescriptor)
+
+> duplicate :: FileDescriptor -> IO FileDescriptor
+> duplicateAfter :: FileDescriptor -> Integer -> IO FileDescriptor
+
+> closeFileDescriptor :: FileDescriptor -> IO ()
+
+> readFileDescriptor :: FileDescriptor -> Integer -> IO String
+
+> writeFileDescriptor :: FileDescriptor -> String -> IO Integer
+
+> setCloseOnExec :: FileDescriptor -> Bool -> IO ()
+> getCloseOnExec :: FileDescriptor -> IO Bool
+
+> setFileDescriptorOptions :: FileDescriptor -> Bool -> Bool -> IO ()
+> getFileDescriptorOptions :: FileDescriptor -> IO (Bool, Bool)
+
+> data LockRequest = ReadLock | WriteLock | Unlock
+
+> type FileLock = (LockRequest, Position, Integer, Integer)
+
+> getLock :: FileDescriptor -> FileLock -> IO (ProcessID, FileLock)
+
+> setLock :: FileDescriptor -> FileLock -> IO ()
+
+> waitToSetLock :: FileDescriptor -> FileLock -> IO ()
+
+> data Position = FromBeginning Integer 
+>               | FromCurrentPosition Integer
+>               | FromEndOfFile Integer
+
+> seekFileDescriptor :: FileDescriptor -> Position -> IO Integer</pre>
+
+<h2>Device- and Class-Specific Functions</h2>
+
+<pre>> data TerminalAttributes
+
+> setInterruptOnBreak :: TerminalAttributes -> TerminalAttributes
+> testInterruptOnBreak :: TerminalAttributes -> Bool
+
+> setMapCRtoLF :: TerminalAttributes -> TerminalAttributes
+> testMapCRtoLF :: TerminalAttributes -> Bool
+
+> setIgnoreBreak :: TerminalAttributes -> TerminalAttributes
+> testIgnoreBreak :: TerminalAttributes -> Bool
+
+> setIgnoreCR :: TerminalAttributes -> TerminalAttributes
+> testIgnoreCR :: TerminalAttributes -> Bool
+
+> setIgnoreParityErrors :: TerminalAttributes -> TerminalAttributes
+> testIgnoreParityErrors :: TerminalAttributes -> Bool
+
+> setMapLFtoCR :: TerminalAttributes -> TerminalAttributes
+> testMapLFtoCR :: TerminalAttributes -> Bool
+
+> setParityChecking :: TerminalAttributes -> TerminalAttributes
+> testParityChecking :: TerminalAttributes -> Bool
+
+> setStripHighBit :: TerminalAttributes -> TerminalAttributes
+> testStripHighBit :: TerminalAttributes -> Bool
+
+> setStartStopInput :: TerminalAttributes -> TerminalAttributes
+> testStartStopInput :: TerminalAttributes -> Bool
+
+> setStartStopOutput :: TerminalAttributes -> TerminalAttributes
+> testStartStopOutput :: TerminalAttributes -> Bool
+
+> setMarkParityErrors :: TerminalAttributes -> TerminalAttributes
+> testMarkParityErrors :: TerminalAttributes -> Bool
+
+> setOutputProcessing :: TerminalAttributes -> TerminalAttributes
+> testOutputProcessing :: TerminalAttributes -> Bool
+
+> setLocalMode :: TerminalAttributes -> TerminalAttributes
+> testLocalMode :: TerminalAttributes -> Bool
+
+> setReadEnable :: TerminalAttributes -> TerminalAttributes
+> testReadEnable :: TerminalAttributes -> Bool
+
+> setTwoStopBits :: TerminalAttributes -> TerminalAttributes
+> testTwoStopBits :: TerminalAttributes -> Bool
+
+> setHangupOnClose :: TerminalAttributes -> TerminalAttributes
+> testHangupOnClose :: TerminalAttributes -> Bool
+
+> setParityEnable :: TerminalAttributes -> TerminalAttributes
+> testParityEnable :: TerminalAttributes -> Bool
+
+> setOddParity :: TerminalAttributes -> TerminalAttributes
+> testOddParity :: TerminalAttributes -> Bool
+
+> setEchoEnable :: TerminalAttributes -> TerminalAttributes
+> testEchoEnable :: TerminalAttributes -> Bool
+
+> setEchoErase :: TerminalAttributes -> TerminalAttributes
+> testEchoErase :: TerminalAttributes -> Bool
+
+> setEchoKill :: TerminalAttributes -> TerminalAttributes
+> testEchoKill :: TerminalAttributes -> Bool
+
+> setEchoLF :: TerminalAttributes -> TerminalAttributes
+> testEchoLF :: TerminalAttributes -> Bool
+
+> setInputProcessing :: TerminalAttributes -> TerminalAttributes
+> testInputProcessing :: TerminalAttributes -> Bool
+
+> setExtendedFunctions :: TerminalAttributes -> TerminalAttributes
+> testExtendedFunctions :: TerminalAttributes -> Bool
+
+> setKeyboardInterrupts :: TerminalAttributes -> TerminalAttributes
+> testKeyboardInterrupts :: TerminalAttributes -> Bool
+
+> setFlushOnInterrupt :: TerminalAttributes -> TerminalAttributes
+> testFlushOnInterrupt :: TerminalAttributes -> Bool
+
+> setBackgroundWriteInterrupt :: TerminalAttributes -> TerminalAttributes
+> testBackgroundWriteInterrupt :: TerminalAttributes -> Bool
+
+> bitsPerByte :: TerminalAttributes -> Int
+> setBitsPerByte :: TerminalAttributes -> Int -> TerminalAttributes
+
+> data ControlCharacter = EndOfFile
+>                       | EndOfLine
+>                       | Erase
+>                       | Interrupt
+>                       | Kill
+>                       | Quit
+>                       | Suspend
+>                       | Start
+>                       | Stop
+
+> controlCharacter :: TerminalAttributes -> ControlCharacter -> Maybe Char
+> setControlCharacter :: TerminalAttributes 
+>                     -> ControlCharacter 
+>                     -> Maybe Char 
+>                     -> TerminalAttributes
+
+> inputTime :: TerminalAttributes -> Int
+> setInputTime :: TerminalAttributes -> Int -> TerminalAttributes
+
+> minimumInput :: TerminalAttributes -> Int
+> setMinimumInput :: TerminalAttributes -> Int -> TerminalAttributes
+
+> data BaudRate = B0 | B50 | B75 | B110 | B134 | B150 | B200 | B300 | B600
+>               | B1200 | B1800 | B2400 | B4800 | B9600 | B19200 | B38400
+
+> baudRate :: TerminalAttributes -> BaudRate
+> setBaudRate :: TerminalAttributes -> BaudRate
+
+> getTerminalAttributes :: FileDescriptor -> IO TerminalAttributes
+
+> data TerminalState = Any | OutputDrained | IOFlushed
+
+> setTerminalAttributes :: FileDescriptor 
+>                       -> TerminalAttributes 
+>                       -> TerminalState
+>                       -> IO ()
+
+> sendBreak :: FileDescriptor -> Integer -> IO ()
+
+> drainOutput :: FileDescriptor -> IO ()
+
+> data QueueSelector = InputQueue | OutputQueue | BothQueues
+
+> discardData :: FileDescriptor -> QueueSelector -> IO ()
+
+> data FlowAction = SuspendOutput | RestartOutput | TransmitStop | TransmitStart
+
+> flow :: FileDescriptor -> FlowAction -> IO ()
+
+> getTerminalProcessGroupID :: FileDescriptor -> IO ProcessGroupID
+> setTerminalProcessGroupID :: FileDescriptor -> ProcessGroupID -> IO ()</pre>
+
+<h2>System Databases</h2>
+
+<pre>> data GroupEntry
+
+> groupName :: GroupEntry -> String
+> groupID :: GroupEntry -> GroupID
+> groupMembers :: GroupEntry -> [String]
+
+> getGroupEntryForID :: GroupID -> IO GroupEntry
+> getGroupEntryForName :: String -> IO GroupEntry
+
+> data UserEntry
+
+> userName :: UserEntry -> String
+> userID :: UserEntry -> UserID
+> userGroupID :: UserEntry -> GroupID
+> homeDirectory :: UserEntry -> String
+> shell :: UserEntry -> String
+
+> getUserEntryForID :: UserID -> IO UserEntry
+> getUserEntryForName :: String -> IO UserEntry</pre>
+
+<h2>Miscellaneous</h2>
+
+<pre>
+> type ErrorCode = Int
+
+> getErrorCode :: IO ErrorCode
+> setErrorCode :: ErrorCode -> IO ()
+
+> noError :: ErrorCode
+> argumentListTooLong :: ErrorCode
+> badFileDescriptor :: ErrorCode
+> brokenPipe :: ErrorCode
+> directoryNotEmpty :: ErrorCode
+> execFormatError :: ErrorCode
+> fileExists :: ErrorCode
+> fileTooLarge :: ErrorCode
+> filenameTooLong :: ErrorCode
+> improperLink :: ErrorCode
+> inappropriateIOControlOperation :: ErrorCode
+> inputOutputError :: ErrorCode
+> interruptedOperation :: ErrorCode
+> invalidArgument :: ErrorCode
+> invalidSeek :: ErrorCode
+> isADirectory :: ErrorCode
+> noChildProcess :: ErrorCode
+> noLocksAvailable :: ErrorCode
+> noSpaceLeftOnDevice :: ErrorCode
+> noSuchOperationOnDevice :: ErrorCode
+> noSuchDeviceOrAddress :: ErrorCode
+> noSuchFileOrDirectory :: ErrorCode
+> noSuchProcess :: ErrorCode
+> notADirectory :: ErrorCode
+> notEnoughMemory :: ErrorCode
+> operationNotImplemented :: ErrorCode
+> operationNotPermitted :: ErrorCode
+> permissionDenied :: ErrorCode
+> readOnlyFileSystem :: ErrorCode
+> resourceBusy :: ErrorCode
+> resourceDeadlockAvoided :: ErrorCode
+> resourceTemporarilyUnavailable :: ErrorCode
+> tooManyLinks :: ErrorCode
+> tooManyOpenFiles :: ErrorCode
+> tooManyOpenFilesInSystem :: ErrorCode
+</pre>
+<p>
+
+<hr><p>
+
+[<a href="LibUserInterrupt.html">Prev</a>] [<a href="IO.html">Up</a>]
+<p>
+
+</body>
+
+<hr>
+<address>
+The Definition of Monadic I/O in Haskell 1.3
+<dl>
+<dt> Haskell 1.3 Committee
+<dt> <a href="mailto:haskell1.3@comp.vuw.ac.nz">haskell1.3@comp.vuw.ac.nz</a>
+</dl>
+</address>
+</html>

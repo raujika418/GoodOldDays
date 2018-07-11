@@ -1,0 +1,337 @@
+#if 0
+%************************************************************************
+%*									*
+\section[mkworld-suffix-rules]{Default stuff for suffix rules}
+%*									*
+%************************************************************************
+
+We are keen on suffix rules, rather than pattern rules, because not
+all makes do the latter.  Sigh.
+
+Suffix rules come in three blobs: (1)~the unavoidable ones [few];
+(2)~the ``always for this project'' ones [turn-off-able]; and (3)~the
+per-Jmakefile ones (you must ``ask for'' these in each Jmakefile where
+you need them.
+
+%************************************************************************
+%*									*
+\subsection[mkworld-suffix-macros]{Macros for making up suffix rules}
+%*									*
+%************************************************************************
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-suffix-macros-literate]{Suffix-rule macros for literate stuff}
+%*									*
+%************************************************************************
+
+The following rule generator assumes the @beforesuff->aftersuff@ is
+known to the literate programming system.
+
+\begin{code}
+#endif /* 0 */
+#ifndef LitSuffixRule
+#define LitSuffixRule(beforesuff,aftersuff)				@@\
+CAT2(beforesuff,aftersuff):						@@\
+	$(RM) $@							@@\
+	$(LIT2PGM) $(LIT2PGMFLAGS) -o $@ $<				@@\
+	@chmod 444 $@							@@\
+									@@\
+beforesuff.itxi:							@@\
+	$(RM) $@							@@\
+	$(LIT2TEXI) -c $(LIT2TEXIFLAGS) -o $@ $<			@@\
+	@chmod 444 $@							@@\
+									@@\
+beforesuff.ihtml:							@@\
+	$(RM) $@							@@\
+	$(LIT2HTML) -c $(LIT2HTMLFLAGS) -o $@ $<			@@\
+	@chmod 444 $@							@@\
+									@@\
+beforesuff.itex:							@@\
+	$(RM) $@							@@\
+	$(LIT2LATEX) -c $(LIT2LATEXFLAGS) -o $@ $<			@@\
+	@chmod 444 $@
+#endif /* LitSuffixRule */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-suffix-macros-Haskell]{Suffix-rule macros for Haskell}
+%*									*
+%************************************************************************
+
+There are several varying flavours of Haskell-related suffix rules;
+each such ``set'' of suffix rules should include...:
+
+\begin{verbatim}
+.o	-> .hi	# hacky pseudo-dependency
+.lhs	-> .o
+.hs	-> .o
+\end{verbatim}
+
+This is the {\em default}; a project or setup could override it.
+\begin{code}
+#endif /* 0 */
+#ifndef HaskellSuffixRules 
+#define HaskellSuffixRules()				@@\
+SuffixRule_o_hi()					@@\
+SuffixRule_lhs_o()					@@\
+SuffixRule_hs_o()
+#endif /* !HaskellSuffixRules */
+#if 0
+\end{code}
+
+We use the internal mkworld CPP macro
+@_body_HaskellCompileWithSpecifiedFlags@, which is shared w/ other
+mkworld stuff.  This keeps the magic to exactly one place.
+
+\begin{code}
+#endif /* 0 */
+#ifndef SuffixRule_o_hi
+#define SuffixRule_o_hi()					@@\
+.o.hi:								@@\
+	@if [ ! -f $@ ] ; then \				@@\
+	    echo You need to create an initial $@ by hand ; \	@@\
+	    exit 1; \						@@\
+	else exit 0 ; \						@@\
+	fi							
+#endif /* !SuffixRule_o_hi */					
+								
+#ifndef SuffixRule_hc_hi					
+#define SuffixRule_hc_hi()					@@\
+.hc.hi:								@@\
+	@if [ ! -f $@ ] ; then \				@@\
+	    echo You need to create an initial $@ by hand ; \	@@\
+	    exit 1; \						@@\
+	else exit 0 ; \						@@\
+	fi
+#endif /* !SuffixRule_hc_hi */
+
+#ifndef SuffixRule_hs_o
+#define SuffixRule_hs_o()					@@\
+.hs.o:								\
+_body_HaskellCompileWithSpecifiedFlags($<,$*.o,$*,hs,-c $(HCFLAGS))
+#endif /* !SuffixRule_hs_o */
+
+#ifndef SuffixRule_lhs_o
+#define SuffixRule_lhs_o()					@@\
+.lhs.o:								\
+_body_HaskellCompileWithSpecifiedFlags($<,$*.o,$*,lhs,-c $(HCFLAGS))
+#endif /* !SuffixRule_lhs_o */
+
+#ifndef SuffixRule_lhs_hc
+#define SuffixRule_lhs_hc()					@@\
+.lhs.hc:							\
+_body_HaskellCompileWithSpecifiedFlags($<,$*.hc,$*,lhs,-C $(HCFLAGS))
+#endif /* !SuffixRule_lhs_o */
+
+#ifndef SuffixRule_hc_o
+#define SuffixRule_hc_o()					@@\
+.hc.o:								\
+_body_HaskellCompileWithSpecifiedFlags($<,$*.o,$*,hc,-c $(HCFLAGS))
+#endif /* !SuffixRule_hc_o */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-suffix-macros-doc]{Suffix-rule macros for document processing}
+%*									*
+%************************************************************************
+
+You have to ask for these.
+
+\begin{code}
+#endif /* 0 */
+#ifndef DocProcessingSuffixRules
+#define DocProcessingSuffixRules()			@@\
+.tex.dvi:						@@\
+	$(RM) $@					@@\
+	$(LTX) $<					@@\
+							@@\
+.verb.tex:						@@\
+	$(RM) $*.tex					@@\
+	expand $*.verb | $(VERBATIM) > $*.tex		@@\
+							@@\
+.tib.tex:						@@\
+	$(RM) $*.tex $*.verb-t.tex			@@\
+	$(TIB) $*.tib					@@\
+	expand $*.tib-t.tex | $(VERBATIM) > $*.tex	@@\
+	$(RM) $*.tib-t.tex				@@\
+							@@\
+.fig.ps:						@@\
+	$(RM) $@					@@\
+	fig2dev -L ps $< $@				@@\
+							@@\
+.fig.tex:						@@\
+	$(RM) $@					@@\
+	fig2dev -L latex $< $@
+
+#endif /* ! DocProcessingSuffixRules */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsection[mkworld-suffix-rule-text]{Generate actual suffix-rule text}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+
+.SUFFIXES: .xdvi .ps .dvi .tex .fig .tib .verb .itex .itxi .ihtml .lit \
+	.p_o .o .s .hi .hc .lhc .lhs .hs \
+	.prl .lprl \
+	.sh .lsh \
+	.c .lc .h .lh .lex .llex .flex .lflex .y \
+	.ljm .jm
+
+#ifndef SuffixRules_WantStdOnes
+#define SuffixRules_WantStdOnes YES /* but you can turn it off */
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-suffixes-literate]{Suffix rules for literate programming}
+%*									*
+%************************************************************************
+
+The \tr{.ljm->.jm} rule isn't optional, because the mkworld system
+uses it.
+
+\begin{code}
+#endif /* 0 */
+LitSuffixRule(.ljm,.jm)		/* mkworld */
+
+#ifndef LiterateSuffixRules
+#define LiterateSuffixRules() \
+LitSuffixRule(.lit,/*none*/)	/* no language really */ \
+LitSuffixRule(.lhs,.hs)		/* Haskell */ \
+LitSuffixRule(.lhc,.hc)		/* Haskell assembler (C) */ \
+LitSuffixRule(.lprl,.prl)	/* Perl */ \
+LitSuffixRule(.lsh,.sh)		/* Bourne shell */ \
+LitSuffixRule(.lc,.c)		/* C */ \
+LitSuffixRule(.lh,.h) \
+LitSuffixRule(.llex,.lex)	/* Lex */ \
+LitSuffixRule(.lflex,.flex)	/* Flex */ \
+\
+/* extra rule... flex can't handle #line's yet */ \
+/* also: save the .lex file in case of some debugging need */ @@\
+.llex.c: @@\
+	$(RM) $@ $*.lex $*.lex.save @@\
+	$(LIT2PGM) $(LIT2PGMFLAGS) $< > $*.lex @@\
+	$(FLEX) $*.lex && mv $*.lex $*.lex.save && mv lex.yy.c $*.c
+
+#endif /* LiterateSuffixRules */
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-suffixes-C]{Suffix rules for C/flex/lex/yacc programming}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#define SuffixRule_s_o()				@@\
+.s.o:							@@\
+	$(RM) $@					@@\
+	$(AS) $(ASFLAGS) -o $@ $< || ( $(RM) $@ && exit 1 )
+#if 0
+\end{code}
+
+See also the ``literate lex'' (llex) rule in the literate section, above.
+
+We don't support the \tr{.y.c} suffix rule; an explicit
+@YaccRunWithExpectMsg@ is better.
+\begin{code}
+#endif /* 0 */
+#define SuffixRules_flexish()				@@\
+.y.c:							@@\
+	@echo please use an explicit "YaccRunWithExpectMsg" macro @@\
+							@@\
+.lex.c:							@@\
+	$(RM) $@					@@\
+	$(LEX) -t $(LFLAGS) $< > $@ || ( $(RM) $@ && exit 1 ) @@\
+							@@\
+.flex.c:						@@\
+	$(RM) $@					@@\
+	$(FLEX) -t $(LFLAGS) $< > $@ || ( $(RM) $@ && exit 1 )
+#if 0
+\end{code}
+
+NB: avoid \tr{-o <something>} because of braindead C compilers.
+\begin{code}
+#endif /* 0 */
+#if CCompilerGroksMinusCMinusO == YES
+
+#define SuffixRule_c_o()					@@\
+.c.o:								@@\
+	$(RM) $@						@@\
+	$(CC) $(CFLAGS) -c $< -o $@
+
+#define SuffixRule_c_s()					@@\
+.c.s:								@@\
+	$(RM) $@						@@\
+	$(CC) $(CFLAGS) -S $< -o $@
+
+#else /* ! CCompilerGroksMinusCMinusO */
+
+#define SuffixRule_c_o()					@@\
+.c.o:								@@\
+	$(RM) $@						@@\
+	$(CC) $(CFLAGS) -c $<					@@\
+	@if [ \( $(@D) != '.' \) -a \( $(@D) != './' \) ] ; then \
+	    echo mv $(@F) $@ ; 					\
+	    mv $(@F) $@ ; 					\
+	else exit 0 ;						\
+	fi
+
+#define SuffixRule_c_s()					@@\
+.c.s:								@@\
+	$(RM) $@						@@\
+	$(CC) $(CFLAGS) -S $<					@@\
+	@if [ \( $(@D) != '.' \) -a \( $(@D) != './' \) ] ; then \
+	    echo mv $(@F) $@ ; 					\
+	    mv $(@F) $@ ; 					\
+	else exit 0 ;						\
+	fi
+
+#endif /* ! CCompilerGroksMinusCMinusO */
+
+#if SuffixRules_WantStdOnes == YES
+SuffixRule_s_o()
+SuffixRules_flexish()
+SuffixRule_c_o()
+SuffixRule_c_s()
+#endif
+#if 0
+\end{code}
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-suffixes-haskell]{Suffix rules for Haskell programming}
+%*									*
+%************************************************************************
+
+Suffix rules for Haskell are {\em not} put in by default.  A Jmakefile
+must ask for one specifically, using one of the macros defined in
+macros section, above (\sectionref{mkworld-suffix-macros-Haskell}).
+
+%************************************************************************
+%*									*
+\subsubsection[mkworld-suffixes-docs]{Suffix rules for document processing (LaTeX/tib/fig/etc)}
+%*									*
+%************************************************************************
+
+\begin{code}
+#endif /* 0 */
+#if SuffixRules_WantDocProcessing == YES
+DocProcessingSuffixRules()
+#endif /* SuffixRules_WantDocProcessing */
+

@@ -1,0 +1,67 @@
+#if 0
+%************************************************************************
+%*									*
+\section[mkworld-site-GEN]{{\em Defaults} for site-selectable things}
+%*									*
+%************************************************************************
+
+If you don't like these settings, do {\em not} change them here!
+If you want to change it for...
+\begin{description}
+\item[All projects at your site:] \tr{mkworld/site.jm}
+\item[One project, \tr{foo}, at your site:]
+\tr{ghc/mkworld/site-ghc.jm} (for example)
+\item[One setup, \tr{full}, of a project \tr{foo} at your site:]
+\tr{ghc/mkworld/site-ghc-full.jm} (for example)
+\end{description}
+
+\begin{code}
+#endif /* 0 */
+/* If you have automounter trouble for setting $hardtop
+   in the STARTUP-* script, replace the if-define-endif
+   here with:
+
+#undef TopDirPwd
+#define TopDirPwd /the/absolute/pathname/to/use
+
+*/
+#ifndef TopDirPwd
+#define TopDirPwd /
+#endif
+TOP_PWD = TopDirPwd /* absolute pathname of TOP */
+#if 0
+\end{code}
+
+@TopDir@ and @CurDir@ are likely defined on command line.
+\begin{code}
+#endif /* 0 */
+#ifndef TopDir
+#define TopDir .
+#endif
+TOP = TopDir
+
+#ifndef CurDir
+#define CurDir .
+#endif
+CURRENT_DIR = CurDir
+
+/* probably set in site.jm.in via configure script */
+#ifndef TmpDir
+#define TmpDir /usr/tmp
+#endif
+TMPDIR = TmpDir	/* where temporary files should go */
+
+#ifndef BootstrapCFlags
+#define BootstrapCFlags /*none*/
+#endif
+BOOTSTRAPCFLAGS = BootstrapCFlags /* set if cpp doesn't have uniq sym */
+
+#ifndef ManDirectoryRoot
+#define ManDirectoryRoot	/usr/man
+#endif
+
+/* Misc. misc. */
+
+#ifndef RemoveTargetByMoving
+#define RemoveTargetByMoving NO		/* affects Jmake.rules */
+#endif

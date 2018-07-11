@@ -1,0 +1,7 @@
+{-# GHC_PRAGMA INTERFACE VERSION 6 #-}
+interface I386PrintCode where
+import CharSeq(CSeq)
+import I386Code(I386Instr)
+import Pretty(PprStyle)
+printLabeledCodes :: PprStyle -> [I386Instr] -> CSeq
+

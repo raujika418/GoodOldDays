@@ -1,0 +1,62 @@
+\section[lit-install]{Standalone installation of Glasgow literate programming}
+
+Here are some quick notes:
+\begin{enumerate}
+\item
+If you don't have \tr{perl}, go get it.
+
+\item
+If you don't have \tr{makeindex} (normally with the TeX distribution)
+and/or \tr{tgrind}, go get them, if you wish.  You can easily get by
+without them, especially \tr{tgrind}.
+
+\item
+Type \tr{./configure --enable-info-utils --prefix=/usr/local/here},
+replacing \tr{/usr/local/here} with the directory beneath which you
+want things installed (executables in \tr{bin}, support files in
+\tr{lib}, etc.)
+
+The \tr{configure} script will do lots of pointless work---normally
+required for the Haskell compiler---which will do no harm.
+
+The \tr{configure} script will complain at the end about
+\tr{ghc/includes/config.h.in}, ``No such file or directory.''
+Ignore it---harmless.
+
+\item
+Next, type \tr{sh < STARTUP}, as \tr{configure} recommends.
+
+\tr{STARTUP} should proceed without incident, except that at the end
+it will say, ``all you need to do is...'' NOTHING!  Which is
+correct---everything you need has already been built.
+
+\item
+Next, make some documentation---this will also serve as a useful
+test of the system:
+\begin{verbatim}
+cd literate/doc
+make literate.dvi
+make literate.info
+make literate.html
+\end{verbatim}
+
+\item
+If things seem basically happy, you can safely install the system.
+\begin{verbatim}
+% cd literate
+% make -n install   # trial run, just to see if it looks "right"
+% make install	    # for real!
+\end{verbatim}
+
+\item
+If you wish to ``install'' the documentation built above, I would
+recommend that you just copy the files by hand.
+
+\item
+You can now either delete the source or just clean up:
+\begin{verbatim}
+% make clean
+\end{verbatim}
+
+If you have problems, please report them to me,
+partain\@dcs.glasgow.ac.uk.

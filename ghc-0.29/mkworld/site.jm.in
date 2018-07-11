@@ -1,0 +1,220 @@
+/* @configure_input@
+*/
+/************************************************************************
+
+General site-specific configuration information:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is where _general_ facts about your local computing environment
+are recorded.
+
+_Project-specific_ facts go in "site-<project>.jm", and facts specific
+to a ``setup'' of a project (unlikely...) go in
+"site-<project>-<setup>.jm".
+
+As you will see, the general style for setting these configuration facts is:
+
+    #ifndef ABuildParameter
+    #define ABuildParameter myvalue
+    #endif
+
+/*
+    "AT_GLASGOW"  -- Are we installing at Glasgow?
+ */
+#ifndef AT_GLASGOW
+#define AT_GLASGOW @AT_GLASGOW@
+#endif
+
+/* only the "prefix" things are set here */
+#ifndef InstRootDir
+#define InstRootDir @prefix@
+#endif
+#ifndef InstBinRootDir
+#define InstBinRootDir @exec_prefix@
+#endif
+
+/*
+    BuildPlatform, HostPlatform;
+    TargetPlatform is in project-specific site file
+    (e.g. ghc/mkworld/site-ghc.jm[.in])
+ */
+#ifndef BuildPlatform
+/* use Host* because of 99-cmd-limit brain-dead seds */
+#define BuildPlatform @HostPlatform@
+#endif
+#ifndef HostPlatform
+#define HostPlatform @HostPlatform@
+#endif
+
+/*
+    "PerlCmd"  -- How do we invoke perl?
+ */
+#ifndef PerlCmd
+#define PerlCmd @PerlCmd@
+#endif
+
+/*
+    "CppCmd"  -- How do we invoke the C preprocessor?
+	(not w/ gcc or something, which also does lots
+	of -Ddefining -- we want the raw thing)
+ */
+
+#ifndef CppCmd
+#define CppCmd @RAWCPP@
+#endif
+
+/* avoid "install" bogosities */
+#ifndef InstallCmd
+#define InstallCmd @INSTALL@
+#endif
+
+/*
+    "RanlibCmd"  -- Do we run ranlib or nothing to generate a table
+    of contents for an archive?
+ */
+ 
+#ifndef RanlibCmd
+#define RanlibCmd @RANLIB@
+#endif
+
+/*
+    "ArCmd"  -- How do we create a random archive?  We prefer to keep
+    temporary files in the same directory, if possible.
+ */
+ 
+#ifndef ArCmd
+#define ArCmd @ArCmd@
+#endif
+
+/*
+    "MakeCmd" -- How to invoke make.  It may be necessary to specify this
+    in order to use eg. GNU make instead of the default make supplied with
+    the system.
+*/
+
+#ifndef MakeCmd
+#define MakeCmd @MakeCmd@
+#endif
+
+/*
+    "ContextDiffCmd"  -- How do we do "diff -c1" (or "diff -C 1" or...)
+ */
+ 
+#ifndef ContextDiffCmd
+#define ContextDiffCmd @ContextDiffCmd@
+#endif
+
+/* 
+    "TmpDir" -- where temporary files tend to be -- defaults to
+    /tmp.  At some place, /usr/tmp tends to be a slightly better choice.
+    At your site, it might be something else...
+    
+    NB: Some tools on some machines respond to a TMPDIR environment
+    variable.  Worth remembering, if you get absolutely stuck...
+    
+    If in doubt, delete this entry!
+*/
+#ifndef TmpDir
+#define TmpDir @TmpDir@
+#endif
+
+/*
+    Stuff for --with-maxheap=<size>, i.e., the user wanted to
+    specify a bigger-than-needed heap for Haskell use.
+*/
+#define HcMaxHeapWasSet @HcMaxHeapWasSet@
+#if HcMaxHeapWasSet && !defined(HcMaxHeap)
+#define HcMaxHeapFlag -H@HcMaxHeap@
+#else
+#define HcMaxHeapFlag /*nothing*/
+#endif
+
+/*
+   "FlexLib" (-lfl) and "LexLib" (-ll): Are they available?
+
+    If you are running flex 2.4.*, as we are, then you *need* the
+    library that comes with it; set this to YES.  Otherwise, set it to
+    NO.  If in doubt, set it to NO.
+*/
+#ifndef LexCmd
+#define LexCmd @LEX@
+#endif
+
+#ifndef LexLib
+#define LexLib @LEXLIB@
+#endif
+
+/* For "make tags", we recommend "etags" from the Emacs distribution.
+   (we supply a variant in the GHC distribution; glafp-utils/etags)
+   If not readily available on your search PATH, say where to find it here.
+
+   If in doubt, delete this entry!
+ */
+#ifndef CTagsCmd
+#define CTagsCmd $(ETAGS)
+#endif
+
+/*
+ * Site-specific compiler things
+ */
+
+/* --------------- C compiler --------------------------------- */
+/* IT IS GOOD TO SAY `YES' !
+    (It is *essential* for the Glasgow Haskell compiler)
+
+   The main point here is to say what you do and don't have,
+   and what those programs are called.  You can delete the
+   junk that has no relevance to your site.
+*/
+#ifndef HaveGcc
+#define HaveGcc @HaveGcc@
+#endif
+
+#ifndef WhatGccIsCalled /* version 2.n, please */
+#define WhatGccIsCalled @WhatGccIsCalled@
+#endif /* ! WhatGccIsCalled */
+
+#ifndef MkDependHSCmd
+#define MkDependHSCmd @MkDependHSCmd@
+#endif
+
+/* Set UseGcc to YES if you want to use it for "ordinary" C compilations.
+   YES, by default.  "UseGcc" *and* "HaveGcc" both have to be YES for
+   anything to happen.
+
+   This is *independent* of whether you set "UseGccForNormalGhcAsm"
+   and/or "UseGccForOptGhcAsm", which are GHC-specific.
+*/
+
+#if !defined(UseGcc)
+#define UseGcc	@HaveGcc@
+#endif /* ! UseGcc */
+
+/* --------------- V misc stuff --------------------------- */
+
+/* If you are going to be using the literate-programming
+   system to make *Info* files, then you should set
+   the following to YES.
+*/
+#ifndef IncludeInfoUtilsInBuild
+#define IncludeInfoUtilsInBuild	@BuildInfoUtils@
+#endif
+
+#ifndef IncludeTestDirsInBuild
+#define IncludeTestDirsInBuild NO
+#endif
+
+/* Your main directory for GNU Info files should come first.
+   If in doubt, get an Emacs person to do "C-h v Info-directory"
+   to tell you where Emacs looks for Info files.
+   
+   If in doubt, delete these entries!
+*/
+#ifndef DefaultInfoPath
+# define DefaultInfoPath $(prefix)/info:.
+#endif
+
+/* ugly, ain't it ? */
+#ifndef TgrindHelperCmd
+#define TgrindHelperCmd	CAT3(/usr/local/tex/lib/tgrind/,HostPlatform,/tfontedpr)
+#endif

@@ -1,0 +1,1071 @@
+\documentstyle[a4wide,grasp]{article}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.9}
+\renewcommand{\dblfloatpagefraction}{0.9}
+
+\sloppy
+
+
+\begin{document}
+
+\title{GHC prelude: types and operations}
+\author{Simon L Peyton Jones \and John Launchbury \and Will Partain}
+
+\maketitle
+\tableofcontents
+
+This ``state interface document'' corresponds to Glasgow Haskell
+version~0.23.
+
+\section{Really primitive stuff}
+
+This section defines all the types which are primitive in Glasgow Haskell, and the
+operations provided for them.
+
+A primitive type is one which cannot be defined in Haskell, and which is 
+therefore built into the language and compiler.
+Primitive types are always unboxed; that is, a value of primitive type cannot be 
+bottom.
+
+Primitive values are often represented by a simple bit-pattern, such as \mbox{\tt Int{\char'43}}, 
+\mbox{\tt Float{\char'43}}, \mbox{\tt Double{\char'43}}.  But this is not necessarily the case: a primitive value 
+might be represented by a pointer to a heap-allocated object.  Examples include 
+\mbox{\tt Array{\char'43}}, the type of primitive arrays.  You might think this odd: doesn't being 
+heap-allocated mean that it has a box?  No, it does not.  A primitive array is 
+heap-allocated because it is too big a value to fit in a register, and would be 
+too expensive to copy around; in a sense, it is accidental that it is represented 
+by a pointer.  If a pointer represents a primitive value, then it really does 
+point to that value: no unevaluated thunks, no indirections...nothing can be at 
+the other end of the pointer than the primitive value.
+
+This section also describes a few non-primitive types, which are needed 
+to express the result types of some primitive operations.
+
+\subsection{Character and numeric types}
+
+There are the following obvious primitive types:
+\begin{verbatim}
+type Char#
+type Int#       -- see also Word# and Addr#, later
+type Float#
+type Double#
+\end{verbatim}
+If you want to know their exact equivalents in C, see
+\mbox{\tt ghc/includes/StgTypes.lh} in the GHC source.
+
+Literals for these types may be written as follows:
+\begin{verbatim}
+1#              an Int#
+1.2#            a Float#
+1.34##          a Double#
+'a'#            a Char#; for weird characters, use '\o<octal>'#
+"a"#            an Addr# (a `char *')
+\end{verbatim}
+
+\subsubsection{Comparison operations}
+\begin{verbatim}
+{gt,ge,eq,ne,lt,le}Char# :: Char# -> Char# -> Bool
+    -- ditto for Int#, Word#, Float#, Double#, and Addr#
+\end{verbatim}
+
+\subsubsection{Unboxed-character operations}
+\begin{verbatim}
+ord# :: Char# -> Int#
+chr# :: Int# -> Char#
+\end{verbatim}
+
+\subsubsection{Unboxed-\mbox{\tt Int} operations}
+\begin{verbatim}
+{plus,minus,times,quot,div,rem}Int# :: Int# -> Int# -> Int#
+negateInt# :: Int# -> Int#
+\end{verbatim}
+NB: No error/overflow checking!
+
+\subsubsection{Unboxed-\mbox{\tt Float} and \mbox{\tt Double} operations}
+\begin{verbatim}
+{plus,minus,times,divide}Float# :: Float# -> Float# -> Float#
+negateFloat# :: Float# -> Float#
+
+float2Int#      :: Float# -> Int#   -- just a cast, no checking!
+int2Float#      :: Int# -> Float#
+
+expFloat#       :: Float# -> Float#
+logFloat#       :: Float# -> Float#
+sqrtFloat#      :: Float# -> Float#
+sinFloat#       :: Float# -> Float#
+cosFloat#       :: Float# -> Float#
+tanFloat#       :: Float# -> Float#
+asinFloat#      :: Float# -> Float#
+acosFloat#      :: Float# -> Float#
+atanFloat#      :: Float# -> Float#
+sinhFloat#      :: Float# -> Float#
+coshFloat#      :: Float# -> Float#
+tanhFloat#      :: Float# -> Float#
+powerFloat#     :: Float# -> Float# -> Float#
+\end{verbatim}
+There's an exactly-matching set of unboxed-\mbox{\tt Double} ops; replace
+\mbox{\tt Float{\char'43}} with \mbox{\tt Double{\char'43}} in the list above.  There are two
+coercion functions for \mbox{\tt Float{\char'43}}/\mbox{\tt Double{\char'43}}:
+\begin{verbatim}
+float2Double#   :: Float# -> Double#
+double2Float#   :: Double# -> Float#
+\end{verbatim}
+The primitive versions of \mbox{\tt encodeFloat}/\mbox{\tt decodeFloat}:
+\begin{verbatim}
+encodeFloat#    :: Int# -> Int# -> ByteArray#   -- Integer mantissa
+                -> Int#                         -- Int exponent
+                -> Float#
+
+decodeFloat#    :: Float#
+                -> _ReturnIntAndGMP
+\end{verbatim}
+(And the same for \mbox{\tt Double{\char'43}}s.)
+
+\subsection{Operations on/for \mbox{\tt Integers} (interface to GMP)}
+\label{sect:horrid-Integer-pairing-types}
+
+We implement \mbox{\tt Integers} (arbitrary-precision integers) using the GNU
+multiple-precision (GMP) package.
+
+The data type for \mbox{\tt Integer} must mirror that for \mbox{\tt MP{\char'137}INT} in \mbox{\tt gmp.h}
+(see \mbox{\tt gmp.info}).  It comes out as:
+\begin{verbatim}
+data Integer = J# Int# Int# ByteArray#
+\end{verbatim}
+So, \mbox{\tt Integer} is really just a ``pairing'' type for a particular
+collection of primitive types.
+
+The operations in the GMP return other combinations of
+GMP-plus-something, so we need ``pairing'' types for those, too:
+\begin{verbatim}
+type _ReturnGMP       = Integer -- synonym
+data _Return2GMPs     = _Return2GMPs Int# Int# ByteArray#
+                                     Int# Int# ByteArray#
+data _ReturnIntAndGMP = _ReturnIntAndGMP Int#
+                                         Int# Int# ByteArray#
+
+-- ????? something to return a string of bytes (in the heap?)
+\end{verbatim}
+The primitive ops to support \mbox{\tt Integers} use the ``pieces'' of the
+representation, and are as follows:
+\begin{verbatim}
+negateInteger#  :: Int# -> Int# -> ByteArray# -> Integer
+
+{plus,minus,times}Integer# :: Int# -> Int# -> ByteArray#
+                           -> Int# -> Int# -> ByteArray#
+                           -> Integer
+
+cmpInteger# :: Int# -> Int# -> ByteArray#
+            -> Int# -> Int# -> ByteArray#
+            -> Int# -- -1 for <; 0 for ==; +1 for >
+
+divModInteger#, quotRemInteger#
+        :: Int# -> Int# -> ByteArray#
+        -> Int# -> Int# -> ByteArray#
+        -> _Return2GMPs
+
+integer2Int# :: Int# -> Int# -> ByteArray#
+             -> Int# 
+
+int2Integer#  :: Int#  -> Integer -- NB: no error-checking on these two!
+word2Integer# :: Word# -> Integer
+
+addr2Integer# :: Addr# -> Integer
+        -- the Addr# is taken to be a `char *' string
+        -- to be converted into an Integer
+\end{verbatim}
+
+
+\subsection{Words and addresses}
+
+A \mbox{\tt Word{\char'43}} is used for bit-twiddling operations.  It is the same size as
+an \mbox{\tt Int{\char'43}}, but has no sign nor any arithmetic operations.
+\begin{verbatim}
+type Word#      -- Same size/etc as Int# but *unsigned*
+type Addr#      -- A pointer from outside the "Haskell world" (from C, probably);
+                -- described under "arrays"
+\end{verbatim}
+\mbox{\tt Word{\char'43}}s and \mbox{\tt Addr{\char'43}}s have the usual comparison operations.
+Other unboxed-\mbox{\tt Word} ops (bit-twiddling and coercions):
+\begin{verbatim}
+and#, or# :: Word# -> Word# -> Word#
+
+not# :: Word# -> Word#
+
+shiftL#, shiftRA#, shiftRL# :: Word# -> Int# -> Word#
+        -- shift left, right arithmetic, right logical
+
+iShiftL#, iShiftRA#, iShiftRL# :: Int# -> Int# -> Int#
+        -- same shift ops, but on Int#s
+
+int2Word#       :: Int#  -> Word# -- just a cast, really
+word2Int#       :: Word# -> Int#
+\end{verbatim}
+
+Unboxed-\mbox{\tt Addr} ops (C casts, really):
+\begin{verbatim}
+int2Addr#       :: Int#  -> Addr#
+addr2Int#       :: Addr# -> Int#
+\end{verbatim}
+Operations for indexing off of C pointers (\mbox{\tt Addr{\char'43}}s) to snatch values
+are listed under ``arrays''.
+
+\subsection{Arrays}
+
+The type \mbox{\tt Array{\char'43}\ elt} is the type of primitive,
+unboxed arrays of values of type \mbox{\tt elt}.  
+\begin{verbatim}
+type Array# elt
+\end{verbatim}
+\mbox{\tt Array{\char'43}} is more primitive than a Haskell
+array --- indeed, Haskell arrays are implemented using \mbox{\tt Array{\char'43}} ---
+in that an \mbox{\tt Array{\char'43}} is indexed only by \mbox{\tt Int{\char'43}}s, starting at zero.  It is also
+more primitive by virtue of being unboxed.  That doesn't mean that it isn't
+a heap-allocated object --- of course, it is.  Rather, being unboxed means
+that it is represented by a pointer to the array itself, and not to a thunk
+which will evaluate to the array (or to bottom).
+The components of an \mbox{\tt Array{\char'43}} are themselves boxed.
+
+The type \mbox{\tt ByteArray{\char'43}} is similar to \mbox{\tt Array{\char'43}}, except that it contains
+just a string of (non-pointer) bytes.
+\begin{verbatim}
+type ByteArray#
+\end{verbatim}
+Arrays of these types are useful when a Haskell program wishes to
+construct a value to pass to a C procedure.  It is also possible to
+use them to build (say) arrays of unboxed characters for internal use
+in a Haskell program.  Given these uses, \mbox{\tt ByteArray{\char'43}} is deliberately
+a bit vague about the type of its components.  Operations are provided
+to extract values of type \mbox{\tt Char{\char'43}}, \mbox{\tt Int{\char'43}}, \mbox{\tt Float{\char'43}}, \mbox{\tt Double{\char'43}}, and
+\mbox{\tt Addr{\char'43}} from arbitrary offsets within a \mbox{\tt ByteArray{\char'43}}.  (For type \mbox{\tt Foo{\char'43}},
+the $i$th offset gets you the $i$th \mbox{\tt Foo{\char'43}}, not the \mbox{\tt Foo{\char'43}} at byte-position $i$.  Mumble.)
+(If you want a \mbox{\tt Word{\char'43}}, grab an \mbox{\tt Int{\char'43}}, then coerce it.)
+
+Lastly, we have static byte-arrays, of type \mbox{\tt Addr{\char'43}} [mentioned
+previously].  (Remember the duality between arrays and pointers in C.)
+Arrays of this types are represented by a pointer to an array in the
+world outside Haskell, so this pointer is not followed by the garbage
+collector.  In other respects they are just like \mbox{\tt ByteArray{\char'43}}.  They
+are only needed in order to pass values from C to Haskell.
+
+\subsubsection{Reading and writing.}
+
+Primitive arrays are linear, and indexed starting at zero.
+
+The size and indices of a \mbox{\tt ByteArray{\char'43}}, \mbox{\tt Addr{\char'43}}, and
+\mbox{\tt MutableByteArray{\char'43}} are all in bytes.  It's up to the program to
+calculate the correct byte offset from the start of the array.  This
+allows a \mbox{\tt ByteArray{\char'43}} to contain a mixture of values of different
+type, which is often needed when preparing data for and unpicking
+results from C.  (Umm... not true of indices... WDP 95/09)
+
+{\em Should we provide some \mbox{\tt sizeOfDouble{\char'43}} constants?}
+
+Out-of-range errors on indexing should be caught by the code which
+uses the primitive operation; the primitive operations themselves do
+{\em not} check for out-of-range indexes. The intention is that the
+primitive ops compile to one machine instruction or thereabouts.
+
+We use the terms ``reading'' and ``writing'' to refer to accessing {\em mutable} 
+arrays (see Section~\ref{sect:mutable}), and ``indexing'' 
+to refer to reading a value from an {\em immutable} 
+array.
+
+If you want to read/write a \mbox{\tt Word{\char'43}}, read an \mbox{\tt Int{\char'43}} and coerce.
+
+Immutable byte arrays are straightforward to index (all indices in bytes):
+\begin{verbatim}
+indexCharArray#   :: ByteArray# -> Int# -> Char#
+indexIntArray#    :: ByteArray# -> Int# -> Int#
+indexAddrArray#   :: ByteArray# -> Int# -> Addr#
+indexFloatArray#  :: ByteArray# -> Int# -> Float#
+indexDoubleArray# :: ByteArray# -> Int# -> Double#
+
+indexCharOffAddr#   :: Addr# -> Int# -> Char#
+indexIntOffAddr#    :: Addr# -> Int# -> Int#
+indexFloatOffAddr#  :: Addr# -> Int# -> Float#
+indexDoubleOffAddr# :: Addr# -> Int# -> Double#
+indexAddrOffAddr#   :: Addr# -> Int# -> Addr#   -- Get an Addr# from an Addr# offset
+\end{verbatim}
+The last of these, \mbox{\tt indexAddrOffAddr{\char'43}}, extracts an \mbox{\tt Addr{\char'43}} using an offset
+from another \mbox{\tt Addr{\char'43}}, thereby providing the ability to follow a chain of
+C pointers.
+
+Something a bit more interesting goes on when indexing arrays of boxed
+objects, because the result is simply the boxed object. So presumably
+it should be entered --- we never usually return an unevaluated
+object!  This is a pain: primitive ops aren't supposed to do
+complicated things like enter objects.  The current solution is to
+return a lifted value, but I don't like it!
+\begin{verbatim}
+indexArray#       :: Array# elt -> Int# -> _Lift elt    -- Yuk!
+\end{verbatim}
+
+\subsubsection{The state type}
+
+The primitive type \mbox{\tt State{\char'43}} represents the state of a state transformer.
+It is parameterised on the desired type of state, which serves to keep
+states from distinct threads distinct from one another.  But the {\em only}
+effect of this parameterisation is in the type system: all values of type
+\mbox{\tt State{\char'43}} are represented in the same way.  Indeed, they are all 
+represented by nothing at all!  The code generator ``knows'' to generate no 
+code, and allocate no registers etc, for primitive states.
+\begin{verbatim}
+type State# s
+\end{verbatim}
+
+The type \mbox{\tt {\char'137}RealWorld} is truly opaque: there are no values defined
+of this type, and no operations over it.  It is ``primitive'' in that
+sense---but it is {\em not unboxed!} Its only role in life is to be the type
+which distinguishes the \mbox{\tt PrimIO} state transformer (see
+Section~\ref{sect:io-spec}).
+\begin{verbatim}
+data _RealWorld
+\end{verbatim}
+
+\subsubsection{States}
+
+A single, primitive, value of type \mbox{\tt State{\char'43}\ {\char'137}RealWorld} is provided.
+\begin{verbatim}
+realWorld# :: State# _RealWorld
+\end{verbatim}
+(Note: in the compiler, not a \mbox{\tt PrimOp}; just a mucho magic \mbox{\tt Id}.)
+
+\subsection{State pairing types}
+\label{sect:horrid-pairing-types}
+
+This subsection defines some types which, while they aren't quite primitive 
+because we can define them in Haskell, are very nearly so.  They define 
+constructors which pair a primitive state with a value of each primitive type.
+They are required to express the result type of the primitive operations in the 
+state monad.
+\begin{verbatim}
+data StateAndPtr#    s elt = StateAndPtr#    (State# s) elt 
+
+data StateAndChar#   s     = StateAndChar#   (State# s) Char# 
+data StateAndInt#    s     = StateAndInt#    (State# s) Int# 
+data StateAndWord#   s     = StateAndWord#   (State# s) Word#
+data StateAndFloat#  s     = StateAndFloat#  (State# s) Float# 
+data StateAndDouble# s     = StateAndDouble# (State# s) Double#  
+data StateAndAddr#   s     = StateAndAddr#   (State# s) Addr#
+
+data StateAndStablePtr# s a = StateAndStablePtr#  (State# s) (StablePtr# a)
+data StateAndForeignObj# s  = StateAndForeignObj# (State# s) ForeignObj#
+data StateAndSynchVar#  s a = StateAndSynchVar#  (State# s) (SynchVar# a)
+
+data StateAndArray#            s elt = StateAndArray#        (State# s) (Array# elt) 
+data StateAndMutableArray#     s elt = StateAndMutableArray# (State# s) (MutableArray# s elt)  
+data StateAndByteArray#        s = StateAndByteArray#        (State# s) ByteArray# 
+data StateAndMutableByteArray# s = StateAndMutableByteArray# (State# s) (MutableByteArray# s)
+\end{verbatim}
+
+
+\subsection{Mutable arrays}
+\label{sect:mutable}
+
+Corresponding to \mbox{\tt Array{\char'43}} and \mbox{\tt ByteArray{\char'43}},
+we have the types of mutable versions of each.  
+In each case, the representation is a pointer
+to a suitable block of (mutable) heap-allocated storage.
+\begin{verbatim}
+type MutableArray# s elt
+type MutableByteArray# s
+\end{verbatim}
+\subsubsection{Allocation.}
+
+Mutable arrays can be allocated.
+Only pointer-arrays are initialised; arrays of non-pointers are filled
+in by ``user code'' rather than by the array-allocation primitive.
+Reason: only the pointer case has to worry about GC striking with a
+partly-initialised array.
+\begin{verbatim}
+newArray#       :: Int# -> elt -> State# s -> StateAndMutableArray# s elt 
+
+newCharArray#   :: Int# -> State# s -> StateAndMutableByteArray# s 
+newIntArray#    :: Int# -> State# s -> StateAndMutableByteArray# s 
+newAddrArray#   :: Int# -> State# s -> StateAndMutableByteArray# s 
+newFloatArray#  :: Int# -> State# s -> StateAndMutableByteArray# s 
+newDoubleArray# :: Int# -> State# s -> StateAndMutableByteArray# s 
+\end{verbatim}
+The size of a \mbox{\tt ByteArray{\char'43}} is given in bytes.
+
+\subsubsection{Reading and writing}
+
+%OLD: Remember, offsets in a \mbox{\tt MutableByteArray{\char'43}} are in bytes.
+\begin{verbatim}
+readArray#       :: MutableArray# s elt -> Int# -> State# s -> StateAndPtr#    s elt
+readCharArray#   :: MutableByteArray# s -> Int# -> State# s -> StateAndChar#   s
+readIntArray#    :: MutableByteArray# s -> Int# -> State# s -> StateAndInt#    s
+readAddrArray#   :: MutableByteArray# s -> Int# -> State# s -> StateAndAddr#   s 
+readFloatArray#  :: MutableByteArray# s -> Int# -> State# s -> StateAndFloat#  s 
+readDoubleArray# :: MutableByteArray# s -> Int# -> State# s -> StateAndDouble# s 
+
+writeArray#       :: MutableArray# s elt -> Int# -> elt     -> State# s -> State# s 
+writeCharArray#   :: MutableByteArray# s -> Int# -> Char#   -> State# s -> State# s 
+writeIntArray#    :: MutableByteArray# s -> Int# -> Int#    -> State# s -> State# s 
+writeAddrArray#   :: MutableByteArray# s -> Int# -> Addr#   -> State# s -> State# s 
+writeFloatArray#  :: MutableByteArray# s -> Int# -> Float#  -> State# s -> State# s 
+writeDoubleArray# :: MutableByteArray# s -> Int# -> Double# -> State# s -> State# s 
+\end{verbatim}
+
+\subsubsection{Equality.}
+
+One can take ``equality'' of mutable arrays.  What is compared is the
+{\em name} or reference to the mutable array, not its contents.
+\begin{verbatim}
+sameMutableArray#     :: MutableArray# s elt -> MutableArray# s elt -> Bool
+sameMutableByteArray# :: MutableByteArray# s -> MutableByteArray# s -> Bool
+\end{verbatim}
+
+\subsubsection{Freezing mutable arrays}
+
+Only unsafe-freeze has a primitive.  (Safe freeze is done directly in Haskell 
+by copying the array and then using \mbox{\tt unsafeFreeze}.) 
+\begin{verbatim}
+unsafeFreezeArray#     :: MutableArray# s elt -> State# s -> StateAndArray#     s elt
+unsafeFreezeByteArray# :: MutableByteArray# s -> State# s -> StateAndByteArray# s
+\end{verbatim}
+
+\subsubsection{Stable pointers}
+
+{\em Andy's comment.} {\bf Errors:} The following is not strictly true: the current
+implementation is not as polymorphic as claimed.  The reason for this
+is that the C programmer will have to use a different entry-routine
+for each type of stable pointer.  At present, we only supply a very
+limited number (1) of these routines.  It might be possible to
+increase the range of these routines by providing general purpose
+entry points to apply stable pointers to (stable pointers to)
+arguments and to enter (stable pointers to) boxed primitive values.
+{\em End of Andy's comment.}
+
+A stable pointer is a name for a Haskell object which can be passed to the 
+external world.  It is ``stable'' in the sense that the name does not change when 
+the Haskell garbage collector runs --- in contrast to the address of the object 
+which may well change.
+
+The stable pointer type is parameterised by the type of the thing which is named.
+\begin{verbatim}
+type StablePtr# a
+\end{verbatim}
+A stable pointer is represented by an index into the (static) 
+\mbox{\tt StablePointerTable}.  The Haskell garbage collector treats the 
+\mbox{\tt StablePointerTable} as a source of roots for GC.
+
+The \mbox{\tt makeStablePointer} function converts a value into a stable pointer.
+It is part of the \mbox{\tt PrimIO} monad, because we want to be sure we don't
+allocate one twice by accident, and then only free one of the copies.
+\begin{verbatim}
+makeStablePointer#  :: a -> State# _RealWorld -> StateAndStablePtr# _RealWorld a
+freeStablePointer#  :: StablePtr# a -> State# _RealWorld -> State# _RealWorld
+deRefStablePointer# :: StablePtr# a -> State# _RealWorld -> StateAndPtr _RealWorld a
+\end{verbatim}
+There is also a C procedure \mbox{\tt FreeStablePtr} which frees a stable pointer.
+
+%
+% Rewritten and updated for MallocPtr++ -- 4/96 SOF
+%
+\subsubsection{Foreign objects}
+
+A \mbox{\tt ForeignObj} is a reference to an object outside the Haskell
+world (i.e., from the C world, or a reference to an object on another
+machine completely.), where the Haskell world has been told ``Let me
+know when you're finished with this ...''.
+
+The \mbox{\tt ForeignObj} type is just a special \mbox{\tt Addr{\char'43}} ({\em not} parameterised).
+\begin{verbatim}
+type ForeignObj#
+\end{verbatim}
+
+A typical use of \mbox{\tt ForeignObj} is in constructing Haskell bindings
+to external libraries. A good example is that of writing a binding to
+an image-processing library (which was actually the main motivation
+for implementing \mbox{\tt ForeignObj}'s precursor, \mbox{\tt MallocPtr}). The
+images manipulated are not stored in the Haskell heap, either because
+the library insist on allocating them internally or we (sensibly)
+decide to spare the GC from having to heave heavy images around.
+
+\begin{verbatim}
+data Image = Image ForeignObj#
+
+instance _CCallable Image
+\end{verbatim}
+
+The \mbox{\tt ForeignObj{\char'43}} type is then used to refer to the externally
+allocated image, and to acheive some type safety, the Haskell binding
+defines the \mbox{\tt Image} data type. So, a value of type \mbox{\tt ForeignObj{\char'43}} is
+used to ``box'' up an external reference into a Haskell heap object
+that we can then indirectly reference:
+
+\begin{verbatim}
+createImage :: (Int,Int) -> PrimIO Image
+\end{verbatim}
+
+So far, this looks just like an \mbox{\tt Addr{\char'43}} type, but \mbox{\tt ForeignObj{\char'43}}
+offers a bit more, namely that we can specify a {\em finalisation
+routine} to invoke when the \mbox{\tt ForeignObj{\char'43}} is discarded by the
+GC. The garbage collector invokes the finalisation routine associated
+with the \mbox{\tt ForeignObj{\char'43}}, saying `` Thanks, I'm through with this
+now..'' For the image-processing library, the finalisation routine could for
+the images free up memory allocated for them. The finalisation routine has
+currently to be written in C (the finalisation routine can in turn call on
+\mbox{\tt FreeStablePtr} to deallocate a stable pointer.).
+
+Associating a finalisation routine with an external object is done by 
+\mbox{\tt makeForeignObj{\char'43}}:
+
+\begin{verbatim}
+makeForeignObj# :: Addr# -- foreign reference
+                -> Addr# -- pointer to finalisation routine
+                -> StateAndForeignObj# _RealWorld ForeignObj#
+\end{verbatim}
+
+(Implementation: a linked list of all \mbox{\tt ForeignObj{\char'43}}s is maintained to allow the
+ garbage collector to detect when a \mbox{\tt ForeignObj{\char'43}} becomes garbage.)
+
+Like \mbox{\tt Array}, \mbox{\tt ForeignObj{\char'43}}s are represented by heap objects.
+
+{\bf ToDo:} Decide whether \mbox{\tt FreeCHeapPointer} is allowed to call on a
+stable pointer. (I sincerely hope not since we will still be in the
+GC at this point.)
+
+\subsubsection{Synchronizing variables (I-vars, M-vars)}
+
+ToDo ToDo ToDo
+
+\begin{verbatim}
+type SynchVar# s elt    -- primitive
+
+newSynchVar#:: State# s -> StateAndSynchVar# s elt
+
+takeMVar#   :: SynchVar# s elt -> State# s -> StateAndPtr# s elt
+putMVar#    :: SynchVar# s elt -> State# s -> State# s
+
+readIVar#   :: SynchVar# s elt -> State# s -> StateAndPtr# s elt
+writeIVar#  :: SynchVar# s elt -> State# s -> State# s
+\end{verbatim}
+
+\subsubsection{Controlling the garbage collector}
+
+The C function {\tt PerformGC\/}, allows the C world to force Haskell
+to do a garbage collection.  It can only be called while Haskell
+is performing a C Call.
+
+Note that this function can be used to define a Haskell IO operation
+with the same effect:
+\begin{verbatim}
+>       performGCIO :: PrimIO ()
+>       performGCIO = _ccall_gc_ PerformGC
+\end{verbatim}
+
+{\bf ToDo:} Is there any need for abnormal/normal termination to force
+a GC too?  Is there any need for a function that provides finer
+control over GC: argument = amount of space required; result = amount
+of space recovered.
+
+\subsection{\mbox{\tt spark{\char'43}} primitive operation (for parallel execution)}
+
+{\em ToDo: say something}  It's used in the unfolding for \mbox{\tt par}.
+
+\subsection{The \mbox{\tt errorIO{\char'43}} primitive operation}
+
+The \mbox{\tt errorIO{\char'43}} primitive takes an argument of type \mbox{\tt PrimIO}.  It aborts execution of
+the current program, and continues instead by performing the given \mbox{\tt PrimIO} value
+on the current state of the world.
+\begin{verbatim}
+errorIO# :: PrimIO () -> a
+\end{verbatim}
+
+\subsection{C Calls}
+
+{\bf ToDo:} current implementation has state variable as second
+argument not last argument.
+
+The \mbox{\tt ccall{\char'43}} primitive can't be given an ordinary type, because it has
+a variable number of arguments.  The nearest we can get is:
+\begin{verbatim}
+ccall# :: CRoutine -> a1# -> ... -> an# -> State# _RealWorld -> StateAndR# _RealWorld
+\end{verbatim}
+where the type variables \mbox{\tt a1{\char'43}}\ldots\mbox{\tt an{\char'43}} and \mbox{\tt r{\char'43}} can be instantiated by any
+primitive type, and \mbox{\tt StateAndR{\char'43}} is the appropriate pairing type from 
+Section~\ref{sect:horrid-pairing-types}.  The \mbox{\tt CRoutine} 
+isn't a proper Haskell type at all; it just reminds us that \mbox{\tt ccall{\char'43}} needs to 
+know what C routine to call.
+
+This notation is really short for a massive family of \mbox{\tt ccall{\char'43}} primitives, one 
+for each combination of types.  (Of course, the compiler simply remembers the 
+types involved, and generates appropriate code when it finally spits out the C.)
+
+Unlike all the other primitive operators, \mbox{\tt ccall{\char'43}} is not bound to an in-scope 
+identifier.  The only way it is possible to generate a \mbox{\tt ccall{\char'43}} is via the 
+\mbox{\tt {\char'137}ccall{\char'137}} construct.
+
+All this applies equally to \mbox{\tt casm{\char'43}}:
+\begin{verbatim}
+casm#  :: CAsmString -> a1# -> ... -> an# -> State# _RealWorld -> StateAndR# _RealWorld
+\end{verbatim}
+
+%------------------------------------------------------------
+\section{Library stuff built with the Really Primitive Stuff}
+
+\subsection{The state transformer monad}
+
+\subsubsection{Types}
+
+A state transformer is a function from a state to a pair of a result and a new 
+state.  
+\begin{verbatim}
+type _ST s a = _State s -> (a, _State s)
+\end{verbatim}
+The \mbox{\tt {\char'137}ST} type is {\em abstract}, so that the programmer cannot see its 
+representation.  If he could, he could write bad things like:
+\begin{verbatim}
+bad :: _ST s a
+bad = \s -> ...(f s)...(g s)...
+\end{verbatim}
+Here, \mbox{\tt s} is duplicated, which would be bad news.
+
+A state is represented by a primitive state value, of type \mbox{\tt State{\char'43}\ s}, 
+wrapped up in a \mbox{\tt {\char'137}State} constructor.  The reason for boxing it in this
+way is so that we can be strict or lazy in the state.  (Remember, all 
+primitive types are unboxed, and hence can't be bottom; but types built
+with \mbox{\tt data} are all boxed.)
+\begin{verbatim}
+data _State s = S# (State# s)
+\end{verbatim}
+
+\subsubsection{The state transformer combinators}
+
+Now for the combinators, all of which live inside the \mbox{\tt {\char'137}ST}
+abstraction.  Notice that \mbox{\tt returnST} and \mbox{\tt thenST} are lazy in the
+state.
+\begin{verbatim}
+returnST :: a -> _ST s a
+returnST a s = (a, s)
+
+thenST :: _ST s a -> (a -> _ST s b) -> _ST s b
+thenST m k s = let (r,new_s) = m s
+               in 
+               k r new_s
+
+fixST :: (a -> _ST s a) -> _ST s a
+fixST k s = let ans = k r s
+                (r,new_s) = ans
+            in
+            ans
+\end{verbatim}
+The interesting one is, of course, \mbox{\tt {\char'137}runST}.  We can't infer its type!
+(It has a funny name because it must be wired into the compiler.)
+\begin{verbatim}
+-- _runST :: forall a. (forall s. _ST s a) -> a
+_runST m = case m (S# realWorld#) of
+           (r,_) -> r
+\end{verbatim}
+
+\subsubsection{Other useful combinators}
+
+There are various other standard combinators, all defined in terms the
+fundamental combinators above. The \mbox{\tt seqST} combinator is like
+\mbox{\tt thenST}, except that it discards the result of the first state
+transformer:
+\begin{verbatim}
+seqST :: _ST s a -> _ST s b -> _ST s b
+seqST m1 m2 = m1 `thenST` (\_ -> m2)
+\end{verbatim}
+
+We also have {\em strict} (... in the state...) variants of the
+then/return combinators (same types as their pals):
+\begin{verbatim}
+returnStrictlyST a s@(S# _) = (a, s)
+
+thenStrictlyST m k s@(S# _)
+  = case (m s) of { (r, new_s@(S# _)) ->
+    k r new_s }
+
+seqStrictlyST m k = ... ditto, for seqST ...
+\end{verbatim}
+
+The combinator \mbox{\tt listST} takes a list of state transformers, and
+composes them in sequence, returning a list of their results:
+\begin{verbatim}
+listST :: [_ST s a] -> _ST s [a]
+listST []     = returnST []
+listST (m:ms) = m               `thenST` \ r ->
+                listST ms       `thenST` \ rs ->
+                returnST (r:rs)
+\end{verbatim}
+The \mbox{\tt mapST} combinator ``lifts'' a function from a value to state
+transformers to one which works over a list of values:
+\begin{verbatim}
+mapST :: (a -> _ST s b) -> [a] -> _ST s [b]
+mapST f ms = listST (map f ms)
+\end{verbatim}
+The \mbox{\tt mapAndUnzipST} combinator is similar to \mbox{\tt mapST}, except that here the
+function returns a pair:
+\begin{verbatim}
+mapAndUnzipST :: (a -> _ST s (b,c)) -> [a] -> _ST s ([b],[c])
+mapAndUnzipST f (m:ms)
+  = f m                 `thenST` \ ( r1,  r2) ->
+    mapAndUnzipST f ms  `thenST` \ (rs1, rs2) ->
+    returnST (r1:rs1, r2:rs2)
+\end{verbatim}
+
+\subsubsection{The \mbox{\tt PrimIO} monad}
+\label{sect:io-spec}
+
+The \mbox{\tt PrimIO} type is defined in as a state transformer which manipulates the 
+\mbox{\tt {\char'137}RealWorld}.
+\begin{verbatim}
+type PrimIO a = _ST _RealWorld a      -- Transparent
+\end{verbatim}
+The \mbox{\tt PrimIO} type is an ordinary type synonym, transparent to the programmer.
+
+The type \mbox{\tt {\char'137}RealWorld} and value \mbox{\tt realWorld{\char'43}} do not need to be hidden (although 
+there is no particular point in exposing them).  Even having a value of type 
+\mbox{\tt realWorld{\char'43}} does not compromise safety, since the type \mbox{\tt {\char'137}ST} is hidden. 
+
+It is type-correct to use \mbox{\tt returnST} in an I/O context, but it is a
+bit more efficient to use \mbox{\tt returnPrimIO}.  The latter is strict in the
+state, which propagates backwards to all the earlier combinators
+(provided they are unfolded).  Why is it safe for \mbox{\tt returnPrimIO} to be
+strict in the state?  Because every context in which an I/O state
+transformer is used will certainly evaluate the resulting state; it is
+the state of the real world!
+\begin{verbatim}
+returnPrimIO :: a -> PrimIO a
+returnPrimIO a s@(S# _) -> (a, s)
+\end{verbatim}
+We provide strict versions of the other combinators too.
+\begin{verbatim}
+thenPrimIO m k s = case m s of
+                     (r,s) -> k r s
+\end{verbatim}
+\mbox{\tt fixPrimIO} has to be lazy, though!
+\begin{verbatim}
+fixPrimIO  = fixST
+\end{verbatim}
+The other combinators are just the same as before, but use the strict
+\mbox{\tt thenPrimIO} and \mbox{\tt returnPrimIO} for efficiency.
+\begin{verbatim}
+foldrPrimIO f z []     = z
+foldrPrimIO f z (m:ms) = foldrPrimIO f z ms `thenPrimIO` \ ms' ->
+                         f m ms'
+
+listPrimIO ms = foldrPrimIO (\ a xs -> a `thenPrimIO` \ x -> returnPrimIO (x : xs))
+                (returnPrimIO []) ms
+
+mapPrimIO f ms = listPrimIO (map f ms)
+
+mapAndUnzipPrimIO f (m:ms)
+  = f m                     `thenPrimIO` \ ( r1,  r2) ->
+    mapAndUnzipPrimIO f ms  `thenPrimIO` \ (rs1, rs2) ->
+    returnPrimIO (r1:rs1, r2:rs2)
+\end{verbatim}
+
+\subsection{Arrays}
+
+\subsubsection{Types}
+
+\begin{verbatim}
+data Array      ix elt = _Array     (ix,ix) (Array# elt)
+data _ByteArray ix     = _ByteArray (ix,ix) ByteArray#
+
+data _MutableArray     s ix elt = _MutableArray     (ix,ix) (MutableArray# s elt)
+data _MutableByteArray s ix     = _MutableByteArray (ix,ix) (MutableByteArray# s)
+\end{verbatim}
+
+\subsubsection{Operations on immutable arrays}
+
+Ordinary array indexing is straightforward.
+\begin{verbatim}
+(!) :: Ix ix => Array ix elt -> ix -> elt
+\end{verbatim}
+QUESTIONs: should \mbox{\tt {\char'137}ByteArray}s be indexed by Ints or ix?  With byte offsets
+or sized ones? (sized ones [WDP])
+\begin{verbatim}
+indexCharArray   :: Ix ix => _ByteArray ix -> ix -> Char
+indexIntArray    :: Ix ix => _ByteArray ix -> ix -> Int
+indexAddrArray   :: Ix ix => _ByteArray ix -> ix -> _Addr
+indexFloatArray  :: Ix ix => _ByteArray ix -> ix -> Float
+indexDoubleArray :: Ix ix => _ByteArray ix -> ix -> Double
+\end{verbatim}
+\mbox{\tt Addr}s are indexed straightforwardly by \mbox{\tt Int}s.  Unlike the primitive
+operations, though, the offsets assume that the array consists entirely of the
+type of value being indexed, and so there's an implicit multiplication by
+the size of that value.  To access \mbox{\tt Addr}s with mixed values requires
+you to do a DIY job using the primitives.
+\begin{verbatim}
+indexAddrChar :: Addr -> Int -> Char
+...etc...
+indexStaticCharArray   :: Addr -> Int -> Char
+indexStaticIntArray    :: Addr -> Int -> Int
+indexStaticFloatArray  :: Addr -> Int -> Float
+indexStaticDoubleArray :: Addr -> Int -> Double
+indexStaticArray       :: Addr -> Int -> Addr
+\end{verbatim}
+
+\subsubsection{Operations on mutable arrays}
+\begin{verbatim}
+newArray     :: Ix ix => (ix,ix) -> elt -> _ST s (_MutableArray s ix elt)
+newCharArray :: Ix ix => (ix,ix) -> _ST s (_MutableByteArray s ix) 
+...
+\end{verbatim}
+
+\begin{verbatim}
+readArray   :: Ix ix => _MutableArray s ix elt -> ix -> _ST s elt 
+readCharArray   :: Ix ix => _MutableByteArray s ix -> ix -> _ST s Char 
+...
+\end{verbatim}
+
+\begin{verbatim}
+writeArray  :: Ix ix => _MutableArray s ix elt -> ix -> elt -> _ST s () 
+writeCharArray  :: Ix ix => _MutableByteArray s ix -> ix -> Char -> _ST s () 
+...
+\end{verbatim}
+
+\begin{verbatim}
+freezeArray :: Ix ix => _MutableArray s ix elt -> _ST s (Array ix elt)
+freezeCharArray :: Ix ix => _MutableByteArray s ix -> _ST s (_ByteArray ix)
+...
+\end{verbatim}
+
+We have no need on one-function-per-type for unsafe freezing:
+\begin{verbatim}
+unsafeFreezeArray :: Ix ix => _MutableArray s ix elt -> _ST s (Array ix elt)  
+unsafeFreezeByteArray :: Ix ix => _MutableByteArray s ix -> _ST s (_ByteArray ix)
+\end{verbatim}
+
+Sometimes we want to snaffle the bounds of one of these beasts:
+\begin{verbatim}
+boundsOfArray     :: Ix ix => _MutableArray s ix elt -> (ix, ix)  
+boundsOfByteArray :: Ix ix => _MutableByteArray s ix -> (ix, ix)
+\end{verbatim}
+
+Lastly, ``equality'':
+\begin{verbatim}
+sameMutableArray     :: _MutableArray s ix elt -> _MutableArray s ix elt -> Bool
+sameMutableByteArray :: _MutableByteArray s ix -> _MutableByteArray s ix -> Bool
+\end{verbatim}
+
+
+\subsection{Variables}
+
+\subsubsection{Types}
+
+Mutable variables are (for now anyway) implemented as arrays.  The \mbox{\tt MutableVar} type
+is opaque, so we can change the implementation later if we want.
+\begin{verbatim}
+type MutableVar s a = _MutableArray s Int a
+\end{verbatim}
+
+\subsubsection{Operations}
+\begin{verbatim}
+newVar   :: a -> _ST s (MutableVar s a)
+readVar  :: MutableVar s a -> _ST s a
+writeVar :: MutableVar s a -> a -> _ST s ()
+sameVar  :: MutableVar s a -> MutableVar s a -> Bool
+\end{verbatim}
+
+\subsection{Stable pointers}
+
+Nothing exciting here, just simple boxing up.
+\begin{verbatim}
+data _StablePtr a = _StablePtr (StablePtr# a)
+
+makeStablePointer :: a -> _StablePtr a
+freeStablePointer :: _StablePtr a -> PrimIO ()
+\end{verbatim}
+
+\subsection{Foreign objects}
+
+Again, just boxing up.
+\begin{verbatim}
+data _ForeignObj = _ForeignObj ForeignObj#
+
+makeForeignObj :: _Addr -> _Addr -> PrimIO _ForeignObj
+\end{verbatim}
+
+\subsection{C calls}
+
+Everything in this section goes for \mbox{\tt {\char'137}casm{\char'137}} too.
+
+{\em ToDo: mention \mbox{\tt {\char'137}ccall{\char'137}gc{\char'137}} and \mbox{\tt {\char'137}casm{\char'137}gc{\char'137}}...}
+
+The \mbox{\tt {\char'137}ccall{\char'137}} construct has the following form:
+$$\mbox{\tt {\char'137}ccall{\char'137}}~croutine~a_1~\ldots~a_n$$
+This whole construct has type $\mbox{\tt PrimIO}~res$.
+The rules are these:
+\begin{itemize}
+\item
+The first ``argument'', $croutine$, must be the literal name of a C procedure.
+It cannot be a Haskell expression which evaluates to a string, etc; it must be 
+simply the name of the procedure.
+\item
+The arguments $a_1, \ldots,a_n$ must be of {\em C-callable} type.
+\item
+The whole construct has type $\mbox{\tt PrimIO}~ty$, where $ty$ is a {\em C-returnable} type.
+\end{itemize}
+A {\em boxed-primitive} type is both C-callable and C-returnable.
+A boxed primitive type is anything declared by:
+\begin{verbatim}
+data T = C# t
+\end{verbatim}
+where \mbox{\tt t} is a primitive type.  Note that
+programmer-defined boxed-primitive types are perfectly OK:
+\begin{verbatim}
+data Widget = W# Int#
+data Screen = S# CHeapPtr#
+\end{verbatim}
+
+There are other types that can be passed to C (C-callable).  This
+table summarises (including the standard boxed-primitive types):
+\begin{verbatim}
+Boxed               Type of transferd   Corresp.     Which is
+Type                Prim. component     C type       *probably*...
+------              ---------------     ------       -------------
+Char                Char#               StgChar       unsigned char
+Int                 Int#                StgInt        long int
+_Word               Word#               StgWord       unsigned long int
+_Addr               Addr#               StgAddr       char *
+Float               Float#              StgFloat      float
+Double              Double#             StgDouble     double
+
+Array               Array#              StgArray      StgPtr
+_ByteArray          ByteArray#          StgByteArray  StgPtr
+_MutableArray       MutableArray#       StgArray      StgPtr
+_MutableByteArray   MutableByteArray#   StgByteArray  StgPtr
+
+_State              State#              nothing!
+
+_StablePtr          StablePtr#          StgStablePtr  StgPtr
+_ForeignObj         ForeignObj#         StgForeignObj StgPtr
+\end{verbatim}
+
+All of the above are {\em C-returnable} except:
+\begin{verbatim}
+        Array, _ByteArray, _MutableArray, _MutableByteArray
+\end{verbatim}
+
+{\bf ToDo:} I'm pretty wary of \mbox{\tt Array} and \mbox{\tt {\char'137}MutableArray} being in
+this list, and not too happy about \mbox{\tt {\char'137}State} [WDP].
+
+{\bf ToDo:} Can code generator pass all the primitive types?  Should this be
+extended to include {\tt Bool\/} (or any enumeration type?)
+
+The type checker must be able to figure out just which of the C-callable/returnable
+types is being used.  If it can't, you have to add type signatures. For example,
+\begin{verbatim}
+f x = _ccall_ foo x
+\end{verbatim}
+is not good enough, because the compiler can't work out what type \mbox{\tt x} is, nor 
+what type the \mbox{\tt {\char'137}ccall{\char'137}} returns.  You have to write, say:
+\begin{verbatim}
+f :: Int -> PrimIO Float
+f x = _ccall_ foo x
+\end{verbatim}
+
+\subsubsection{Implementation}
+
+The desugarer unwraps the \mbox{\tt {\char'137}ccall{\char'137}} construct by inserting the necessary 
+evaluations etc to unbox the arguments.  For example, the body of the definition 
+of \mbox{\tt f} above would become:
+\begin{verbatim}
+        (\ s -> case x of { I# x# -> 
+                case s of { S# s# ->
+                case ccall# [Int#,Float#] x# s# of { StateAndFloat# f# new_s# ->
+                (F# f#, S# new_s#)
+                }}})
+\end{verbatim}
+Notice that the state, too, is unboxed.
+
+The code generator must deal specially with primitive objects which
+are stored on the heap.
+
+... details omitted ...
+
+%
+%More importantly, it must construct a C Heap Pointer heap-object after
+%a \mbox{\tt {\char'137}ccall{\char'137}} which returns a \mbox{\tt MallocPtr{\char'43}}.
+%
+
+%--------------------------------------------------------
+\section{Non-primitive stuff that must be wired into GHC}
+
+\begin{verbatim}
+data Char    = C# Char#
+data Int     = I# Int#
+data _Word   = W# Word#
+data _Addr   = A# Addr#
+
+data Float   = F# Float#
+data Double  = D# Double#
+data Integer = J# Int# Int# ByteArray#
+
+-- and the other boxed-primitive types:
+    Array, _ByteArray, _MutableArray, _MutableByteArray,
+    _StablePtr, _ForeignObj
+
+data Bool     = False | True
+data CMP_TAG# = LT# | EQ# | GT#  -- used in derived comparisons
+
+data List a = [] | a : (List a)
+-- tuples...
+
+data Ratio a  = a :% a
+type Rational = Ratio Integer
+
+data {Request,Response,etc} -- so we can check the type of "main"
+
+data _Lift a = _Lift a    -- used Yukkily as described elsewhere
+
+type String  = [Char]    -- convenience, only
+\end{verbatim}
+
+%------------------------------------------------------------
+\section{Programmer interface(s)}
+
+\subsection{The bog-standard interface}
+
+If you rely on the implicit \mbox{\tt import\ Prelude} that GHC normally does
+for you, and if you don't use any weird flags (notably
+\mbox{\tt -fglasgow-exts}), and if you don't import one of the fairly-magic
+\mbox{\tt PreludeGla*} interfaces, then GHC should work {\em exactly} as the
+Haskell report says, and the full user namespaces should be available
+to you.
+
+Exception: until we burn in the new names \mbox{\tt {\char'137}scc{\char'137}} and \mbox{\tt {\char'137}ccall{\char'137}}, the
+names \mbox{\tt scc} and \mbox{\tt ccall} are still available.
+
+\subsection{If you mess about with \mbox{\tt import\ Prelude}...}
+
+Innocent renaming and hiding, e.g.,
+\begin{verbatim}
+import Prelude hiding ( fromIntegral ) renaming (map to mop)
+\end{verbatim}
+should work just fine (even it {\em is} atrocious programming practice).
+
+There are some things you can do that will make GHC crash, e.g.,
+hiding a standard class:
+\begin{verbatim}
+import Prelude hiding ( Eq(..) )
+\end{verbatim}
+Don't do that.
+
+\subsection{Turning on Glasgow extensions with \mbox{\tt -fglasgow-exts}}
+
+If you turn on \mbox{\tt -fglasgow-exts}, then all the primitive types and
+operations described herein are available.
+
+It is possible that some name conflicts between your code and the
+wired-in things might spring to life (though we doubt it...).
+Change your names :-)
+
+\subsection{\mbox{\tt import\ PreludeGlaST}}
+
+\begin{verbatim}
+type ST s a = _ST s a   -- so you don't need -fglasgow-exts...
+\end{verbatim}
+
+\subsection{\mbox{\tt import\ PreludeGlaMisc}}
+
+\end{document}
+                                                        

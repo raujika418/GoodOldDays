@@ -1,0 +1,136 @@
+# this *.prl file is shoved through "msub"
+#
+# generate a Makefile from a Jmakefile from _outside_ [only] the GHC
+# sources!
+#
+# based on X11R4 xmkmf /bin/sh script via Paul DuBois
+#
+# uses:
+# (1) a new project with no special jmake requirements; want to use
+#     installed "none"-project stuff:
+#	type% cd top-of-project-sources
+#	type% jmkmf
+#
+# (2) a new project with a "project-label" (and maybe a "setup-label")
+#
+#	type% cd top-of-project-sources
+#   	type% jmkmf -P project-label -S setup-label [-C project-config-dir]
+#
+# (3) for a project using installed utils, jmkmf will be invoked when
+#     "make Makefile" happens:
+#
+#      jmkmf -P <proj-label> -S <setup-label> - -DTopDir=<foo> -DTopDirPwd=<bar> -DCurDir=<baz>
+#
+#     The "-" separates the getopt-able options from the rest.
+#
+# The -S option may be omitted if "setup-label" is "std" and -C option
+# may be omitted if the project's config files happen to live in the
+# std place (see -A).
+#
+# The "-A allprojects-config-dir" option may be used to override
+# jmkmf's built-in idea of where the jmake config files are installed.
+#
+# don't let people fiddle with TopDir and CurDir
+#
+$Pgm = $0; $Pgm =~ s/.*\/([^\/]+)$/\1/;
+$Status    = 0;
+do 'getopts.pl' || die "Giant error 'do'ing getopts.pl: $@";
+$Usage  = "usage: $Pgm ".
+	  '[-v] '.
+	  '[-P project-label] '.
+	  '[-S setup-label] '.
+	  '[-C project-config-dir] '.
+	  '[-A alternate-installed-config-dir] '.
+	  "[- args to pass on to jmake]\n";
+
+$TopDir = '.';
+$CurDir = '.';
+$jmake_extra_args = '';
+
+chop($TopDirPwd = `pwd`);
+$TopDirPwd =~ s/^\/tmp_mnt//; # anti-NFS attack
+
+if ( ! &Getopts('A:C:P:S:v')) {
+    print STDERR $Usage;
+    exit 1;
+} else {
+    while ($#ARGV >= 0) {
+	$_ = $ARGV[0]; shift(@ARGV);
+	next               if /^-$/;
+	$TopDir    = $1, next if /^-DTopDir=(.*)$/;
+	$TopDirPwd = $1, next if /^-DTopDirPwd=(.*)$/;
+	$CurDir    = $1, next if /^-DCurDir=(.*)$/;
+	$jmake_extra_args .= " $_";
+    }
+}
+
+$Verbose	    = ($opt_v) ?      1 :  0;
+$Project_label	    = ($opt_P) ? $opt_P : 'none';
+$Setup_label	    = ($opt_S) ? $opt_S : 'std';
+$Project_config_dir = ($opt_C) ? $opt_C : '';
+# the next line fixed up by msub
+# dir1 is the platform dir; only used in the default, installed case
+$Std_config_dir1    = ($opt_A) ? ''
+			       : (( $(INSTALLING) ) ? '$(INSTLIBDIR_MKWORLD)'
+						    : '');
+# dir2 is the *main* one
+$Std_config_dir2    = ($opt_A) ? $opt_A
+			       : (( $(INSTALLING) ) ? '$(INSTDATADIR_MKWORLD)'
+						    : '$(TOP_PWD)/$(CURRENT_DIR)');
+
+# chk that all the config and dirs files will be there if needed?
+
+# relative-ise Project_config_dir
+$Have_project_config_dir = '';
+$Project_config_dir_is_relative = '';
+if ($Project_config_dir) {
+    $Have_project_config_dir = '-DHaveProjectConfigDir';
+    $Real_project_config_dir = $Project_config_dir;
+    if ($Project_config_dir !~ /^\//) {
+	$Project_config_dir_is_relative = '-DRelativeProjectConfigDir';
+	if (! $TopDir) {
+	    print STDERR "$Pgm: I don't know what TopDir is\n";
+	} else {
+	    $Real_project_config_dir= "$TopDir/$Project_config_dir";
+	}
+    }
+    # tidy the name
+    $Project_config_dir =~ s/^(\.\/)+/\.\//;
+}
+
+# do it
+if ( -f Makefile ) {
+    print STDERR "mv Makefile Makefile.bak\n";
+    $Makefile_moved = 1;
+    (system('mv -f Makefile Makefile.bak') >> 8) && die "$Pgm: mv -f Makefile Makefile.bak: failed\n";
+} else {
+    $Makefile_moved = 0;
+}
+
+# should this always -DUseInstalledUtils?
+
+$jmake_args  = "-DUseInstalledUtils -P $Project_label -S $Setup_label";
+
+$jmake_args .= " $Have_project_config_dir";
+$jmake_args .= " $Project_config_dir_is_relative";
+if ($Project_config_dir) {
+    $jmake_args .= " -DProjectConfigDir=$Project_config_dir -I$Real_project_config_dir";
+}
+$jmake_args .= " -I$Std_config_dir1" if $Std_config_dir1;
+$jmake_args .= " -I$Std_config_dir2";
+$jmake_args .= " -DTopDir=$TopDir -DTopDirPwd=$TopDirPwd -DCurDir=$CurDir";
+$jmake_args .= $jmake_extra_args;
+
+print STDERR "jmake $jmake_args\n";
+if (system("jmake $jmake_args") >> 8) {
+    if ($Makefile_moved) {
+	print STDERR "$Pgm: trying to restore Makefile...\n";
+	rename('Makefile.bak','Makefile') || die "$Pgm: mv Makefile.bak Makefile: failed\n";
+    } else {
+	unlink('Makefile'); # don't want to confuse the issue
+    }
+    exit(1);
+}
+# chmod 0444, 'Makefile';
+exit 0;
+
