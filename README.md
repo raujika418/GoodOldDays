@@ -16,7 +16,7 @@
 
 "What do you mean?"
 
-"Oh, you see, you won’t have to send them anywhere. I don`t pay for them, but then, I’ll leave them here, for you."
+"Oh, you see, you won’t have to send them anywhere. I will pay for them, but then, I’ll leave them here, for you."
 
 
 from: Space man (1960)
